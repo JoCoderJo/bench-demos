@@ -39,5 +39,181 @@
     <div class="d">A screener for landline scam calls. Play a scam call and a legitimate one, and hear how it decides.</div>
   </a>
 
+  <a class="card" href="#suggest" id="suggest-open" style="border-left-color:#3fb950"><span class="go">+</span>
+    <div class="t">Suggest a project</div>
+    <div class="d">Something in Spokane you wish existed, or a problem worth building for? Tell us — we read every one.</div>
+  </a>
+
   <footer>Updated August 22, 2026</footer>
 </div>
+
+<!-- Netlify parses these at deploy time to register the forms; the widgets post to "/" by AJAX. -->
+<form name="project-idea" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="text" name="form-name" value="project-idea">
+  <input type="text" name="bot-field">
+  <input type="text" name="contact">
+  <textarea name="idea"></textarea>
+</form>
+
+<script>
+document.getElementById('suggest-open').addEventListener('click', function (e) {
+  e.preventDefault();
+  if (document.getElementById('sg-wrap')) return;
+  var Z = 2147483000;
+  var w = document.createElement('div');
+  w.id = 'sg-wrap';
+  w.setAttribute('style', 'position:fixed;inset:0;z-index:' + (Z + 1) + ';background:rgba(0,0,0,.6);' +
+    'display:flex;align-items:flex-end;justify-content:center;padding:16px');
+  w.innerHTML = '<div style="width:100%;max-width:430px;background:#12161c;color:#e6e8ea;' +
+      'border:1px solid #262b33;border-radius:16px;padding:18px;max-height:88vh;overflow:auto">' +
+    '<h3 style="margin:0 0 3px;font-size:18px">Suggest a project</h3>' +
+    '<p style="margin:0 0 13px;font-size:13px;color:#9aa4b2">What should we build next, and who would it help?</p>' +
+    '<textarea id="sg-idea" placeholder="The idea, in your own words." style="width:100%;min-height:120px;' +
+      'background:#0d1014;color:#e6e8ea;border:1px solid #262b33;border-radius:10px;padding:11px 12px;font-size:16px"></textarea>' +
+    '<input id="sg-contact" placeholder="Email or name (optional)" style="width:100%;margin-top:9px;' +
+      'background:#0d1014;color:#e6e8ea;border:1px solid #262b33;border-radius:10px;padding:11px 12px;font-size:16px">' +
+    '<div style="display:flex;gap:9px;margin-top:14px">' +
+      '<button id="sg-cancel" type="button" style="flex:1;padding:12px;border-radius:10px;background:transparent;' +
+        'color:#9aa4b2;border:1px solid #262b33;font:600 14px system-ui;cursor:pointer">Cancel</button>' +
+      '<button id="sg-send" type="button" style="flex:1;padding:12px;border-radius:10px;background:#c9a24b;' +
+        'color:#14171c;border:0;font:600 14px system-ui;cursor:pointer">Send</button></div>' +
+    '<div id="sg-msg" style="font-size:13px;margin-top:10px;color:#9aa4b2"></div></div>';
+  document.body.appendChild(w);
+  function close() { w.remove(); }
+  w.addEventListener('click', function (ev) { if (ev.target === w) close(); });
+  document.getElementById('sg-cancel').onclick = close;
+  document.getElementById('sg-idea').focus();
+  document.getElementById('sg-send').onclick = function () {
+    var idea = document.getElementById('sg-idea').value.trim();
+    var msg = document.getElementById('sg-msg');
+    if (idea.length < 6) { msg.textContent = 'Tell us a bit more first.'; return; }
+    msg.textContent = 'Sending…';
+    fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ 'form-name': 'project-idea', idea: idea.slice(0, 4000),
+        contact: document.getElementById('sg-contact').value.slice(0, 120) }).toString() })
+      .then(function (r) { if (!r.ok) throw new Error(r.status);
+        w.querySelector('div').innerHTML = '<h3 style="margin:0 0 3px;font-size:18px">Thank you.</h3>' +
+          '<p style="margin:0;font-size:13px;color:#9aa4b2">We read every one of these.</p>'; 
+        setTimeout(close, 1800); })
+      .catch(function () { msg.textContent = 'Could not send — try again in a moment.'; });
+  };
+});
+</script>
+<!-- Public demo feedback bubble. Injected into every page of the demo site by
+     publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
+     touching the Bench or the tailnet). Submissions land in Netlify → Forms.
+     The hidden <form> below is what Netlify parses at deploy time to register the
+     form; the visible UI posts to "/" by AJAX with the same field names. -->
+<form name="demo-feedback" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="text" name="form-name" value="demo-feedback">
+  <input type="text" name="bot-field">
+  <input type="text" name="demo">
+  <input type="text" name="kind">
+  <input type="text" name="contact">
+  <textarea name="message"></textarea>
+</form>
+<div id="bench-fb"></div>
+<script>
+(function () {
+  if (window.__benchFb) return; window.__benchFb = 1;
+  var Z = 2147483000, open = false, sending = false;
+  var demo = (function () {
+    var p = location.pathname;
+    if (p.indexOf('/manito') === 0) return 'Manito Park App';
+    if (p.indexOf('/rover') === 0) return 'Rover Bot';
+    if (p.indexOf('/scam') === 0) return 'Voice AI Scam Filter';
+    return 'Demos home';
+  })();
+
+  var css = document.createElement('style');
+  css.textContent =
+    '#bfb-btn{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:' + Z + ';' +
+      'width:54px;height:54px;border-radius:50%;border:0;background:#c9a24b;color:#14171c;font-size:24px;' +
+      'line-height:1;cursor:pointer;box-shadow:0 3px 14px rgba(0,0,0,.45)}' +
+    '#bfb-btn:active{transform:scale(.95)}' +
+    '#bfb-wrap{position:fixed;inset:0;z-index:' + (Z + 1) + ';background:rgba(0,0,0,.6);display:flex;' +
+      'align-items:flex-end;justify-content:center;padding:16px}' +
+    '#bfb-card{width:100%;max-width:430px;background:#12161c;color:#e6e8ea;border:1px solid #262b33;' +
+      'border-radius:16px;padding:18px;max-height:88vh;overflow:auto;' +
+      'font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}' +
+    '#bfb-card h3{margin:0 0 3px;font-size:18px}' +
+    '#bfb-card p.sub{margin:0 0 13px;font-size:13px;color:#9aa4b2}' +
+    '#bfb-card label{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;' +
+      'color:#9aa4b2;margin:11px 0 4px}' +
+    '#bfb-card input,#bfb-card textarea,#bfb-card select{width:100%;background:#0d1014;color:#e6e8ea;' +
+      'border:1px solid #262b33;border-radius:10px;padding:11px 12px;font-size:16px}' +
+    '#bfb-card textarea{min-height:104px;resize:vertical}' +
+    '#bfb-row{display:flex;gap:9px;margin-top:14px}' +
+    '#bfb-row button{flex:1;padding:12px;border-radius:10px;font:600 14px system-ui,sans-serif;cursor:pointer}' +
+    '#bfb-cancel{background:transparent;color:#9aa4b2;border:1px solid #262b33}' +
+    '#bfb-send{background:#c9a24b;color:#14171c;border:0}' +
+    '#bfb-msg{font-size:13px;margin-top:10px;color:#9aa4b2}';
+  document.head.appendChild(css);
+
+  var btn = document.createElement('button');
+  btn.id = 'bfb-btn'; btn.type = 'button';
+  btn.setAttribute('aria-label', 'Send feedback');
+  btn.textContent = '💬';
+  document.body.appendChild(btn);
+
+  function close() { var w = document.getElementById('bfb-wrap'); if (w) w.remove(); open = false; }
+
+  btn.onclick = function () {
+    if (open) return close();
+    open = true;
+    var wrap = document.createElement('div');
+    wrap.id = 'bfb-wrap';
+    wrap.innerHTML =
+      '<div id="bfb-card">' +
+        '<h3>Tell us what you found</h3>' +
+        '<p class="sub">' + demo + ' — bugs, confusing bits, or things you wish it did.</p>' +
+        '<label>What kind of note is this?</label>' +
+        '<select id="bfb-kind">' +
+          '<option>Something is broken</option>' +
+          '<option>Something is confusing</option>' +
+          '<option>Idea / feature request</option>' +
+          '<option>It worked well</option>' +
+        '</select>' +
+        '<label>What happened?</label>' +
+        '<textarea id="bfb-text" placeholder="As specific as you can — what you tapped, what you expected, what you got."></textarea>' +
+        '<label>Email or name (optional)</label>' +
+        '<input id="bfb-contact" autocomplete="off" placeholder="only if you want a reply">' +
+        '<div id="bfb-row"><button id="bfb-cancel" type="button">Cancel</button>' +
+        '<button id="bfb-send" type="button">Send</button></div>' +
+        '<div id="bfb-msg"></div>' +
+      '</div>';
+    document.body.appendChild(wrap);
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
+    document.getElementById('bfb-cancel').onclick = close;
+    document.getElementById('bfb-text').focus();
+
+    document.getElementById('bfb-send').onclick = function () {
+      if (sending) return;
+      var text = document.getElementById('bfb-text').value.trim();
+      var msg = document.getElementById('bfb-msg');
+      if (text.length < 4) { msg.textContent = 'Add a little more detail first.'; return; }
+      sending = true; msg.textContent = 'Sending…';
+      var body = new URLSearchParams({
+        'form-name': 'demo-feedback',
+        'demo': demo,
+        'kind': document.getElementById('bfb-kind').value,
+        'contact': document.getElementById('bfb-contact').value.slice(0, 120),
+        'message': text.slice(0, 4000)
+      }).toString();
+      fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body })
+        .then(function (r) {
+          sending = false;
+          if (!r.ok) throw new Error(r.status);
+          document.getElementById('bfb-card').innerHTML =
+            '<h3>Thank you — got it.</h3><p class="sub">That goes straight to the two of us building this.</p>' +
+            '<div id="bfb-row"><button id="bfb-send" type="button">Close</button></div>';
+          document.getElementById('bfb-send').onclick = close;
+        })
+        .catch(function () {
+          sending = false;
+          msg.textContent = 'Could not send — check your connection and try again.';
+        });
+    };
+  };
+})();
+</script>
