@@ -1107,4 +1107,11 @@ function renderStock(){
 }
 document.getElementById('sq').addEventListener('input',e=>{sq=e.target.value.toLowerCase();renderStock()});
 renderStock();
+</script><style id="bench-public-rover">
+/* public demo: the driving simulation only — hide the engineering chrome */
+#modebar,#mpick,#msearch,#mtools,#mtree{display:none !important}
+</style>
+<script>
+/* force the simulation on load even if the visitor arrives without the #demo hash */
+(function(){ if(location.hash!=="#demo"){ location.hash="#demo"; } })();
 </script></body></html>

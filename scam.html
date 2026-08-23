@@ -323,3 +323,7 @@ tray('Change log','last '+g.log.length+' commits'+(g.dirty?' · <span class="war
   +(g.dirty?'<div style="margin-top:10px"><div class="sec">Uncommitted work</div><div class="files">'+g.dirty_files.map(E).join('<br>')+'</div></div>':'')
   +'<div style="font-family:var(--mono);font-size:10.5px;color:var(--zinc);margin-top:10px">docs: '+D.code.docs.map(E).join(' · ')+(g.remote?'<br>remote: '+E(g.remote):'')+'</div>',true);
 </script>
+<style id="bench-public-scam">
+/* public demo: keep the demo panel, hide the internal status cards and build stamp */
+#grid,#stamp{display:none !important}
+</style>
