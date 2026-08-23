@@ -1108,10 +1108,70 @@ function renderStock(){
 document.getElementById('sq').addEventListener('input',e=>{sq=e.target.value.toLowerCase();renderStock()});
 renderStock();
 </script><style id="bench-public-rover">
-/* public demo: the driving simulation only — hide the engineering chrome */
+/* public demo: DRIVE ONLY. The visitor gets the rover in the sim and a joystick —
+   no parts tree, no sub-assemblies, no BOM/docs, no stock, no dash. */
 #modebar,#mpick,#msearch,#mtools,#mtree{display:none !important}
+nav,#sheet,#v-dash{display:none !important}
+#simui label{display:none !important}   /* the L/R sliders: the joystick writes them now */
+#joy{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));
+     transform:translateX(-50%);width:150px;height:150px;border-radius:50%;
+     background:rgba(20,23,28,.72);border:1px solid #3a4150;box-shadow:0 2px 14px rgba(0,0,0,.45);
+     touch-action:none;z-index:40;-webkit-user-select:none;user-select:none}
+#joyk{position:absolute;left:50%;top:50%;width:62px;height:62px;margin:-31px 0 0 -31px;
+      border-radius:50%;background:#c9a24b;opacity:.92;pointer-events:none}
+#joyhint{position:fixed;left:0;right:0;bottom:calc(178px + env(safe-area-inset-bottom));
+     text-align:center;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+     color:#9aa4b2;pointer-events:none;z-index:40}
 </style>
+<div id="joy"><div id="joyk"></div></div>
+<div id="joyhint">drag to drive</div>
 <script>
-/* force the simulation on load even if the visitor arrives without the #demo hash */
-(function(){ if(location.hash!=="#demo"){ location.hash="#demo"; } })();
+/* Open straight into the drive sim whatever hash we arrive on. The built-in
+   #demo handler only registers when the hash is already present at parse time,
+   so a visitor landing on /rover.html would otherwise get the dash. */
+addEventListener("load",function(){
+  var s=document.getElementById("simui");
+  if(!(s&&s.style.display==="block")&&typeof startDemo==="function")startDemo();
+  /* no drive sim in this build (gearbox-only): the joystick would do nothing */
+  setTimeout(function(){
+    if(s&&s.style.display==="block")return;
+    ["joy","joyhint"].forEach(function(i){var e=document.getElementById(i);if(e)e.style.display="none";});
+  },0);
+});
+/* Touch joystick -> the two side commands the sim already reads. Arcade mix:
+   L = y + x, R = y - x (up = forward, right = +x), clamped to the slider range.
+   Writing them fires "input", which is what stands the canned lap down. */
+(function(){
+  var joy=document.getElementById("joy"),knob=document.getElementById("joyk");
+  var L=document.getElementById("sL"),R=document.getElementById("sR");
+  if(!joy||!knob||!L||!R)return;
+  var pid=null,cx=0,cy=0,rad=1;
+  function clamp(v){return Math.max(-100,Math.min(100,Math.round(v)));}
+  function send(l,r){
+    L.value=clamp(l);R.value=clamp(r);
+    L.dispatchEvent(new Event("input",{bubbles:true}));
+    R.dispatchEvent(new Event("input",{bubbles:true}));
+  }
+  function at(e){
+    var dx=e.clientX-cx,dy=e.clientY-cy,d=Math.hypot(dx,dy);
+    if(d>rad){dx=dx*rad/d;dy=dy*rad/d;}
+    knob.style.transform="translate("+dx+"px,"+dy+"px)";
+    var x=dx/rad,y=-dy/rad;
+    send((y+x)*100,(y-x)*100);
+  }
+  function stop(){if(pid===null)return;pid=null;knob.style.transform="";send(0,0);}
+  joy.addEventListener("pointerdown",function(e){
+    if(pid!==null)return;
+    var b=joy.getBoundingClientRect();
+    cx=b.left+b.width/2;cy=b.top+b.height/2;rad=Math.max(1,b.width/2-18);
+    pid=e.pointerId;
+    try{joy.setPointerCapture(pid);}catch(err){}
+    at(e);e.preventDefault();
+  });
+  joy.addEventListener("pointermove",function(e){if(e.pointerId===pid){at(e);e.preventDefault();}});
+  ["pointerup","pointercancel","lostpointercapture"].forEach(function(t){
+    joy.addEventListener(t,function(e){if(e.pointerId===pid)stop();});
+  });
+  addEventListener("blur",function(){stop();});
+})();
 </script></body></html>

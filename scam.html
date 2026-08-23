@@ -324,6 +324,93 @@ tray('Change log','last '+g.log.length+' commits'+(g.dirty?' · <span class="war
   +'<div style="font-family:var(--mono);font-size:10.5px;color:var(--zinc);margin-top:10px">docs: '+D.code.docs.map(E).join(' · ')+(g.remote?'<br>remote: '+E(g.remote):'')+'</div>',true);
 </script>
 <style id="bench-public-scam">
-/* public demo: keep the demo panel, hide the internal status cards and build stamp */
-#grid,#stamp{display:none !important}
+/* public demo: keep the Demo call tray, hide the internal status cards and build
+   stamp. The demo tray is itself a child of #grid, so hide the trays and put the
+   one holding #demo-panel back (marked by the script below). */
+#stamp{display:none !important}
+#grid>.tray{display:none !important}
+#grid>.tray.bench-demo{display:block !important}
+/* screener voices: every voice as a tappable button, not a dropdown */
+#demo-voice{display:none !important}
+#bench-voices{margin-top:12px;border-top:1px solid var(--edge);padding-top:10px}
+#bench-voices .vhead{font-family:var(--mono);font-size:11px;color:var(--zinc);margin-bottom:7px}
+#bench-voices .vlist{display:flex;flex-wrap:wrap;max-height:38vh;overflow-y:auto;
+  -webkit-overflow-scrolling:touch}
+#bench-voices .demo-btn{font-size:12.5px;padding:7px 12px;text-transform:none;letter-spacing:0}
+#bench-voices .vnone{color:var(--zinc);font-size:12px;line-height:1.5}
 </style>
+<script>
+/* The voice list lives in a closure, but the dropdown it fills is the same list —
+   mirror its <option>s as buttons, and drive the select on tap so the existing
+   save-to-localStorage + preview handler runs unchanged. */
+(function(){
+  var sel=document.getElementById("demo-voice");
+  var panel=document.getElementById("demo-panel");
+  if(panel&&panel.closest){var tr=panel.closest(".tray");if(tr)tr.classList.add("bench-demo");}
+  if(!sel)return;
+  var box=document.createElement("div");box.id="bench-voices";
+  var head=document.createElement("div");head.className="vhead";
+  head.textContent="AI SCREENER VOICE — TAP ONE TO HEAR IT";
+  var list=document.createElement("div");list.className="vlist";
+  box.appendChild(head);box.appendChild(list);
+  var row=sel.closest(".demo-row")||sel.parentNode;
+  row.parentNode.insertBefore(box,row.nextSibling);
+
+  /* Phones often report no voices until the first tap and do not always fire
+     voiceschanged; fill the select ourselves if it is still empty by then. */
+  function seed(){
+    var sy=window.speechSynthesis;
+    if(!sy||sel.options.length>1)return;
+    var all=[];try{all=sy.getVoices()||[];}catch(e){}
+    if(!all.length)return;
+    var en=all.filter(function(v){return /^en([-_]|$)/i.test(v.lang||"");});
+    var pool=en.length?en:all;
+    sel.disabled=false;sel.textContent="";
+    var o0=document.createElement("option");o0.value="";o0.textContent="voice: auto";
+    sel.appendChild(o0);
+    pool.forEach(function(v){
+      var o=document.createElement("option");
+      o.value=v.voiceURI||v.name;o.textContent=v.name+" · "+v.lang;
+      sel.appendChild(o);});
+    var saved="";try{saved=localStorage.getItem("scam-demo-voice")||"";}catch(e){}
+    if(saved)sel.value=saved;
+  }
+  function mark(){
+    var bs=list.querySelectorAll("button");
+    for(var i=0;i<bs.length;i++)bs[i].classList.toggle("active",bs[i].getAttribute("data-v")===sel.value);
+  }
+  function sig(){
+    var a=[];for(var i=0;i<sel.options.length;i++)a.push(sel.options[i].value);
+    return a.join("|");
+  }
+  var last=null;
+  function render(){
+    seed();
+    var s=sig();
+    if(s===last){mark();return;}
+    last=s;list.textContent="";
+    if(sel.options.length<=1){
+      var n=document.createElement("div");n.className="vnone";
+      n.textContent="This browser has not reported any speech voices yet — tap Play call once and they will appear here.";
+      list.appendChild(n);return;
+    }
+    Array.prototype.forEach.call(sel.options,function(o){
+      var b=document.createElement("button");
+      b.type="button";b.className="demo-btn";
+      b.textContent=o.value===""?"Auto (best available)":o.textContent;
+      b.setAttribute("data-v",o.value);
+      b.onclick=function(){
+        sel.value=o.value;
+        sel.dispatchEvent(new Event("change",{bubbles:true}));
+        mark();};
+      list.appendChild(b);});
+    mark();
+  }
+  render();
+  var sy=window.speechSynthesis;
+  /* addEventListener, NOT onvoiceschanged — the page owns that property */
+  if(sy&&sy.addEventListener)sy.addEventListener("voiceschanged",function(){setTimeout(render,0);});
+  document.addEventListener("click",function(){setTimeout(render,250);},true);
+  var n=0,iv=setInterval(function(){render();if(++n>20)clearInterval(iv);},500);
+})();
+</script>
