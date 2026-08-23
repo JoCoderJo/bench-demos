@@ -1,0 +1,325 @@
+<title>Scam Filter Dashboard</title>
+<style>
+/* Voice AI Scam Filter — project dashboard. Committed single theme (bench
+   family, signal-red accent); every ground painted explicitly. */
+:root{
+  --oxide:#1d1a1c; --tray:#26222a; --cell:#2e2933; --edge:#3d3644;
+  --sig:#d97b6a; --sig-dim:#8f5347; --zinc:#a49aa8; --paper:#ebe6e6;
+  --ok:#8fbf7a; --amber:#d9a441; --red:#d0665a; --blue:#6f9ac0;
+  --disp:"Bahnschrift SemiCondensed","Bahnschrift","Arial Narrow",Arial,sans-serif;
+  --mono:"Cascadia Mono","Consolas",ui-monospace,monospace;
+  --body:"Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html{background:var(--oxide)}
+body{background:var(--oxide);color:var(--paper);font-family:var(--body);font-size:14.5px;line-height:1.5;padding:26px 18px 60px;min-height:100vh}
+.wrap{max-width:1100px;margin:0 auto}
+header{border-bottom:2px solid var(--sig);padding-bottom:12px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px}
+h1{font-family:var(--disp);font-weight:700;font-size:32px;letter-spacing:.05em;text-transform:uppercase;line-height:1}
+h1 span{color:var(--sig)}
+.stamp{font-family:var(--mono);font-size:11px;color:var(--zinc);text-align:right;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.tray{background:var(--tray);border:1px solid var(--edge);border-radius:10px;overflow:hidden}
+.tray.wide{grid-column:1/-1}
+.th{padding:9px 14px;border-bottom:1px solid var(--edge);background:linear-gradient(#302a36,#28232d);display:flex;justify-content:space-between;align-items:baseline}
+.th h2{font-family:var(--disp);font-size:16px;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.th small{font-family:var(--mono);font-size:10px;color:var(--zinc)}
+.pad{padding:12px 14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.kpi{background:var(--cell);border:1px solid var(--edge);border-radius:8px;padding:9px 10px}
+.kpi b{display:block;font-family:var(--disp);font-size:26px;line-height:1;color:var(--sig)}
+.kpi b.ok{color:var(--ok)}.kpi b.bad{color:var(--red)}
+.kpi span{font-family:var(--mono);font-size:10px;color:var(--zinc);letter-spacing:.06em;text-transform:uppercase}
+.bar{height:6px;background:var(--cell);border-radius:3px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--sig)}
+.ms{list-style:none;display:flex;flex-direction:column;gap:6px}
+.ms li{display:flex;gap:9px;align-items:baseline;font-size:13px}
+.ms .box{width:13px;height:13px;border:1.5px solid var(--sig-dim);border-radius:3px;flex:none;position:relative;top:2px}
+.ms .box.on{background:var(--sig);border-color:var(--sig)}
+.ms .box.on::after{content:"";position:absolute;left:3.5px;top:0;width:4px;height:8px;border:solid #1d1a1c;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.ms small{color:var(--zinc);font-family:var(--mono);font-size:10px;margin-left:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:4px 7px;text-align:left;border-bottom:1px solid var(--edge)}
+th{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--zinc);text-transform:uppercase;font-weight:400}
+td.m{font-family:var(--mono);font-size:11px}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.pill{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:4px;letter-spacing:.06em;flex:none}
+.pill.ok{background:#2c3a2e;color:var(--ok);border:1px solid #3d5040}
+.pill.bad{background:#3a2c2c;color:var(--red);border:1px solid #503d3d}
+.pill.blk{background:#3a2c2c;color:var(--sig);border:1px solid #503d3d}
+.pill.mdl{background:#2a3038;color:var(--blue);border:1px solid #3a4a5c}
+.sec{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--zinc);text-transform:uppercase;padding:8px 0 3px}
+.log{list-style:none;font-family:var(--mono);font-size:11.5px;line-height:1.55}
+.log li{display:flex;gap:9px;padding:3px 0;border-bottom:1px solid var(--edge)}
+.log .h{color:var(--sig);flex:none}.log .dt{color:var(--zinc);flex:none;margin-left:auto}
+.next{list-style:none;display:flex;flex-direction:column;gap:5px}
+.next li{font-size:13px;padding-left:16px;position:relative}
+.next li::before{content:"";position:absolute;left:2px;top:7px;width:7px;height:7px;border:1.5px solid var(--sig-dim);border-radius:2px}
+.hw li.have::before{background:var(--ok);border-color:var(--ok)}
+.hw li.need::before{border-color:var(--amber)}
+.files{font-family:var(--mono);font-size:10.5px;color:var(--zinc);columns:2;column-gap:18px;line-height:1.7}
+.warn{color:var(--amber)}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;background:var(--cell);border:1px solid var(--edge);border-radius:4px;padding:1px 6px;margin:2px 3px 2px 0;color:var(--paper)}
+.demo-btn{font-family:var(--disp);font-size:14px;letter-spacing:.05em;text-transform:uppercase;background:var(--cell);color:var(--paper);border:1px solid var(--sig-dim);border-radius:8px;padding:8px 16px;cursor:pointer;margin:0 8px 4px 0}
+.demo-btn:hover{border-color:var(--sig);color:var(--sig)}
+.demo-btn.active{background:var(--sig);border-color:var(--sig);color:var(--oxide)}
+.demo-row{display:flex;flex-wrap:wrap;align-items:center}
+/* The demo set is a dozen calls, so they live in a grouped picker rather than
+   a button per call — a button row wrapped to four lines on a phone. */
+.demo-pick{font-family:var(--disp);font-size:14px;letter-spacing:.03em;background:var(--cell);color:var(--paper);border:1px solid var(--sig-dim);border-radius:8px;padding:8px 10px;margin:0 8px 4px 0;max-width:min(430px,58vw)}
+.demo-pick:focus{outline:none;border-color:var(--sig)}
+.demo-pick optgroup{font-family:var(--mono);font-size:11px;color:var(--zinc);background:var(--tray)}
+.demo-pick option{font-family:var(--body);font-size:13px;color:var(--paper);background:var(--tray)}
+.demo-mute{font-size:11px;padding:6px 10px;margin-left:auto;border-color:var(--edge);color:var(--zinc)}
+.demo-mute.muted{color:var(--amber);border-color:var(--amber)}
+.demo-mute:disabled{opacity:.5;cursor:default}
+.demo-voice{font-family:var(--mono);font-size:11px;background:var(--cell);color:var(--zinc);border:1px solid var(--edge);border-radius:8px;padding:6px 8px;margin:0 0 4px 8px;max-width:46vw}
+.demo-voice:disabled{opacity:.5}
+.demo-tap{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:4px 0}
+.demo-panel{margin-top:10px;background:var(--cell);border:1px solid var(--edge);border-radius:8px;padding:10px 14px}
+.demo-line{display:flex;gap:11px;padding:6px 0;border-bottom:1px solid var(--edge);font-size:13px;opacity:0;animation:demoIn .35s ease forwards}
+.demo-line:last-child{border-bottom:none}
+@keyframes demoIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.demo-who{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--zinc);flex:none;width:70px;position:relative;top:2px}
+.demo-line.caller .demo-who{color:var(--amber)}
+.demo-line.screener .demo-who{color:var(--blue)}
+.demo-line.filter .demo-who{color:var(--sig)}
+.demo-line.speak span:last-child{font-style:italic}
+.demo-line.rules span:last-child,.demo-line.note span:last-child{font-family:var(--mono);font-size:11.5px;color:var(--zinc)}
+.demo-line.verdict span:last-child{font-weight:600}
+.demo-line.action span:last-child{color:var(--zinc)}
+.demo-wait{font-family:var(--mono);font-size:11px;color:var(--zinc);padding:6px 0 2px}
+.demo-wait i{font-style:normal;animation:demoBlink 1s step-start infinite}
+@keyframes demoBlink{50%{opacity:0}}
+footer{margin-top:26px;font-family:var(--mono);font-size:10.5px;color:#766d78;line-height:1.8}
+footer code{color:var(--zinc)}
+@media (max-width:420px){h1{font-size:26px}.files{columns:1}}
+</style>
+<div class="wrap">
+<header>
+  <div><h1>VOICE AI <span>SCAM FILTER</span></h1>
+    <div style="color:var(--zinc);font-size:12.5px;margin-top:5px">Local landline call screening — Uno Q + HT813 · tests, decision suite, bring-up ladder, live from the repo</div></div>
+  <div class="stamp" id="stamp"></div>
+</header>
+<div class="grid" id="grid"></div>
+<footer>Regenerate: <code>python tools/dashboard.py</code> — runs the unit tests and the rules-only decision suite, records the demo-call traces, counts rules, reads git. Bring-up stages + hardware + next-up live in <code>tools/status.yaml</code>. The demo replays a build-time trace; for a live model verdict run <code>python tools/simulate_call.py --demo --llm-url http://unoq.local:8080</code>.</footer>
+</div>
+<script>
+const D={"built": "2026-08-22", "tests": {"ok": true, "passed": 55, "failed": 0, "summary": "55 passed in 0.93s"}, "sim": {"ok": true, "cases": [{"ok": true, "name": "ssa_impersonation", "decision": "block", "score": 18, "path": "rules", "sec": "0.00", "signals": "arrest threat, ssa scam", "section": "Scam"}, {"ok": true, "name": "gift_card", "decision": "block", "score": 10, "path": "rules", "sec": "0.00", "signals": "gift card payment", "section": "Scam"}, {"ok": true, "name": "tech_support", "decision": "block", "score": 16, "path": "rules", "sec": "0.00", "signals": "tech support, device compromised", "section": "Scam"}, {"ok": true, "name": "auto_warranty", "decision": "block", "score": 20, "path": "rules", "sec": "0.00", "signals": "legal threat, auto warranty, ivr prompt", "section": "Scam"}, {"ok": true, "name": "bank_fraud_pretext", "decision": "block", "score": 18, "path": "rules", "sec": "0.00", "signals": "safe account, banking pretext", "section": "Scam"}, {"ok": true, "name": "irs", "decision": "block", "score": 14, "path": "rules", "sec": "0.00", "signals": "irs scam, legal threat", "section": "Scam"}, {"ok": true, "name": "otp_harvest", "decision": "block", "score": 8, "path": "rules", "sec": "0.00", "signals": "credential request", "section": "Scam"}, {"ok": true, "name": "crypto", "decision": "block", "score": 16, "path": "rules", "sec": "0.00", "signals": "crypto payment, prize scam", "section": "Scam"}, {"ok": true, "name": "grandparent_emergency", "decision": "block", "score": 13, "path": "rules", "sec": "0.00", "signals": "family emergency, secrecy", "section": "Scam"}, {"ok": true, "name": "medicare_card", "decision": "block", "score": 18, "path": "rules", "sec": "0.00", "signals": "medicare scam, medical freebie, credential request", "section": "Scam"}, {"ok": true, "name": "sweepstakes", "decision": "block", "score": 14, "path": "rules", "sec": "0.00", "signals": "prize scam, advance fee", "section": "Scam"}, {"ok": true, "name": "romance_money", "decision": "block", "score": 14, "path": "rules", "sec": "0.00", "signals": "wire transfer, romance money", "section": "Scam"}, {"ok": true, "name": "utility_shutoff", "decision": "block", "score": 8, "path": "rules", "sec": "0.00", "signals": "utility shutoff", "section": "Scam"}, {"ok": true, "name": "jury_duty", "decision": "block", "score": 18, "path": "rules", "sec": "0.00", "signals": "arrest threat, jury duty", "section": "Scam"}, {"ok": true, "name": "delivery_fee", "decision": "block", "score": 15, "path": "rules", "sec": "0.00", "signals": "delivery fee, ivr prompt", "section": "Scam"}, {"ok": true, "name": "disaster_charity", "decision": "block", "score": 12, "path": "rules", "sec": "0.00", "signals": "credential request, disaster charity", "section": "Scam"}, {"ok": true, "name": "delivery", "decision": "(model)", "score": 0, "path": "rules", "sec": "0.00", "signals": "", "section": "Legitimate"}, {"ok": true, "name": "doctor", "decision": "(model)", "score": 0, "path": "rules", "sec": "0.00", "signals": "", "section": "Legitimate"}, {"ok": true, "name": "school", "decision": "(model)", "score": 0, "path": "rules", "sec": "0.00", "signals": "", "section": "Legitimate"}, {"ok": true, "name": "plumber", "decision": "(model)", "score": 0, "path": "rules", "sec": "0.00", "signals": "", "section": "Legitimate"}, {"ok": true, "name": "neighbour", "decision": "(model)", "score": 0, "path": "rules", "sec": "0.00", "signals": "", "section": "Legitimate"}, {"ok": true, "name": "returned_call", "decision": "(model)", "score": 0, "path": "rules", "sec": "0.00", "signals": "", "section": "Legitimate"}, {"ok": true, "name": "real_grandson", "decision": "(model)", "score": 0, "path": "rules", "sec": "0.00", "signals": "", "section": "Legitimate"}, {"ok": true, "name": "utility_appointment", "decision": "(model)", "score": 0, "path": "rules", "sec": "0.00", "signals": "", "section": "Legitimate"}, {"ok": true, "name": "pharmacy_medicare", "decision": "(model)", "score": 0, "path": "rules", "sec": "0.00", "signals": "", "section": "Legitimate"}, {"ok": true, "name": "courier_at_door", "decision": "(model)", "score": 0, "path": "rules", "sec": "0.00", "signals": "", "section": "Legitimate"}, {"ok": true, "name": "vague_business", "decision": "(model)", "score": 0, "path": "rules", "sec": "0.00", "signals": "", "section": "Ambiguous"}, {"ok": true, "name": "no_name", "decision": "(model)", "score": 0, "path": "rules", "sec": "0.00", "signals": "", "section": "Ambiguous"}, {"ok": true, "name": "survey", "decision": "(model)", "score": 0, "path": "rules", "sec": "0.00", "signals": "", "section": "Ambiguous"}, {"ok": true, "name": "charity", "decision": "(model)", "score": 0, "path": "rules", "sec": "0.00", "signals": "", "section": "Ambiguous"}], "verdict": "all cases within the acceptable range"}, "rules": {"count": 31, "by_weight": {"10": ["gift_card_payment", "crypto_payment", "arrest_threat", "safe_account"], "8": ["ssa_scam", "irs_scam", "jury_duty", "tech_support", "device_compromised", "advance_fee", "utility_shutoff", "delivery_fee", "family_emergency", "romance_money", "credential_request", "banking_pretext"], "7": ["auto_warranty", "ivr_prompt"], "6": ["wire_transfer", "legal_threat", "remote_access", "prize_scam"], "5": ["auto_warranty_plain", "debt_relief", "medicare_scam", "medical_freebie", "no_hangup", "secrecy"], "4": ["urgency", "disaster_charity", "robo_opener"]}}, "git": {"branch": "main", "commits": "10", "month": "10", "log": [{"h": "2fb647a", "d": "2026-08-22", "s": "Bench the audio path: WIRING checklist + BENCH-LOG (request #34)"}, {"h": "1b4fa2d", "d": "2026-08-22", "s": "Demo set: the top 10 scams targeting older adults (request #25)"}, {"h": "63183d8", "d": "2026-08-21", "s": "Natural voice for the AI screener: dashboard demo + Piper default (request #15)"}, {"h": "0baa6b3", "d": "2026-08-21", "s": "dashboard: voice the demo call with speechSynthesis (request #14)"}, {"h": "7e72bca", "d": "2026-08-21", "s": "dashboard: auto-play first demo call on #demo deep link (bench app Demo button, request #13)"}, {"h": "2e0b08b", "d": "2026-08-20", "s": "Add demo-call replay: simulate_call.py --demo + dashboard button"}, {"h": "f077acb", "d": "2026-08-18", "s": "dashboard: strip ANSI colour from simulate_call output (Linux)"}, {"h": "750c36b", "d": "2026-08-16", "s": "Add project dashboard generator (tools/dashboard.py)"}, {"h": "cdee558", "d": "2026-08-16", "s": "Add .gitignore; untrack __pycache__"}, {"h": "cf974c2", "d": "2026-08-16", "s": "Initial commit: Voice AI Scam Filter (Arduino Uno Q + HT813 landline gateway)"}], "dirty": 0, "dirty_files": [], "remote": "https://github.com/JoCoderJo/voice-ai-scam-filter.git"}, "demo": {"ok": true, "calls": [{"name": "grandparent_emergency", "kind": "scam", "title": "Family emergency \u2014 cloned grandson", "caller_id": "3055550142", "verdict": "block", "confidence": 0.95, "source": "rules", "action": "reject", "score": 13, "labels": ["family_emergency", "secrecy"], "steps": [{"who": "line", "kind": "ring", "text": "Incoming call \u2014 caller ID 3055550142, not in contacts. The screener answers; the handset does not ring yet.", "ms": 1600}, {"who": "screener", "kind": "speak", "text": "Hello. This line is screened by an automated assistant, and this call is being recorded. Please say your name, and what you're calling about.", "ms": 3400}, {"who": "caller", "kind": "hear", "text": "grandma it's me your grandson please don't tell mom and dad i was in a car accident last night and i'm in jail i need you to send bail money right now before the hearing", "ms": 3600}, {"who": "screener", "kind": "speak", "text": "Thank you. One moment please.", "ms": 1600}, {"who": "filter", "kind": "rules", "text": "Rules score 13 (blocks at 8+) \u2014 signals: family_emergency, secrecy", "ms": 1600}, {"who": "filter", "kind": "verdict", "text": "0.95 confidence via rules \u2014 family emergency, secrecy", "ms": 1800, "verdict": "block"}, {"who": "screener", "kind": "speak", "text": "This call has been declined by the screening service. Goodbye.", "ms": 2400}, {"who": "line", "kind": "action", "text": "reject \u2014 call ended. The handset never rang.", "ms": 1600}]}, {"name": "ssa_impersonation", "kind": "scam", "title": "Government imposter \u2014 Social Security", "caller_id": "2025550188", "verdict": "block", "confidence": 0.95, "source": "rules", "action": "reject", "score": 18, "labels": ["arrest_threat", "ssa_scam"], "steps": [{"who": "line", "kind": "ring", "text": "Incoming call \u2014 caller ID 2025550188, not in contacts. The screener answers; the handset does not ring yet.", "ms": 1600}, {"who": "screener", "kind": "speak", "text": "Hello. This line is screened by an automated assistant, and this call is being recorded. Please say your name, and what you're calling about.", "ms": 3400}, {"who": "caller", "kind": "hear", "text": "this is officer daniel wilson from the social security administration your social security number has been suspended due to suspicious activity there is a warrant for your arrest do not hang up", "ms": 3600}, {"who": "screener", "kind": "speak", "text": "Thank you. One moment please.", "ms": 1600}, {"who": "filter", "kind": "rules", "text": "Rules score 18 (blocks at 8+) \u2014 signals: arrest_threat, ssa_scam", "ms": 1600}, {"who": "filter", "kind": "verdict", "text": "0.95 confidence via rules \u2014 arrest threat, ssa scam", "ms": 1800, "verdict": "block"}, {"who": "screener", "kind": "speak", "text": "This call has been declined by the screening service. Goodbye.", "ms": 2400}, {"who": "line", "kind": "action", "text": "reject \u2014 call ended. The handset never rang.", "ms": 1600}]}, {"name": "bank_fraud_pretext", "kind": "scam", "title": "Bank imposter \u2014 \u201csafe account\u201d", "caller_id": "8005550111", "verdict": "block", "confidence": 0.95, "source": "rules", "action": "reject", "score": 18, "labels": ["safe_account", "banking_pretext"], "steps": [{"who": "line", "kind": "ring", "text": "Incoming call \u2014 caller ID 8005550111, not in contacts. The screener answers; the handset does not ring yet.", "ms": 1600}, {"who": "screener", "kind": "speak", "text": "Hello. This line is screened by an automated assistant, and this call is being recorded. Please say your name, and what you're calling about.", "ms": 3400}, {"who": "caller", "kind": "hear", "text": "this is the fraud department at your bank we detected a suspicious transaction to protect your funds we need to transfer your money to a safe account right now", "ms": 3600}, {"who": "screener", "kind": "speak", "text": "Thank you. One moment please.", "ms": 1600}, {"who": "filter", "kind": "rules", "text": "Rules score 18 (blocks at 8+) \u2014 signals: safe_account, banking_pretext", "ms": 1600}, {"who": "filter", "kind": "verdict", "text": "0.95 confidence via rules \u2014 safe account, banking pretext", "ms": 1800, "verdict": "block"}, {"who": "screener", "kind": "speak", "text": "This call has been declined by the screening service. Goodbye.", "ms": 2400}, {"who": "line", "kind": "action", "text": "reject \u2014 call ended. The handset never rang.", "ms": 1600}]}, {"name": "tech_support", "kind": "scam", "title": "Tech support \u2014 infected computer", "caller_id": "8885550164", "verdict": "block", "confidence": 0.95, "source": "rules", "action": "reject", "score": 16, "labels": ["tech_support", "device_compromised"], "steps": [{"who": "line", "kind": "ring", "text": "Incoming call \u2014 caller ID 8885550164, not in contacts. The screener answers; the handset does not ring yet.", "ms": 1600}, {"who": "screener", "kind": "speak", "text": "Hello. This line is screened by an automated assistant, and this call is being recorded. Please say your name, and what you're calling about.", "ms": 3400}, {"who": "caller", "kind": "hear", "text": "hello i am calling from microsoft windows support your computer has been infected with a virus we need remote access to fix it", "ms": 3600}, {"who": "screener", "kind": "speak", "text": "Thank you. One moment please.", "ms": 1600}, {"who": "filter", "kind": "rules", "text": "Rules score 16 (blocks at 8+) \u2014 signals: tech_support, device_compromised", "ms": 1600}, {"who": "filter", "kind": "verdict", "text": "0.95 confidence via rules \u2014 tech support, device compromised", "ms": 1800, "verdict": "block"}, {"who": "screener", "kind": "speak", "text": "This call has been declined by the screening service. Goodbye.", "ms": 2400}, {"who": "line", "kind": "action", "text": "reject \u2014 call ended. The handset never rang.", "ms": 1600}]}, {"name": "gift_card", "kind": "scam", "title": "Gift-card refund \u2014 fake Amazon billing", "caller_id": "8445550199", "verdict": "block", "confidence": 0.95, "source": "rules", "action": "reject", "score": 10, "labels": ["gift_card_payment"], "steps": [{"who": "line", "kind": "ring", "text": "Incoming call \u2014 caller ID 8445550199, not in contacts. The screener answers; the handset does not ring yet.", "ms": 1600}, {"who": "screener", "kind": "speak", "text": "Hello. This line is screened by an automated assistant, and this call is being recorded. Please say your name, and what you're calling about.", "ms": 3400}, {"who": "caller", "kind": "hear", "text": "hi this is amazon billing we noticed an unauthorized charge of eight hundred dollars to process your refund we need you to purchase google play gift cards", "ms": 3600}, {"who": "screener", "kind": "speak", "text": "Thank you. One moment please.", "ms": 1600}, {"who": "filter", "kind": "rules", "text": "Rules score 10 (blocks at 8+) \u2014 signals: gift_card_payment", "ms": 1600}, {"who": "filter", "kind": "verdict", "text": "0.95 confidence via rules \u2014 gift card payment", "ms": 1800, "verdict": "block"}, {"who": "screener", "kind": "speak", "text": "This call has been declined by the screening service. Goodbye.", "ms": 2400}, {"who": "line", "kind": "action", "text": "reject \u2014 call ended. The handset never rang.", "ms": 1600}]}, {"name": "medicare_card", "kind": "scam", "title": "Medicare \u2014 new card and free brace", "caller_id": "8665550107", "verdict": "block", "confidence": 0.95, "source": "rules", "action": "reject", "score": 18, "labels": ["medicare_scam", "medical_freebie", "credential_request"], "steps": [{"who": "line", "kind": "ring", "text": "Incoming call \u2014 caller ID 8665550107, not in contacts. The screener answers; the handset does not ring yet.", "ms": 1600}, {"who": "screener", "kind": "speak", "text": "Hello. This line is screened by an automated assistant, and this call is being recorded. Please say your name, and what you're calling about.", "ms": 3400}, {"who": "caller", "kind": "hear", "text": "hello i'm calling about your medicare benefits you qualify for a new plastic card and a free back brace at no cost to you i just need you to confirm your medicare number so we can get it sent out", "ms": 3600}, {"who": "screener", "kind": "speak", "text": "Thank you. One moment please.", "ms": 1600}, {"who": "filter", "kind": "rules", "text": "Rules score 18 (blocks at 8+) \u2014 signals: medicare_scam, medical_freebie, credential_request", "ms": 1600}, {"who": "filter", "kind": "verdict", "text": "0.95 confidence via rules \u2014 medicare scam, medical freebie, credential request", "ms": 1800, "verdict": "block"}, {"who": "screener", "kind": "speak", "text": "This call has been declined by the screening service. Goodbye.", "ms": 2400}, {"who": "line", "kind": "action", "text": "reject \u2014 call ended. The handset never rang.", "ms": 1600}]}, {"name": "sweepstakes", "kind": "scam", "title": "Sweepstakes \u2014 pay to release the prize", "caller_id": "7025550153", "verdict": "block", "confidence": 0.95, "source": "rules", "action": "reject", "score": 14, "labels": ["prize_scam", "advance_fee"], "steps": [{"who": "line", "kind": "ring", "text": "Incoming call \u2014 caller ID 7025550153, not in contacts. The screener answers; the handset does not ring yet.", "ms": 1600}, {"who": "screener", "kind": "speak", "text": "Hello. This line is screened by an automated assistant, and this call is being recorded. Please say your name, and what you're calling about.", "ms": 3400}, {"who": "caller", "kind": "hear", "text": "congratulations you have won the second prize in the publishers sweepstakes two point five million dollars to release the funds you just need to pay the delivery and insurance fee today", "ms": 3600}, {"who": "screener", "kind": "speak", "text": "Thank you. One moment please.", "ms": 1600}, {"who": "filter", "kind": "rules", "text": "Rules score 14 (blocks at 8+) \u2014 signals: prize_scam, advance_fee", "ms": 1600}, {"who": "filter", "kind": "verdict", "text": "0.95 confidence via rules \u2014 prize scam, advance fee", "ms": 1800, "verdict": "block"}, {"who": "screener", "kind": "speak", "text": "This call has been declined by the screening service. Goodbye.", "ms": 2400}, {"who": "line", "kind": "action", "text": "reject \u2014 call ended. The handset never rang.", "ms": 1600}]}, {"name": "romance_money", "kind": "scam", "title": "Romance \u2014 stranded and needs a wire", "caller_id": "2345550176", "verdict": "block", "confidence": 0.95, "source": "rules", "action": "reject", "score": 14, "labels": ["wire_transfer", "romance_money"], "steps": [{"who": "line", "kind": "ring", "text": "Incoming call \u2014 caller ID 2345550176, not in contacts. The screener answers; the handset does not ring yet.", "ms": 1600}, {"who": "screener", "kind": "speak", "text": "Hello. This line is screened by an automated assistant, and this call is being recorded. Please say your name, and what you're calling about.", "ms": 3400}, {"who": "caller", "kind": "hear", "text": "my darling i know we have not met in person yet but i am stuck at the airport and my accounts are frozen can you wire me three thousand dollars i will pay you back the moment i fly home to you", "ms": 3600}, {"who": "screener", "kind": "speak", "text": "Thank you. One moment please.", "ms": 1600}, {"who": "filter", "kind": "rules", "text": "Rules score 14 (blocks at 8+) \u2014 signals: wire_transfer, romance_money", "ms": 1600}, {"who": "filter", "kind": "verdict", "text": "0.95 confidence via rules \u2014 wire transfer, romance money", "ms": 1800, "verdict": "block"}, {"who": "screener", "kind": "speak", "text": "This call has been declined by the screening service. Goodbye.", "ms": 2400}, {"who": "line", "kind": "action", "text": "reject \u2014 call ended. The handset never rang.", "ms": 1600}]}, {"name": "crypto", "kind": "scam", "title": "Crypto investment \u2014 initial deposit", "caller_id": "6465550129", "verdict": "block", "confidence": 0.95, "source": "rules", "action": "reject", "score": 16, "labels": ["crypto_payment", "prize_scam"], "steps": [{"who": "line", "kind": "ring", "text": "Incoming call \u2014 caller ID 6465550129, not in contacts. The screener answers; the handset does not ring yet.", "ms": 1600}, {"who": "screener", "kind": "speak", "text": "Hello. This line is screened by an automated assistant, and this call is being recorded. Please say your name, and what you're calling about.", "ms": 3400}, {"who": "caller", "kind": "hear", "text": "congratulations you have been selected for our investment programme we just need an initial deposit in bitcoin to get started", "ms": 3600}, {"who": "screener", "kind": "speak", "text": "Thank you. One moment please.", "ms": 1600}, {"who": "filter", "kind": "rules", "text": "Rules score 16 (blocks at 8+) \u2014 signals: crypto_payment, prize_scam", "ms": 1600}, {"who": "filter", "kind": "verdict", "text": "0.95 confidence via rules \u2014 crypto payment, prize scam", "ms": 1800, "verdict": "block"}, {"who": "screener", "kind": "speak", "text": "This call has been declined by the screening service. Goodbye.", "ms": 2400}, {"who": "line", "kind": "action", "text": "reject \u2014 call ended. The handset never rang.", "ms": 1600}]}, {"name": "utility_shutoff", "kind": "scam", "title": "Utility shutoff \u2014 power cut today", "caller_id": "4155550138", "verdict": "block", "confidence": 0.95, "source": "rules", "action": "reject", "score": 8, "labels": ["utility_shutoff"], "steps": [{"who": "line", "kind": "ring", "text": "Incoming call \u2014 caller ID 4155550138, not in contacts. The screener answers; the handset does not ring yet.", "ms": 1600}, {"who": "screener", "kind": "speak", "text": "Hello. This line is screened by an automated assistant, and this call is being recorded. Please say your name, and what you're calling about.", "ms": 3400}, {"who": "caller", "kind": "hear", "text": "this is the electric company your account is seriously past due and a technician has already been dispatched to disconnect your power today unless you make a payment over the phone right now", "ms": 3600}, {"who": "screener", "kind": "speak", "text": "Thank you. One moment please.", "ms": 1600}, {"who": "filter", "kind": "rules", "text": "Rules score 8 (blocks at 8+) \u2014 signals: utility_shutoff", "ms": 1600}, {"who": "filter", "kind": "verdict", "text": "0.95 confidence via rules \u2014 utility shutoff", "ms": 1800, "verdict": "block"}, {"who": "screener", "kind": "speak", "text": "This call has been declined by the screening service. Goodbye.", "ms": 2400}, {"who": "line", "kind": "action", "text": "reject \u2014 call ended. The handset never rang.", "ms": 1600}]}, {"name": "real_grandson", "kind": "legit", "title": "Legit call \u2014 the real grandson", "caller_id": "5559870144", "verdict": "allow", "confidence": 0.88, "source": "model-replay", "action": "ring", "score": 0, "labels": [], "steps": [{"who": "line", "kind": "ring", "text": "Incoming call \u2014 caller ID 5559870144, not in contacts. The screener answers; the handset does not ring yet.", "ms": 1600}, {"who": "screener", "kind": "speak", "text": "Hello. This line is screened by an automated assistant, and this call is being recorded. Please say your name, and what you're calling about.", "ms": 3400}, {"who": "caller", "kind": "hear", "text": "hi grandma it's jamie your grandson just ringing to say i'll come over on sunday to fix that fence panel", "ms": 3600}, {"who": "screener", "kind": "speak", "text": "Thank you. One moment please.", "ms": 1600}, {"who": "filter", "kind": "rules", "text": "Rules score 0 \u2014 no scam signals. Handing the transcript to the on-device model.", "ms": 1600}, {"who": "filter", "kind": "note", "text": "Model verdict below is a recorded replay (rules-only build; pass --llm-url for a live one).", "ms": 1200}, {"who": "filter", "kind": "verdict", "text": "0.88 confidence via model-replay \u2014 gave a name and asked for nothing", "ms": 1800, "verdict": "allow"}, {"who": "screener", "kind": "speak", "text": "Thank you. Connecting you now, please hold.", "ms": 2200}, {"who": "line", "kind": "action", "text": "ring \u2014 handset rings; whoever picks up first hears: \u201cScreened call. jamie, the grandson. About visiting sunday to fix a fence.\u201d, then the caller is bridged.", "ms": 2000}]}, {"name": "plumber", "kind": "legit", "title": "Legit call \u2014 plumber callback", "caller_id": "5559870123", "verdict": "allow", "confidence": 0.92, "source": "model-replay", "action": "ring", "score": 0, "labels": [], "steps": [{"who": "line", "kind": "ring", "text": "Incoming call \u2014 caller ID 5559870123, not in contacts. The screener answers; the handset does not ring yet.", "ms": 1600}, {"who": "screener", "kind": "speak", "text": "Hello. This line is screened by an automated assistant, and this call is being recorded. Please say your name, and what you're calling about.", "ms": 3400}, {"who": "caller", "kind": "hear", "text": "hi it's dave the plumber returning your call about the leaking radiator", "ms": 3600}, {"who": "screener", "kind": "speak", "text": "Thank you. One moment please.", "ms": 1600}, {"who": "filter", "kind": "rules", "text": "Rules score 0 \u2014 no scam signals. Handing the transcript to the on-device model.", "ms": 1600}, {"who": "filter", "kind": "note", "text": "Model verdict below is a recorded replay (rules-only build; pass --llm-url for a live one).", "ms": 1200}, {"who": "filter", "kind": "verdict", "text": "0.92 confidence via model-replay \u2014 named himself, returning a call", "ms": 1800, "verdict": "allow"}, {"who": "screener", "kind": "speak", "text": "Thank you. Connecting you now, please hold.", "ms": 2200}, {"who": "line", "kind": "action", "text": "ring \u2014 handset rings; whoever picks up first hears: \u201cScreened call. dave the plumber. About radiator repair callback.\u201d, then the caller is bridged.", "ms": 2000}]}]}, "code": {"modules": 15, "lines": 2166, "docs": ["BENCH-LOG.md", "HT813-SETTINGS.md", "PERFORMANCE.md", "RUNBOOK.md", "WIRING.md"]}, "ladder": [{"name": "Stage 0 \u2014 before the hardware", "done": true, "auto": true}, {"name": "Stage 1 \u2014 Uno Q base system", "done": false, "auto": false}, {"name": "Stage 2 \u2014 SIP registration", "done": false, "auto": false}, {"name": "Stage 3 \u2014 the handset", "done": false, "auto": false}, {"name": "Stage 4 \u2014 first screened call", "done": false, "auto": false}, {"name": "Stage 5 \u2014 prove the failure modes", "done": false, "auto": false}], "hardware": ["Arduino Uno Q 4GB \u2014 need", "Grandstream HT813 FXS/FXO \u2014 need", "5V/3A USB-C supply for the Uno Q \u2014 need", "12V/0.5A supply for the HT813 (ships with it) \u2014 need", "RJ45 patch lead, HT813 WAN to router \u2014 need", "Analog handset + RJ11 cabling \u2014 have", "Multimeter (12V rail + RJ11 continuity checks) \u2014 have"], "next": ["Order/receive Uno Q + HT813; wire per docs/WIRING.md", "Stage 1 \u2014 flash Debian, fixed IP, run scripts/install.sh (~30 min, 1.3 GB models)", "Stage 2 \u2014 HT813 SIP registration (docs/HT813-SETTINGS.md, four make-or-break settings)", "Audio path bench, repo side \u2014 done 2026-08-22, rules path only (docs/BENCH-LOG.md)", "Audio path bench, hardware \u2014 blocked on HT813: 9 checks in docs/WIRING.md", "True end-to-end \u2014 simulate_call.py --suite against llama-server, then first screened call (RUNBOOK stage 4)", "Race STT/LLM/TTS options with tools/bench.py once on-device"]};
+const E=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const g=D.git,t=D.tests,s=D.sim,r=D.rules;
+document.getElementById('stamp').innerHTML='built '+E(D.built)+'<br>'+E(g.branch)+' · '+E(g.commits)+' commits · '+E(g.month)+' in 30d';
+const grid=document.getElementById('grid');
+const tray=(title,small,body,wide)=>grid.insertAdjacentHTML('beforeend',
+  '<section class="tray'+(wide?' wide':'')+'"><div class="th"><h2>'+title+'</h2><small>'+small+'</small></div><div class="pad">'+body+'</div></section>');
+
+// KPIs
+const simPass=s.cases.filter(c=>c.ok).length;
+tray('Health','tests · decision suite · rules · code',
+  '<div class="kpis">'
+  +'<div class="kpi"><b class="'+(t.ok?'ok':'bad')+'">'+t.passed+'</b><span>tests passing'+(t.failed?' · '+t.failed+' failed':'')+'</span></div>'
+  +'<div class="kpi"><b class="'+(s.ok?'ok':'bad')+'">'+simPass+'/'+s.cases.length+'</b><span>suite cases ok</span></div>'
+  +'<div class="kpi"><b>'+r.count+'</b><span>scam signals</span></div>'
+  +'<div class="kpi"><b>'+D.code.modules+'</b><span>agent modules · '+D.code.lines+' lines</span></div>'
+  +'</div>');
+
+// Demo call — replay a build-time screening trace like a live call
+const demo=(D.demo&&D.demo.calls)||[];
+if(demo.length){
+  const nScam=demo.filter(c=>c.kind==='scam').length,nLegit=demo.length-nScam;
+  // Grouped picker + one Play button: the demo set is the top senior-targeted
+  // scams plus legit contrast, too many for a button apiece.
+  const optgrp=(label,kind)=>{
+    const rows=demo.map((c,i)=>'<option value="'+i+'">'+E(c.title)+'</option>')
+                   .filter((_,i)=>demo[i].kind===kind);
+    return rows.length?'<optgroup label="'+E(label)+'">'+rows.join('')+'</optgroup>':'';
+  };
+  tray('Demo call','simulate_call.py --demo · '+nScam+' top senior-targeted scams + '+nLegit+' legit · replayed trace of what the Uno Q will do',
+    '<div class="demo-row">'
+    +'<select class="demo-pick" id="demo-pick" aria-label="which call to replay">'
+    +optgrp('Scam calls — top '+nScam+' targeting older adults','scam')
+    +optgrp('Legitimate calls — must get through','legit')
+    +'</select>'
+    +'<button class="demo-btn" id="demo-play">&#9654; Play call</button>'
+    +'<button class="demo-btn demo-mute" id="demo-mute" aria-label="toggle demo sound">&#128266; sound</button>'
+    +'<select class="demo-voice" id="demo-voice" aria-label="screener voice" title="Voice for the AI screener"><option value="">voice: auto</option></select></div>'
+    +'<div class="demo-panel" id="demo-panel" hidden></div>',true);
+  // ---- Audio: speak the call through the browser's speech synthesis ----
+  // Screener lines (kind "speak") and the caller's transcript (kind "hear") are
+  // voiced with two different voices so you can follow who is talking. No pitch
+  // warping — that is what makes browser voices sound robotic; instead we rank
+  // the installed voices by quality (Natural/Neural/Premium/Google/Online first)
+  // and let you pick the screener's voice from a dropdown (remembered per device).
+  // The rest (ring, rules, verdict, action) stays text-only — it is what the box is doing.
+  const synth=window.speechSynthesis||null;
+  const MUTE_KEY='scam-demo-mute',VOICE_KEY='scam-demo-voice';
+  let muted=(()=>{try{return localStorage.getItem(MUTE_KEY)==='1'}catch(e){return false}})();
+  let chosen=(()=>{try{return localStorage.getItem(VOICE_KEY)||''}catch(e){return ''}})();
+  const VOICED={speak:1,hear:1};
+  const vid=v=>v.voiceURI||v.name;
+  const isEn=v=>/^en([-_]|$)/i.test(v.lang||'');
+  const FEM=/female|samantha|zira|aria|jenny|ava|allison|susan|karen|moira|tessa|fiona|victoria|serena|libby|sonia|emma|joanna|salli|kendra|uk english female|us english female/i;
+  const MAL=/\bmale|daniel|david|mark|alex|fred|tom|guy|ryan|george|matthew|joey|brian|arthur|uk english male|us english male/i;
+  // Quality first: premium/neural voices, then native en-US/en-GB, then any English voice.
+  const score=v=>{
+    let s=0;const n=v.name||'';
+    if(/natural|neural|premium|enhanced|wavenet|online/i.test(n))s+=40;
+    if(/google/i.test(n))s+=30;
+    if(/siri|samantha|daniel|karen|moira|ava|allison/i.test(n))s+=20;      // Apple's better built-ins
+    if(/^en[-_](US|GB)$/i.test(v.lang||''))s+=10;else if(isEn(v))s+=5;
+    if(/espeak|eSpeak|robot|compact|novelty|whisper|bells|cellos|albert|bad news|bubbles|zarvox|trinoids|boing|organ|wobble|jester|fred/i.test(n))s-=30;
+    if(/google/i.test(n)&&/^en/i.test(v.lang)&&!/^en[-_](US|GB)$/i.test(v.lang))s-=5;
+    return s;
+  };
+  let voiceCache=null;
+  const voices=()=>{
+    if(!synth)return {};
+    let all=[];try{all=synth.getVoices()||[];}catch(e){}
+    if(!all.length)return {};
+    if(voiceCache&&voiceCache.n===all.length&&voiceCache.c===chosen)return voiceCache.v;
+    const en=all.filter(isEn);
+    const pool=(en.length?en:all).slice().sort((a,b)=>score(b)-score(a));
+    const best=(re,avoid)=>pool.find(v=>re.test(v.name)&&v!==avoid)||pool.find(v=>v!==avoid)||pool[0];
+    const top=score(pool[0]);
+    // Screener: the user's pick if it exists, else the best-quality female voice (or just the best voice).
+    let screener=chosen?all.find(v=>vid(v)===chosen):null;
+    if(!screener){const f=best(FEM,null);screener=(score(f)>=top-10)?f:pool[0];}
+    // Caller: a different voice, preferably male, never worse than "generic English".
+    let caller=best(MAL,screener);
+    if(caller===screener||score(caller)<top-45)caller=pool.find(v=>v!==screener)||screener;
+    voiceCache={n:all.length,c:chosen,v:{screener,caller,pool}};
+    return voiceCache.v;
+  };
+  const say=(who,text)=>new Promise(res=>{
+    if(!synth||muted)return res();
+    let done=false;const fin=()=>{if(!done){done=true;res();}};
+    try{
+      const u=new SpeechSynthesisUtterance(text);
+      const v=voices();
+      u.pitch=1;                                   // natural pitch — never warp it
+      if(who==='caller'){u.rate=1.0;if(v.caller)u.voice=v.caller;}
+      else{u.rate=0.96;if(v.screener)u.voice=v.screener;}
+      u.lang=(u.voice&&u.voice.lang)||'en-US';
+      u.onend=fin;u.onerror=fin;
+      synth.speak(u);
+      setTimeout(fin,Math.max(8000,text.length*120));   // safety: never hang the demo on a stuck utterance
+    }catch(e){fin();}
+  });
+  const hush=()=>{if(synth){try{synth.cancel();}catch(e){}}};
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+  // ---- Player: sequential runner; a generation counter lets replay/switch/hide abort it ----
+  let gen=0;
+  const panel=()=>document.getElementById('demo-panel');
+  const playDemo=async i=>{
+    const my=++gen;hush();
+    const c=demo[i],p=panel();
+    p.hidden=false;p.innerHTML='<div class="demo-wait">'+E(c.title)+' — caller ID '+E(c.caller_id)+(synth&&!muted?' · &#128266; sound on':'')+' <i>&#9679;</i></div>';
+    const pk=document.getElementById('demo-pick');if(pk.value!==String(i))pk.value=String(i);
+    document.getElementById('demo-play').classList.add('active');
+    await wait(350);if(my!==gen)return;
+    for(const st of c.steps){
+      let text=E(st.text);
+      if(st.kind==='verdict'&&st.verdict){
+        const cls=st.verdict==='block'?'blk':(st.verdict==='allow'?'ok':'mdl');
+        text='<span class="pill '+cls+'">'+E(st.verdict)+'</span> '+text;
+      }
+      if(st.kind==='speak'||st.kind==='hear')text='&ldquo;'+text+'&rdquo;';
+      p.insertAdjacentHTML('beforeend','<div class="demo-line '+E(st.who)+' '+E(st.kind)+'"><span class="demo-who">'+E(st.who)+'</span><span>'+text+'</span></div>');
+      // Hold the line for its scripted time, or until the voice finishes (+ a breath) — whichever is longer.
+      await Promise.all([wait(st.ms||1400),VOICED[st.kind]?say(st.who,st.text).then(()=>wait(450)):null]);
+      if(my!==gen)return;
+    }
+    const w=p.querySelector('.demo-wait');if(w)w.innerHTML=E(c.title)+' — done: <b>'+E(c.verdict)+' &rarr; '+E(c.action)+'</b>';
+    document.getElementById('demo-play').classList.remove('active');
+  };
+  const stopDemo=why=>{
+    if(!gen)return;gen++;hush();
+    document.getElementById('demo-play').classList.remove('active');
+    const w=panel().querySelector('.demo-wait');if(w&&w.querySelector('i'))w.innerHTML=E(why)+' — pick a call and press play';
+  };
+  const picked=()=>Math.min(Math.max(parseInt(document.getElementById('demo-pick').value,10)||0,0),demo.length-1);
+  document.getElementById('demo-play').onclick=()=>playDemo(picked());
+  // Selecting a call plays it: the change is itself a user gesture, so audio is
+  // allowed, and a demo shouldn't need two taps to hear one call.
+  document.getElementById('demo-pick').onchange=()=>playDemo(picked());
+
+  // Mute toggle (remembered on this device). Muting mid-call silences it at once; the text keeps going.
+  const mb=document.getElementById('demo-mute');
+  const paintMute=()=>{mb.innerHTML=muted?'&#128263; muted':'&#128266; sound';mb.classList.toggle('muted',muted);mb.title=muted?'Tap to hear the call':'Tap to mute the call';};
+  if(!synth){mb.disabled=true;mb.innerHTML='&#128263; no speech on this browser';}
+  else{paintMute();mb.onclick=()=>{muted=!muted;try{localStorage.setItem(MUTE_KEY,muted?'1':'0')}catch(e){}paintMute();if(muted)hush();};}
+
+  // Voice picker for the AI screener (remembered on this device). Lists the installed
+  // English voices best-first; "auto" takes the top-ranked one. Voices arrive async on
+  // Chrome/Android, so (re)fill whenever the browser reports them.
+  const vs=document.getElementById('demo-voice');
+  const fillVoices=()=>{
+    const v=voices();
+    if(!v.pool){vs.disabled=true;return;}
+    vs.disabled=false;
+    const auto=v.pool[0];
+    vs.innerHTML='<option value="">voice: auto'+(auto?' ('+E(auto.name)+')':'')+'</option>'
+      +v.pool.map(x=>'<option value="'+E(vid(x))+'"'+(vid(x)===chosen?' selected':'')+'>'+E(x.name)+' · '+E(x.lang)+'</option>').join('');
+    if(chosen&&!v.pool.some(x=>vid(x)===chosen))vs.value='';
+  };
+  if(!synth){vs.disabled=true;}
+  else{
+    fillVoices();
+    synth.onvoiceschanged=()=>{voiceCache=null;fillVoices();};
+    vs.onchange=()=>{chosen=vs.value;voiceCache=null;try{localStorage.setItem(VOICE_KEY,chosen)}catch(e){}
+      // Preview the new voice unless a call is playing (it will pick it up on the next line).
+      const v=voices();if(!muted&&v.screener&&!(gen&&panel().querySelector('.demo-wait i'))){hush();say('screener','Hello, this is the screening assistant.');}};
+  }
+
+  // Cancel speech when the tab hides / page unloads (Android Chrome keeps talking otherwise).
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)stopDemo('paused (page hidden)');});
+  addEventListener('pagehide',hush);
+
+  // #demo deep link (the Bench app's Demo button opens /dash/scam#demo): jump to the
+  // Demo-call tray. Audio cannot start without a tap, so offer a one-tap "play with sound"
+  // prompt; browsers without speech synthesis just auto-play the text as before.
+  if(location.hash==='#demo'){
+    const p=panel();p.closest('.tray').scrollIntoView();
+    if(synth&&!muted){
+      p.hidden=false;
+      p.innerHTML='<div class="demo-tap"><button class="demo-btn active" id="demo-tap-go">&#128266; Play the call with sound</button>'
+        +'<button class="demo-btn" id="demo-tap-quiet">text only</button>'
+        +'<div class="demo-wait" style="margin-top:6px">'+E(demo[0].title)+' — tap to start; phones only play audio after a tap.</div></div>';
+      document.getElementById('demo-tap-go').onclick=()=>playDemo(0);
+      document.getElementById('demo-tap-quiet').onclick=()=>{muted=true;paintMute();playDemo(0);};
+    }else playDemo(0);
+  }
+}
+
+// Bring-up ladder
+const done=D.ladder.filter(l=>l.done).length,total=D.ladder.length;
+tray('Bring-up ladder',done+' / '+total+' stages',
+  '<div class="bar"><i style="width:'+Math.round(100*done/Math.max(total,1))+'%"></i></div><ul class="ms" style="margin-top:10px">'
+  +D.ladder.map(l=>'<li><span class="box'+(l.done?' on':'')+'"></span><span>'+E(l.name)+'</span><small>'+(l.auto?'auto-verified':'status.yaml')+'</small></li>').join('')+'</ul>');
+
+// Hardware
+if(D.hardware.length)tray('Hardware','tools/status.yaml','<ul class="next hw">'+D.hardware.map(h=>{const need=/—\s*need/i.test(h);return '<li class="'+(need?'need':'have')+'">'+E(h)+'</li>'}).join('')+'</ul>');
+
+// Next up
+if(D.next.length)tray('Next up','tools/status.yaml','<ul class="next">'+D.next.map(n=>'<li>'+E(n)+'</li>').join('')+'</ul>');
+
+// Decision suite table
+let last='';
+tray('Decision suite','simulate_call.py --suite --rules-only · '+E(s.verdict),
+  '<table><tr><th></th><th>case</th><th>decision</th><th style="text-align:right">score</th><th>path</th><th>signals</th></tr>'
+  +s.cases.map(c=>{const sec=c.section!==last?'<tr><td colspan="6" class="sec">'+E(c.section)+'</td></tr>':'';last=c.section;
+    const dec=c.decision==='block'?'<span class="pill blk">block</span>':'<span class="pill mdl">'+E(c.decision)+'</span>';
+    return sec+'<tr><td><span class="pill '+(c.ok?'ok':'bad')+'">'+(c.ok?'pass':'FAIL')+'</span></td><td class="m">'+E(c.name)+'</td><td>'+dec+'</td><td class="n">'+c.score+'</td><td class="m">'+E(c.path)+'</td><td style="color:var(--zinc);font-size:11px">'+E(c.signals)+'</td></tr>'}).join('')
+  +'</table>',true);
+
+// Rules by weight
+tray('Rules by weight','agent/rules.py — rules only ever block',
+  Object.entries(r.by_weight).map(([w,names])=>'<div style="margin-bottom:8px"><span class="pill blk">weight '+E(w)+'</span> <span style="font-family:var(--mono);font-size:10.5px;color:var(--zinc)">'+names.length+(w==='10'?' — blocks alone':'')+'</span><div style="margin-top:4px">'+names.map(n=>'<span class="tag">'+E(n)+'</span>').join('')+'</div></div>').join(''),true);
+
+// Git
+tray('Change log','last '+g.log.length+' commits'+(g.dirty?' · <span class="warn">'+g.dirty+' uncommitted</span>':''),
+  '<ul class="log">'+g.log.map(x=>'<li><span class="h">'+E(x.h)+'</span><span>'+E(x.s)+'</span><span class="dt">'+E(x.d)+'</span></li>').join('')+'</ul>'
+  +(g.dirty?'<div style="margin-top:10px"><div class="sec">Uncommitted work</div><div class="files">'+g.dirty_files.map(E).join('<br>')+'</div></div>':'')
+  +'<div style="font-family:var(--mono);font-size:10.5px;color:var(--zinc);margin-top:10px">docs: '+D.code.docs.map(E).join(' · ')+(g.remote?'<br>remote: '+E(g.remote):'')+'</div>',true);
+</script>
