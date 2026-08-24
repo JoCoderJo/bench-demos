@@ -117,6 +117,17 @@ document.getElementById('suggest-open').addEventListener('click', function (e) {
 (function () {
   if (window.__benchFb) return; window.__benchFb = 1;
   var Z = 2147483000, open = false, sending = false;
+  // Everyone shares one passcode, so a note is anonymous unless the tester says who they are.
+  // Hand each person a link like  https://…/?who=jane  and the name rides along automatically;
+  // it is remembered on that device, and they can still overwrite it in the box.
+  var WHO_KEY = 'bench-who';
+  var who = '';
+  try {
+    var q = new URLSearchParams(location.search).get('who');
+    if (q) { who = q.slice(0, 40); localStorage.setItem(WHO_KEY, who); }
+    else { who = localStorage.getItem(WHO_KEY) || ''; }
+  } catch (e) {}
+
   var demo = (function () {
     var p = location.pathname;
     if (p.indexOf('/manito') === 0) return 'Manito Park App';
@@ -176,8 +187,8 @@ document.getElementById('suggest-open').addEventListener('click', function (e) {
         '</select>' +
         '<label>What happened?</label>' +
         '<textarea id="bfb-text" placeholder="As specific as you can — what you tapped, what you expected, what you got."></textarea>' +
-        '<label>Email or name (optional)</label>' +
-        '<input id="bfb-contact" autocomplete="off" placeholder="only if you want a reply">' +
+        '<label>Who is this? (so we can follow up)</label>' +
+        '<input id="bfb-contact" autocomplete="off" placeholder="so we know who this came from">' +
         '<div id="bfb-row"><button id="bfb-cancel" type="button">Cancel</button>' +
         '<button id="bfb-send" type="button">Send</button></div>' +
         '<div id="bfb-msg"></div>' +
@@ -185,6 +196,7 @@ document.getElementById('suggest-open').addEventListener('click', function (e) {
     document.body.appendChild(wrap);
     wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
     document.getElementById('bfb-cancel').onclick = close;
+    if (who) document.getElementById('bfb-contact').value = who;
     document.getElementById('bfb-text').focus();
 
     document.getElementById('bfb-send').onclick = function () {
