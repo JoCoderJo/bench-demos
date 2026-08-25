@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta charset="utf-8">
+<!DOCTYPE html><html lang="en"><head><script id="bench-gate-loader" src="/bench-gate.js"></script><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Rover Bot Mission Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -273,6 +273,23 @@ table.probj td .skip{color:var(--amber);font-size:10px;font-family:'IBM Plex Mon
   border:1px solid var(--brass);background:none;color:var(--brass);cursor:pointer}
 .prbuild.prview{border-color:#3a4a5c;color:var(--blue);font-weight:400}
 .prbuild:disabled{opacity:.45}
+/* bed fit (request #70): packed size vs the usable bed, under the row, as the copies change */
+.prfit{grid-column:1/-1;font-family:'IBM Plex Mono',monospace;font-size:9.5px;line-height:1.4;color:var(--zinc);min-height:0}
+.prfit:empty{display:none}
+.prfit.bad{color:var(--red)}
+/* print outcomes (request #71): what actually came off the A1, one line under each row —
+   never printed / printed <date> / FAILED <date> — note. MARK swaps the line for the control
+   (note field + PRINTED / FAILED) so a 390px row stays one badge and one button until tapped. */
+.prrun{grid-column:1/-1;display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:9.5px;line-height:1.4;color:var(--zinc)}
+.prrun .prout{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prrun .prout.printed{color:var(--ok)}.prrun .prout.failed{color:var(--red)}
+.prrun .prmark{flex:none;min-height:32px;padding:0 10px;font:inherit;border:1px solid #3a4a5c;border-radius:6px;background:none;color:var(--blue);cursor:pointer}
+.prrun .prnote{flex:1 1 100%;min-height:36px;background:var(--cell);border:1px solid #3a4150;border-radius:6px;color:var(--paper);padding:0 8px;font:inherit;font-size:12px}
+.prrun .prmarkgo{flex:1;min-height:38px;font:inherit;font-size:10.5px;font-weight:600;border-radius:7px;background:none;cursor:pointer;border:1px solid var(--ok);color:var(--ok)}
+.prrun .prmarkgo.failed{border-color:var(--red);color:var(--red)}
+.prrun button:disabled{opacity:.45}
+#prProg{font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.5;color:var(--paper);padding:0 4px 8px;border-bottom:1px solid #2c313b;margin-bottom:4px}
+#prProg b{color:var(--ok);font-weight:600}#prProg .f{color:var(--red)}#prProg small{color:var(--zinc);font-size:9.5px;margin-left:6px}
 .prhint{font-size:10.5px;color:var(--zinc);line-height:1.5;margin-top:8px}
 #prApply{width:100%;min-height:44px;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;
   border-radius:8px;border:1px solid var(--brass);background:none;color:var(--brass);cursor:pointer}
@@ -469,10 +486,16 @@ function initPrint(){
   // screen instead (request #69: plates/<set>__<stem>.3mf, picked in the Parts list);
   // parts = /parts rows for cur.project (null when only the baked snapshot is available)
   let sets=[],cur=null,part=null,parts=null,qtys={},live=true,slice=null,prof=null,svg='',pollT=null,busy=false;
+  // bed fit (request #70): 'stem|qty' -> /fit answer, asked (debounced) as the copies change
+  const fits={},fitT={};
+  // print outcomes (request #71): the stem whose MARK control is open (one at a time)
+  let markOpen=null;
 
   async function api(path,opt){
     const r=await fetch('/api/print/'+path,Object.assign({credentials:'same-origin'},opt||{}));
     if(!r.ok){let d='';try{d=(await r.json()).detail||''}catch(e){}
+      // a 409 from the build carries {error, fit} — show the sentence, not [object Object]
+      if(d&&typeof d==='object')d=d.error||JSON.stringify(d);
       const err=new Error(d||('HTTP '+r.status));err.status=r.status;throw err;}
     return r;}
   const j=(path,opt)=>api(path,opt).then(r=>r.json());
@@ -586,13 +609,16 @@ function initPrint(){
     // PART PICKER (request #69): every printable part of the release from the BOM, one
     // plate each. BUILD = plate.py --only <stem> --qty N --slice, then that plate is shown.
     if(parts){
-      h+='<section class="tray"><div class="traylabel"><h2>Parts</h2><small>'+parts.length+' printable · one plate per part</small></div><div class="pad"><div id="prPick">'
+      h+='<section class="tray"><div class="traylabel"><h2>Parts</h2><small>'+parts.length+' printable · one plate per part</small></div><div class="pad">'
+        +'<div id="prProg">'+progTxt()+'</div><div id="prPick">'
         +parts.map((p,i)=>'<div class="prrow'+(part&&part.stem===p.stem?' on':'')+'" data-i="'+i+'">'
           +'<div class="prname"><b>'+E(p.stem)+'</b><span class="prst '+stCls(p.state)+'">'+E(p.state)+'</span>'
           +'<small>'+E(p.material)+' · BOM ×'+p.qty+(p.note?' · '+E(p.note):'')+'</small></div>'
           +'<input type="number" class="prqty" min="1" max="200" step="1" value="'+qtyOf(p)+'" data-i="'+i+'" aria-label="copies on the plate"'+(live?'':' disabled')+'>'
-          +'<button class="prbuild'+(p.sliced&&!p.stale?' prview':'')+'" data-i="'+i+'"'+(live?'':' disabled')+'>'+(p.sliced&&!p.stale?'VIEW':'BUILD')+'</button></div>').join('')
-        +'</div><div class="prhint">BUILD packs just that part (the copies shown), slices it headless with its material\'s profile and shows that plate\'s time, grams and warnings. VIEW shows a plate already sliced; RE-SLICE PART rebuilds it. DOWNLOAD hands you the .3mf for Bambu Studio on the Windows box.</div></div></section>';
+          +'<button class="prbuild'+(p.sliced&&!p.stale?' prview':'')+'" data-i="'+i+'"'+(live?'':' disabled')+'>'+(p.sliced&&!p.stale?'VIEW':'BUILD')+'</button>'
+          +'<div class="prfit" data-i="'+i+'"></div>'
+          +'<div class="prrun" data-i="'+i+'">'+runLine(p,i)+'</div></div>').join('')
+        +'</div><div class="prhint">BUILD packs just that part (the copies shown), slices it headless with its material\'s profile and shows that plate\'s time, grams and warnings. Change the copies and the row says whether that many fit the A1 bed — BUILD is off when they will not. VIEW shows a plate already sliced; RE-SLICE PART rebuilds it. DOWNLOAD hands you the .3mf for Bambu Studio on the Windows box.</div></div></section>';
     }else if(slice){
       const g={};(slice.objects||[]).forEach(o=>{const k=o.name+(o.skipped?'|s':'');
         (g[k]=g[k]||{name:o.name,skipped:o.skipped,n:0}).n++;});
@@ -626,12 +652,18 @@ function initPrint(){
       const[p,s]=c.dataset.set.split('|');cur=sets.find(x=>x.project===p&&x.set===s)||cur;
       part=null;stopPoll();loadSet();});
     const bk=document.getElementById('prBack');if(bk)bk.onclick=()=>{part=null;stopPoll();loadSet();};
-    body.querySelectorAll('.prqty').forEach(i=>i.onchange=()=>{
-      const p=parts[+i.dataset.i],v=Math.max(1,Math.min(200,parseInt(i.value)||1));i.value=v;qtys[p.stem]=v;});
+    body.querySelectorAll('.prqty').forEach(i=>{
+      i.onchange=()=>{
+        const p=parts[+i.dataset.i],v=Math.max(1,Math.min(200,parseInt(i.value)||1));i.value=v;qtys[p.stem]=v;checkFit(+i.dataset.i,v);};
+      // while typing: ask after a 350 ms pause, without rewriting the field under the thumb
+      i.oninput=()=>{const v=parseInt(i.value);if(v>=1&&v<=200)checkFit(+i.dataset.i,v,true);};});
     body.querySelectorAll('.prbuild').forEach(b=>b.onclick=()=>{
       const p=parts[+b.dataset.i];
       if(p.sliced&&!p.stale){part=p;stopPoll();loadSet();}
       else buildPart(p);});
+    if(parts)parts.forEach((p,i)=>wireRun(i));
+    // rows whose copies were changed earlier this session get their verdict back right away
+    if(parts&&live)parts.forEach((p,i)=>{if(qtyOf(p)!==1||fits[p.stem+'|1'])checkFit(i,qtyOf(p));});
     const dl=document.getElementById('prDiffL');
     if(dl&&prof&&prof.diff&&prof.diff.changed)dl.onclick=showDiff;
     const ap=document.getElementById('prApply');if(ap)ap.onclick=apply;
@@ -640,10 +672,102 @@ function initPrint(){
 
   function stat(msg,cls){const el=document.getElementById('prStat');
     if(el){el.textContent=msg||'';el.className=cls||'';}}
+
+  // ---- print outcomes (request #71): what actually came off the printer, marked by Joe ----
+  // The row's last run from /parts (`last`, `printed_copies`); MARK opens the control in
+  // place: a note field and PRINTED / FAILED. Two taps: MARK, then the verdict — the note
+  // is optional but sits right there, because "warped corner" is the point of recording it.
+  const fmtD=t=>new Date((t||0)*1000).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+  // "3 of 8 parts printed" for the selected print set — PARTS, not copies (omni_roller is one
+  // part whether 4 or 32 are done); a part whose newest run failed needs a reprint, so it is
+  // not counted as printed even if an earlier run was
+  function progTxt(){
+    const set=part?part.set:cur.set,ps=(parts||[]).filter(p=>p.set===set);
+    if(!ps.length)return E(set)+': no printable parts';
+    const ok=ps.filter(p=>p.last&&p.last.outcome==='printed').length,
+          bad=ps.filter(p=>p.last&&p.last.outcome==='failed').length;
+    return E(set)+': <b>'+ok+' of '+ps.length+'</b> parts printed'+(bad?' · <span class="f">'+bad+' failed</span>':'')
+      +(ok===ps.length?'<small>release complete</small>':'<small>'+(ps.length-ok)+' to go</small>');
+  }
+  function paintProg(){const el=document.getElementById('prProg');if(el)el.innerHTML=progTxt();}
+  function runLine(p,i){
+    const dis=live?'':' disabled';
+    if(markOpen===p.stem)return '<input class="prnote" data-i="'+i+'" maxlength="500" placeholder="note — e.g. warped corner, layer shift at 40%"'+dis+'>'
+      +'<button class="prmarkgo" data-i="'+i+'" data-o="printed"'+dis+'>✓ PRINTED'+(qtyOf(p)>1?' ×'+qtyOf(p):'')+'</button>'
+      +'<button class="prmarkgo failed" data-i="'+i+'" data-o="failed"'+dis+'>✗ FAILED</button>'
+      +'<button class="prmark" data-i="'+i+'" aria-label="close"'+dis+'>✕</button>';
+    const l=p.last;let t,cls='';
+    if(!l)t='never printed';
+    else if(l.outcome==='printed'){cls='printed';t='printed '+fmtD(l.at)+(l.qty>1?' ×'+l.qty:'');}
+    else{cls='failed';t='FAILED '+fmtD(l.at)+(l.note?' — '+l.note:'');}
+    if(p.qty>1&&p.printed_copies)t+=' · '+p.printed_copies+' of '+p.qty+' copies';
+    return '<span class="prout '+cls+'" title="'+E(t)+'">'+E(t)+'</span>'
+      +'<button class="prmark" data-i="'+i+'"'+dis+'>MARK</button>';
+  }
+  function wireRun(i){
+    const el=body.querySelector('.prrun[data-i="'+i+'"]');if(!el)return;
+    el.querySelectorAll('.prmark').forEach(b=>b.onclick=()=>{
+      const p=parts[i],was=markOpen;markOpen=markOpen===p.stem?null:p.stem;
+      // one control open at a time: repaint the row that just lost it too
+      if(was&&was!==markOpen){const k=parts.findIndex(x=>x.stem===was);if(k>=0)paintRun(k);}
+      paintRun(i);});
+    el.querySelectorAll('.prmarkgo').forEach(b=>b.onclick=()=>markPart(i,b.dataset.o));
+  }
+  function paintRun(i){
+    const p=parts&&parts[i],el=body.querySelector('.prrun[data-i="'+i+'"]');if(!p||!el)return;
+    el.innerHTML=runLine(p,i);
+    wireRun(i);
+  }
+  async function markPart(i,outcome){
+    const p=parts&&parts[i];if(!p||!live||busy)return;
+    const inp=body.querySelector('.prnote[data-i="'+i+'"]'),note=inp?inp.value.trim():'',q=qtyOf(p);
+    body.querySelectorAll('.prrun[data-i="'+i+'"] button').forEach(b=>b.disabled=true);
+    try{
+      const r=await j(cur.project+'/part/'+encodeURIComponent(p.stem)+'/mark',{method:'POST',
+        headers:{'Content-Type':'application/json'},body:JSON.stringify({outcome:outcome,note:note,qty:q})});
+      p.last=r.last||r.run;p.printed_copies=r.printed_copies||0;markOpen=null;
+      stat(p.stem+(q>1?' ×'+q:'')+' marked '+outcome.toUpperCase()+(note?' — '+note:''),outcome==='printed'?'good':'');
+    }catch(e){stat('could not mark '+p.stem+': '+e.message,'bad');}
+    paintRun(i);paintProg();
+  }
+
+  // ---- bed fit (request #70): plate.py's packing verdict, with the numbers, BEFORE a build ----
+  const fitTxt=f=>f.block_w.toFixed(0)+' x '+f.block_h.toFixed(0)+' mm — '+(f.fits?'fits the ':'too big for the ')+f.usable.toFixed(0)+' mm bed';
+  // paint the row's verdict for the copies it shows now; a stale answer (copies changed
+  // again while the request was in flight) is simply not painted
+  function paintFit(i){
+    if(!parts||!parts[i])return;
+    const p=parts[i],row=body.querySelector('.prfit[data-i="'+i+'"]'),btn=body.querySelector('.prbuild[data-i="'+i+'"]');
+    if(!row)return;
+    const f=fits[p.stem+'|'+qtyOf(p)];
+    if(!f){row.textContent='';row.className='prfit';return;}
+    if(f.pending){row.textContent='checking '+qtyOf(p)+' on the bed…';row.className='prfit';return;}
+    if(f.error){row.textContent='fit check failed: '+f.error;row.className='prfit';return;}
+    row.textContent=(qtyOf(p)>1?'×'+qtyOf(p)+' packs to ':'')+fitTxt(f);row.className='prfit'+(f.fits?'':' bad');
+    const bad=!f.fits;
+    if(btn&&!btn.classList.contains('prview')){btn.disabled=bad||busy||!live;btn.title=bad?f.reason||fitTxt(f):'';}
+    if(part&&part.stem===p.stem){const rs=document.getElementById('prReslice');
+      if(rs){rs.disabled=bad||busy||!live;rs.title=bad?f.reason||fitTxt(f):'';}}
+  }
+  function checkFit(i,v,debounce){
+    const p=parts&&parts[i];if(!p||!live)return;
+    clearTimeout(fitT[p.stem]);
+    const go=()=>{
+      qtys[p.stem]=v;
+      const k=p.stem+'|'+v;
+      if(fits[k]&&!fits[k].error){paintFit(i);return;}
+      fits[k]={pending:true};paintFit(i);
+      j(cur.project+'/fit?stem='+encodeURIComponent(p.stem)+'&qty='+v)
+        .then(f=>{fits[k]=f;})
+        .catch(e=>{fits[k]={error:e.message};})
+        .then(()=>{if(qtyOf(p)===v)paintFit(i);});};
+    if(debounce)fitT[p.stem]=setTimeout(go,350);else go();
+  }
   function lock(on){busy=on;['prApply','prReslice'].forEach(id=>{
     const b=document.getElementById(id);if(b)b.disabled=on||!live;});
-    body.querySelectorAll('.prbuild').forEach(b=>b.disabled=on||!live);
-    const a=document.getElementById('prDl');if(a)a.classList.toggle('off',on||!live||!!(part&&!part.plated));}
+    body.querySelectorAll('.prbuild,.prrun button').forEach(b=>b.disabled=on||!live);
+    const a=document.getElementById('prDl');if(a)a.classList.toggle('off',on||!live||!!(part&&!part.plated));
+    if(parts)parts.forEach((p,i)=>paintFit(i));}  // a known no-fit row stays off (request #70)
 
   async function showDiff(){
     const el=document.getElementById('prDiff');
@@ -694,7 +818,11 @@ function initPrint(){
       const secs=Math.round((Date.now()-t0)/1000),tail=(st.log||[]).filter(l=>l.trim()).slice(-1)[0]||'';
       if(st.state==='running'){stat(label+'… '+secs+'s\n'+tail);return;}
       stopPoll();
-      if(st.state==='crashed')stat('slice CRASHED (rc '+st.rc+')\n'+(st.log||[]).slice(-4).join('\n'),'bad');
+      // request #70: plate.py's own fit verdict rides in the status, so an overflowing
+      // plate is named as such — it is not the slicer crash of issue 007
+      const over=st.fit&&!st.fit.fits?'the plate does NOT fit the bed: '+fitTxt(st.fit)+' (usable) — split it in the slicer':'';
+      if(st.state==='crashed')stat('slice CRASHED (rc '+st.rc+')'+(over?' — '+over:'')+'\n'+(st.log||[]).slice(-4).join('\n'),'bad');
+      else if(over)stat('slice done in '+secs+'s, but '+over+' — reloading','bad');
       else stat('slice done in '+secs+'s — reloading','good');
       lock(false);
       if(st.state!=='crashed')await loadSets();
