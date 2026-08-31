@@ -2,14 +2,17 @@
 <html lang="en"><script id="bench-gate-loader" src="/bench-gate.js"></script><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Phonics Frog</title>
-<!-- Browser demo of Project Phonics Frog: a 100% offline phonics & spelling toy.
+<title>Phonics Friends</title>
+<!-- Browser demo of Project Phonics Friends: a 100% offline phonics & spelling toy.
      The real toy is two microcontrollers — an M5Stack CoreS3 doing wake-word and phoneme
      recognition (ESP-SR), and an Arduino UNO Q doing servos and LEDs — joined by UART.
-     This page simulates both "helpers" locally in the browser: SpeechRecognition is the
-     ears, speechSynthesis is the mouth, and an animated frog is the muscles. Everything
-     runs on the visitor's own device; the page makes no network calls, except to
-     load its own recorded phoneme clips from audio/ when any are listed in SAMPLES.
+     This page simulates both "helpers" in the browser: SpeechRecognition is the ears,
+     speechSynthesis is the mouth, and an animated friend is the muscles — the child picks
+     a frog, cat, owl or bunny on a start panel, names it, and each pick brings its own
+     colour scheme. Unlike the real
+     toy, the ears may not be fully local — some browsers (Chrome) run SpeechRecognition
+     through their vendor's cloud speech service. The page's own only network use is
+     loading its recorded phoneme clips from audio/ when any are listed in SAMPLES.
      Source of truth: reference/Phonics_Frog_Architecture_Guide.pdf -->
 <style>
  :root{--bg:#eef6ea;--card:#fff;--ink:#1d3021;--dim:#5b7261;--green:#3f9b4f;--deep:#2c6e3a;
@@ -22,7 +25,8 @@
  h1{font-size:24px;margin:4px 0 0;text-align:center;color:var(--deep)}
  .sub{text-align:center;color:var(--dim);font-size:13px;margin:2px 0 10px}
 
- /* the frog */
+ /* the friend — the svg keeps its original #frog id so the animations and JS stay stable
+    while its innerHTML is swapped per animal */
  #stage{position:relative;display:flex;justify-content:center;padding:6px 0 0}
  #frog{width:230px;height:200px;transition:transform .25s}
  #frog.nod{animation:nod .5s ease 2}
@@ -49,21 +53,31 @@
       padding:6px 8px;font-weight:600}
  #say small{display:block;font-weight:400;color:var(--dim);font-size:13px}
 
- /* controls */
+ /* the one control: idle / listening / thinking live in its label + pulse */
  .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0}
  button{border:0;border-radius:12px;cursor:pointer;font-weight:700}
  .big{background:var(--green);color:#fff;font-size:18px;padding:14px 22px}
- .big[disabled]{opacity:.45}
- .ghost{background:var(--card);color:var(--deep);border:2px solid var(--edge);
-        font-size:14px;padding:10px 14px}
- #own{width:150px;border:2px solid var(--edge);border-radius:12px;padding:10px 12px;
-      font-size:16px;font-weight:700;background:var(--card);color:var(--deep);
-      text-transform:uppercase}
- #own:focus{outline:none;border-color:var(--green)}
- #mic.live{background:#d43d3d;animation:pulse 1.2s infinite}
+ #go{min-width:220px}
+ #go.live{background:#d43d3d;animation:pulse 1.2s infinite}
+ .mini{background:none;color:var(--dim);font-size:13px;font-weight:600;
+       padding:6px 10px;text-decoration:underline}
 
- /* on-screen keyboard: the fallback ears, and the primary input on browsers
-    without SpeechRecognition */
+ /* "Pick your friend" start panel: choose an animal, give it a name */
+ #pick{background:var(--card);border:1px solid var(--edge);border-radius:14px;
+       padding:12px;margin:10px 0}
+ #pick h2{font-size:16px;margin:0 0 8px;text-align:center;color:var(--deep)}
+ .pets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+ .pets button{background:var(--bg);border:2px solid var(--edge);border-radius:12px;
+       padding:8px 2px;font-size:14px;color:var(--ink)}
+ .pets button .pe{display:block;font-size:30px;line-height:1.2}
+ .pets button.sel{border-color:var(--green);background:var(--lily)}
+ .namerow{display:flex;gap:8px;margin-top:10px}
+ #petname{flex:1;min-width:0;font:inherit;padding:10px;border:2px solid var(--edge);
+       border-radius:10px;background:var(--bg);color:var(--ink)}
+ #savepet{font-size:16px;padding:10px 16px}
+
+ /* on-screen keyboard: the fallback ears — appears when the mic is blocked, speech
+    keeps missing, or the browser has no SpeechRecognition at all */
  #keys{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px}
  #keys button{background:var(--card);border:2px solid var(--edge);color:var(--ink);
       font-size:19px;padding:11px 0;border-radius:10px}
@@ -81,8 +95,17 @@
  .foot{text-align:center;color:var(--dim);font-size:12px;margin-top:14px}
 </style>
 <div class="wrap">
-  <h1>🐸 Phonics Frog</h1>
-  <div class="sub">A spelling buddy that runs 100% on this device — no internet, no account, nothing recorded.</div>
+  <h1 id="title">🐸 Phonics Friends</h1>
+  <div class="sub" id="sub">A spelling buddy you drive with your voice — the real toy is 100% offline; this demo borrows your browser’s speech helpers.</div>
+
+  <div id="pick" style="display:none">
+    <h2>Pick your friend!</h2>
+    <div class="pets" id="pets"></div>
+    <div class="namerow">
+      <input id="petname" maxlength="20" placeholder="Name your friend (optional)">
+      <button class="big" id="savepet">Let’s play!</button>
+    </div>
+  </div>
 
   <div id="stage">
     <svg id="frog" viewBox="0 0 230 200" aria-hidden="true">
@@ -109,32 +132,25 @@
   </div>
 
   <div id="word"></div>
-  <div id="say">Tap <b>Start</b> and I’ll help you spell!<small>&nbsp;</small></div>
+  <div id="say">Tap the button, then tell me a word to spell!<small>&nbsp;</small></div>
 
   <div class="row">
-    <button class="big" id="start">▶ Start</button>
-    <button class="big" id="mic" style="display:none">🎤 Say it</button>
-    <button class="ghost" id="hear" style="display:none">🔊 hear it again</button>
-    <button class="ghost" id="next" style="display:none">another word</button>
-  </div>
-  <div class="row" id="ownrow">
-    <input id="own" maxlength="10" placeholder="your word…" autocapitalize="characters"
-           autocomplete="off" spellcheck="false" aria-label="type a word to spell">
-    <button class="ghost" id="ownGo">✨ spell my word</button>
+    <button class="big" id="go">▶ Start</button>
   </div>
   <div id="keys" style="display:none"></div>
+  <div class="row"><button class="mini" id="switch">🐾 Change friend</button></div>
 
   <details>
-    <summary>🐸 How the real frog works (peek inside)</summary>
+    <summary>🔍 How the real toy works (peek inside)</summary>
     <p style="margin:8px 0 2px">The real toy is two tiny computers, no internet at all:</p>
     <div class="helper"><span class="hdot" id="h1dot"></span><b>Helper 1 — the ears &amp; mouth</b>&nbsp;<span style="color:var(--dim)">(M5Stack CoreS3, offline speech)</span></div>
     <div class="helper"><span class="hdot" id="h2dot"></span><b>Helper 2 — the muscles</b>&nbsp;<span style="color:var(--dim)">(Arduino UNO Q: servos + lights)</span></div>
     <p style="margin:6px 0 2px;color:var(--dim)">They pass secret notes over a wire (UART). Watch the notes:</p>
     <div id="uart">—</div>
-    <p style="margin:8px 0 0;color:var(--dim)">This page plays both helpers using your browser’s own offline-capable speech — nothing you say leaves this device.</p>
+    <p style="margin:8px 0 0;color:var(--dim)">This page plays both helpers with your browser’s built-in speech. Heads-up: some browsers (like Chrome) send what you say to their own speech service to work out the words — the real toy never does that; it is fully offline.</p>
   </details>
 
-  <div class="foot">Project Phonics Frog · a fully local AI toy · demo runs entirely in your browser</div>
+  <div class="foot">Project Phonics Friends · a fully local AI toy · demo runs in your browser via its speech helpers</div>
 </div>
 
 <script>
@@ -148,7 +164,7 @@ var WORDS=[
  {w:"GREEN", cues:["/g/ like a gulp… g-g-g","/r/ like a race car… rrr","/e/ long E, like eee!","this one is a twin — another E, eee!","/n/ hum in your nose… nnn"]},
  {w:"FRIEND",cues:["/f/ soft hiss… ffff","/r/ race car… rrr","/i/ here it is spelled with an I","/e/ and its buddy E","/n/ hum… nnn","/d/ drum… d-d-d"]}
 ];
-/* cues for any word the user types: one per letter, same style as the
+/* cues for any word the child asks for: one per letter, same style as the
    hand-written words above */
 var LCUE={a:"/a/ like in apple… a-a-a",b:"/b/ like a bouncing ball… b-b-b",
  c:"/k/ like a camera click… k-k-k",d:"/d/ like a drum… d-d-d",e:"/e/ like in egg… eh",
@@ -184,6 +200,71 @@ var NAME={a:["a","ay","hey","eh"],b:["b","be","bee"],c:["c","see","sea","si"],d:
  t:["t","te","tee","tea"],u:["u","you","yu"],v:["v","ve","vee"],w:["w","doubleu","double you"],
  x:["x","ex"],y:["y","why"],z:["z","zee","zed"]};
 
+/* ---------- the friend: pickable animals, each with its own colour scheme ----------
+   pal keys map 1:1 onto the :root custom props; svg is the innerHTML for the #frog
+   svg (ids/classes inside — #mouth, .pupil — are what the animations re-query);
+   mouthC/mouthO are the closed/open mouth paths mouthOpen() swaps between.
+   The frog entry is today's art and colours verbatim. */
+var PETKEYS=['frog','cat','owl','bunny'];
+var ANIMALS={
+ frog:{label:"Frog",emoji:"🐸",
+  pal:{bg:"#eef6ea",card:"#fff",ink:"#1d3021",dim:"#5b7261",green:"#3f9b4f",
+       deep:"#2c6e3a",lily:"#cfe8c6",warm:"#f0a441",edge:"#cfe0cb"},
+  mouthC:"M75 118 Q115 138 155 118",mouthO:"M78 116 Q115 150 152 116",
+  svg:'<ellipse cx="115" cy="185" rx="105" ry="14" fill="#9ccc8f"/>'+
+   '<ellipse cx="45" cy="160" rx="26" ry="16" fill="#4da85c"/><ellipse cx="185" cy="160" rx="26" ry="16" fill="#4da85c"/>'+
+   '<ellipse cx="115" cy="130" rx="72" ry="58" fill="#5cb56a"/><ellipse cx="115" cy="148" rx="50" ry="34" fill="#a8dba0"/>'+
+   '<g id="eyeL"><circle cx="78" cy="72" r="24" fill="#5cb56a"/><circle cx="78" cy="72" r="15" fill="#fff"/><circle class="pupil" cx="78" cy="74" r="7" fill="#1d3021"/></g>'+
+   '<g id="eyeR"><circle cx="152" cy="72" r="24" fill="#5cb56a"/><circle cx="152" cy="72" r="15" fill="#fff"/><circle class="pupil" cx="152" cy="74" r="7" fill="#1d3021"/></g>'+
+   '<path id="mouth" d="M75 118 Q115 138 155 118" stroke="#2c6e3a" stroke-width="5" fill="none" stroke-linecap="round"/>'+
+   '<circle cx="62" cy="112" r="8" fill="#f6c9a0" opacity=".55"/><circle cx="168" cy="112" r="8" fill="#f6c9a0" opacity=".55"/>'},
+ cat:{label:"Cat",emoji:"🐱",
+  pal:{bg:"#fbf1e3",card:"#fff",ink:"#3a2a1d",dim:"#8a6f57",green:"#e07b39",
+       deep:"#a3542a",lily:"#f8e0c2",warm:"#e8b84c",edge:"#eed9bd"},
+  mouthC:"M99 110 Q115 122 131 110",mouthO:"M101 108 Q115 132 129 108",
+  svg:'<ellipse cx="115" cy="185" rx="105" ry="14" fill="#e9cfae"/>'+
+   '<path d="M178 168 Q215 160 208 128" stroke="#e8933f" stroke-width="14" fill="none" stroke-linecap="round"/>'+
+   '<ellipse cx="115" cy="142" rx="64" ry="46" fill="#e8933f"/><ellipse cx="115" cy="156" rx="42" ry="26" fill="#f8dcb4"/>'+
+   '<polygon points="62,64 74,18 98,52" fill="#e8933f"/><polygon points="70,58 77,32 88,50" fill="#f2b27c"/>'+
+   '<polygon points="168,64 156,18 132,52" fill="#e8933f"/><polygon points="160,58 153,32 142,50" fill="#f2b27c"/>'+
+   '<circle cx="115" cy="82" r="50" fill="#e8933f"/>'+
+   '<path d="M100 40 L104 54 M115 36 L115 52 M130 40 L126 54" stroke="#c9722a" stroke-width="5" stroke-linecap="round" fill="none"/>'+
+   '<circle cx="94" cy="76" r="13" fill="#fff"/><circle class="pupil" cx="94" cy="78" r="7" fill="#3a2a1d"/>'+
+   '<circle cx="136" cy="76" r="13" fill="#fff"/><circle class="pupil" cx="136" cy="78" r="7" fill="#3a2a1d"/>'+
+   '<polygon points="108,94 122,94 115,103" fill="#d96a6a"/>'+
+   '<path d="M70 96 L38 90 M70 104 L40 106 M160 96 L192 90 M160 104 L190 106" stroke="#c9722a" stroke-width="2.5" stroke-linecap="round" fill="none"/>'+
+   '<path id="mouth" d="M99 110 Q115 122 131 110" stroke="#a3542a" stroke-width="5" fill="none" stroke-linecap="round"/>'+
+   '<circle cx="76" cy="102" r="8" fill="#f6c9a0" opacity=".55"/><circle cx="154" cy="102" r="8" fill="#f6c9a0" opacity=".55"/>'},
+ owl:{label:"Owl",emoji:"🦉",
+  pal:{bg:"#efecf8",card:"#fff",ink:"#272040",dim:"#6f6790",green:"#7a5fc0",
+       deep:"#53418f",lily:"#e4def5",warm:"#f2b544",edge:"#d9d3ec"},
+  mouthC:"M107 104 Q115 120 123 104 Q115 110 107 104",mouthO:"M104 102 Q115 132 126 102 Q115 110 104 102",
+  svg:'<rect x="30" y="176" width="170" height="12" rx="6" fill="#8a6b4f"/>'+
+   '<polygon points="60,58 68,24 92,44" fill="#7e68b8"/><polygon points="170,58 162,24 138,44" fill="#7e68b8"/>'+
+   '<ellipse cx="115" cy="116" rx="66" ry="64" fill="#7e68b8"/>'+
+   '<ellipse cx="58" cy="120" rx="16" ry="40" fill="#6a55a4"/><ellipse cx="172" cy="120" rx="16" ry="40" fill="#6a55a4"/>'+
+   '<ellipse cx="115" cy="146" rx="40" ry="32" fill="#e6dff7"/>'+
+   '<path d="M91 132 Q99 140 107 132 M123 132 Q131 140 139 132 M99 148 Q107 156 115 148 Q123 156 131 148" stroke="#c9bde8" stroke-width="3" fill="none"/>'+
+   '<circle cx="90" cy="80" r="24" fill="#f2c14e"/><circle cx="90" cy="80" r="16" fill="#fff"/><circle class="pupil" cx="90" cy="82" r="7" fill="#272040"/>'+
+   '<circle cx="140" cy="80" r="24" fill="#f2c14e"/><circle cx="140" cy="80" r="16" fill="#fff"/><circle class="pupil" cx="140" cy="82" r="7" fill="#272040"/>'+
+   '<path d="M92 178 L92 190 M100 178 L100 190 M130 178 L130 190 M138 178 L138 190" stroke="#c27d20" stroke-width="5" stroke-linecap="round" fill="none"/>'+
+   '<path id="mouth" d="M107 104 Q115 120 123 104 Q115 110 107 104" fill="#f0a441" stroke="#c27d20" stroke-width="2"/>'},
+ bunny:{label:"Bunny",emoji:"🐰",
+  pal:{bg:"#fdeef3",card:"#fff",ink:"#41232f",dim:"#94687a",green:"#e0679c",
+       deep:"#ab3f6e",lily:"#fad9e6",warm:"#f0a441",edge:"#f2d7e1"},
+  mouthC:"M102 118 Q115 128 128 118",mouthO:"M104 114 Q115 136 126 114",
+  svg:'<ellipse cx="115" cy="185" rx="105" ry="14" fill="#cfe3bd"/>'+
+   '<ellipse cx="92" cy="42" rx="15" ry="36" fill="#f6f2ee" transform="rotate(-8 92 42)"/><ellipse cx="92" cy="46" rx="8" ry="26" fill="#f4c2d0" transform="rotate(-8 92 42)"/>'+
+   '<ellipse cx="138" cy="42" rx="15" ry="36" fill="#f6f2ee" transform="rotate(8 138 42)"/><ellipse cx="138" cy="46" rx="8" ry="26" fill="#f4c2d0" transform="rotate(8 138 42)"/>'+
+   '<ellipse cx="115" cy="150" rx="60" ry="40" fill="#f6f2ee"/><circle cx="115" cy="94" r="46" fill="#f6f2ee"/>'+
+   '<ellipse cx="115" cy="158" rx="38" ry="24" fill="#fdfbf9"/>'+
+   '<circle cx="97" cy="88" r="12" fill="#fff" stroke="#e7dcd6" stroke-width="2"/><circle class="pupil" cx="97" cy="90" r="7" fill="#41232f"/>'+
+   '<circle cx="133" cy="88" r="12" fill="#fff" stroke="#e7dcd6" stroke-width="2"/><circle class="pupil" cx="133" cy="90" r="7" fill="#41232f"/>'+
+   '<polygon points="109,104 121,104 115,111" fill="#e78aa8"/>'+
+   '<path id="mouth" d="M102 118 Q115 128 128 118" stroke="#ab3f6e" stroke-width="5" fill="none" stroke-linecap="round"/>'+
+   '<circle cx="76" cy="106" r="8" fill="#f4c2d0" opacity=".7"/><circle cx="154" cy="106" r="8" fill="#f4c2d0" opacity=".7"/>'+
+   '<ellipse cx="88" cy="182" rx="16" ry="10" fill="#fdfbf9"/><ellipse cx="142" cy="182" rx="16" ry="10" fill="#fdfbf9"/>'}};
+
 var say=document.getElementById('say'), frog=document.getElementById('frog'),
     mouth=document.getElementById('mouth'), keys=document.getElementById('keys'),
     leds=[].slice.call(document.querySelectorAll('.led')),
@@ -191,26 +272,72 @@ var say=document.getElementById('say'), frog=document.getElementById('frog'),
     uart=document.getElementById('uart');
 var cur=null, idx=0, busy=false, wi=Math.floor(Math.random()*WORDS.length);
 
+/* ---------- the friend: pick, name, theme, remember ---------- */
+var pick=document.getElementById('pick'), pets=document.getElementById('pets'),
+    petname=document.getElementById('petname');
+/* "Phonics Friends" (the brand) doubles as the sentinel: nobody picked yet; a committed pet always carries a real name
+   (the typed one, or the animal's label when the input is left blank) */
+var pet={animal:'frog',name:'Phonics Friends'};
+function cleanName(s){return String(s||'').replace(/[<>&"]/g,'').trim().slice(0,20)}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function applyPet(){var a=ANIMALS[pet.animal],p=a.pal,rs=document.documentElement.style,k;
+ for(k in p)rs.setProperty('--'+k,p[k]);
+ frog.innerHTML=a.svg;
+ mouth=document.getElementById('mouth'); /* re-query: innerHTML swap replaced it */
+ document.getElementById('title').textContent=a.emoji+' '+pet.name;
+ document.getElementById('sub').textContent=(pet.name==='Phonics Friends'
+  ?'A spelling buddy you drive with your voice'
+  :'Spell out loud with '+pet.name)+
+  ' — the real toy is 100% offline; this demo borrows your browser’s speech helpers.'}
+/* file:// storage is unreliable in some browsers — never let it break the page */
+function loadPet(){try{var s=JSON.parse(localStorage.getItem('phonicsFriendPet'));
+  if(s&&ANIMALS[s.animal]){pet.animal=s.animal;
+   pet.name=cleanName(s.name)||ANIMALS[s.animal].label;return true}
+ }catch(e){}return false}
+function savePet(){try{localStorage.setItem('phonicsFriendPet',JSON.stringify(pet))}catch(e){}}
+function markSel(){pets.querySelectorAll('button').forEach(function(b){
+ b.className=b.dataset.k===pet.animal?'sel':''})}
+function buildPets(){var h='';PETKEYS.forEach(function(k){var a=ANIMALS[k];
+  h+='<button data-k="'+k+'"><span class="pe">'+a.emoji+'</span>'+a.label+'</button>'});
+ pets.innerHTML=h;
+ pets.querySelectorAll('button').forEach(function(b){b.onclick=function(){
+  pet.animal=b.dataset.k;
+  pet.name=cleanName(petname.value)||ANIMALS[pet.animal].label;
+  applyPet();markSel()}})}
+function openPick(){kill();
+ if(goState==='listen'||goState==='think'){if(cur)goLetter();else setGo('word','▶ Start')}
+ petname.value=pet.name===ANIMALS[pet.animal].label||pet.name==='Phonics Friends'?'':pet.name;
+ markSel();pick.style.display='block'}
+function commitPet(){pet.name=cleanName(petname.value)||ANIMALS[pet.animal].label;
+ applyPet();savePet();pick.style.display='none'}
+
 /* ---------- helper 2: the muscles ---------- */
 function led(cls,ms){leds.forEach(function(l){l.className='led '+cls});
  if(ms)setTimeout(function(){leds.forEach(function(l){l.className='led'})},ms)}
 function anim(k,ms){frog.classList.add(k);setTimeout(function(){frog.classList.remove(k)},ms||900)}
-function mouthOpen(o){mouth.setAttribute('d',o?'M78 116 Q115 150 152 116':'M75 118 Q115 138 155 118')}
+function mouthOpen(o){var a=ANIMALS[pet.animal];mouth.setAttribute('d',o?a.mouthO:a.mouthC)}
 function note(code,label){var t=new Date().toTimeString().slice(0,8);
  uart.innerHTML='M5&nbsp;→&nbsp;UNO&nbsp;&nbsp;0x'+code+'&nbsp;'+label+'&nbsp;<span style="color:#8aa591">'+t+'</span><br>'+uart.innerHTML;
  h2.className='hdot busy';setTimeout(function(){h2.className='hdot'},600)}
 
 /* ---------- helper 1: the mouth (TTS) ---------- */
-/* Prefer a natural-sounding voice by name — the generic engine voices are the
-   robotic ones. getVoices() is empty on first call in Chrome/Safari, so we
-   re-pick when voiceschanged fires; first en voice stays the fallback. */
+/* Rank voices for warmth: named natural/neural voices first, local ones ahead of
+   remote, the flat engine voices (espeak, compact, old Microsoft) last. getVoices()
+   is empty on first call in Chrome/Safari, so we re-pick when voiceschanged fires. */
 var VOICE=null;
 function pickVoice(){var vs=[];try{vs=speechSynthesis.getVoices()||[]}catch(e){return}
- var en=vs.filter(function(v){return v.lang.slice(0,2)==='en'});
- function find(re){for(var i=0;i<en.length;i++)if(re.test(en[i].name))return en[i];return null}
- VOICE=find(/natural/i)||find(/google us english/i)||find(/samantha/i)||en[0]||null}
+ var en=vs.filter(function(v){return (v.lang||'').slice(0,2).toLowerCase()==='en'});
+ function score(v){var n=v.name||'',s=0;
+  if(/natural|neural/i.test(n))s+=8;
+  if(/siri|samantha/i.test(n))s+=6;
+  if(/google/i.test(n))s+=4;
+  if(v.localService)s+=3;
+  if(/espeak|compact|microsoft david|microsoft zira/i.test(n))s-=9;
+  return s}
+ en.sort(function(a,b){return score(b)-score(a)});
+ VOICE=en[0]||null}
 function speak(text,cb){try{
-  var u=new SpeechSynthesisUtterance(text);u.rate=.95;u.pitch=1.1;
+  var u=new SpeechSynthesisUtterance(text);u.rate=.9;u.pitch=1.05;
   if(!VOICE)pickVoice();
   if(VOICE)u.voice=VOICE;
   h1.className='hdot busy';mouthOpen(true);
@@ -235,80 +362,145 @@ function playSound(key,fallbackText,cb){
   var p=a.play();if(p&&p['catch'])p['catch'](fail);
  }catch(e){fail()}}
 
-/* ---------- helper 1: the ears (SpeechRecognition, optional) ---------- */
-var SR=window.SpeechRecognition||window.webkitSpeechRecognition, rec=null, micBtn=document.getElementById('mic');
-function hearLetter(){if(!SR||busy)return;
- try{rec=new SR();rec.lang='en-US';rec.interimResults=false;rec.maxAlternatives=5;
-  micBtn.classList.add('live');h1.className='hdot busy';
-  rec.onresult=function(e){var target=cur.w[idx].toLowerCase(),hit=false;
-    for(var i=0;i<e.results[0].length&&!hit;i++){
-      var t=e.results[0][i].transcript.trim().toLowerCase().replace(/[^a-z ]/g,'');
-      if(t[0]===target||NAME[target].indexOf(t)>=0||t.split(' ').indexOf(target)>=0)hit=true;}
-    settle();answer(hit?cur.w[idx]:'?');};
-  rec.onerror=function(){settle();speak("I couldn't hear that — tap the letter instead!")};
-  rec.onend=settle;rec.start();
- }catch(e){settle()}}
-function settle(){micBtn.classList.remove('live');h1.className='hdot'}
+/* ---------- helper 1: the ears (SpeechRecognition, optional) ----------
+   Chrome's recogniser ships the audio to its cloud service, so results lag —
+   the button shows listening / thinking so the wait reads as on purpose. */
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition, rec=null,
+    go=document.getElementById('go'),
+    micBlocked=!SR,  /* true = voice is off for good: preset words + letter keyboard */
+    retried=false,   /* one free re-ask per question before we fall back */
+    misses=0,        /* wrong letters in a row — two opens the keyboard */
+    goState='idle';  /* idle | word | listen | think | letter */
+function setGo(state,label){goState=state;go.textContent=label;
+ if(state==='listen')go.classList.add('live');else go.classList.remove('live')}
+function goLetter(){setGo('letter',micBlocked?'🔊 Hear it again':'🎤 Say the letter')}
+function openKeys(){keys.style.display='grid'}
+function kill(){if(rec){try{
+  rec.onresult=rec.onerror=rec.onend=rec.onspeechend=rec.onaudioend=null;rec.abort();
+ }catch(e){}rec=null}}
+function listen(kind){if(micBlocked)return;kill();
+ try{var r=new SR();rec=r;r.lang='en-US';r.interimResults=false;
+  r.maxAlternatives=kind==='letter'?5:3;
+  var settled=false;
+  setGo('listen','🎤 Listening…');h1.className='hdot busy';
+  r.onspeechend=r.onaudioend=function(){if(!settled)setGo('think','💭 Thinking…')};
+  r.onresult=function(e){if(settled)return;settled=true;h1.className='hdot';
+   if(kind==='letter')gotLetter(e);else gotWord(e)};
+  r.onerror=function(e){if(settled)return;settled=true;h1.className='hdot';
+   oops(kind,(e&&e.error)||'')};
+  r.onend=function(){if(settled)return;settled=true;h1.className='hdot';
+   oops(kind,'no-speech')};
+  r.start();
+ }catch(e){oops(kind,'not-allowed')}}
+/* the child picks the word by voice: "spell frog" or just "frog" */
+function gotWord(e){var w='',res=e.results[0];
+ for(var i=0;i<res.length&&!w;i++){
+  var toks=res[i].transcript.toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/)
+   .filter(function(t){return t});
+  var si=toks.indexOf('spell');
+  w=((si>=0?toks[si+1]:toks[0])||'').replace(/[^a-z]/g,'').slice(0,10)}
+ if(!w){oops('word','no-match');return}
+ startWord(makeWord(w.toUpperCase()))}
+function gotLetter(e){goLetter();
+ var target=cur.w[idx].toLowerCase(),hit=false;
+ for(var i=0;i<e.results[0].length&&!hit;i++){
+  var t=e.results[0][i].transcript.trim().toLowerCase().replace(/[^a-z ]/g,'');
+  if(t[0]===target||NAME[target].indexOf(t)>=0||t.split(' ').indexOf(target)>=0)hit=true}
+ answer(hit?cur.w[idx]:'?')}
+/* real failure handling, spoken and on screen — a denied mic is never a dead page */
+function oops(kind,code){if(code==='aborted')return;
+ if(code==='not-allowed'||code==='service-not-allowed'||code==='audio-capture'){
+  micBlocked=true;
+  if(kind==='letter'){goLetter();openKeys();
+   say.innerHTML='Tap the letter that makes the sound!<small>the microphone isn’t available</small>';
+   speak("No worries — tap the letters instead!")}
+  else{setGo('word','▶ Start');
+   speak("No worries — we can play by tapping! Let me pick a word.",begin)}
+  return}
+ /* no-speech, no-match, network, anything else: re-ask once, then fall back */
+ if(!retried){retried=true;
+  if(kind==='word'){setGo('word','🎤 Say a word');
+   speak("I didn't catch that. Say spell, then your word — like, spell frog!",
+    function(){listen('word')})}
+  else{goLetter();speak("I didn't hear you — say the letter!",function(){listen('letter')})}
+  return}
+ if(kind==='word'){setGo('word','🎤 Say a word');
+  say.innerHTML='Tap the button when you’re ready!<small>then say a word to spell</small>';
+  speak("Tap the button when you're ready to play!")}
+ else{goLetter();openKeys();
+  say.innerHTML='Tap the letter that makes the sound!<small>or tap the big button to hear it again</small>';
+  speak("Tap the letter that makes the sound!")}}
 
 /* ---------- the lesson state machine (Phase 1-3 from the architecture) ---------- */
 function slots(){var h='';for(var i=0;i<cur.w.length;i++)
   h+='<div class="slot '+(i<idx?'done':(i===idx?'now':''))+'">'+(i<idx?cur.w[i]:'')+'</div>';
  document.getElementById('word').innerHTML=h}
-function prompt(){slots();
+function prompt(){slots();retried=false;
  var c=cur.cues[idx]||('the letter that makes the next sound');
  var k=(cur.keys&&cur.keys[idx])||cur.w[idx].toLowerCase();
- say.innerHTML='Listen for the sound… <small>say the letter, or tap it below</small>';
+ say.innerHTML='Listen for the sound…<small>'+
+  (keys.style.display==='grid'?'say the letter, or tap it below':'then say the letter out loud')+'</small>';
  note('0'+(idx+1),'PROMPT_'+cur.w[idx]);
+ var after=function(){if(!micBlocked)listen('letter')};
  if(SAMPLES[k])speak("The next sound is…",function(){
-   playSound(k,c,function(){speak("What letter makes that sound?")})});
- else speak("The next sound is "+c+". What letter makes that sound?")}
-function answer(letter){if(busy)return;busy=true;
+   playSound(k,c,function(){speak("What letter makes that sound?",after)})});
+ else speak("The next sound is "+c+". What letter makes that sound?",after)}
+function answer(letter){if(busy)return;busy=true;kill();
  var ok=letter===cur.w[idx];
- if(ok){note('10','SUCCESS');led('on-g',900);anim('nod');idx++;
+ if(ok){misses=0;note('10','SUCCESS');led('on-g',900);anim('nod');idx++;
    var dn=idx>=cur.w.length;
    speak(dn?'':'Yes! '+letter+'!',function(){busy=false;dn?celebrate():prompt()});
    if(dn)return;
- }else{note('20','ENCOURAGE');led('on-w',900);anim('tilt');
+ }else{misses++;if(misses>=2)openKeys();
+   note('20','ENCOURAGE');led('on-w',900);anim('tilt');
    speak("Good try! Listen once more…",function(){busy=false;prompt()});}
  slots()}
 function celebrate(){slots();note('30','SEQ_COMPLETE');led('on-g',2600);anim('cheer',1400);
- say.innerHTML='🎉 You spelled <b>'+cur.w+'</b>!<small>the real frog wiggles all four motors here</small>';
- speak("Hooray! F… no wait — "+cur.w.split('').join(', ')+" — "+cur.w+"! You did it!",function(){busy=false});
- document.getElementById('next').style.display='';
- document.getElementById('ownrow').style.display='';
- document.getElementById('mic').style.display='none';
- document.getElementById('hear').style.display='none';keys.style.display='none'}
+ say.innerHTML='🎉 You spelled <b>'+cur.w+'</b>!<small>'+esc(pet.name)+
+  ' is so proud — the real toy wiggles all four motors here</small>';
+ keys.style.display='none';
+ setGo('word',micBlocked?'▶ Another word':'🎤 Say a word');
+ speak("Hooray! F… no wait — "+cur.w.split('').join(', ')+" — "+cur.w+
+  "! You did it! High five from "+pet.name+"!",
+  function(){busy=false;if(!micBlocked)askWord()})}
 
-function startWord(entry){cur=entry;idx=0;busy=false;
- document.getElementById('start').style.display='none';
- document.getElementById('next').style.display='none';
- document.getElementById('ownrow').style.display='none';
- document.getElementById('hear').style.display='';
- if(SR)document.getElementById('mic').style.display='';
- keys.style.display='grid';buildKeys();
+function startWord(entry){cur=entry;idx=0;busy=false;retried=false;misses=0;
+ goLetter();
+ keys.style.display=micBlocked?'grid':'none';buildKeys();
  note('00','INIT_SPELLING');
  speak("Let's spell "+cur.w.split('').join(' ')+"… I mean, let's spell "+cur.w.toLowerCase()+"!",prompt)}
 function begin(){startWord(WORDS[wi%WORDS.length]);wi++}
-function beginOwn(){var w=(document.getElementById('own').value||'')
-  .toUpperCase().replace(/[^A-Z]/g,'').slice(0,10);
- if(!w){speak("Type a word first, then tap spell my word!");return}
- document.getElementById('own').value='';
- startWord(makeWord(w))}
+/* voice picks the word; with no voice we fall back to the built-in list */
+function askWord(){cur=null;retried=false;
+ if(micBlocked){begin();return}
+ setGo('word','🎤 Say a word');
+ say.innerHTML='Say <b>spell</b>, then your word!<small>like “spell frog”</small>';
+ speak("What shall we spell? Say spell, then your word — like, spell frog!",
+  function(){listen('word')})}
 function buildKeys(){var h='';'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(L){
   h+='<button data-l="'+L+'">'+L+'</button>'});keys.innerHTML=h;
- keys.querySelectorAll('button').forEach(function(b){b.onclick=function(){if(!busy)answer(b.dataset.l)}})}
+ keys.querySelectorAll('button').forEach(function(b){b.onclick=function(){
+  kill();if(!busy)answer(b.dataset.l)}})}
 
-document.getElementById('start').onclick=begin;
-document.getElementById('next').onclick=begin;
-document.getElementById('hear').onclick=function(){if(!busy)prompt()};
-document.getElementById('ownGo').onclick=beginOwn;
-document.getElementById('own').addEventListener('keydown',function(e){
- if(e.key==='Enter'||e.keyCode===13)beginOwn()});
-micBtn.onclick=hearLetter;
+/* one button, always tappable — a tap is also the user gesture that un-strands
+   gesture-gated speechSynthesis (iOS) if a spoken hand-off ever went quiet */
+go.onclick=function(){
+ if(pick.style.display!=='none')commitPet(); /* Start with the picker open = commit the pick */
+ if(goState==='listen'||goState==='think'){kill();if(cur)prompt();else askWord();return}
+ if(goState==='letter'){if(!busy)prompt();return}
+ askWord()};
+document.getElementById('savepet').onclick=function(){commitPet();
+ speak("Hi, I'm "+pet.name+"! Tap the big button and tell me a word to spell!")};
+document.getElementById('switch').onclick=openPick;
 /* idle blink */
 setInterval(function(){document.querySelectorAll('.pupil').forEach(function(p){
   p.setAttribute('r','1')});setTimeout(function(){document.querySelectorAll('.pupil').forEach(function(p){
   p.setAttribute('r','7')})},140)},4200);
+/* restore a remembered friend, or open the picker before play */
+buildPets();
+var havePet=loadPet();
+applyPet();
+if(!havePet)openPick();
 /* voices load async in Chrome/Safari — pick now and again when they arrive */
 if(window.speechSynthesis){pickVoice();
  if(speechSynthesis.addEventListener)speechSynthesis.addEventListener('voiceschanged',pickVoice);
