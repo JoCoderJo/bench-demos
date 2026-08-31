@@ -8,7 +8,8 @@
      recognition (ESP-SR), and an Arduino UNO Q doing servos and LEDs — joined by UART.
      This page simulates both "helpers" locally in the browser: SpeechRecognition is the
      ears, speechSynthesis is the mouth, and an animated frog is the muscles. Everything
-     runs on the visitor's own device; the page makes no network calls at all.
+     runs on the visitor's own device; the page makes no network calls, except to
+     load its own recorded phoneme clips from audio/ when any are listed in SAMPLES.
      Source of truth: reference/Phonics_Frog_Architecture_Guide.pdf -->
 <style>
  :root{--bg:#eef6ea;--card:#fff;--ink:#1d3021;--dim:#5b7261;--green:#3f9b4f;--deep:#2c6e3a;
@@ -55,6 +56,10 @@
  .big[disabled]{opacity:.45}
  .ghost{background:var(--card);color:var(--deep);border:2px solid var(--edge);
         font-size:14px;padding:10px 14px}
+ #own{width:150px;border:2px solid var(--edge);border-radius:12px;padding:10px 12px;
+      font-size:16px;font-weight:700;background:var(--card);color:var(--deep);
+      text-transform:uppercase}
+ #own:focus{outline:none;border-color:var(--green)}
  #mic.live{background:#d43d3d;animation:pulse 1.2s infinite}
 
  /* on-screen keyboard: the fallback ears, and the primary input on browsers
@@ -112,6 +117,11 @@
     <button class="ghost" id="hear" style="display:none">🔊 hear it again</button>
     <button class="ghost" id="next" style="display:none">another word</button>
   </div>
+  <div class="row" id="ownrow">
+    <input id="own" maxlength="10" placeholder="your word…" autocapitalize="characters"
+           autocomplete="off" spellcheck="false" aria-label="type a word to spell">
+    <button class="ghost" id="ownGo">✨ spell my word</button>
+  </div>
   <div id="keys" style="display:none"></div>
 
   <details>
@@ -138,6 +148,34 @@ var WORDS=[
  {w:"GREEN", cues:["/g/ like a gulp… g-g-g","/r/ like a race car… rrr","/e/ long E, like eee!","this one is a twin — another E, eee!","/n/ hum in your nose… nnn"]},
  {w:"FRIEND",cues:["/f/ soft hiss… ffff","/r/ race car… rrr","/i/ here it is spelled with an I","/e/ and its buddy E","/n/ hum… nnn","/d/ drum… d-d-d"]}
 ];
+/* cues for any word the user types: one per letter, same style as the
+   hand-written words above */
+var LCUE={a:"/a/ like in apple… a-a-a",b:"/b/ like a bouncing ball… b-b-b",
+ c:"/k/ like a camera click… k-k-k",d:"/d/ like a drum… d-d-d",e:"/e/ like in egg… eh",
+ f:"/f/ like a cat hissing softly… ffff",g:"/g/ like a gulp… g-g-g",
+ h:"/h/ like a puff of air… hhh",i:"/i/ like in itchy… ih",
+ j:"/j/ like the start of jelly… j-j-j",k:"/k/ like a little click… k-k-k",
+ l:"/l/ like singing la la la… lll",m:"/m/ the yummy sound… mmm",
+ n:"/n/ like a hum in your nose… nnn",o:"/o/ says aaah, like the doctor",
+ p:"/p/ like a little pop… p-p-p",q:"/kw/ like a duck's quack… kw",
+ r:"/r/ like a race car… rrr",s:"/s/ like a sneaky snake… sss",
+ t:"/t/ like a ticking clock… t-t-t",u:"/u/ says uh, like uh-oh",
+ v:"/v/ like a buzzy motor… vvv",w:"/w/ like wind blowing… wuh",
+ x:"/ks/ like a fox… k-s",y:"/y/ like in yo-yo… yuh",z:"/z/ like a buzzing bee… zzz"};
+/* common digraphs get one joint sound but still ask for both letters,
+   like the hand-written GREEN "twin E" and FRIEND "IE" cues */
+var DIGRAPH={sh:"/sh/ like telling a secret… shhh",ch:"/ch/ like a chugging train… ch-ch-ch",
+ th:"/th/ tongue between your teeth… thhh",ck:"/k/ like a little click… k-k-k",
+ ee:"/ee/ twin E's saying eee!",oo:"/oo/ like a surprised owl… oooo"};
+function makeWord(w){var cues=[],keys=[],i=0;
+ while(i<w.length){var two=w.slice(i,i+2).toLowerCase();
+  if(two.length===2&&DIGRAPH[two]){
+   cues.push(DIGRAPH[two]+" — two letters make it! First comes "+w[i]);
+   cues.push("the second half of that sound — "+w[i+1]);
+   keys.push(two,two);i+=2;
+  }else{var l=w[i].toLowerCase();
+   cues.push(LCUE[l]||("the letter "+w[i]));keys.push(l);i++}}
+ return{w:w,cues:cues,keys:keys}}
 /* letter-name homophones the recogniser tends to return */
 var NAME={a:["a","ay","hey","eh"],b:["b","be","bee"],c:["c","see","sea","si"],d:["d","de","dee"],
  e:["e","ee"],f:["f","ef","eff"],g:["g","je","gee","ji"],h:["h","aitch","age"],i:["i","eye","aye"],
@@ -163,14 +201,39 @@ function note(code,label){var t=new Date().toTimeString().slice(0,8);
  h2.className='hdot busy';setTimeout(function(){h2.className='hdot'},600)}
 
 /* ---------- helper 1: the mouth (TTS) ---------- */
+/* Prefer a natural-sounding voice by name — the generic engine voices are the
+   robotic ones. getVoices() is empty on first call in Chrome/Safari, so we
+   re-pick when voiceschanged fires; first en voice stays the fallback. */
+var VOICE=null;
+function pickVoice(){var vs=[];try{vs=speechSynthesis.getVoices()||[]}catch(e){return}
+ var en=vs.filter(function(v){return v.lang.slice(0,2)==='en'});
+ function find(re){for(var i=0;i<en.length;i++)if(re.test(en[i].name))return en[i];return null}
+ VOICE=find(/natural/i)||find(/google us english/i)||find(/samantha/i)||en[0]||null}
 function speak(text,cb){try{
-  var u=new SpeechSynthesisUtterance(text);u.rate=.92;u.pitch=1.25;
-  var vs=speechSynthesis.getVoices().filter(function(v){return v.lang.slice(0,2)==='en'});
-  if(vs.length)u.voice=vs[0];
+  var u=new SpeechSynthesisUtterance(text);u.rate=.95;u.pitch=1.1;
+  if(!VOICE)pickVoice();
+  if(VOICE)u.voice=VOICE;
   h1.className='hdot busy';mouthOpen(true);
   u.onend=function(){h1.className='hdot';mouthOpen(false);if(cb)cb()};
   speechSynthesis.cancel();speechSynthesis.speak(u);
  }catch(e){if(cb)cb()}}
+
+/* ---------- helper 1: recorded phoneme samples ----------
+   Drop real recordings into audio/ beside this page and list them here — the key
+   is a letter (a-z) or a digraph (sh ch th ck ee oo). Inline on purpose: fetching
+   a manifest breaks over file://. Any key not listed falls back to TTS, so the
+   page still works with no audio files at all. */
+var SAMPLES={};  /* e.g. {f:"audio/f.mp3", sh:"audio/sh.mp3"} */
+function playSound(key,fallbackText,cb){
+ var src=SAMPLES[(key||'').toLowerCase()];
+ if(!src){speak(fallbackText,cb);return}
+ var done=false;
+ function fin(){if(done)return;done=true;h1.className='hdot';mouthOpen(false);if(cb)cb()}
+ function fail(){if(done)return;done=true;h1.className='hdot';mouthOpen(false);speak(fallbackText,cb)}
+ try{var a=new Audio(src);a.onended=fin;a.onerror=fail;
+  h1.className='hdot busy';mouthOpen(true);
+  var p=a.play();if(p&&p['catch'])p['catch'](fail);
+ }catch(e){fail()}}
 
 /* ---------- helper 1: the ears (SpeechRecognition, optional) ---------- */
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition, rec=null, micBtn=document.getElementById('mic');
@@ -193,9 +256,12 @@ function slots(){var h='';for(var i=0;i<cur.w.length;i++)
  document.getElementById('word').innerHTML=h}
 function prompt(){slots();
  var c=cur.cues[idx]||('the letter that makes the next sound');
+ var k=(cur.keys&&cur.keys[idx])||cur.w[idx].toLowerCase();
  say.innerHTML='Listen for the sound… <small>say the letter, or tap it below</small>';
  note('0'+(idx+1),'PROMPT_'+cur.w[idx]);
- speak("The next sound is "+c+". What letter makes that sound?")}
+ if(SAMPLES[k])speak("The next sound is…",function(){
+   playSound(k,c,function(){speak("What letter makes that sound?")})});
+ else speak("The next sound is "+c+". What letter makes that sound?")}
 function answer(letter){if(busy)return;busy=true;
  var ok=letter===cur.w[idx];
  if(ok){note('10','SUCCESS');led('on-g',900);anim('nod');idx++;
@@ -209,17 +275,25 @@ function celebrate(){slots();note('30','SEQ_COMPLETE');led('on-g',2600);anim('ch
  say.innerHTML='🎉 You spelled <b>'+cur.w+'</b>!<small>the real frog wiggles all four motors here</small>';
  speak("Hooray! F… no wait — "+cur.w.split('').join(', ')+" — "+cur.w+"! You did it!",function(){busy=false});
  document.getElementById('next').style.display='';
+ document.getElementById('ownrow').style.display='';
  document.getElementById('mic').style.display='none';
  document.getElementById('hear').style.display='none';keys.style.display='none'}
 
-function begin(){cur=WORDS[wi%WORDS.length];wi++;idx=0;busy=false;
+function startWord(entry){cur=entry;idx=0;busy=false;
  document.getElementById('start').style.display='none';
  document.getElementById('next').style.display='none';
+ document.getElementById('ownrow').style.display='none';
  document.getElementById('hear').style.display='';
  if(SR)document.getElementById('mic').style.display='';
  keys.style.display='grid';buildKeys();
  note('00','INIT_SPELLING');
  speak("Let's spell "+cur.w.split('').join(' ')+"… I mean, let's spell "+cur.w.toLowerCase()+"!",prompt)}
+function begin(){startWord(WORDS[wi%WORDS.length]);wi++}
+function beginOwn(){var w=(document.getElementById('own').value||'')
+  .toUpperCase().replace(/[^A-Z]/g,'').slice(0,10);
+ if(!w){speak("Type a word first, then tap spell my word!");return}
+ document.getElementById('own').value='';
+ startWord(makeWord(w))}
 function buildKeys(){var h='';'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(L){
   h+='<button data-l="'+L+'">'+L+'</button>'});keys.innerHTML=h;
  keys.querySelectorAll('button').forEach(function(b){b.onclick=function(){if(!busy)answer(b.dataset.l)}})}
@@ -227,13 +301,18 @@ function buildKeys(){var h='';'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(fun
 document.getElementById('start').onclick=begin;
 document.getElementById('next').onclick=begin;
 document.getElementById('hear').onclick=function(){if(!busy)prompt()};
+document.getElementById('ownGo').onclick=beginOwn;
+document.getElementById('own').addEventListener('keydown',function(e){
+ if(e.key==='Enter'||e.keyCode===13)beginOwn()});
 micBtn.onclick=hearLetter;
 /* idle blink */
 setInterval(function(){document.querySelectorAll('.pupil').forEach(function(p){
   p.setAttribute('r','1')});setTimeout(function(){document.querySelectorAll('.pupil').forEach(function(p){
   p.setAttribute('r','7')})},140)},4200);
-/* some browsers load voices async */
-if(window.speechSynthesis)speechSynthesis.getVoices();
+/* voices load async in Chrome/Safari — pick now and again when they arrive */
+if(window.speechSynthesis){pickVoice();
+ if(speechSynthesis.addEventListener)speechSynthesis.addEventListener('voiceschanged',pickVoice);
+ else speechSynthesis.onvoiceschanged=pickVoice}
 })();
 </script>
 </html>
