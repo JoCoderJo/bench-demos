@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en"><script id="bench-gate-loader" src="/bench-gate.js"></script><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Phonics Frog</title>
+<!-- Browser demo of Project Phonics Frog: a 100% offline phonics & spelling toy.
+     The real toy is two microcontrollers — an M5Stack CoreS3 doing wake-word and phoneme
+     recognition (ESP-SR), and an Arduino UNO Q doing servos and LEDs — joined by UART.
+     This page simulates both "helpers" locally in the browser: SpeechRecognition is the
+     ears, speechSynthesis is the mouth, and an animated frog is the muscles. Everything
+     runs on the visitor's own device; the page makes no network calls at all.
+     Source of truth: reference/Phonics_Frog_Architecture_Guide.pdf -->
+<style>
+ :root{--bg:#eef6ea;--card:#fff;--ink:#1d3021;--dim:#5b7261;--green:#3f9b4f;--deep:#2c6e3a;
+       --lily:#cfe8c6;--warm:#f0a441;--edge:#cfe0cb}
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ body{margin:0;background:var(--bg);color:var(--ink);
+      font:17px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;
+      padding:14px 12px calc(20px + env(safe-area-inset-bottom))}
+ .wrap{max-width:560px;margin:0 auto}
+ h1{font-size:24px;margin:4px 0 0;text-align:center;color:var(--deep)}
+ .sub{text-align:center;color:var(--dim);font-size:13px;margin:2px 0 10px}
+
+ /* the frog */
+ #stage{position:relative;display:flex;justify-content:center;padding:6px 0 0}
+ #frog{width:230px;height:200px;transition:transform .25s}
+ #frog.nod{animation:nod .5s ease 2}
+ #frog.cheer{animation:hop .45s ease 3}
+ #frog.tilt{animation:tilt .8s ease 1}
+ @keyframes nod{50%{transform:rotate(4deg) translateY(6px)}}
+ @keyframes hop{40%{transform:translateY(-22px)}}
+ @keyframes tilt{50%{transform:rotate(-7deg)}}
+ .led{position:absolute;bottom:2px;width:11px;height:11px;border-radius:50%;
+      background:#b9cdb4;transition:background .15s,box-shadow .15s}
+ .led.on-g{background:#37e05b;box-shadow:0 0 10px #37e05b}
+ .led.on-w{background:var(--warm);box-shadow:0 0 10px var(--warm)}
+
+ /* word + letters */
+ #word{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0 4px}
+ .slot{width:44px;height:54px;border-radius:10px;border:2px dashed var(--edge);
+       background:var(--card);display:flex;align-items:center;justify-content:center;
+       font-size:28px;font-weight:700;color:var(--deep)}
+ .slot.done{border-style:solid;border-color:var(--green);background:var(--lily)}
+ .slot.now{border-color:var(--warm);border-style:solid;animation:pulse 1.2s infinite}
+ @keyframes pulse{50%{box-shadow:0 0 0 6px rgba(240,164,65,.25)}}
+
+ #say{min-height:44px;text-align:center;font-size:17px;color:var(--ink);
+      padding:6px 8px;font-weight:600}
+ #say small{display:block;font-weight:400;color:var(--dim);font-size:13px}
+
+ /* controls */
+ .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0}
+ button{border:0;border-radius:12px;cursor:pointer;font-weight:700}
+ .big{background:var(--green);color:#fff;font-size:18px;padding:14px 22px}
+ .big[disabled]{opacity:.45}
+ .ghost{background:var(--card);color:var(--deep);border:2px solid var(--edge);
+        font-size:14px;padding:10px 14px}
+ #mic.live{background:#d43d3d;animation:pulse 1.2s infinite}
+
+ /* on-screen keyboard: the fallback ears, and the primary input on browsers
+    without SpeechRecognition */
+ #keys{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px}
+ #keys button{background:var(--card);border:2px solid var(--edge);color:var(--ink);
+      font-size:19px;padding:11px 0;border-radius:10px}
+ #keys button:active{background:var(--lily)}
+
+ /* helpers panel — the ELI5 of the real hardware, live */
+ details{margin-top:14px;background:var(--card);border:1px solid var(--edge);
+         border-radius:12px;padding:10px 14px;font-size:14px}
+ summary{cursor:pointer;font-weight:700;color:var(--deep)}
+ .helper{display:flex;gap:8px;align-items:center;margin:8px 0 2px}
+ .hdot{width:10px;height:10px;border-radius:50%;background:#b9cdb4;flex:none}
+ .hdot.busy{background:var(--warm)}.hdot.ok{background:#37e05b}
+ #uart{font:12px/1.5 ui-monospace,monospace;background:#f2f7ef;border-radius:8px;
+       padding:8px 10px;margin-top:8px;max-height:120px;overflow-y:auto;color:#31503a}
+ .foot{text-align:center;color:var(--dim);font-size:12px;margin-top:14px}
+</style>
+<div class="wrap">
+  <h1>🐸 Phonics Frog</h1>
+  <div class="sub">A spelling buddy that runs 100% on this device — no internet, no account, nothing recorded.</div>
+
+  <div id="stage">
+    <svg id="frog" viewBox="0 0 230 200" aria-hidden="true">
+      <!-- lily pad -->
+      <ellipse cx="115" cy="185" rx="105" ry="14" fill="#9ccc8f"/>
+      <!-- legs -->
+      <ellipse cx="45" cy="160" rx="26" ry="16" fill="#4da85c"/>
+      <ellipse cx="185" cy="160" rx="26" ry="16" fill="#4da85c"/>
+      <!-- body -->
+      <ellipse cx="115" cy="130" rx="72" ry="58" fill="#5cb56a"/>
+      <ellipse cx="115" cy="148" rx="50" ry="34" fill="#a8dba0"/>
+      <!-- eyes -->
+      <g id="eyeL"><circle cx="78" cy="72" r="24" fill="#5cb56a"/><circle cx="78" cy="72" r="15" fill="#fff"/><circle class="pupil" cx="78" cy="74" r="7" fill="#1d3021"/></g>
+      <g id="eyeR"><circle cx="152" cy="72" r="24" fill="#5cb56a"/><circle cx="152" cy="72" r="15" fill="#fff"/><circle class="pupil" cx="152" cy="74" r="7" fill="#1d3021"/></g>
+      <!-- mouth -->
+      <path id="mouth" d="M75 118 Q115 138 155 118" stroke="#2c6e3a" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <!-- cheeks -->
+      <circle cx="62" cy="112" r="8" fill="#f6c9a0" opacity=".55"/>
+      <circle cx="168" cy="112" r="8" fill="#f6c9a0" opacity=".55"/>
+    </svg>
+    <div class="led" style="left:14%"></div><div class="led" style="left:30%"></div>
+    <div class="led" style="left:46%"></div><div class="led" style="left:62%"></div>
+    <div class="led" style="left:78%"></div>
+  </div>
+
+  <div id="word"></div>
+  <div id="say">Tap <b>Start</b> and I’ll help you spell!<small>&nbsp;</small></div>
+
+  <div class="row">
+    <button class="big" id="start">▶ Start</button>
+    <button class="big" id="mic" style="display:none">🎤 Say it</button>
+    <button class="ghost" id="hear" style="display:none">🔊 hear it again</button>
+    <button class="ghost" id="next" style="display:none">another word</button>
+  </div>
+  <div id="keys" style="display:none"></div>
+
+  <details>
+    <summary>🐸 How the real frog works (peek inside)</summary>
+    <p style="margin:8px 0 2px">The real toy is two tiny computers, no internet at all:</p>
+    <div class="helper"><span class="hdot" id="h1dot"></span><b>Helper 1 — the ears &amp; mouth</b>&nbsp;<span style="color:var(--dim)">(M5Stack CoreS3, offline speech)</span></div>
+    <div class="helper"><span class="hdot" id="h2dot"></span><b>Helper 2 — the muscles</b>&nbsp;<span style="color:var(--dim)">(Arduino UNO Q: servos + lights)</span></div>
+    <p style="margin:6px 0 2px;color:var(--dim)">They pass secret notes over a wire (UART). Watch the notes:</p>
+    <div id="uart">—</div>
+    <p style="margin:8px 0 0;color:var(--dim)">This page plays both helpers using your browser’s own offline-capable speech — nothing you say leaves this device.</p>
+  </details>
+
+  <div class="foot">Project Phonics Frog · a fully local AI toy · demo runs entirely in your browser</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- lesson content: word + a phoneme cue per letter ---------- */
+var WORDS=[
+ {w:"FROG",  cues:["/f/ like a cat hissing softly… ffff","/r/ like a race car… rrr","/o/ says aaah, like the doctor","/g/ like a gulp… g-g-g"]},
+ {w:"POND",  cues:["/p/ like a little pop… p-p-p","/o/ says aaah","/n/ like a hum in your nose… nnn","/d/ like a drum… d-d-d"]},
+ {w:"JUMP",  cues:["/j/ like the start of jelly… j-j-j","/u/ says uh, like uh-oh","/m/ yummy sound… mmm","/p/ a little pop… p-p-p"]},
+ {w:"GREEN", cues:["/g/ like a gulp… g-g-g","/r/ like a race car… rrr","/e/ long E, like eee!","this one is a twin — another E, eee!","/n/ hum in your nose… nnn"]},
+ {w:"FRIEND",cues:["/f/ soft hiss… ffff","/r/ race car… rrr","/i/ here it is spelled with an I","/e/ and its buddy E","/n/ hum… nnn","/d/ drum… d-d-d"]}
+];
+/* letter-name homophones the recogniser tends to return */
+var NAME={a:["a","ay","hey","eh"],b:["b","be","bee"],c:["c","see","sea","si"],d:["d","de","dee"],
+ e:["e","ee"],f:["f","ef","eff"],g:["g","je","gee","ji"],h:["h","aitch","age"],i:["i","eye","aye"],
+ j:["j","jay"],k:["k","kay","que"],l:["l","el","elle"],m:["m","em"],n:["n","en"],o:["o","oh","owe"],
+ p:["p","pe","pee","pea"],q:["q","cue","queue"],r:["r","are","ar"],s:["s","es","ess"],
+ t:["t","te","tee","tea"],u:["u","you","yu"],v:["v","ve","vee"],w:["w","doubleu","double you"],
+ x:["x","ex"],y:["y","why"],z:["z","zee","zed"]};
+
+var say=document.getElementById('say'), frog=document.getElementById('frog'),
+    mouth=document.getElementById('mouth'), keys=document.getElementById('keys'),
+    leds=[].slice.call(document.querySelectorAll('.led')),
+    h1=document.getElementById('h1dot'), h2=document.getElementById('h2dot'),
+    uart=document.getElementById('uart');
+var cur=null, idx=0, busy=false, wi=Math.floor(Math.random()*WORDS.length);
+
+/* ---------- helper 2: the muscles ---------- */
+function led(cls,ms){leds.forEach(function(l){l.className='led '+cls});
+ if(ms)setTimeout(function(){leds.forEach(function(l){l.className='led'})},ms)}
+function anim(k,ms){frog.classList.add(k);setTimeout(function(){frog.classList.remove(k)},ms||900)}
+function mouthOpen(o){mouth.setAttribute('d',o?'M78 116 Q115 150 152 116':'M75 118 Q115 138 155 118')}
+function note(code,label){var t=new Date().toTimeString().slice(0,8);
+ uart.innerHTML='M5&nbsp;→&nbsp;UNO&nbsp;&nbsp;0x'+code+'&nbsp;'+label+'&nbsp;<span style="color:#8aa591">'+t+'</span><br>'+uart.innerHTML;
+ h2.className='hdot busy';setTimeout(function(){h2.className='hdot'},600)}
+
+/* ---------- helper 1: the mouth (TTS) ---------- */
+function speak(text,cb){try{
+  var u=new SpeechSynthesisUtterance(text);u.rate=.92;u.pitch=1.25;
+  var vs=speechSynthesis.getVoices().filter(function(v){return v.lang.slice(0,2)==='en'});
+  if(vs.length)u.voice=vs[0];
+  h1.className='hdot busy';mouthOpen(true);
+  u.onend=function(){h1.className='hdot';mouthOpen(false);if(cb)cb()};
+  speechSynthesis.cancel();speechSynthesis.speak(u);
+ }catch(e){if(cb)cb()}}
+
+/* ---------- helper 1: the ears (SpeechRecognition, optional) ---------- */
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition, rec=null, micBtn=document.getElementById('mic');
+function hearLetter(){if(!SR||busy)return;
+ try{rec=new SR();rec.lang='en-US';rec.interimResults=false;rec.maxAlternatives=5;
+  micBtn.classList.add('live');h1.className='hdot busy';
+  rec.onresult=function(e){var target=cur.w[idx].toLowerCase(),hit=false;
+    for(var i=0;i<e.results[0].length&&!hit;i++){
+      var t=e.results[0][i].transcript.trim().toLowerCase().replace(/[^a-z ]/g,'');
+      if(t[0]===target||NAME[target].indexOf(t)>=0||t.split(' ').indexOf(target)>=0)hit=true;}
+    settle();answer(hit?cur.w[idx]:'?');};
+  rec.onerror=function(){settle();speak("I couldn't hear that — tap the letter instead!")};
+  rec.onend=settle;rec.start();
+ }catch(e){settle()}}
+function settle(){micBtn.classList.remove('live');h1.className='hdot'}
+
+/* ---------- the lesson state machine (Phase 1-3 from the architecture) ---------- */
+function slots(){var h='';for(var i=0;i<cur.w.length;i++)
+  h+='<div class="slot '+(i<idx?'done':(i===idx?'now':''))+'">'+(i<idx?cur.w[i]:'')+'</div>';
+ document.getElementById('word').innerHTML=h}
+function prompt(){slots();
+ var c=cur.cues[idx]||('the letter that makes the next sound');
+ say.innerHTML='Listen for the sound… <small>say the letter, or tap it below</small>';
+ note('0'+(idx+1),'PROMPT_'+cur.w[idx]);
+ speak("The next sound is "+c+". What letter makes that sound?")}
+function answer(letter){if(busy)return;busy=true;
+ var ok=letter===cur.w[idx];
+ if(ok){note('10','SUCCESS');led('on-g',900);anim('nod');idx++;
+   var dn=idx>=cur.w.length;
+   speak(dn?'':'Yes! '+letter+'!',function(){busy=false;dn?celebrate():prompt()});
+   if(dn)return;
+ }else{note('20','ENCOURAGE');led('on-w',900);anim('tilt');
+   speak("Good try! Listen once more…",function(){busy=false;prompt()});}
+ slots()}
+function celebrate(){slots();note('30','SEQ_COMPLETE');led('on-g',2600);anim('cheer',1400);
+ say.innerHTML='🎉 You spelled <b>'+cur.w+'</b>!<small>the real frog wiggles all four motors here</small>';
+ speak("Hooray! F… no wait — "+cur.w.split('').join(', ')+" — "+cur.w+"! You did it!",function(){busy=false});
+ document.getElementById('next').style.display='';
+ document.getElementById('mic').style.display='none';
+ document.getElementById('hear').style.display='none';keys.style.display='none'}
+
+function begin(){cur=WORDS[wi%WORDS.length];wi++;idx=0;busy=false;
+ document.getElementById('start').style.display='none';
+ document.getElementById('next').style.display='none';
+ document.getElementById('hear').style.display='';
+ if(SR)document.getElementById('mic').style.display='';
+ keys.style.display='grid';buildKeys();
+ note('00','INIT_SPELLING');
+ speak("Let's spell "+cur.w.split('').join(' ')+"… I mean, let's spell "+cur.w.toLowerCase()+"!",prompt)}
+function buildKeys(){var h='';'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(L){
+  h+='<button data-l="'+L+'">'+L+'</button>'});keys.innerHTML=h;
+ keys.querySelectorAll('button').forEach(function(b){b.onclick=function(){if(!busy)answer(b.dataset.l)}})}
+
+document.getElementById('start').onclick=begin;
+document.getElementById('next').onclick=begin;
+document.getElementById('hear').onclick=function(){if(!busy)prompt()};
+micBtn.onclick=hearLetter;
+/* idle blink */
+setInterval(function(){document.querySelectorAll('.pupil').forEach(function(p){
+  p.setAttribute('r','1')});setTimeout(function(){document.querySelectorAll('.pupil').forEach(function(p){
+  p.setAttribute('r','7')})},140)},4200);
+/* some browsers load voices async */
+if(window.speechSynthesis)speechSynthesis.getVoices();
+})();
+</script>
+</html>
+<!-- Public demo feedback bubble. Injected into every page of the demo site by
+     publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
+     touching the Bench or the tailnet). Submissions land in Netlify → Forms.
+     The hidden <form> below is what Netlify parses at deploy time to register the
+     form; the visible UI posts to "/" by AJAX with the same field names. -->
+<form name="demo-feedback" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="text" name="form-name" value="demo-feedback">
+  <input type="text" name="bot-field">
+  <input type="text" name="demo">
+  <input type="text" name="kind">
+  <input type="text" name="contact">
+  <textarea name="message"></textarea>
+</form>
+<div id="bench-fb"></div>
+<script>
+(function () {
+  if (window.__benchFb) return; window.__benchFb = 1;
+  var Z = 2147483000, open = false, sending = false;
+  // Everyone shares one passcode, so a note is anonymous unless the tester says who they are.
+  // Hand each person a link like  https://…/?who=jane  and the name rides along automatically;
+  // it is remembered on that device, and they can still overwrite it in the box.
+  var WHO_KEY = 'bench-who';
+  var who = '';
+  try {
+    var q = new URLSearchParams(location.search).get('who');
+    if (q) { who = q.slice(0, 40); localStorage.setItem(WHO_KEY, who); }
+    else { who = localStorage.getItem(WHO_KEY) || ''; }
+  } catch (e) {}
+
+  var demo = (function () {
+    var p = location.pathname;
+    if (p.indexOf('/manito') === 0) return 'Manito Park App';
+    if (p.indexOf('/rover') === 0) return 'Rover Bot';
+    if (p.indexOf('/scam') === 0) return 'Voice AI Scam Filter';
+    return 'Demos home';
+  })();
+
+  var css = document.createElement('style');
+  css.textContent =
+    '#bfb-btn{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:' + Z + ';' +
+      'width:54px;height:54px;border-radius:50%;border:0;background:#c9a24b;color:#14171c;font-size:24px;' +
+      'line-height:1;cursor:pointer;box-shadow:0 3px 14px rgba(0,0,0,.45)}' +
+    '#bfb-btn:active{transform:scale(.95)}' +
+    '#bfb-wrap{position:fixed;inset:0;z-index:' + (Z + 1) + ';background:rgba(0,0,0,.6);display:flex;' +
+      'align-items:flex-end;justify-content:center;padding:16px}' +
+    '#bfb-card{width:100%;max-width:430px;background:#12161c;color:#e6e8ea;border:1px solid #262b33;' +
+      'border-radius:16px;padding:18px;max-height:88vh;overflow:auto;' +
+      'font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}' +
+    '#bfb-card h3{margin:0 0 3px;font-size:18px}' +
+    '#bfb-card p.sub{margin:0 0 13px;font-size:13px;color:#9aa4b2}' +
+    '#bfb-card label{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;' +
+      'color:#9aa4b2;margin:11px 0 4px}' +
+    '#bfb-card input,#bfb-card textarea,#bfb-card select{width:100%;background:#0d1014;color:#e6e8ea;' +
+      'border:1px solid #262b33;border-radius:10px;padding:11px 12px;font-size:16px}' +
+    '#bfb-card textarea{min-height:104px;resize:vertical}' +
+    '#bfb-row{display:flex;gap:9px;margin-top:14px}' +
+    '#bfb-row button{flex:1;padding:12px;border-radius:10px;font:600 14px system-ui,sans-serif;cursor:pointer}' +
+    '#bfb-cancel{background:transparent;color:#9aa4b2;border:1px solid #262b33}' +
+    '#bfb-send{background:#c9a24b;color:#14171c;border:0}' +
+    '#bfb-msg{font-size:13px;margin-top:10px;color:#9aa4b2}';
+  document.head.appendChild(css);
+
+  var btn = document.createElement('button');
+  btn.id = 'bfb-btn'; btn.type = 'button';
+  btn.setAttribute('aria-label', 'Send feedback');
+  btn.textContent = '💬';
+  document.body.appendChild(btn);
+
+  function close() { var w = document.getElementById('bfb-wrap'); if (w) w.remove(); open = false; }
+
+  btn.onclick = function () {
+    if (open) return close();
+    open = true;
+    var wrap = document.createElement('div');
+    wrap.id = 'bfb-wrap';
+    wrap.innerHTML =
+      '<div id="bfb-card">' +
+        '<h3>Tell us what you found</h3>' +
+        '<p class="sub">' + demo + ' — bugs, confusing bits, or things you wish it did.</p>' +
+        '<label>What kind of note is this?</label>' +
+        '<select id="bfb-kind">' +
+          '<option>Something is broken</option>' +
+          '<option>Something is confusing</option>' +
+          '<option>Idea / feature request</option>' +
+          '<option>It worked well</option>' +
+        '</select>' +
+        '<label>What happened?</label>' +
+        '<textarea id="bfb-text" placeholder="As specific as you can — what you tapped, what you expected, what you got."></textarea>' +
+        '<label>Who is this? (so we can follow up)</label>' +
+        '<input id="bfb-contact" autocomplete="off" placeholder="so we know who this came from">' +
+        '<div id="bfb-row"><button id="bfb-cancel" type="button">Cancel</button>' +
+        '<button id="bfb-send" type="button">Send</button></div>' +
+        '<div id="bfb-msg"></div>' +
+      '</div>';
+    document.body.appendChild(wrap);
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
+    document.getElementById('bfb-cancel').onclick = close;
+    if (who) document.getElementById('bfb-contact').value = who;
+    document.getElementById('bfb-text').focus();
+
+    document.getElementById('bfb-send').onclick = function () {
+      if (sending) return;
+      var text = document.getElementById('bfb-text').value.trim();
+      var msg = document.getElementById('bfb-msg');
+      if (text.length < 4) { msg.textContent = 'Add a little more detail first.'; return; }
+      sending = true; msg.textContent = 'Sending…';
+      var body = new URLSearchParams({
+        'form-name': 'demo-feedback',
+        'demo': demo,
+        'kind': document.getElementById('bfb-kind').value,
+        'contact': document.getElementById('bfb-contact').value.slice(0, 120),
+        'message': text.slice(0, 4000)
+      }).toString();
+      fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body })
+        .then(function (r) {
+          sending = false;
+          if (!r.ok) throw new Error(r.status);
+          document.getElementById('bfb-card').innerHTML =
+            '<h3>Thank you — got it.</h3><p class="sub">That goes straight to the two of us building this.</p>' +
+            '<div id="bfb-row"><button id="bfb-send" type="button">Close</button></div>';
+          document.getElementById('bfb-send').onclick = close;
+        })
+        .catch(function () {
+          sending = false;
+          msg.textContent = 'Could not send — check your connection and try again.';
+        });
+    };
+  };
+})();
+</script>
