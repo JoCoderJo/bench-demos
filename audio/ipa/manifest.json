@@ -1,0 +1,250 @@
+{
+ "s": {
+  "file": "audio/ipa/s.mp3",
+  "ipa": "s",
+  "symbols": "ssss",
+  "seconds": 0.33,
+  "rms": 0.0433,
+  "kb": 3.1
+ },
+ "m": {
+  "file": "audio/ipa/m.mp3",
+  "ipa": "m",
+  "symbols": "mmmm",
+  "seconds": 0.17,
+  "rms": 0.0276,
+  "kb": 1.8
+ },
+ "f": {
+  "file": "audio/ipa/f.mp3",
+  "ipa": "f",
+  "symbols": "ffff",
+  "seconds": 0.8,
+  "rms": 0.0272,
+  "kb": 6.7
+ },
+ "n": {
+  "file": "audio/ipa/n.mp3",
+  "ipa": "n",
+  "symbols": "nnnn",
+  "seconds": 0.35,
+  "rms": 0.0361,
+  "kb": 3.3
+ },
+ "l": {
+  "file": "audio/ipa/l.mp3",
+  "ipa": "l",
+  "symbols": "llll",
+  "seconds": 0.37,
+  "rms": 0.0417,
+  "kb": 3.5
+ },
+ "r": {
+  "file": "audio/ipa/r.mp3",
+  "ipa": "r",
+  "symbols": "rrrr",
+  "seconds": 0.53,
+  "rms": 0.0404,
+  "kb": 4.7
+ },
+ "v": {
+  "file": "audio/ipa/v.mp3",
+  "ipa": "v",
+  "symbols": "vvvv",
+  "seconds": 0.41,
+  "rms": 0.044,
+  "kb": 3.7
+ },
+ "z": {
+  "file": "audio/ipa/z.mp3",
+  "ipa": "z",
+  "symbols": "zzzz",
+  "seconds": 0.45,
+  "rms": 0.0287,
+  "kb": 4.1
+ },
+ "sh": {
+  "file": "audio/ipa/sh.mp3",
+  "ipa": "\u0283",
+  "symbols": "\u0283\u0283\u0283\u0283",
+  "seconds": 0.24,
+  "rms": 0.0281,
+  "kb": 2.4
+ },
+ "th": {
+  "file": "audio/ipa/th.mp3",
+  "ipa": "\u03b8",
+  "symbols": "\u03b8\u03b8\u03b8\u03b8",
+  "seconds": 2.25,
+  "rms": 0.0561,
+  "kb": 18.2
+ },
+ "ee": {
+  "file": "audio/ipa/ee.mp3",
+  "ipa": "i\u02d0",
+  "symbols": "i\u02d0i\u02d0",
+  "seconds": 0.43,
+  "rms": 0.0462,
+  "kb": 3.9
+ },
+ "oo": {
+  "file": "audio/ipa/oo.mp3",
+  "ipa": "u\u02d0",
+  "symbols": "u\u02d0u\u02d0",
+  "seconds": 0.48,
+  "rms": 0.0653,
+  "kb": 4.3
+ },
+ "a": {
+  "file": "audio/ipa/a.mp3",
+  "ipa": "\u00e6",
+  "symbols": "\u00e6\u00e6",
+  "seconds": 0.45,
+  "rms": 0.0526,
+  "kb": 4.1
+ },
+ "e": {
+  "file": "audio/ipa/e.mp3",
+  "ipa": "\u025b",
+  "symbols": "\u025b\u025b",
+  "seconds": 0.9,
+  "rms": 0.0403,
+  "kb": 7.6
+ },
+ "i": {
+  "file": "audio/ipa/i.mp3",
+  "ipa": "\u026a",
+  "symbols": "\u026a\u026a",
+  "seconds": 0.43,
+  "rms": 0.0456,
+  "kb": 3.9
+ },
+ "o": {
+  "file": "audio/ipa/o.mp3",
+  "ipa": "\u0252",
+  "symbols": "\u0252\u0252",
+  "seconds": 0.52,
+  "rms": 0.0484,
+  "kb": 4.5
+ },
+ "u": {
+  "file": "audio/ipa/u.mp3",
+  "ipa": "\u028c",
+  "symbols": "\u028c\u028c",
+  "seconds": 0.44,
+  "rms": 0.0727,
+  "kb": 3.9
+ },
+ "w": {
+  "file": "audio/ipa/w.mp3",
+  "ipa": "w",
+  "symbols": "w",
+  "seconds": 0.55,
+  "rms": 0.0594,
+  "kb": 4.9
+ },
+ "y": {
+  "file": "audio/ipa/y.mp3",
+  "ipa": "j",
+  "symbols": "j",
+  "seconds": 0.35,
+  "rms": 0.0219,
+  "kb": 3.3
+ },
+ "b": {
+  "file": "audio/ipa/b.mp3",
+  "ipa": "b",
+  "symbols": "b",
+  "seconds": 0.34,
+  "rms": 0.05,
+  "kb": 3.3
+ },
+ "d": {
+  "file": "audio/ipa/d.mp3",
+  "ipa": "d",
+  "symbols": "d",
+  "seconds": 0.66,
+  "rms": 0.0462,
+  "kb": 5.7
+ },
+ "g": {
+  "file": "audio/ipa/g.mp3",
+  "ipa": "\u0261",
+  "symbols": "\u0261",
+  "seconds": 0.74,
+  "rms": 0.0945,
+  "kb": 6.3
+ },
+ "p": {
+  "file": "audio/ipa/p.mp3",
+  "ipa": "p",
+  "symbols": "p",
+  "seconds": 0.44,
+  "rms": 0.0592,
+  "kb": 3.9
+ },
+ "t": {
+  "file": "audio/ipa/t.mp3",
+  "ipa": "t",
+  "symbols": "t",
+  "seconds": 0.87,
+  "rms": 0.054,
+  "kb": 7.3
+ },
+ "c": {
+  "file": "audio/ipa/c.mp3",
+  "ipa": "k",
+  "symbols": "k",
+  "seconds": 1.06,
+  "rms": 0.0617,
+  "kb": 8.8
+ },
+ "k": {
+  "file": "audio/ipa/k.mp3",
+  "ipa": "k",
+  "symbols": "k",
+  "seconds": 1.06,
+  "rms": 0.0586,
+  "kb": 8.8
+ },
+ "j": {
+  "file": "audio/ipa/j.mp3",
+  "ipa": "d\u0292",
+  "symbols": "d\u0292",
+  "seconds": 2.05,
+  "rms": 0.0736,
+  "kb": 16.5
+ },
+ "ch": {
+  "file": "audio/ipa/ch.mp3",
+  "ipa": "t\u0283",
+  "symbols": "t\u0283",
+  "seconds": 0.22,
+  "rms": 0.0154,
+  "kb": 2.2
+ },
+ "ck": {
+  "file": "audio/ipa/ck.mp3",
+  "ipa": "k",
+  "symbols": "k",
+  "seconds": 1.2,
+  "rms": 0.0486,
+  "kb": 10.0
+ },
+ "q": {
+  "file": "audio/ipa/q.mp3",
+  "ipa": "kw",
+  "symbols": "kw",
+  "seconds": 1.24,
+  "rms": 0.0623,
+  "kb": 10.2
+ },
+ "x": {
+  "file": "audio/ipa/x.mp3",
+  "ipa": "ks",
+  "symbols": "ks",
+  "seconds": 0.47,
+  "rms": 0.0599,
+  "kb": 4.1
+ }
+}
