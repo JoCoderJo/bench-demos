@@ -1,0 +1,1430 @@
+{
+ "words": {
+  "apple": {
+   "file": "apple.mp3",
+   "source": "File:En-us-apple.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-apple.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.9,
+   "seconds": 0.46
+  },
+  "ball": {
+   "file": "ball.mp3",
+   "source": "File:En-us-ball.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-ball.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.3,
+   "seconds": 0.38
+  },
+  "cat": {
+   "file": "cat.mp3",
+   "source": "File:En-us-cat.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-cat.ogg",
+   "desc": "Pronunciation of the word 'cat' in US English",
+   "kb": 4.3,
+   "seconds": 0.52
+  },
+  "chip": {
+   "file": "chip.mp3",
+   "source": "File:En-us-chip.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-chip.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.3,
+   "seconds": 0.39
+  },
+  "dog": {
+   "file": "dog.mp3",
+   "source": "File:En-us-dog.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-dog.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.7,
+   "seconds": 0.44
+  },
+  "duck": {
+   "file": "duck.mp3",
+   "source": "File:En-us-duck.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-duck.ogg",
+   "desc": "Audio pronunciation of the term 'duck' in United States English.",
+   "kb": 4.2,
+   "seconds": 0.48
+  },
+  "egg": {
+   "file": "egg.mp3",
+   "source": "File:En-us-egg.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-egg.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.5,
+   "seconds": 0.39
+  },
+  "fish": {
+   "file": "fish.mp3",
+   "source": "File:En-us-fish.ogg",
+   "licence": "Public domain",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-fish.ogg",
+   "desc": "",
+   "kb": 5.1,
+   "seconds": 0.62
+  },
+  "fox": {
+   "file": "fox.mp3",
+   "source": "File:En-us-fox.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-fox.ogg",
+   "desc": "Audio pronunciation of the term 'fox' in United States English.",
+   "kb": 5.1,
+   "seconds": 0.61
+  },
+  "goat": {
+   "file": "goat.mp3",
+   "source": "File:En-us-goat.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-goat.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.7,
+   "seconds": 0.42
+  },
+  "hat": {
+   "file": "hat.mp3",
+   "source": "File:En-us-hat.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-hat.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.5,
+   "seconds": 0.42
+  },
+  "insect": {
+   "file": "insect.mp3",
+   "source": "File:En-us-insect.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-insect.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 6.9,
+   "seconds": 0.84
+  },
+  "jam": {
+   "file": "jam.mp3",
+   "source": "File:En-us-jam.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-jam.ogg",
+   "desc": "Audio pronunciation of the term 'jam' in United States English.",
+   "kb": 4.2,
+   "seconds": 0.47
+  },
+  "kite": {
+   "file": "kite.mp3",
+   "source": "File:En-us-kite.ogg",
+   "licence": "CC0",
+   "author": "Mx. Granger",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-kite.ogg",
+   "desc": "American English pronunciation of \"kite\" by a male speaker.",
+   "kb": 4.7,
+   "seconds": 0.55
+  },
+  "leaf": {
+   "file": "leaf.mp3",
+   "source": "File:En-us-leaf.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-leaf.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.5,
+   "seconds": 0.54
+  },
+  "moon": {
+   "file": "moon.mp3",
+   "source": "File:En-us-moon.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-moon.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.5,
+   "seconds": 0.53
+  },
+  "nest": {
+   "file": "nest.mp3",
+   "source": "File:En-us-nest.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-nest.ogg",
+   "desc": "Audio pronunciation of the term 'nest' in United States English.",
+   "kb": 9.0,
+   "seconds": 1.1
+  },
+  "octopus": {
+   "file": "octopus.mp3",
+   "source": "File:En-us-octopus.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-octopus.ogg",
+   "desc": "Audio pronunciation of the term 'octopus' in United States English.",
+   "kb": 5.9,
+   "seconds": 0.71
+  },
+  "pig": {
+   "file": "pig.mp3",
+   "source": "File:En-us-pig.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-pig.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.7,
+   "seconds": 0.44
+  },
+  "queen": {
+   "file": "queen.mp3",
+   "source": "File:En-us-queen.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-queen.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.9,
+   "seconds": 0.58
+  },
+  "rain": {
+   "file": "rain.mp3",
+   "source": "File:En-us-rain.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-rain.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.1,
+   "seconds": 0.48
+  },
+  "ship": {
+   "file": "ship.mp3",
+   "source": "File:En-us-ship.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-ship.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.1,
+   "seconds": 0.49
+  },
+  "sun": {
+   "file": "sun.mp3",
+   "source": "File:En-us-sun.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-sun.ogg",
+   "desc": "Audio pronunciation of the term 'Sun' in United States English.",
+   "kb": 4.5,
+   "seconds": 0.52
+  },
+  "tap": {
+   "file": "tap.mp3",
+   "source": "File:En-us-tap.ogg",
+   "licence": "Public domain",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-tap.ogg",
+   "desc": "Pronunciation of the word 'tap' in US English",
+   "kb": 3.1,
+   "seconds": 0.35
+  },
+  "thumb": {
+   "file": "thumb.mp3",
+   "source": "File:En-us-thumb.ogg",
+   "licence": "Public domain",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-thumb.ogg",
+   "desc": "Pronunciation of the acronym 'thumb' in US English",
+   "kb": 3.7,
+   "seconds": 0.44
+  },
+  "tree": {
+   "file": "tree.mp3",
+   "source": "File:En-us-tree.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-tree.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.9,
+   "seconds": 0.46
+  },
+  "umbrella": {
+   "file": "umbrella.mp3",
+   "source": "File:En-us-umbrella.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-umbrella.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 5.1,
+   "seconds": 0.63
+  },
+  "van": {
+   "file": "van.mp3",
+   "source": "File:En-us-van.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-van.ogg",
+   "desc": "Audio pronunciation of the term 'van' in United States English.",
+   "kb": 5.9,
+   "seconds": 0.71
+  },
+  "web": {
+   "file": "web.mp3",
+   "source": "File:En-us-web.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-web.ogg",
+   "desc": "Audio pronunciation of the term 'web' in United States English.",
+   "kb": 3.9,
+   "seconds": 0.45
+  },
+  "yes": {
+   "file": "yes.mp3",
+   "source": "File:En-us-yes.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-yes.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.3,
+   "seconds": 0.5
+  },
+  "zip": {
+   "file": "zip.mp3",
+   "source": "File:En-us-zip.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-zip.ogg",
+   "desc": "Pronunciation of the word 'zip' in US English",
+   "kb": 4.5,
+   "seconds": 0.55
+  },
+  "bat": {
+   "file": "bat.mp3",
+   "source": "File:En-us-bat.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-bat.ogg",
+   "desc": "Pronunciation of the word 'bat' in US English",
+   "kb": 3.5,
+   "seconds": 0.41
+  },
+  "bed": {
+   "file": "bed.mp3",
+   "source": "File:En-us-bed.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-bed.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.3,
+   "seconds": 0.39
+  },
+  "big": {
+   "file": "big.mp3",
+   "source": "File:En-us-big.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-big.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 2.9,
+   "seconds": 0.34
+  },
+  "bin": {
+   "file": "bin.mp3",
+   "source": "File:En-us-bin.ogg",
+   "licence": "Public domain",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-bin.ogg",
+   "desc": "",
+   "kb": 8.6,
+   "seconds": 1.04
+  },
+  "bit": {
+   "file": "bit.mp3",
+   "source": "File:En-us-bit.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-bit.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.5,
+   "seconds": 0.41
+  },
+  "bug": {
+   "file": "bug.mp3",
+   "source": "File:En-us-bug.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-bug.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.1,
+   "seconds": 0.34
+  },
+  "can": {
+   "file": "can.mp3",
+   "source": "File:En-us-can.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-can.ogg",
+   "desc": "Pronunciation of the word 'can'in US English",
+   "kb": 4.3,
+   "seconds": 0.51
+  },
+  "cap": {
+   "file": "cap.mp3",
+   "source": "File:En-us-cap.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-cap.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.7,
+   "seconds": 0.43
+  },
+  "cot": {
+   "file": "cot.mp3",
+   "source": "File:En-us-cot.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-cot.ogg",
+   "desc": "Pronunciation of the word 'cot' in US English",
+   "kb": 3.3,
+   "seconds": 0.38
+  },
+  "cup": {
+   "file": "cup.mp3",
+   "source": "File:En-us-cup.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-cup.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.7,
+   "seconds": 0.43
+  },
+  "dig": {
+   "file": "dig.mp3",
+   "source": "File:En-us-dig.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-dig.ogg",
+   "desc": "Audio pronunciation of the term 'dig' in United States English.",
+   "kb": 4.8,
+   "seconds": 0.55
+  },
+  "dot": {
+   "file": "dot.mp3",
+   "source": "File:En-us-dot.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-dot.ogg",
+   "desc": "",
+   "kb": 3.5,
+   "seconds": 0.39
+  },
+  "fed": {
+   "file": "fed.mp3",
+   "source": "File:En-us-fed.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-fed.ogg",
+   "desc": "Audio pronunciation of the term 'fed' in United States English.",
+   "kb": 5.3,
+   "seconds": 0.65
+  },
+  "fig": {
+   "file": "fig.mp3",
+   "source": "File:En-us-fig.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-fig.ogg",
+   "desc": "Audio pronunciation of the term 'fig' in United States English.",
+   "kb": 5.6,
+   "seconds": 0.65
+  },
+  "fit": {
+   "file": "fit.mp3",
+   "source": "File:En-us-fit.ogg",
+   "licence": "Public domain",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-fit.ogg",
+   "desc": "Pronunciation of the word 'fit' in US English",
+   "kb": 3.7,
+   "seconds": 0.44
+  },
+  "fog": {
+   "file": "fog.mp3",
+   "source": "File:En-us-fog.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-fog.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.3,
+   "seconds": 0.52
+  },
+  "friend": {
+   "file": "friend.mp3",
+   "source": "File:En-us-friend.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-friend.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.7,
+   "seconds": 0.57
+  },
+  "frog": {
+   "file": "frog.mp3",
+   "source": "File:En-us-frog.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-frog.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.5,
+   "seconds": 0.54
+  },
+  "fun": {
+   "file": "fun.mp3",
+   "source": "File:En-us-fun.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-fun.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.3,
+   "seconds": 0.52
+  },
+  "get": {
+   "file": "get.mp3",
+   "source": "File:En-us-get.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-get.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.9,
+   "seconds": 0.47
+  },
+  "green": {
+   "file": "green.mp3",
+   "source": "File:En-us-green.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-green.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.1,
+   "seconds": 0.47
+  },
+  "hen": {
+   "file": "hen.mp3",
+   "source": "File:En-us-hen.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-hen.ogg",
+   "desc": "Audio pronunciation of the term 'hen' in United States English.",
+   "kb": 4.8,
+   "seconds": 0.56
+  },
+  "hit": {
+   "file": "hit.mp3",
+   "source": "File:En-us-hit.ogg",
+   "licence": "Public domain",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-hit.ogg",
+   "desc": "",
+   "kb": 7.3,
+   "seconds": 0.9
+  },
+  "hog": {
+   "file": "hog.mp3",
+   "source": "File:En-us-hog.ogg",
+   "licence": "Public domain",
+   "author": "DroEsperanto",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-hog.ogg",
+   "desc": "Pronunciation by a native male speaker of American English.",
+   "kb": 6.1,
+   "seconds": 0.75
+  },
+  "hop": {
+   "file": "hop.mp3",
+   "source": "File:En-us-hop.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-hop.ogg",
+   "desc": "Audio pronunciation of the term 'hop' in United States English.",
+   "kb": 3.7,
+   "seconds": 0.4
+  },
+  "hot": {
+   "file": "hot.mp3",
+   "source": "File:En-us-hot.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-hot.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.9,
+   "seconds": 0.46
+  },
+  "hug": {
+   "file": "hug.mp3",
+   "source": "File:En-us-hug.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-hug.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.9,
+   "seconds": 0.46
+  },
+  "jump": {
+   "file": "jump.mp3",
+   "source": "File:En-us-jump.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "TreeMama",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-jump.ogg",
+   "desc": "Audio pronunciation of the term 'jump' in United States English.",
+   "kb": 9.8,
+   "seconds": 1.21
+  },
+  "log": {
+   "file": "log.mp3",
+   "source": "File:En-us-log.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-log.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.5,
+   "seconds": 0.53
+  },
+  "man": {
+   "file": "man.mp3",
+   "source": "File:En-us-man.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-man.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.1,
+   "seconds": 0.49
+  },
+  "map": {
+   "file": "map.mp3",
+   "source": "File:En-us-map.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-map.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.9,
+   "seconds": 0.46
+  },
+  "mat": {
+   "file": "mat.mp3",
+   "source": "File:En-us-mat.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-mat.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.3,
+   "seconds": 0.51
+  },
+  "men": {
+   "file": "men.mp3",
+   "source": "File:En-us-men.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-men.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.1,
+   "seconds": 0.47
+  },
+  "mop": {
+   "file": "mop.mp3",
+   "source": "File:En-us-mop.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-mop.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.5,
+   "seconds": 0.41
+  },
+  "mug": {
+   "file": "mug.mp3",
+   "source": "File:En-us-mug.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "No machine-readable author provided. Dvortygirl assumed (based on copyright claims).",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-mug.ogg",
+   "desc": "Pronunciation of the term in US English, recorded by Dvortygirl, 7 January 2006",
+   "kb": 3.9,
+   "seconds": 0.45
+  },
+  "net": {
+   "file": "net.mp3",
+   "source": "File:En-us-net.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-net.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.5,
+   "seconds": 0.42
+  },
+  "pan": {
+   "file": "pan.mp3",
+   "source": "File:En-us-pan.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-pan.ogg",
+   "desc": "Audio pronunciation of the term 'pan' in United States English.",
+   "kb": 5.1,
+   "seconds": 0.61
+  },
+  "pen": {
+   "file": "pen.mp3",
+   "source": "File:En-us-pen.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-pen.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 5.5,
+   "seconds": 0.66
+  },
+  "pet": {
+   "file": "pet.mp3",
+   "source": "File:En-us-pet.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-pet.ogg",
+   "desc": "Pronunciation of the term in US English, recorded by EncycloPetey",
+   "kb": 3.3,
+   "seconds": 0.37
+  },
+  "pin": {
+   "file": "pin.mp3",
+   "source": "File:En-us-pin.ogg",
+   "licence": "Public domain",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-pin.ogg",
+   "desc": "",
+   "kb": 4.5,
+   "seconds": 0.54
+  },
+  "pond": {
+   "file": "pond.mp3",
+   "source": "File:En-us-pond.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-pond.ogg",
+   "desc": "Audio pronunciation of the term 'pond' in United States English.",
+   "kb": 4.2,
+   "seconds": 0.49
+  },
+  "pop": {
+   "file": "pop.mp3",
+   "source": "File:En-us-pop.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-pop.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.3,
+   "seconds": 0.37
+  },
+  "pot": {
+   "file": "pot.mp3",
+   "source": "File:En-us-pot.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-pot.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.1,
+   "seconds": 0.47
+  },
+  "pup": {
+   "file": "pup.mp3",
+   "source": "File:En-us-pup.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-pup.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.3,
+   "seconds": 0.38
+  },
+  "ran": {
+   "file": "ran.mp3",
+   "source": "File:En-us-ran.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-ran.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.3,
+   "seconds": 0.52
+  },
+  "rat": {
+   "file": "rat.mp3",
+   "source": "File:En-us-rat.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-rat.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.7,
+   "seconds": 0.44
+  },
+  "red": {
+   "file": "red.mp3",
+   "source": "File:En-us-red.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-red.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.7,
+   "seconds": 0.43
+  },
+  "run": {
+   "file": "run.mp3",
+   "source": "File:En-us-run.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-run.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.7,
+   "seconds": 0.44
+  },
+  "sat": {
+   "file": "sat.mp3",
+   "source": "File:En-us-sat.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-sat.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.3,
+   "seconds": 0.51
+  },
+  "sit": {
+   "file": "sit.mp3",
+   "source": "File:En-us-sit.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-sit.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.3,
+   "seconds": 0.51
+  },
+  "ten": {
+   "file": "ten.mp3",
+   "source": "File:En-us-ten.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "No machine-readable author provided. TheDaveRoss assumed (based on copyright claims).",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-ten.ogg",
+   "desc": "Pronunciation of the term in US English, recorded by TheDaveRoss 19:02, 15 June 2006 (UTC)",
+   "kb": 4.3,
+   "seconds": 0.51
+  },
+  "tin": {
+   "file": "tin.mp3",
+   "source": "File:En-us-tin.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "No machine-readable author provided. Dvortygirl assumed (based on copyright claims).",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-tin.ogg",
+   "desc": "Pronunciation of the term in US English, recorded by Dvortygirl, 21 September 2006",
+   "kb": 3.9,
+   "seconds": 0.47
+  },
+  "top": {
+   "file": "top.mp3",
+   "source": "File:En-us-top.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-top.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.7,
+   "seconds": 0.44
+  },
+  "wet": {
+   "file": "wet.mp3",
+   "source": "File:En-us-wet.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-wet.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 4.1,
+   "seconds": 0.47
+  },
+  "wig": {
+   "file": "wig.mp3",
+   "source": "File:En-us-wig.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-wig.ogg",
+   "desc": "Audio pronunciation of the term 'wig' in United States English.",
+   "kb": 4.8,
+   "seconds": 0.55
+  },
+  "win": {
+   "file": "win.mp3",
+   "source": "File:En-us-win.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Dvortygirl",
+   "page": "https://commons.wikimedia.org/wiki/File%3AEn-us-win.ogg",
+   "desc": "Pronunciation of the term in US English",
+   "kb": 3.9,
+   "seconds": 0.46
+  }
+ },
+ "sounds": {
+  "s": {
+   "file": "s.mp3",
+   "source": "File:Voiceless alveolar fricative.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Peter Isotalo",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiceless_alveolar_fricative.ogg",
+   "desc": "Pronunciation of a voiceless alveolar , [s] between two [a]s; [sa asa] by 44-year-old cis male speaker raised in Stockholm and Moscow.",
+   "kb": 17.1,
+   "seconds": 2.15,
+   "kind": "continuous",
+   "alternatives": [
+    {
+     "file": "Voiceless alveolar fricative.ogg",
+     "seconds": 2.59
+    },
+    {
+     "file": "Voiceless alveolar sibilant.ogg",
+     "seconds": 2.59
+    }
+   ]
+  },
+  "m": {
+   "file": "m.mp3",
+   "source": "File:Bilabial nasal.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3ABilabial_nasal.ogg",
+   "desc": "",
+   "kb": 14.7,
+   "seconds": 1.84,
+   "kind": "continuous",
+   "alternatives": [
+    {
+     "file": "Bilabial nasal.ogg",
+     "seconds": 2.01
+    }
+   ]
+  },
+  "f": {
+   "file": "f.mp3",
+   "source": "File:Voiceless labiodental fricative.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiceless_labiodental_fricative.ogg",
+   "desc": "",
+   "kb": 5.9,
+   "seconds": 0.71,
+   "kind": "continuous",
+   "alternatives": [
+    {
+     "file": "Voiceless labiodental fricative.ogg",
+     "seconds": 0.72
+    },
+    {
+     "file": "Voiceless labio-dental fricative.ogg",
+     "seconds": 1.88
+    }
+   ]
+  },
+  "n": {
+   "file": "n.mp3",
+   "source": "File:Alveolar nasal.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AAlveolar_nasal.ogg",
+   "desc": "",
+   "kb": 16.3,
+   "seconds": 2.05,
+   "kind": "continuous",
+   "alternatives": [
+    {
+     "file": "Alveolar nasal.ogg",
+     "seconds": 2.29
+    }
+   ]
+  },
+  "l": {
+   "file": "l.mp3",
+   "source": "File:Alveolar lateral approximant.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AAlveolar_lateral_approximant.ogg",
+   "desc": "",
+   "kb": 15.7,
+   "seconds": 1.97,
+   "kind": "continuous",
+   "alternatives": [
+    {
+     "file": "Alveolar lateral approximant.ogg",
+     "seconds": 2.15
+    }
+   ]
+  },
+  "r": {
+   "file": "r.mp3",
+   "source": "File:Alveolar approximant.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Erutuon",
+   "page": "https://commons.wikimedia.org/wiki/File%3AAlveolar_approximant.ogg",
+   "desc": "An alveolar approximant: [\u0279a a\u0279a].",
+   "kb": 15.1,
+   "seconds": 1.9,
+   "kind": "continuous",
+   "alternatives": [
+    {
+     "file": "Alveolar approximant.ogg",
+     "seconds": 1.95
+    }
+   ]
+  },
+  "v": {
+   "file": "v.mp3",
+   "source": "File:Voiced labiodental fricative.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiced_labiodental_fricative.ogg",
+   "desc": "",
+   "kb": 5.7,
+   "seconds": 0.68,
+   "kind": "continuous",
+   "alternatives": [
+    {
+     "file": "Voiced labiodental fricative.ogg",
+     "seconds": 0.7
+    },
+    {
+     "file": "Voiced labio-dental fricative.ogg",
+     "seconds": 1.71
+    }
+   ]
+  },
+  "z": {
+   "file": "z.mp3",
+   "source": "File:Voiced alveolar fricative.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiced_alveolar_fricative.ogg",
+   "desc": "",
+   "kb": 15.9,
+   "seconds": 1.99,
+   "kind": "continuous",
+   "alternatives": [
+    {
+     "file": "Voiced alveolar fricative.ogg",
+     "seconds": 2.17
+    },
+    {
+     "file": "Voiced alveolar sibilant.ogg",
+     "seconds": 2.17
+    }
+   ]
+  },
+  "sh": {
+   "file": "sh.mp3",
+   "source": "File:Voiceless palato-alveolar sibilant.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Peter Isotalo",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiceless_palato-alveolar_sibilant.ogg",
+   "desc": "Pronunciation of voiceless postalveolar fricative [\u0283] between two [a]s [\u0283a a\u0283a] by 44-year-old cis male speaker raised in Stockholm and Moscow.",
+   "kb": 16.9,
+   "seconds": 2.13,
+   "kind": "continuous",
+   "alternatives": [
+    {
+     "file": "Voiceless palato-alveolar sibilant.ogg",
+     "seconds": 2.43
+    },
+    {
+     "file": "Voiceless postalveolar fricative.ogg",
+     "seconds": 2.43
+    }
+   ]
+  },
+  "th": {
+   "file": "th.mp3",
+   "source": "File:Voiceless dental fricative.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiceless_dental_fricative.ogg",
+   "desc": "",
+   "kb": 17.6,
+   "seconds": 2.21,
+   "kind": "continuous",
+   "alternatives": [
+    {
+     "file": "Voiceless dental fricative.ogg",
+     "seconds": 2.28
+    }
+   ]
+  },
+  "ee": {
+   "file": "ee.mp3",
+   "source": "File:Close front unrounded vowel.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "No machine-readable author provided. Denelson83 assumed (based on copyright claims).",
+   "page": "https://commons.wikimedia.org/wiki/File%3AClose_front_unrounded_vowel.ogg",
+   "desc": "Close front unrounded vowel, [i].  Recorded by Denelson83.",
+   "kb": 4.9,
+   "seconds": 0.59,
+   "kind": "vowel",
+   "alternatives": [
+    {
+     "file": "Close front unrounded vowel.ogg",
+     "seconds": 0.6
+    }
+   ]
+  },
+  "oo": {
+   "file": "oo.mp3",
+   "source": "File:Close back rounded vowel.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "No machine-readable author provided. Denelson83 assumed (based on copyright claims).",
+   "page": "https://commons.wikimedia.org/wiki/File%3AClose_back_rounded_vowel.ogg",
+   "desc": "Close back rounded vowel, [u].  Recorded by Denelson83.",
+   "kb": 5.5,
+   "seconds": 0.67,
+   "kind": "vowel",
+   "alternatives": [
+    {
+     "file": "Close back rounded vowel.ogg",
+     "seconds": 0.67
+    }
+   ]
+  },
+  "a": {
+   "file": "a.mp3",
+   "source": "File:Near-open front unrounded vowel.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "No machine-readable author provided. Denelson83 assumed (based on copyright claims).",
+   "page": "https://commons.wikimedia.org/wiki/File%3ANear-open_front_unrounded_vowel.ogg",
+   "desc": "Near-open front unrounded vowel, [\u00e6].  Recorded by Denelson83.",
+   "kb": 5.9,
+   "seconds": 0.71,
+   "kind": "vowel",
+   "alternatives": [
+    {
+     "file": "Near-open front unrounded vowel.ogg",
+     "seconds": 0.71
+    }
+   ]
+  },
+  "e": {
+   "file": "e.mp3",
+   "source": "File:Open-mid front unrounded vowel.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "No machine-readable author provided. Denelson83 assumed (based on copyright claims).",
+   "page": "https://commons.wikimedia.org/wiki/File%3AOpen-mid_front_unrounded_vowel.ogg",
+   "desc": "Open-mid front unrounded vowel, [\u025b].  Recorded by Terfili.",
+   "kb": 5.5,
+   "seconds": 0.66,
+   "kind": "vowel",
+   "alternatives": [
+    {
+     "file": "Open-mid front unrounded vowel.ogg",
+     "seconds": 1.55
+    }
+   ]
+  },
+  "i": {
+   "file": "i.mp3",
+   "source": "File:Near-close near-front unrounded vowel.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "No machine-readable author provided. Denelson83 assumed (based on copyright claims).",
+   "page": "https://commons.wikimedia.org/wiki/File%3ANear-close_near-front_unrounded_vowel.ogg",
+   "desc": "Near-close near-front unrounded vowel, [\u026a].  Recorded by Denelson83.",
+   "kb": 4.7,
+   "seconds": 0.57,
+   "kind": "vowel",
+   "alternatives": [
+    {
+     "file": "Near-close near-front unrounded vowel.ogg",
+     "seconds": 0.57
+    }
+   ]
+  },
+  "o": {
+   "file": "o.mp3",
+   "source": "File:Open back rounded vowel.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "No machine-readable author provided. Denelson83 assumed (based on copyright claims).",
+   "page": "https://commons.wikimedia.org/wiki/File%3AOpen_back_rounded_vowel.ogg",
+   "desc": "Open back rounded vowel, [\u0252]. Recorded by Denelson83.",
+   "kb": 5.7,
+   "seconds": 0.68,
+   "kind": "vowel",
+   "alternatives": [
+    {
+     "file": "Open back rounded vowel.ogg",
+     "seconds": 0.68
+    }
+   ]
+  },
+  "u": {
+   "file": "u.mp3",
+   "source": "File:Open-mid back unrounded vowel.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "No machine-readable author provided. Denelson83 assumed (based on copyright claims).",
+   "page": "https://commons.wikimedia.org/wiki/File%3AOpen-mid_back_unrounded_vowel.ogg",
+   "desc": "Open-mid back unrounded vowel, [\u028c]. Recorded by Denelson83.",
+   "kb": 5.3,
+   "seconds": 0.64,
+   "kind": "vowel",
+   "alternatives": [
+    {
+     "file": "Open-mid back unrounded vowel.ogg",
+     "seconds": 0.64
+    }
+   ]
+  },
+  "h": {
+   "file": "h.mp3",
+   "source": "File:Voiceless glottal fricative.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiceless_glottal_fricative.ogg",
+   "desc": "",
+   "kb": 15.7,
+   "seconds": 1.96,
+   "kind": "breath",
+   "alternatives": [
+    {
+     "file": "Voiceless glottal fricative.ogg",
+     "seconds": 2.18
+    }
+   ]
+  },
+  "w": {
+   "file": "w.mp3",
+   "source": "File:Voiced labio-velar approximant.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiced_labio-velar_approximant.ogg",
+   "desc": "",
+   "kb": 14.1,
+   "seconds": 1.77,
+   "kind": "glide",
+   "alternatives": [
+    {
+     "file": "Voiced labio-velar approximant.ogg",
+     "seconds": 1.8
+    }
+   ]
+  },
+  "y": {
+   "file": "y.mp3",
+   "source": "File:Palatal approximant.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3APalatal_approximant.ogg",
+   "desc": "",
+   "kb": 15.1,
+   "seconds": 1.9,
+   "kind": "glide",
+   "alternatives": [
+    {
+     "file": "Palatal approximant.ogg",
+     "seconds": 2.09
+    }
+   ]
+  },
+  "b": {
+   "file": "b.mp3",
+   "source": "File:Voiced bilabial stop.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiced_bilabial_stop.ogg",
+   "desc": "",
+   "kb": 4.9,
+   "seconds": 0.58,
+   "kind": "stop",
+   "alternatives": [
+    {
+     "file": "Voiced bilabial stop.ogg",
+     "seconds": 0.59
+    },
+    {
+     "file": "Voiced bilabial plosive.ogg",
+     "seconds": 2.06
+    }
+   ]
+  },
+  "d": {
+   "file": "d.mp3",
+   "source": "File:Voiced alveolar stop.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiced_alveolar_stop.ogg",
+   "desc": "",
+   "kb": 4.3,
+   "seconds": 0.5,
+   "kind": "stop",
+   "alternatives": [
+    {
+     "file": "Voiced alveolar stop.ogg",
+     "seconds": 0.56
+    },
+    {
+     "file": "Voiced alveolar plosive.ogg",
+     "seconds": 1.93
+    }
+   ]
+  },
+  "g": {
+   "file": "g.mp3",
+   "source": "File:Voiced velar plosive.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiced_velar_plosive.ogg",
+   "desc": "",
+   "kb": 6.1,
+   "seconds": 0.74,
+   "kind": "stop",
+   "alternatives": [
+    {
+     "file": "Voiced velar plosive.ogg",
+     "seconds": 0.92
+    },
+    {
+     "file": "Voiced velar stop.ogg",
+     "seconds": 1.86
+    }
+   ]
+  },
+  "p": {
+   "file": "p.mp3",
+   "source": "File:Voiceless bilabial stop.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiceless_bilabial_stop.ogg",
+   "desc": "",
+   "kb": 4.5,
+   "seconds": 0.53,
+   "kind": "stop",
+   "alternatives": [
+    {
+     "file": "Voiceless bilabial stop.ogg",
+     "seconds": 0.53
+    },
+    {
+     "file": "Voiceless bilabial plosive.ogg",
+     "seconds": 1.52
+    }
+   ]
+  },
+  "t": {
+   "file": "t.mp3",
+   "source": "File:Voiceless alveolar stop.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiceless_alveolar_stop.ogg",
+   "desc": "",
+   "kb": 4.5,
+   "seconds": 0.54,
+   "kind": "stop",
+   "alternatives": [
+    {
+     "file": "Voiceless alveolar stop.ogg",
+     "seconds": 0.56
+    },
+    {
+     "file": "Voiceless alveolar plosive.ogg",
+     "seconds": 1.93
+    }
+   ]
+  },
+  "c": {
+   "file": "c.mp3",
+   "source": "File:Voiceless velar plosive.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiceless_velar_plosive.ogg",
+   "desc": "",
+   "kb": 13.9,
+   "seconds": 1.73,
+   "kind": "stop",
+   "alternatives": [
+    {
+     "file": "Voiceless velar plosive.ogg",
+     "seconds": 1.98
+    }
+   ]
+  },
+  "k": {
+   "file": "k.mp3",
+   "source": "File:Voiceless velar plosive.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiceless_velar_plosive.ogg",
+   "desc": "",
+   "kb": 13.9,
+   "seconds": 1.73,
+   "kind": "stop",
+   "alternatives": [
+    {
+     "file": "Voiceless velar plosive.ogg",
+     "seconds": 1.98
+    }
+   ]
+  },
+  "j": {
+   "file": "j.mp3",
+   "source": "File:Voiced palato-alveolar affricate.ogg",
+   "licence": "Public domain",
+   "author": "The original uploader was Octane at English Wikipedia.",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiced_palato-alveolar_affricate.ogg",
+   "desc": "Voiced postalveolar affricate",
+   "kb": 10.4,
+   "seconds": 1.29,
+   "kind": "stop",
+   "alternatives": [
+    {
+     "file": "Voiced palato-alveolar affricate.ogg",
+     "seconds": 1.32
+    },
+    {
+     "file": "Voiced postalveolar affricate.ogg",
+     "seconds": 1.32
+    }
+   ]
+  },
+  "ch": {
+   "file": "ch.mp3",
+   "source": "File:Voiceless palato-alveolar affricate.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "Peter Isotalo",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiceless_palato-alveolar_affricate.ogg",
+   "desc": "A pronunciation of a Voiceless postalveolar affricate|voiceless postalveolar affricate|Voiceless postalveolar affricate [t\u0361\u0283] in a context of an open front unrounded vowel [a].\ntranscription: [t\u0361\u0283a\u02d0 a",
+   "kb": 13.1,
+   "seconds": 1.63,
+   "kind": "stop",
+   "alternatives": [
+    {
+     "file": "Voiceless palato-alveolar affricate.ogg",
+     "seconds": 2.07
+    }
+   ]
+  },
+  "ck": {
+   "file": "ck.mp3",
+   "source": "File:Voiceless velar plosive.ogg",
+   "licence": "CC BY-SA 3.0",
+   "author": "?",
+   "page": "https://commons.wikimedia.org/wiki/File%3AVoiceless_velar_plosive.ogg",
+   "desc": "",
+   "kb": 13.9,
+   "seconds": 1.73,
+   "kind": "stop",
+   "alternatives": [
+    {
+     "file": "Voiceless velar plosive.ogg",
+     "seconds": 1.98
+    }
+   ]
+  }
+ }
+}

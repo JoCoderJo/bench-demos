@@ -503,7 +503,10 @@ function named(withName,plain){return VOICECLIPS[slug(withName)]?withName:plain}
    is a letter (a-z) or a digraph (sh ch th ck ee oo). Inline on purpose: fetching
    a manifest breaks over file://. Any key not listed falls back to TTS, so the
    page still works with no audio files at all. */
-var SAMPLES={};  /* e.g. {f:"audio/f.mp3", sh:"audio/sh.mp3"} */
+/*SAMPLES-START*/
+var SAMPLES={
+};
+/*SAMPLES-END*/
 function playSound(key,fallbackText,cb){
  var src=SAMPLES[(key||'').toLowerCase()];
  if(!src){speak(fallbackText,cb);return}
