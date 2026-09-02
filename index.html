@@ -18,6 +18,8 @@
  .t{font-size:18px;font-weight:600}
  .d{color:var(--dim);font-size:13.5px;margin-top:4px}
  .go{float:right;color:var(--brass);font-size:20px;line-height:1}
+ .v{float:right;clear:right;margin-top:6px;font:11px ui-monospace,Menlo,Consolas,monospace;color:var(--dim)}
+ footer a{color:var(--brass);text-decoration:none}
  footer{color:var(--dim);font-size:12px;margin-top:22px;border-top:1px solid var(--edge);padding-top:12px}
  @media(prefers-color-scheme:light){:root{--bg:#f6f7f8;--tray:#fff;--edge:#dfe3e8;--ink:#14171c;--dim:#5b6672}}
 </style>
@@ -26,22 +28,22 @@
   <p class="sub">Three things we're building. Each one runs right here in your browser — nothing to install.</p>
 
   <a class="card" href="/manito/"><span class="go">&rsaquo;</span>
-    <div class="t">Manito Park App</div>
+    <div class="t">Manito Park App</div><span class="v">v1.0.0</span>
     <div class="d">A location app for Spokane's Manito Park — ten stops, historical photos, trivia, a plant guide and a garden designer. Opens straight into the app.</div>
   </a>
 
   <a class="card" href="/rover.html#demo"><span class="go">&rsaquo;</span>
-    <div class="t">Rover Bot — driving simulation</div>
+    <div class="t">Rover Bot — driving simulation</div><span class="v">v1.0.0</span>
     <div class="d">A 4-motor skid-steer rover, designed prompt-to-CAD and printed at home. Opens straight into the simulation — drive it yourself with the on-screen joystick.</div>
   </a>
 
   <a class="card" href="/scam.html"><span class="go">&rsaquo;</span>
-    <div class="t">Voice AI Scam Filter — demo calls</div>
+    <div class="t">Voice AI Scam Filter — demo calls</div><span class="v">v1.0.0</span>
     <div class="d">A screener for landline scam calls. Play a scam call and a legitimate one, and hear how it decides.</div>
   </a>
 
   <a class="card" href="/phonics.html"><span class="go">&rsaquo;</span>
-    <div class="t">Phonics Friends</div>
+    <div class="t">Phonics Friends</div><span class="v">v1.0.0</span>
     <div class="d">A spelling buddy for kids — pick your friend (frog, cat, owl or bunny), name it, then say the word and spell it out loud. The real toy is fully offline.</div>
   </a>
 
@@ -50,7 +52,7 @@
     <div class="d">Something in Spokane you wish existed, or a problem worth building for? Tell us — we read every one.</div>
   </a>
 
-  <footer>Updated September 2, 2026</footer>
+  <footer>Updated September 2, 2026 · <a href="/releases.html">What's new</a> — each demo shows its version bottom-left; quote it when something breaks.</footer>
 </div>
 
 <!-- Netlify parses these at deploy time to register the forms; the widgets post to "/" by AJAX. -->
@@ -115,6 +117,7 @@ document.getElementById('suggest-open').addEventListener('click', function (e) {
   <input type="text" name="bot-field">
   <input type="text" name="demo">
   <input type="text" name="kind">
+  <input type="text" name="release">
   <input type="text" name="contact">
   <textarea name="message"></textarea>
 </form>
@@ -215,6 +218,7 @@ document.getElementById('suggest-open').addEventListener('click', function (e) {
         'form-name': 'demo-feedback',
         'demo': demo,
         'kind': document.getElementById('bfb-kind').value,
+        'release': String(window.BENCH_RELEASE || '').slice(0, 60),   // "phonics 1.0.0+eb48367", stamped by publish-demos-site.sh
         'contact': document.getElementById('bfb-contact').value.slice(0, 120),
         'message': text.slice(0, 4000)
       }).toString();

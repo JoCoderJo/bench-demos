@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head><script id="bench-gate-loader" src="/bench-gate.js"></script><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
+  <head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="manito 1.0.0+3301d58" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
     <meta charset="utf-8" />
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -34,7 +34,8 @@
     <!-- The root element for your Expo app. -->
     <div id="root"></div>
   <script src="/_expo/static/js/web/AppEntry-01529401eec41227da45a89f6c4843ea.js" defer></script>
-<!-- Public demo feedback bubble. Injected into every page of the demo site by
+<script id="bench-release">window.BENCH_RELEASE="manito 1.0.0+3301d58";</script>
+<a id="bench-release-pill" href="/releases.html#manito" title="release notes" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483000;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:#9aa4b2;background:rgba(20,23,28,.72);border:1px solid #2a3039;border-radius:999px;padding:5px 8px;text-decoration:none;opacity:.85">v1.0.0</a><!-- Public demo feedback bubble. Injected into every page of the demo site by
      publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
      touching the Bench or the tailnet). Submissions land in Netlify → Forms.
      The hidden <form> below is what Netlify parses at deploy time to register the
@@ -44,6 +45,7 @@
   <input type="text" name="bot-field">
   <input type="text" name="demo">
   <input type="text" name="kind">
+  <input type="text" name="release">
   <input type="text" name="contact">
   <textarea name="message"></textarea>
 </form>
@@ -144,6 +146,7 @@
         'form-name': 'demo-feedback',
         'demo': demo,
         'kind': document.getElementById('bfb-kind').value,
+        'release': String(window.BENCH_RELEASE || '').slice(0, 60),   // "phonics 1.0.0+eb48367", stamped by publish-demos-site.sh
         'contact': document.getElementById('bfb-contact').value.slice(0, 120),
         'message': text.slice(0, 4000)
       }).toString();
