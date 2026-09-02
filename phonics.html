@@ -52,6 +52,7 @@
  #say{min-height:44px;text-align:center;font-size:17px;color:var(--ink);
       padding:6px 8px;font-weight:600}
  #say small{display:block;font-weight:400;color:var(--dim);font-size:13px}
+#heard{min-height:16px;font-size:12px;color:var(--dim);margin:2px 0 0;font-style:italic}
 
  /* the one control: idle / listening / thinking live in its label + pulse */
  .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0}
@@ -133,6 +134,7 @@
 
   <div id="word"></div>
   <div id="say">Tap the button, then tell me a word to spell!<small>&nbsp;</small></div>
+  <div id="heard" aria-live="polite"></div>
 
   <div class="row">
     <button class="big" id="go">▶ Start</button>
@@ -199,6 +201,60 @@ var NAME={a:["a","ay","hey","eh"],b:["b","be","bee"],c:["c","see","sea","si"],d:
  p:["p","pe","pee","pea"],q:["q","cue","queue"],r:["r","are","ar"],s:["s","es","ess"],
  t:["t","te","tee","tea"],u:["u","you","yu"],v:["v","ve","vee"],w:["w","doubleu","double you"],
  x:["x","ex"],y:["y","why"],z:["z","zee","zed"]};
+/*EARS-START*/
+/* ---------- the ears, as pure functions (tools/check-ears.py runs these under node) ----------
+   What the recogniser tends to return when a child makes the SOUND instead of saying the
+   letter name. Phonics teaches the sound, so "buh" for b is a right answer, not a miss. */
+var SOUND={a:["ah","aa","uh"],b:["buh","bah","ba","bu"],c:["kuh","cuh","ka","ca","ku","ch","chh"],
+ d:["duh","dah","da","du"],e:["eh","ehh"],f:["ff","fff","ffff","fuh"],g:["guh","gah","ga","gu"],
+ h:["huh","hah","ha","hu","hh"],i:["ih","ii"],j:["juh","jah","ja","ju"],k:["kuh","cuh","ka","ku"],
+ l:["ll","lll","luh","la","ul","el"],m:["mm","mmm","mmmm","hmm","muh"],n:["nn","nnn","nnnn","nuh","un"],
+ o:["oh","aw","ah"],p:["puh","pah","pa","pu"],q:["kwuh","kw","qu","coo"],r:["rr","rrr","ruh","er","ur","err"],
+ s:["ss","sss","ssss","suh","sh","shh","shhh"],t:["tuh","tah","ta","tu","th","thh"],u:["uh","ugh","huh"],v:["vv","vvv","vuh"],
+ w:["wuh","wah","wa","woo"],x:["ks","eks","ex"],y:["yuh","yah","ya","yeah"],z:["zz","zzz","zuh","zed"]};
+/* Did the child name (or sound) the target letter? alts = every transcript the recogniser
+   offered. Accept the letter itself, its name as the recogniser spells it (NAME), the sound
+   as the recogniser spells it (SOUND), the letter repeated ("mmm", "fff"), or the letter
+   plus a schwa the recogniser could not help writing ("buh", "tuh", "ga"). Reject whole
+   words that merely start with it: "no" is not an /n/ and "frog" is not an /f/ — the old
+   rule took any first letter, which marked wrong answers right and taught the wrong thing. */
+function letterHit(target,alts){target=String(target||'').toLowerCase();if(!target)return false;
+ var names=NAME[target]||[],sounds=SOUND[target]||[];
+ for(var i=0;i<alts.length;i++){
+  var t=String(alts[i]||'').toLowerCase().replace(/[^a-z ]/g,' ').replace(/\s+/g,' ').trim();
+  if(!t)continue;
+  if(names.indexOf(t)>=0||sounds.indexOf(t)>=0)return true;
+  var ws=t.split(' ');
+  for(var j=0;j<ws.length;j++){var w=ws[j];
+   if(w===target||names.indexOf(w)>=0||sounds.indexOf(w)>=0)return true;
+   if(ws.length===1&&w.charAt(0)===target&&w.length<=4){
+    var rest=w.slice(1);
+    if(rest.replace(new RegExp(target,'g'),'')===''||/^(uh|ah|a|u|h|e|eh)$/.test(rest))return true}}}
+ return false}
+/* The decodable words the friend knows best (tools/wordlist.json: the spelling words plus the
+   word families). A heard word one letter off one of these snaps to it — "spell frock" is
+   frog — but any other word is still allowed, so the child can ask for anything. */
+var BANK=["bat", "bed", "big", "bin", "bit", "bug", "bun", "can", "cap", "cat", "cot", "cup", "dig", "dog", "dot", "fan", "fed", "fig", "fit", "fog", "friend", "frog", "fun", "get", "green", "hat", "hen", "hit", "hog", "hop", "hot", "hug", "jet", "jug", "jump", "log", "man", "map", "mat", "men", "mop", "mug", "nap", "net", "pan", "pen", "pet", "pig", "pin", "pond", "pop", "pot", "pup", "ran", "rat", "red", "rug", "run", "sat", "sit", "sun", "tap", "ten", "tin", "top", "van", "wet", "wig", "win"];
+function edit1(a,b){if(a===b)return true;var la=a.length,lb=b.length;if(Math.abs(la-lb)>1)return false;
+ var i=0,j=0,d=0;while(i<la&&j<lb){if(a.charAt(i)===b.charAt(j)){i++;j++;continue}
+  if(++d>1)return false;if(la>lb)i++;else if(lb>la)j++;else{i++;j++}}
+ return d+(la-i)+(lb-j)<=1}
+/* pickWord(alts) -> the word to spell, or '' when nothing usable was heard.
+   "spell frog", "frog", "spell a frog" all give frog. Exact bank word wins; else a unique
+   one-letter-off bank word; else the first real word heard. */
+function pickWord(alts){var cands=[];
+ for(var i=0;i<alts.length;i++){
+  var toks=String(alts[i]||'').toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/)
+   .filter(function(x){return x});
+  var si=toks.indexOf('spell'),rest=si>=0?toks.slice(si+1):toks;
+  rest=rest.filter(function(x){return x!=='a'&&x!=='the'&&x!=='word'&&x!=='please'});
+  var w=(rest[0]||'').replace(/[^a-z]/g,'').slice(0,10);
+  if(w.length>=2&&cands.indexOf(w)<0)cands.push(w)}
+ for(var c=0;c<cands.length;c++)if(BANK.indexOf(cands[c])>=0)return cands[c];
+ for(c=0;c<cands.length;c++){var near=BANK.filter(function(b){return edit1(cands[c],b)});
+  if(near.length===1)return near[0]}
+ return cands[0]||''}
+/*EARS-END*/
 
 /* ---------- the friend: pickable animals, each with its own colour scheme ----------
    pal keys map 1:1 onto the :root custom props; svg is the innerHTML for the #frog
@@ -506,15 +562,15 @@ function named(withName,plain){return VOICECLIPS[slug(withName)]?withName:plain}
 /*SAMPLES-START*/
 var SAMPLES={
  "a":"audio/human/a.mp3",
- "b":"audio/ipa/b.mp3",
+ "b":"audio/free/sounds/b.mp3",
  "c":"audio/ipa/c.mp3",
  "ch":"audio/ipa/ch.mp3",
  "ck":"audio/ipa/ck.mp3",
- "d":"audio/ipa/d.mp3",
+ "d":"audio/free/sounds/d.mp3",
  "e":"audio/human/e.mp3",
  "ee":"audio/human/ee.mp3",
  "f":"audio/human/f.mp3",
- "g":"audio/ipa/g.mp3",
+ "g":"audio/free/sounds/g.mp3",
  "i":"audio/human/i.mp3",
  "j":"audio/ipa/j.mp3",
  "k":"audio/ipa/k.mp3",
@@ -523,14 +579,14 @@ var SAMPLES={
  "n":"audio/human/n.mp3",
  "o":"audio/human/o.mp3",
  "oo":"audio/human/oo.mp3",
- "p":"audio/ipa/p.mp3",
+ "p":"audio/free/sounds/p.mp3",
  "q":"audio/ipa/q.mp3",
  "r":"audio/human/r.mp3",
  "s":"audio/human/s.mp3",
  "sh":"audio/human/sh.mp3",
- "t":"audio/ipa/t.mp3",
+ "t":"audio/free/sounds/t.mp3",
  "th":"audio/human/th.mp3",
- "u":"audio/ipa/u.mp3",
+ "u":"audio/free/sounds/u.mp3",
  "v":"audio/human/v.mp3",
  "w":"audio/ipa/w.mp3",
  "x":"audio/ipa/x.mp3",
@@ -580,20 +636,18 @@ function listen(kind){if(micBlocked)return;kill();
   r.start();
  }catch(e){oops(kind,'not-allowed')}}
 /* the child picks the word by voice: "spell frog" or just "frog" */
-function gotWord(e){var w='',res=e.results[0];
- for(var i=0;i<res.length&&!w;i++){
-  var toks=res[i].transcript.toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/)
-   .filter(function(t){return t});
-  var si=toks.indexOf('spell');
-  w=((si>=0?toks[si+1]:toks[0])||'').replace(/[^a-z]/g,'').slice(0,10)}
+/* what the recogniser returned, in plain sight — for the grown-up sitting next to the child:
+   when a right answer is marked wrong, this line says whether the ears or the child slipped */
+function heard(alts){var el=document.getElementById('heard');if(!el)return;
+ var t=alts&&alts.length?String(alts[0]).trim():'';
+ el.textContent=t?'I heard: \u201c'+t+'\u201d':''}
+function transcripts(e){var out=[],res=e&&e.results&&e.results[0];
+ for(var i=0;res&&i<res.length;i++)out.push(res[i].transcript);return out}
+function gotWord(e){var alts=transcripts(e),w=pickWord(alts);heard(alts);
  if(!w){oops('word','no-match');return}
  startWord(makeWord(w.toUpperCase()))}
-function gotLetter(e){goLetter();
- var target=cur.w[idx].toLowerCase(),hit=false;
- for(var i=0;i<e.results[0].length&&!hit;i++){
-  var t=e.results[0][i].transcript.trim().toLowerCase().replace(/[^a-z ]/g,'');
-  if(t[0]===target||NAME[target].indexOf(t)>=0||t.split(' ').indexOf(target)>=0)hit=true}
- answer(hit?cur.w[idx]:'?')}
+function gotLetter(e){goLetter();var alts=transcripts(e);heard(alts);
+ answer(letterHit(cur.w[idx],alts)?cur.w[idx]:'?')}
 /* real failure handling, spoken and on screen — a denied mic is never a dead page */
 function oops(kind,code){if(code==='aborted')return;
  if(code==='not-allowed'||code==='service-not-allowed'||code==='audio-capture'){
@@ -622,7 +676,7 @@ function oops(kind,code){if(code==='aborted')return;
 function slots(){var h='';for(var i=0;i<cur.w.length;i++)
   h+='<div class="slot '+(i<idx?'done':(i===idx?'now':''))+'">'+(i<idx?cur.w[i]:'')+'</div>';
  document.getElementById('word').innerHTML=h}
-function prompt(){slots();retried=false;
+function prompt(){slots();retried=false;heard([]);
  var c=cur.cues[idx]||('the letter that makes the next sound');
  var k=(cur.keys&&cur.keys[idx])||cur.w[idx].toLowerCase();
  say.innerHTML='Listen for the sound…<small>'+
@@ -659,7 +713,7 @@ function startWord(entry){cur=entry;idx=0;busy=false;retried=false;misses=0;
  speak("Let's spell "+cur.w.split('').join(' ')+"… I mean, let's spell "+cur.w.toLowerCase()+"!",prompt)}
 function begin(){startWord(WORDS[wi%WORDS.length]);wi++}
 /* voice picks the word; with no voice we fall back to the built-in list */
-function askWord(){cur=null;retried=false;
+function askWord(){cur=null;retried=false;heard([]);
  if(micBlocked){begin();return}
  setGo('word','🎤 Say a word');
  say.innerHTML='Say <b>spell</b>, then your word!<small>like “spell frog”</small>';
