@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="phonics 1.0.0+02f33a3" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
+<html lang="en"><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="phonics 1.0.0+e45d7dd" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Phonics Friends</title>
@@ -209,12 +209,14 @@ function makeWord(w){var cues=[],keys=[],i=0;
    cues.push(LCUE[l]||("the letter "+w[i]));keys.push(l);i++}}
  return{w:w,cues:cues,keys:keys}}
 /* letter-name homophones the recogniser tends to return */
-var NAME={a:["a","ay","hey","eh"],b:["b","be","bee"],c:["c","see","sea","si"],d:["d","de","dee"],
- e:["e","ee"],f:["f","ef","eff"],g:["g","je","gee","ji"],h:["h","aitch","age"],i:["i","eye","aye"],
- j:["j","jay"],k:["k","kay","que"],l:["l","el","elle"],m:["m","em"],n:["n","en"],o:["o","oh","owe"],
- p:["p","pe","pee","pea"],q:["q","cue","queue"],r:["r","are","ar"],s:["s","es","ess"],
- t:["t","te","tee","tea"],u:["u","you","yu"],v:["v","ve","vee"],w:["w","doubleu","double you"],
- x:["x","ex"],y:["y","why"],z:["z","zee","zed"]};
+var NAME={a:["a","ay","hey","eh","hay"],b:["b","be","bee","bea"],c:["c","see","sea","si","cee"],
+ d:["d","de","dee","the"],e:["e","ee","he"],f:["f","ef","eff","if"],g:["g","je","gee","ji","jee"],
+ h:["h","aitch","age","each"],i:["i","eye","aye","hi"],j:["j","jay"],k:["k","kay","que","okay","ok"],
+ l:["l","el","elle"],m:["m","em","um","im"],n:["n","en","and","in","an"],o:["o","oh","owe","zero"],
+ p:["p","pe","pee","pea"],q:["q","cue","queue","kew"],r:["r","are","ar","our","or"],
+ s:["s","es","ess","yes"],t:["t","te","tee","tea"],u:["u","you","yu"],v:["v","ve","vee","we"],
+ w:["w","doubleu","double you","double u"],x:["x","ex","ax","axe"],y:["y","why","wye","wi"],
+ z:["z","zee","zed"]};
 /*EARS-START*/
 /* ---------- the ears, as pure functions (tools/check-ears.py runs these under node) ----------
    What the recogniser tends to return when a child makes the SOUND instead of saying the
@@ -226,6 +228,9 @@ var SOUND={a:["ah","aa","uh"],b:["buh","bah","ba","bu"],c:["kuh","cuh","ka","ca"
  o:["oh","aw","ah"],p:["puh","pah","pa","pu"],q:["kwuh","kw","qu","coo"],r:["rr","rrr","ruh","er","ur","err"],
  s:["ss","sss","ssss","suh","sh","shh","shhh"],t:["tuh","tah","ta","tu","th","thh"],u:["uh","ugh","huh"],v:["vv","vvv","vuh"],
  w:["wuh","wah","wa","woo"],x:["ks","eks","ex"],y:["yuh","yah","ya","yeah"],z:["zz","zzz","zuh","zed"]};
+/* a letter said on its own comes back as a digit now and then — "O" as 0 — and a digit
+   would otherwise be stripped as noise, so a lone 0 is read as the letter it sounds like */
+var DIGIT={"0":"o"};
 /* Did the child name (or sound) the target letter? alts = every transcript the recogniser
    offered. Accept the letter itself, its name as the recogniser spells it (NAME), the sound
    as the recogniser spells it (SOUND), the letter repeated ("mmm", "fff"), or the letter
@@ -235,7 +240,9 @@ var SOUND={a:["ah","aa","uh"],b:["buh","bah","ba","bu"],c:["kuh","cuh","ka","ca"
 function letterHit(target,alts){target=String(target||'').toLowerCase();if(!target)return false;
  var names=NAME[target]||[],sounds=SOUND[target]||[];
  for(var i=0;i<alts.length;i++){
-  var t=String(alts[i]||'').toLowerCase().replace(/[^a-z ]/g,' ').replace(/\s+/g,' ').trim();
+  var t=String(alts[i]||'').toLowerCase().trim();
+  if(DIGIT[t])t=DIGIT[t];
+  t=t.replace(/[^a-z ]/g,' ').replace(/\s+/g,' ').trim();
   if(!t)continue;
   if(names.indexOf(t)>=0||sounds.indexOf(t)>=0)return true;
   var ws=t.split(' ');
@@ -842,7 +849,7 @@ if(window.speechSynthesis){pickVoice();
    and whether it has ears at all. BUILD is the request that last changed this page; the
    release id (VERSION+git hash) is stamped in by the publish script. A wrapped word row
    under a build number that cannot wrap means the phone is holding an old copy. */
-var BUILD='117';
+var BUILD='118';
 (function(){var el=document.getElementById('build'),m=document.querySelector('meta[name="bench-release"]');
  var ua=navigator.userAgent||'',v=function(re){var x=ua.match(re);return x?' '+x[1]:''};
  var eng=/iPhone|iPad|iPod/.test(ua)?'iOS '+(/CriOS/.test(ua)?'Chrome':/FxiOS/.test(ua)?'Firefox':'Safari')+v(/OS (\d+)_/)
@@ -852,7 +859,7 @@ var BUILD='117';
 })();
 </script>
 </html>
-<script id="bench-release">window.BENCH_RELEASE="phonics 1.0.0+02f33a3";</script>
+<script id="bench-release">window.BENCH_RELEASE="phonics 1.0.0+e45d7dd";</script>
 <a id="bench-release-pill" href="/releases.html#phonics" title="release notes" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483000;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:#9aa4b2;background:rgba(20,23,28,.72);border:1px solid #2a3039;border-radius:999px;padding:5px 8px;text-decoration:none;opacity:.85">v1.0.0</a><!-- Public demo feedback bubble. Injected into every page of the demo site by
      publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
      touching the Bench or the tailnet). Submissions land in Netlify → Forms.
