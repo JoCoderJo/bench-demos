@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="phonics 1.0.0+eb48367" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
+<html lang="en"><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="phonics 1.0.0+02f33a3" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Phonics Friends</title>
@@ -40,11 +40,18 @@
  .led.on-g{background:#37e05b;box-shadow:0 0 10px #37e05b}
  .led.on-w{background:var(--warm);box-shadow:0 0 10px var(--warm)}
 
- /* word + letters */
- #word{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0 4px}
- .slot{width:44px;height:54px;border-radius:10px;border:2px dashed var(--edge);
+ /* word + letters — always one line, in plain CSS a phone engine cannot reject: the slots
+    share the row (flex:1 1 0, no minimum) and stop growing at 44px, so a twelve-letter
+    word squeezes onto one row instead of its last letters dropping to a second. The
+    letter size follows the measured slot width — set on #word by slots() — because no
+    pure-CSS form scales type to a variable letter count without dividing by a var, which
+    is the construct the previous build leaned on and the prime suspect for the wrap */
+ #word{display:flex;gap:6px;justify-content:center;flex-wrap:nowrap;margin:10px 0 4px;
+       font-size:28px}
+ .slot{flex:1 1 0;min-width:0;max-width:44px;height:54px;
+       border-radius:10px;border:2px dashed var(--edge);
        background:var(--card);display:flex;align-items:center;justify-content:center;
-       font-size:28px;font-weight:700;color:var(--deep)}
+       font-weight:700;color:var(--deep)}
  .slot.done{border-style:solid;border-color:var(--green);background:var(--lily)}
  .slot.now{border-color:var(--warm);border-style:solid;animation:pulse 1.2s infinite}
  @keyframes pulse{50%{box-shadow:0 0 0 6px rgba(240,164,65,.25)}}
@@ -62,6 +69,11 @@
  #go.live{background:#d43d3d;animation:pulse 1.2s infinite}
  .mini{background:none;color:var(--dim);font-size:13px;font-weight:600;
        padding:6px 10px;text-decoration:underline}
+ /* the mic pill: the mic stays open for a whole word, so this — not the button — says so */
+ #mic{text-align:center;font-size:14px;font-weight:600;color:var(--dim);margin:-2px 0 4px}
+ #mic.on{color:var(--green)}
+ #mic.on::before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;
+       background:#d43d3d;margin-right:6px;vertical-align:1px;animation:pulse 1.2s infinite}
 
  /* "Pick your friend" start panel: choose an animal, give it a name */
  #pick{background:var(--card);border:1px solid var(--edge);border-radius:14px;
@@ -77,11 +89,12 @@
        border-radius:10px;background:var(--bg);color:var(--ink)}
  #savepet{font-size:16px;padding:10px 16px}
 
- /* on-screen keyboard: the fallback ears — appears when the mic is blocked, speech
-    keeps missing, or the browser has no SpeechRecognition at all */
- #keys{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px}
+ /* the answer pad: on screen from the first letter of every word, big enough for a small
+    finger — a child says the letter or taps it, whichever comes first. It is the only ears
+    when the mic is blocked or the browser has no SpeechRecognition at all */
+ #keys{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:8px}
  #keys button{background:var(--card);border:2px solid var(--edge);color:var(--ink);
-      font-size:19px;padding:11px 0;border-radius:10px}
+      font-size:24px;min-height:56px;padding:0;border-radius:12px}
  #keys button:active{background:var(--lily)}
 
  /* helpers panel — the ELI5 of the real hardware, live */
@@ -139,6 +152,7 @@
   <div class="row">
     <button class="big" id="go">▶ Start</button>
   </div>
+  <div id="mic" style="display:none"></div>
   <div id="keys" style="display:none"></div>
   <div class="row"><button class="mini" id="switch">🐾 Change friend</button></div>
 
@@ -152,7 +166,7 @@
     <p style="margin:8px 0 0;color:var(--dim)">This page plays both helpers with your browser’s built-in speech. Heads-up: some browsers (like Chrome) send what you say to their own speech service to work out the words — the real toy never does that; it is fully offline.</p>
   </details>
 
-  <div class="foot">Project Phonics Friends · a fully local AI toy · demo runs in your browser via its speech helpers</div>
+  <div class="foot">Project Phonics Friends · a fully local AI toy · demo runs in your browser via its speech helpers<br><span id="build"></span></div>
 </div>
 
 <script>
@@ -248,12 +262,28 @@ function pickWord(alts){var cands=[];
    .filter(function(x){return x});
   var si=toks.indexOf('spell'),rest=si>=0?toks.slice(si+1):toks;
   rest=rest.filter(function(x){return x!=='a'&&x!=='the'&&x!=='word'&&x!=='please'});
-  var w=(rest[0]||'').replace(/[^a-z]/g,'').slice(0,10);
+  var w=(rest[0]||'').replace(/[^a-z]/g,'').slice(0,12);
   if(w.length>=2&&cands.indexOf(w)<0)cands.push(w)}
  for(var c=0;c<cands.length;c++)if(BANK.indexOf(cands[c])>=0)return cands[c];
  for(c=0;c<cands.length;c++){var near=BANK.filter(function(b){return edit1(cands[c],b)});
   if(near.length===1)return near[0]}
  return cands[0]||''}
+/* earsTurn(mode,target,finals,interims) -> what one recogniser event does to the turn, or
+   null for "nothing yet". A final grades a letter right or wrong. An interim — the
+   recogniser's running guess while the child is still being heard — may grade a letter
+   RIGHT the moment it matches, which is what makes the turn flow; one that does not match
+   is not a miss yet. Interims never pick the word: "spell lemon" on the way to lemonade
+   would start the wrong word. A segment that also caught the friend's tail runs long, so
+   anything over four words is not the child's answer. */
+function earsTurn(mode,target,finals,interims){
+ var short=function(t){return String(t||'').trim().split(/\s+/).length<=4};
+ finals=(finals||[]).filter(short);interims=(interims||[]).filter(short);
+ if(mode==='letter'){
+  if(interims.length&&letterHit(target,interims))return{hit:true,alts:interims,early:true};
+  if(finals.length)return{hit:letterHit(target,finals),alts:finals};
+  return null}
+ if(mode==='word'&&finals.length)return{word:pickWord(finals),alts:finals};
+ return null}
 /*EARS-END*/
 
 /* ---------- the friend: pickable animals, each with its own colour scheme ----------
@@ -360,8 +390,8 @@ function buildPets(){var h='';PETKEYS.forEach(function(k){var a=ANIMALS[k];
   pet.animal=b.dataset.k;
   pet.name=cleanName(petname.value)||ANIMALS[pet.animal].label;
   applyPet();markSel()}})}
-function openPick(){kill();
- if(goState==='listen'||goState==='think'){if(cur)goLetter();else setGo('word','▶ Start')}
+function openPick(){micStop();
+ if(goState==='listen')setGo('word','▶ Start');
  petname.value=pet.name===ANIMALS[pet.animal].label||pet.name==='Phonics Friends'?'':pet.name;
  markSel();pick.style.display='block'}
 function commitPet(){pet.name=cleanName(petname.value)||ANIMALS[pet.animal].label;
@@ -371,7 +401,10 @@ function commitPet(){pet.name=cleanName(petname.value)||ANIMALS[pet.animal].labe
 function led(cls,ms){leds.forEach(function(l){l.className='led '+cls});
  if(ms)setTimeout(function(){leds.forEach(function(l){l.className='led'})},ms)}
 function anim(k,ms){frog.classList.add(k);setTimeout(function(){frog.classList.remove(k)},ms||900)}
-function mouthOpen(o){var a=ANIMALS[pet.animal];mouth.setAttribute('d',o?a.mouthO:a.mouthC)}
+/* every voice path opens the mouth to start and closes it to finish, so this is also where
+   the ears learn the friend is talking (see canHear) */
+function mouthOpen(o){var a=ANIMALS[pet.animal];mouth.setAttribute('d',o?a.mouthO:a.mouthC);
+ talking=!!o;if(!o)talkEnd=Date.now()}
 function note(code,label){var t=new Date().toTimeString().slice(0,8);
  uart.innerHTML='M5&nbsp;→&nbsp;UNO&nbsp;&nbsp;0x'+code+'&nbsp;'+label+'&nbsp;<span style="color:#8aa591">'+t+'</span><br>'+uart.innerHTML;
  h2.className='hdot busy';setTimeout(function(){h2.className='hdot'},600)}
@@ -397,9 +430,13 @@ function speakTTS(text,cb){try{
   if(!VOICE)pickVoice();
   if(VOICE)u.voice=VOICE;
   h1.className='hdot busy';mouthOpen(true);
-  u.onend=function(){h1.className='hdot';mouthOpen(false);if(cb)cb()};
+  var fin=function(){h1.className='hdot';mouthOpen(false);if(cb)cb()};
+  u.onend=fin;
+  /* a failed utterance must not strand the turn (and leave the ears muted); an
+     interrupted one was replaced by a newer line, whose own callback carries on */
+  u.onerror=function(ev){var c=ev&&ev.error;if(c!=='interrupted'&&c!=='canceled')fin()};
   speechSynthesis.cancel();speechSynthesis.speak(u);
- }catch(e){if(cb)cb()}}
+ }catch(e){h1.className='hdot';mouthOpen(false);if(cb)cb()}}
 
 /* ---------- helper 1b: the pre-rendered voice ----------
    The browser's own voice is whatever the visitor's phone ships, and on most Android
@@ -454,11 +491,11 @@ var VOICECLIPS={
  "humnnn":"audio/v02763fff.mp3",
  "ididntcatchthatsayspellthenyourwordlikespellfrog":"audio/v700fb3aa.mp3",
  "ididnthearyousaytheletter":"audio/v0f6899d3.mp3",
- "letsspellfriendimeanletsspellfriend":"audio/v07fe73f3.mp3",
- "letsspellfrogimeanletsspellfrog":"audio/v02ce6629.mp3",
- "letsspellgreenimeanletsspellgreen":"audio/v35924458.mp3",
- "letsspelljumpimeanletsspelljump":"audio/vf2cf0469.mp3",
- "letsspellpondimeanletsspellpond":"audio/vd3e7ca5e.mp3",
+ "letsspellfriend":"audio/vf24c87d1.mp3",
+ "letsspellfrog":"audio/v10666db3.mp3",
+ "letsspellgreen":"audio/v476aa73c.mp3",
+ "letsspelljump":"audio/v7dd5e646.mp3",
+ "letsspellpond":"audio/vf2e8a6c8.mp3",
  "likeabouncingballbbb":"audio/v088481e5.mp3",
  "likeabuzzingbeezzz":"audio/vcd89a443.mp3",
  "likeabuzzymotorvvv":"audio/vd4f58a13.mp3",
@@ -492,7 +529,6 @@ var VOICECLIPS={
  "softhissffff":"audio/v288dd4be.mp3",
  "tapthebuttonwhenyourereadytoplay":"audio/vd4b2adb9.mp3",
  "taptheletterthatmakesthesound":"audio/v0c3e9e09.mp3",
- "thenextsoundis":"audio/v93bbef98.mp3",
  "theyummysoundmmm":"audio/vb0fab1a2.mp3",
  "thisoneisatwinanothereeee":"audio/v77058502.mp3",
  "whatlettermakesthatsound":"audio/v63ffd04f.mp3",
@@ -606,93 +642,147 @@ function playSound(key,fallbackText,cb){
  }catch(e){fail()}}
 
 /* ---------- helper 1: the ears (SpeechRecognition, optional) ----------
-   Chrome's recogniser ships the audio to its cloud service, so results lag —
-   the button shows listening / thinking so the wait reads as on purpose. */
+   ONE recogniser, kept open for the whole word: a five-year-old should not have to tap
+   between letters. It runs continuous, and because browsers still end the session on
+   their own (Chrome after a silence, Android after most results) onend simply starts it
+   again. Results are routed by `mode` — 'word' picks the word, 'letter' answers the
+   current slot, null drops them — and are ignored while the friend is talking and for a
+   beat after, so the mic does not hear the friend's own voice and grade it.
+   Chrome's recogniser ships the audio to its cloud service, so finals lag — which is why
+   it runs with interim results on: a letter is graded on the first running guess that
+   matches (earsTurn), not on the final that follows it a second later. The mic pill
+   under the button shows "listening" so any wait still reads as on purpose. */
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition, rec=null,
-    go=document.getElementById('go'),
+    go=document.getElementById('go'), micEl=document.getElementById('mic'),
     micBlocked=!SR,  /* true = voice is off for good: preset words + letter keyboard */
-    retried=false,   /* one free re-ask per question before we fall back */
-    misses=0,        /* wrong letters in a row — two opens the keyboard */
-    goState='idle';  /* idle | word | listen | think | letter */
+    micOn=false,     /* we want the mic open: restart it whenever the browser ends it */
+    running=false,   /* the browser says it is open right now */
+    mode=null,       /* 'word' | 'letter' | null — where the next result goes */
+    lastStart=0,     /* when start() was last called */
+    shorts=[],       /* sessions that died within 400ms of starting: the restart-storm guard
+                        (a normal end after a silence or an answer is not a symptom) */
+    graded=-1,       /* index of the last result that graded a turn: the final that follows an
+                        interim hit is the same result and must not be graded twice */
+    nudge=null,      /* silence timer: one spoken reminder, then rest the mic */
+    retried=false,   /* one free reminder per question before we rest the mic */
+    misses=0,        /* wrong letters in a row */
+    goState='idle',  /* idle | word | listen | letter */
+    talking=false, talkEnd=0;  /* kept by mouthOpen(): the friend's voice is on / just ended */
 function setGo(state,label){goState=state;go.textContent=label;
  if(state==='listen')go.classList.add('live');else go.classList.remove('live')}
-function goLetter(){setGo('letter',micBlocked?'🔊 Hear it again':'🎤 Say the letter')}
+function goLetter(){setGo('letter','🔊 Hear it again')}
 function openKeys(){keys.style.display='grid'}
-function kill(){if(rec){try{
-  rec.onresult=rec.onerror=rec.onend=rec.onspeechend=rec.onaudioend=null;rec.abort();
- }catch(e){}rec=null}}
-function listen(kind){if(micBlocked)return;kill();
- try{var r=new SR();rec=r;r.lang='en-US';r.interimResults=false;
-  r.maxAlternatives=kind==='letter'?5:3;
-  var settled=false;
-  setGo('listen','🎤 Listening…');h1.className='hdot busy';
-  r.onspeechend=r.onaudioend=function(){if(!settled)setGo('think','💭 Thinking…')};
-  r.onresult=function(e){if(settled)return;settled=true;h1.className='hdot';
-   if(kind==='letter')gotLetter(e);else gotWord(e)};
-  r.onerror=function(e){if(settled)return;settled=true;h1.className='hdot';
-   oops(kind,(e&&e.error)||'')};
-  r.onend=function(){if(settled)return;settled=true;h1.className='hdot';
-   oops(kind,'no-speech')};
-  r.start();
- }catch(e){oops(kind,'not-allowed')}}
-/* the child picks the word by voice: "spell frog" or just "frog" */
+function showMic(){if(!micEl)return;
+ if(micBlocked||(!cur&&!micOn)){micEl.style.display='none';return}
+ micEl.style.display='';micEl.className=micOn?'on':'';
+ micEl.textContent=micOn?'I’m listening…':'🎤 Mic is off — tap the letters'}
+/* a result is the child's only when the friend is quiet — and has been for a moment,
+   since the recogniser reports what it heard a little after it was said */
+function canHear(){return !talking&&!busy&&Date.now()-talkEnd>350}
+/* every alternative of every final (or, with interim=true, every running) result that is
+   new in this event and not already graded (continuous mode keeps the whole session's
+   results in the list; resultIndex marks the fresh ones) */
+function transcripts(e,interim){var out=[],rs=(e&&e.results)||[];
+ for(var i=Math.max((e&&e.resultIndex)||0,graded+1);i<rs.length;i++){var r=rs[i];
+  if((r.isFinal===false)!==!!interim)continue;
+  for(var j=0;j<r.length;j++)out.push(r[j].transcript)}
+ return out}
+function ensureRec(){if(rec)return rec;var r=new SR();rec=r;
+ r.lang='en-US';r.continuous=true;r.interimResults=true;r.maxAlternatives=5;
+ r.onstart=function(){running=true;graded=-1;showMic()};
+ r.onresult=function(e){if(!mode||!canHear())return;
+  var t=earsTurn(mode,cur?cur.w[idx]:'',transcripts(e,false),transcripts(e,true));
+  if(!t)return;
+  graded=((e&&e.results)||[]).length-1;heard(t.alts);
+  if(mode==='letter')answer(t.hit?cur.w[idx]:'?');
+  else if(t.word)startWord(makeWord(t.word.toUpperCase()))};
+ r.onerror=function(e){var c=(e&&e.error)||'';
+  if(c==='not-allowed'||c==='service-not-allowed'||c==='audio-capture'){
+   micOn=false;micBlocked=true;showMic();oops(cur?'letter':'word',c)}};
+ /* everything else — no-speech, network, aborted, a session the browser just ended —
+    lands here; if we still want the mic, open it again (after a breath), unless it is
+    ending as fast as we open it, in which case rest it and point at the letters */
+ r.onend=function(){running=false;
+  if(!micOn||micBlocked){showMic();return}
+  var now=Date.now();if(now-lastStart<400)shorts.push(now);
+  shorts=shorts.filter(function(t){return now-t<10000});
+  if(shorts.length>=8){micOn=false;showMic();oops(cur?'letter':'word','flaky');return}
+  setTimeout(function(){if(micOn&&!running)micStart()},120)};
+ return r}
+function micStart(){lastStart=Date.now();
+ try{ensureRec().start()}catch(e){} /* already started: fine, it is open */}
+function micStop(){micOn=false;mode=null;clearTimeout(nudge);
+ if(rec&&running){try{rec.abort()}catch(e){}}showMic()}
+/* point the open mic at a question; opens it if it is not already */
+function listen(kind){mode=kind;retried=false;clearTimeout(nudge);
+ if(micBlocked)return;micOn=true;
+ if(kind==='word')setGo('listen','🎤 Listening…');
+ if(running)showMic();else micStart();
+ nudge=setTimeout(function(){quiet(kind)},kind==='word'?9000:10000)}
+/* nothing heard for a while: remind once, then rest the mic (a tap brings it back) */
+function quiet(kind){if(!micOn||mode!==kind)return;
+ if(!retried){retried=true;
+  speak(kind==='word'?"I didn't catch that. Say spell, then your word — like, spell frog!"
+   :"I didn't hear you — say the letter!",
+   function(){if(micOn&&mode===kind)nudge=setTimeout(function(){quiet(kind)},12000)});
+  return}
+ micStop();oops(kind,'flaky')}
 /* what the recogniser returned, in plain sight — for the grown-up sitting next to the child:
    when a right answer is marked wrong, this line says whether the ears or the child slipped */
 function heard(alts){var el=document.getElementById('heard');if(!el)return;
  var t=alts&&alts.length?String(alts[0]).trim():'';
  el.textContent=t?'I heard: \u201c'+t+'\u201d':''}
-function transcripts(e){var out=[],res=e&&e.results&&e.results[0];
- for(var i=0;res&&i<res.length;i++)out.push(res[i].transcript);return out}
-function gotWord(e){var alts=transcripts(e),w=pickWord(alts);heard(alts);
- if(!w){oops('word','no-match');return}
- startWord(makeWord(w.toUpperCase()))}
-function gotLetter(e){goLetter();var alts=transcripts(e);heard(alts);
- answer(letterHit(cur.w[idx],alts)?cur.w[idx]:'?')}
-/* real failure handling, spoken and on screen — a denied mic is never a dead page */
-function oops(kind,code){if(code==='aborted')return;
- if(code==='not-allowed'||code==='service-not-allowed'||code==='audio-capture'){
-  micBlocked=true;
+/* real failure handling, spoken and on screen — a denied mic is never a dead page.
+   'flaky' is softer: the mic is resting (offline? no service? a long silence?) and
+   the big button tries it again; anything else turns voice off for good */
+function oops(kind,code){clearTimeout(nudge);
+ if(code==='flaky'){
   if(kind==='letter'){goLetter();openKeys();
-   say.innerHTML='Tap the letter that makes the sound!<small>the microphone isn’t available</small>';
-   speak("No worries — tap the letters instead!")}
-  else{setGo('word','▶ Start');
-   speak("No worries — we can play by tapping! Let me pick a word.",begin)}
+   say.innerHTML='Tap the letter that makes the sound!<small>or tap the big button to hear it again</small>';
+   speak("Tap the letter that makes the sound!")}
+  else{setGo('word','🎤 Say a word');
+   say.innerHTML='Tap the button when you’re ready!<small>then say a word to spell</small>';
+   speak("Tap the button when you're ready to play!")}
   return}
- /* no-speech, no-match, network, anything else: re-ask once, then fall back */
- if(!retried){retried=true;
-  if(kind==='word'){setGo('word','🎤 Say a word');
-   speak("I didn't catch that. Say spell, then your word — like, spell frog!",
-    function(){listen('word')})}
-  else{goLetter();speak("I didn't hear you — say the letter!",function(){listen('letter')})}
-  return}
- if(kind==='word'){setGo('word','🎤 Say a word');
-  say.innerHTML='Tap the button when you’re ready!<small>then say a word to spell</small>';
-  speak("Tap the button when you're ready to play!")}
- else{goLetter();openKeys();
-  say.innerHTML='Tap the letter that makes the sound!<small>or tap the big button to hear it again</small>';
-  speak("Tap the letter that makes the sound!")}}
+ micBlocked=true;showMic();
+ if(kind==='letter'){goLetter();openKeys();
+  say.innerHTML='Tap the letter that makes the sound!<small>the microphone isn’t available</small>';
+  speak("No worries — tap the letters instead!")}
+ else{setGo('word','▶ Start');
+  speak("No worries — we can play by tapping! Let me pick a word.",begin)}}
+/* a hidden tab has no business restarting the mic (Android chimes on every start);
+   coming back, the big button or a letter tap picks the turn up again */
+document.addEventListener('visibilitychange',function(){if(document.hidden)micStop()});
 
 /* ---------- the lesson state machine (Phase 1-3 from the architecture) ---------- */
-function slots(){var h='';for(var i=0;i<cur.w.length;i++)
+function slots(){var h='',el=document.getElementById('word');
+ for(var i=0;i<cur.w.length;i++)
   h+='<div class="slot '+(i<idx?'done':(i===idx?'now':''))+'">'+(i<idx?cur.w[i]:'')+'</div>';
- document.getElementById('word').innerHTML=h}
-function prompt(){slots();retried=false;heard([]);
- var c=cur.cues[idx]||('the letter that makes the next sound');
+ el.innerHTML=h;fitWord()}
+/* the letter size from the width the slots actually get: the row's width shared by the
+   letter count (6px gaps between), capped where the slot stops growing (44px, 28px type) */
+function fitWord(){var el=document.getElementById('word');if(!cur||!el)return;
+ var n=cur.w.length,w=Math.min(44,(el.clientWidth-(n-1)*6)/n);
+ el.style.fontSize=Math.max(10,Math.min(28,Math.round(w*.66)))+'px'}
+window.addEventListener('resize',fitWord);
+var pt=null,      /* the beat before the next sound */
+    asked=false;  /* "What letter makes that sound?" — once per word, on the first sound */
+/* one turn: the sound, then the mic. No lead-up — the pulsing slot says whose turn it is */
+function prompt(){slots();retried=false;heard([]);mode=null;clearTimeout(nudge);clearTimeout(pt);
+ /* the on-screen cue keeps its /f/ marker; spoken, the words alone match the rendered clip */
+ var c=(cur.cues[idx]||'the letter that makes the next sound').replace(/^\/[^\/]{1,4}\/\s*/,'');
  var k=(cur.keys&&cur.keys[idx])||cur.w[idx].toLowerCase();
- say.innerHTML='Listen for the sound…<small>'+
-  (keys.style.display==='grid'?'say the letter, or tap it below':'then say the letter out loud')+'</small>';
+ say.innerHTML='Listen for the sound…<small>say the letter, or tap it below</small>';
  note('0'+(idx+1),'PROMPT_'+cur.w[idx]);
- var after=function(){if(!micBlocked)listen('letter')};
- if(SAMPLES[k])speak("The next sound is…",function(){
-   playSound(k,c,function(){speak("What letter makes that sound?",after)})});
- else speak("The next sound is "+c+". What letter makes that sound?",after)}
-function answer(letter){if(busy)return;busy=true;kill();
+ var after=function(){listen('letter')};
+ var ask=asked?after:function(){asked=true;speak("What letter makes that sound?",after)};
+ pt=setTimeout(function(){playSound(k,c,ask)},idx===0?0:350)}
+function answer(letter){if(busy)return;busy=true;mode=null;clearTimeout(nudge);clearTimeout(pt);
  var ok=letter===cur.w[idx];
  if(ok){misses=0;note('10','SUCCESS');led('on-g',900);anim('nod');idx++;
-   var dn=idx>=cur.w.length;
-   speak(dn?'':'Yes! '+letter+'!',function(){busy=false;dn?celebrate():prompt()});
-   if(dn)return;
- }else{misses++;if(misses>=2)openKeys();
+   if(idx>=cur.w.length){celebrate();return}
+   speak('Yes! '+letter+'!',function(){busy=false;prompt()});
+ }else{misses++;
    note('20','ENCOURAGE');led('on-w',900);anim('tilt');
    speak("Good try! Listen once more…",function(){busy=false;prompt()});}
  slots()}
@@ -706,14 +796,14 @@ function celebrate(){slots();note('30','SEQ_COMPLETE');led('on-g',2600);anim('ch
  speak(named(cheer+" from "+pet.name+"!",cheer+"!"),
   function(){busy=false;if(!micBlocked)askWord()})}
 
-function startWord(entry){cur=entry;idx=0;busy=false;retried=false;misses=0;
- goLetter();
- keys.style.display=micBlocked?'grid':'none';buildKeys();
+/* the lead-up is one line — "Let's spell frog!" — then straight into the first sound */
+function startWord(entry){cur=entry;idx=0;busy=false;retried=false;misses=0;asked=false;mode=null;
+ goLetter();openKeys();buildKeys();showMic();
  note('00','INIT_SPELLING');
- speak("Let's spell "+cur.w.split('').join(' ')+"… I mean, let's spell "+cur.w.toLowerCase()+"!",prompt)}
+ speak("Let's spell "+cur.w.toLowerCase()+"!",prompt)}
 function begin(){startWord(WORDS[wi%WORDS.length]);wi++}
 /* voice picks the word; with no voice we fall back to the built-in list */
-function askWord(){cur=null;retried=false;heard([]);
+function askWord(){cur=null;retried=false;heard([]);mode=null;clearTimeout(nudge);
  if(micBlocked){begin();return}
  setGo('word','🎤 Say a word');
  say.innerHTML='Say <b>spell</b>, then your word!<small>like “spell frog”</small>';
@@ -722,13 +812,13 @@ function askWord(){cur=null;retried=false;heard([]);
 function buildKeys(){var h='';'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(L){
   h+='<button data-l="'+L+'">'+L+'</button>'});keys.innerHTML=h;
  keys.querySelectorAll('button').forEach(function(b){b.onclick=function(){
-  kill();if(!busy)answer(b.dataset.l)}})}
+  if(!busy)answer(b.dataset.l)}})}
 
 /* one button, always tappable — a tap is also the user gesture that un-strands
-   gesture-gated speechSynthesis (iOS) if a spoken hand-off ever went quiet */
+   gesture-gated speechSynthesis (iOS) if a spoken hand-off ever went quiet.
+   Mid-word it replays the sound (and re-opens a resting mic); otherwise it asks for a word */
 go.onclick=function(){
  if(pick.style.display!=='none')commitPet(); /* Start with the picker open = commit the pick */
- if(goState==='listen'||goState==='think'){kill();if(cur)prompt();else askWord();return}
  if(goState==='letter'){if(!busy)prompt();return}
  askWord()};
 document.getElementById('savepet').onclick=function(){commitPet();
@@ -748,10 +838,21 @@ if(!havePet)openPick();
 if(window.speechSynthesis){pickVoice();
  if(speechSynthesis.addEventListener)speechSynthesis.addEventListener('voiceschanged',pickVoice);
  else speechSynthesis.onvoiceschanged=pickVoice}
+/* build stamp, in the footer: which build this phone is actually running, on which engine,
+   and whether it has ears at all. BUILD is the request that last changed this page; the
+   release id (VERSION+git hash) is stamped in by the publish script. A wrapped word row
+   under a build number that cannot wrap means the phone is holding an old copy. */
+var BUILD='117';
+(function(){var el=document.getElementById('build'),m=document.querySelector('meta[name="bench-release"]');
+ var ua=navigator.userAgent||'',v=function(re){var x=ua.match(re);return x?' '+x[1]:''};
+ var eng=/iPhone|iPad|iPod/.test(ua)?'iOS '+(/CriOS/.test(ua)?'Chrome':/FxiOS/.test(ua)?'Firefox':'Safari')+v(/OS (\d+)_/)
+  :/Android/.test(ua)?'Android'+v(/Android (\d+)/)+' '+(/Chrome\//.test(ua)?'Chrome'+v(/Chrome\/(\d+)/):/Firefox\//.test(ua)?'Firefox'+v(/Firefox\/(\d+)/):'WebView')
+  :/Chrome\//.test(ua)?'Chrome'+v(/Chrome\/(\d+)/):/Firefox\//.test(ua)?'Firefox'+v(/Firefox\/(\d+)/):/Safari\//.test(ua)?'Safari':'browser';
+ if(el)el.textContent='build '+BUILD+(m&&m.content?' · '+m.content:'')+' · '+eng+' · ears: '+(SR?'yes':'none')})();
 })();
 </script>
 </html>
-<script id="bench-release">window.BENCH_RELEASE="phonics 1.0.0+eb48367";</script>
+<script id="bench-release">window.BENCH_RELEASE="phonics 1.0.0+02f33a3";</script>
 <a id="bench-release-pill" href="/releases.html#phonics" title="release notes" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483000;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:#9aa4b2;background:rgba(20,23,28,.72);border:1px solid #2a3039;border-radius:999px;padding:5px 8px;text-decoration:none;opacity:.85">v1.0.0</a><!-- Public demo feedback bubble. Injected into every page of the demo site by
      publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
      touching the Bench or the tailnet). Submissions land in Netlify → Forms.

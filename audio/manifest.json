@@ -1,8 +1,8 @@
 {
  "meta": {
   "voice": "en_US-kristin-medium",
-  "clips": 109,
-  "bytes": 2229216,
+  "clips": 108,
+  "bytes": 2135804,
   "length_scale": 1.05
  },
  "clips": {
@@ -39,16 +39,15 @@
   "hooraypnowaitpondpondyoudidithighfive": "audio/v07316e37.mp3",
   "ididntcatchthatsayspellthenyourwordlikespellfrog": "audio/v700fb3aa.mp3",
   "ididnthearyousaytheletter": "audio/v0f6899d3.mp3",
-  "letsspellfriendimeanletsspellfriend": "audio/v07fe73f3.mp3",
-  "letsspellfrogimeanletsspellfrog": "audio/v02ce6629.mp3",
-  "letsspellgreenimeanletsspellgreen": "audio/v35924458.mp3",
-  "letsspelljumpimeanletsspelljump": "audio/vf2cf0469.mp3",
-  "letsspellpondimeanletsspellpond": "audio/vd3e7ca5e.mp3",
+  "letsspellfriend": "audio/vf24c87d1.mp3",
+  "letsspellfrog": "audio/v10666db3.mp3",
+  "letsspellgreen": "audio/v476aa73c.mp3",
+  "letsspelljump": "audio/v7dd5e646.mp3",
+  "letsspellpond": "audio/vf2e8a6c8.mp3",
   "noworriestapthelettersinstead": "audio/vb4fbd356.mp3",
   "noworrieswecanplaybytappingletmepickaword": "audio/v831abe08.mp3",
   "tapthebuttonwhenyourereadytoplay": "audio/vd4b2adb9.mp3",
   "taptheletterthatmakesthesound": "audio/v0c3e9e09.mp3",
-  "thenextsoundis": "audio/v93bbef98.mp3",
   "whatlettermakesthatsound": "audio/v63ffd04f.mp3",
   "whatshallwespellsayspellthenyourwordlikespellfrog": "audio/v52dd8bfb.mp3",
   "yesa": "audio/v61ff1c87.mp3",
