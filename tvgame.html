@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="en">
+<head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="tvgame 1.0.0+ca86857" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0e1b33">
+<title>Spelling Pop · Move to Learn</title>
+<!--
+  Spelling Pop (request #150): the first Move to Learn TV game. Letter bubbles drift next to a picture;
+  reach up into a bubble to pop it and spell the word in order. 1 or 2 players, one level per grade
+  (K, 1st, 2nd), stars per word, the word and the letters spoken aloud.
+
+  One file, nothing loaded from outside, so the same page runs three ways:
+    laptop      open it from the repo, or the Bench at /static/leaning-move/ (tap or click bubbles)
+    phone       the Bench link over https; the front or the back camera (Lens on the start screen,
+                #153: the back one is sharper) looks at you and you reach into bubbles. To play on a
+                TV, cast the phone's screen to a Chromecast and stand the phone in front of the TV
+                with the back camera on the kids; the screen stays awake while a round runs. The
+                "Cast to TV" button (#156) opens the how-to for that: a web page cannot open the
+                phone's own cast picker, so the button guides, it does not cast by itself.
+                With the camera on the picture is shown at full strength and the blue sky goes
+                (#156: at 42% the players were lost in the blue); a thin dark band behind the
+                picture and the letter boxes keeps them readable.
+    Pi 3        pi/run.sh serves this folder on localhost and opens Chromium in kiosk mode; ?kiosk=1
+                turns the camera on without a tap and hides the cursor.
+
+  Tracking is deliberately tiny so a Pi 3 can do it: the mirrored camera picture is drawn into a
+  grid about 144 cells wide and every cell is compared with the previous frame. A bubble pops when
+  enough of ITS cells changed (a hand arriving), and never when the whole picture changed (someone
+  walking through, a light switching on). No pose model, no library.
+-->
+<style>
+ :root{--p1:#ffb340;--p2:#5ee0a0;--ink:#fff;--sky1:#0e1b33;--sky2:#1d3f7a;--sky3:#2f77c9}
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+ html,body{margin:0;height:100%;overflow:hidden;background:var(--sky1);color:var(--ink);
+   font-family:"Nunito","Quicksand","Segoe UI Rounded","Arial Rounded MT Bold",system-ui,-apple-system,"Segoe UI",sans-serif}
+ body{position:fixed;inset:0;touch-action:none}
+ #sky{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 110%,var(--sky3) 0%,var(--sky2) 45%,var(--sky1) 100%)}
+ #cam{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);
+   opacity:0;transition:opacity .6s;pointer-events:none;background:#000}
+ #cam.on{opacity:1}                      /* full strength: it covers the sky; camera off, the sky stays */
+ #play{position:absolute;inset:0;width:100%;height:100%;display:block}
+ #lanes{position:absolute;inset:0;display:flex;pointer-events:none}
+ .lane{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+ .lane+.lane{border-left:3px dashed rgba(255,255,255,.28)}
+ @media (orientation:portrait){#lanes{flex-direction:column} .lane+.lane{border-left:0;border-top:3px dashed rgba(255,255,255,.28)}}
+ .head{padding:max(10px,2vh) 12px 6px;text-align:center;pointer-events:none}
+ /* camera on: a thin dark band behind the picture and the letter boxes, the only tint over the players */
+ body.camon .head{background:linear-gradient(180deg,rgba(6,14,32,.72) 0%,rgba(6,14,32,.62) 78%,rgba(6,14,32,0) 100%)}
+ .who{display:inline-block;font-weight:900;font-size:clamp(12px,1.8vw,18px);letter-spacing:.12em;
+   padding:2px 12px;border-radius:999px;background:var(--c);color:#222;margin-bottom:4px}
+ .pic{font-size:clamp(56px,13vmin,150px);line-height:1.05;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45));
+   transition:transform .25s}
+ .pic.bump{transform:scale(1.18) rotate(-6deg)}
+ .slots{display:flex;justify-content:center;gap:clamp(4px,.9vmin,12px);margin:8px 0 4px;flex-wrap:wrap;
+   pointer-events:auto}
+ .slot{width:clamp(34px,6.6vmin,86px);height:clamp(44px,8vmin,104px);border-radius:14px;
+   background:rgba(255,255,255,.14);border:3px solid rgba(255,255,255,.35);
+   display:flex;align-items:center;justify-content:center;font-size:clamp(24px,5vmin,66px);font-weight:900;
+   text-transform:uppercase;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.25);transition:transform .2s,background .2s}
+ .slot.done{background:var(--c);border-color:#fff;color:#222;text-shadow:none;transform:scale(1.06)}
+ .slot.next{border-color:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.25);animation:pulse 1.2s infinite}
+ @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+ .row{display:flex;justify-content:center;align-items:center;gap:10px;pointer-events:auto}
+ .stars{font-size:clamp(14px,2.6vmin,30px);letter-spacing:.1em;min-height:1.4em}
+ .say{font-size:clamp(16px,3vmin,32px);background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.4);
+   border-radius:999px;padding:2px 12px;color:#fff;cursor:pointer;line-height:1.3}
+ .say:active{transform:scale(.95)}
+ .zone{flex:1;min-height:0}
+ /* screens */
+ .screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+   padding:18px;background:rgba(6,14,32,.72);overflow:auto;z-index:5}
+ body.camon .screen{background:rgba(6,14,32,.4)}   /* see-through: check you are in the picture before START */
+ body.camon .panel{text-shadow:0 1px 3px rgba(0,0,0,.6)}
+ .screen[hidden]{display:none}
+ #castHelp{z-index:7;background:rgba(6,14,32,.96)}   /* the how-to reads over anything */
+ #castHelp .panel{text-align:left;font-size:clamp(15px,2.6vmin,20px);line-height:1.4}
+ #castHelp h2{font-size:clamp(22px,5vmin,36px);margin:0 0 8px;text-align:center}
+ #castHelp ol{padding-left:1.3em;margin:8px 0}
+ #castHelp li{margin:6px 0}
+ #castHelp a{color:#ffd37a;font-weight:800}
+ #castHelp .plain{background:rgba(255,255,255,.1);border-radius:14px;padding:10px 14px;margin:12px 0}
+ .panel{width:min(94vw,560px);text-align:center}
+ h1{font-size:clamp(34px,9vmin,80px);margin:0;line-height:1;font-weight:900;letter-spacing:-.01em;
+   background:linear-gradient(180deg,#fff 30%,#ffd37a);-webkit-background-clip:text;background-clip:text;color:transparent;
+   filter:drop-shadow(0 4px 0 rgba(0,0,0,.35))}
+ .tag{margin:8px 0 18px;font-size:clamp(15px,2.6vmin,22px);opacity:.9;font-weight:700}
+ .opt{display:flex;align-items:center;gap:8px;margin:10px 0}
+ .opt label{width:92px;text-align:right;font-weight:800;font-size:clamp(13px,2.2vmin,17px);opacity:.85;flex:none}
+ .seg{display:flex;flex:1;background:rgba(255,255,255,.12);border-radius:14px;padding:4px;gap:4px}
+ .seg button{flex:1;border:0;border-radius:11px;background:transparent;color:#fff;font:inherit;font-weight:800;
+   font-size:clamp(15px,2.6vmin,20px);padding:10px 4px;cursor:pointer;transition:background .15s}
+ .seg button.on{background:#fff;color:#123}
+ .seg button.p1.on{background:var(--p1)}.seg button.p2.on{background:var(--p2)}
+ .note{font-size:clamp(12px,2vmin,15px);opacity:.75;margin:2px 0 0 100px;text-align:left;min-height:1.2em}
+ .big{display:block;width:100%;margin:20px 0 8px;border:0;border-radius:22px;padding:18px;font:inherit;font-weight:900;
+   font-size:clamp(24px,5vmin,40px);color:#123;background:linear-gradient(180deg,#ffe08a,#ffb340);
+   box-shadow:0 8px 0 #b97612,0 14px 24px rgba(0,0,0,.35);cursor:pointer}
+ .big:active{transform:translateY(4px);box-shadow:0 4px 0 #b97612}
+ .ghost{background:rgba(255,255,255,.14);color:#fff;box-shadow:none;border:2px solid rgba(255,255,255,.35);padding:12px;
+   font-size:clamp(16px,3vmin,24px);margin-top:8px}
+ .ghost:active{box-shadow:none}
+ .big[hidden]{display:none}              /* .big is display:block, which would beat the hidden attribute (kiosk) */
+ .small{font-size:clamp(12px,2vmin,14px);opacity:.6;margin-top:14px}
+ .score{display:flex;justify-content:center;gap:18px;margin:14px 0;flex-wrap:wrap}
+ .sc{background:rgba(255,255,255,.1);border-radius:18px;padding:14px 22px;min-width:150px}
+ .sc .who{margin-bottom:6px}
+ .sc .n{font-size:clamp(34px,8vmin,64px);font-weight:900;line-height:1}
+ .sc .s{font-size:clamp(14px,2.4vmin,18px);opacity:.85}
+ #back{position:absolute;top:max(6px,env(safe-area-inset-top));right:max(6px,env(safe-area-inset-right));z-index:4;
+   background:rgba(0,0,0,.35);color:#fff;border:2px solid rgba(255,255,255,.35);border-radius:999px;width:40px;height:40px;
+   font-size:20px;font-weight:900;cursor:pointer;display:none}
+ #back.show{display:block}
+ #dbg{position:absolute;left:6px;bottom:6px;z-index:4;font:12px ui-monospace,monospace;background:rgba(0,0,0,.5);
+   padding:4px 8px;border-radius:6px;display:none;white-space:pre}
+ #toast{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);z-index:6;pointer-events:none;
+   font-weight:900;font-size:clamp(40px,11vmin,140px);color:#fff;text-shadow:0 6px 0 rgba(0,0,0,.3),0 0 30px rgba(255,200,80,.8);
+   opacity:0;transition:opacity .25s,transform .25s}
+ #toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+ body.kiosk{cursor:none}
+</style>
+</head>
+<body>
+<div id="sky"></div>
+<video id="cam" autoplay playsinline muted></video>
+<canvas id="play"></canvas>
+<div id="lanes"></div>
+<button id="back" title="Menu" aria-label="Back to menu">✕</button>
+<div id="toast"></div>
+<div id="dbg"></div>
+
+<div id="menu" class="screen">
+ <div class="panel">
+  <h1>Spelling Pop</h1>
+  <div class="tag">Reach up and pop the letters to spell the word!</div>
+  <div class="opt"><label>Players</label><div class="seg" id="oPlayers">
+   <button class="p1" data-v="1">1 player</button><button class="p2" data-v="2">2 players</button></div></div>
+  <div class="opt"><label>Grade</label><div class="seg" id="oGrade">
+   <button data-v="K">K</button><button data-v="1">1st</button><button data-v="2">2nd</button></div></div>
+  <div class="opt"><label>Camera</label><div class="seg" id="oCam">
+   <button data-v="1">On · move to pop</button><button data-v="0">Off · tap to pop</button></div></div>
+  <div class="opt"><label>Lens</label><div class="seg" id="oLens">
+   <button data-v="front">Front</button><button data-v="back">Back · sharper</button></div></div>
+  <div class="note" id="camNote"></div>
+  <div class="opt" id="sensRow"><label>Sensitivity</label><div class="seg" id="oSens">
+   <button data-v="low">Low</button><button data-v="med">Medium</button><button data-v="high">High</button></div></div>
+  <button class="big" id="start">START</button>
+  <button class="big ghost" id="castBtn">📺 Cast to TV</button>
+  <div class="small">Stand back so your whole arm is in the picture. Reach into a bubble to pop it.<br>Esc or ✕ comes back here.</div>
+ </div>
+</div>
+
+<div id="castHelp" class="screen" hidden>
+ <div class="panel">
+  <h2>📺 Cast to TV</h2>
+  <div id="castBody"></div>
+  <button class="big ghost" id="castClose">Back</button>
+ </div>
+</div>
+
+<div id="end" class="screen" hidden>
+ <div class="panel">
+  <h1>Great job!</h1>
+  <div class="tag" id="endTag"></div>
+  <div class="score" id="score"></div>
+  <button class="big" id="again">PLAY AGAIN</button>
+  <button class="big ghost" id="toMenu">Menu</button>
+ </div>
+</div>
+
+<script>
+'use strict';
+/* ---------------- words: one list per grade, a picture for each (an emoji, so the page
+   carries its own art). 2nd grade adds a few sight words that are only spoken. ---------------- */
+var WORDS = {
+ K: [['cat','🐱'],['dog','🐶'],['sun','☀️'],['pig','🐷'],['bus','🚌'],['hat','🎩'],['cup','☕'],['bed','🛏️'],
+     ['fox','🦊'],['egg','🥚'],['bat','🦇'],['cow','🐮'],['ant','🐜'],['bug','🐞'],['map','🗺️'],['pen','🖊️'],
+     ['box','📦'],['car','🚗'],['hen','🐔'],['jam','🍯'],['owl','🦉'],['pan','🍳'],['web','🕸️'],['zip','🤐']],
+ 1: [['ship','🚢'],['frog','🐸'],['fish','🐟'],['duck','🦆'],['crab','🦀'],['drum','🥁'],['flag','🚩'],['shell','🐚'],
+     ['clock','🕐'],['truck','🚚'],['sock','🧦'],['milk','🥛'],['nest','🪺'],['ring','💍'],['star','⭐'],['tree','🌳'],
+     ['snake','🐍'],['hand','✋'],['moon','🌙'],['bell','🔔'],['king','🤴'],['chick','🐥'],['brush','🪥'],['crown','👑'],
+     ['swim','🏊'],['ghost','👻'],['plant','🪴'],['lamp','🛋️']],
+ 2: [['cake','🎂'],['whale','🐳'],['grapes','🍇'],['mouse','🐭'],['house','🏠'],['boat','⛵'],['rain','🌧️'],['train','🚆'],
+     ['bike','🚲'],['kite','🪁'],['snail','🐌'],['cloud','☁️'],['plane','✈️'],['sheep','🐑'],['cheese','🧀'],['bread','🍞'],
+     ['pizza','🍕'],['robot','🤖'],['tiger','🐯'],['flower','🌸'],['rocket','🚀'],['candle','🕯️'],['koala','🐨'],['panda','🐼'],
+     ['zebra','🦓'],['said',''],['they',''],['when',''],['what',''],['want',''],['because',''],['friend','']]
+};
+var DISTRACT = {K:2, 1:3, 2:4};          // extra wrong letters floating with the word's letters
+var WORDS_PER_ROUND = 5;
+var SENS = {low:{diff:48, frac:.42}, med:{diff:32, frac:.30}, high:{diff:20, frac:.22}};
+var COLORS = ['#ffb340','#5ee0a0'];
+var Q = {}; location.search.slice(1).split('&').forEach(function(kv){var p=kv.split('='); if(p[0]) Q[decodeURIComponent(p[0])]=decodeURIComponent(p[1]||'1');});
+var KIOSK = Q.kiosk === '1', DEBUG = Q.debug === '1';
+if (KIOSK) { document.body.classList.add('kiosk'); document.getElementById('castBtn').hidden = true; }   // the Pi is the TV: no cast button
+
+/* ---------------- Cast to TV (#156): the how-to behind the button. A web page cannot open the
+   phone's own cast picker (only the Google Cast SDK can, and that needs a public https page for the
+   TV plus a Google sign-up), so the button explains the steps instead of casting by itself. ---------------- */
+var UA = navigator.userAgent || '', IS_ANDROID = /Android/i.test(UA), IS_IOS = /iPhone|iPad|iPod/i.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
+// tries to open the Google Home app on Android (Chrome's intent link); falls back to its Play Store page
+var HOME_APP = 'intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.google.android.apps.chromecast.app;S.browser_fallback_url=' +
+  encodeURIComponent('https://play.google.com/store/apps/details?id=com.google.android.apps.chromecast.app') + ';end';
+function castHelpHtml(){
+  var honest = '<div class="plain">This button cannot cast by itself: a web page is not allowed to open the phone\'s cast picker. ' +
+    'It only shows the steps. Once the TV mirrors the phone, come back here, set <b>Lens: Back</b>, stand the phone on its side in front of the TV with the back camera on the players, and tap START.</div>';
+  if (IS_ANDROID) return '<ol>' +
+    '<li>Swipe down from the top of the screen twice to open <b>Quick Settings</b>.</li>' +
+    '<li>Tap <b>Cast screen</b> (also called <b>Screen cast</b> or <b>Smart View</b> on a Samsung; swipe the tiles sideways or tap the pencil to find it).</li>' +
+    '<li>Pick the Chromecast that is on the TV. The phone and the Chromecast must be on the same Wi-Fi.</li>' +
+    '<li>No tile? <a href="' + HOME_APP + '">Open the Google Home app</a>, tap the Chromecast, then <b>Cast my screen</b>.</li></ol>' + honest;
+  if (IS_IOS) return '<div class="plain"><b>An iPhone or iPad cannot cast its screen to a Chromecast.</b> Apple does not allow it and there is no app that fixes it. ' +
+    'To get this game on a TV from an Apple device you need an Apple TV (Control Center, Screen Mirroring), or an Android phone, or the Raspberry Pi on the TV.</div>' +
+    '<div class="plain">The phone still works on its own: prop it up, tap START and pop the bubbles on its screen.</div>';
+  return '<ol>' +
+    '<li>In Chrome on this computer: the <b>⋮</b> menu, then <b>Cast…</b>, and pick the Chromecast on the TV.</li>' +
+    '<li>On an Android phone: Quick Settings, <b>Cast screen</b>, then the Chromecast.</li>' +
+    '<li>An iPhone cannot cast to a Chromecast.</li></ol>' + honest;
+}
+var castHelp = document.getElementById('castHelp');
+document.getElementById('castBtn').addEventListener('click', function(){ SFX.tap(); document.getElementById('castBody').innerHTML = castHelpHtml(); castHelp.hidden = false; });
+document.getElementById('castClose').addEventListener('click', function(){ SFX.tap(); castHelp.hidden = true; });
+
+/* ---------------- settings (remembered on this device) ---------------- */
+var S = {players:'1', grade:'K', cam:'1', lens:'front', sens:'med'};
+try { var saved = JSON.parse(localStorage.getItem('spellingPop')||'{}'); for (var k in saved) if (k in S) S[k]=saved[k]; } catch(e){}
+if (Q.players) S.players = Q.players; if (Q.grade) S.grade = Q.grade; if (Q.cam) S.cam = Q.cam; if (Q.lens) S.lens = Q.lens; if (Q.sens) S.sens = Q.sens;
+var SEG = {};   // id -> repaint, so a setting changed by code (camera refused) shows on the buttons
+function seg(id, key, onchange){
+  var el = document.getElementById(id), bs = el.querySelectorAll('button');
+  function paint(){ bs.forEach(function(b){ b.classList.toggle('on', b.dataset.v === S[key]); }); }
+  bs.forEach(function(b){ b.addEventListener('click', function(){ S[key]=b.dataset.v; paint(); save(); if (onchange) onchange(); }); });
+  paint(); SEG[id] = paint;
+}
+function save(){ try { localStorage.setItem('spellingPop', JSON.stringify(S)); } catch(e){} }
+seg('oPlayers','players'); seg('oGrade','grade'); seg('oSens','sens');
+seg('oCam','cam', function(){ if (S.cam==='1') camStart(); else camStop(); });
+seg('oLens','lens', function(){ if (stream) { camStop(); camStart(); } });   // swap the running camera straight away
+
+/* ---------------- sound: tiny synthesized pops, no files ---------------- */
+var AC = null;
+function audio(){ if (!AC) { try { AC = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){} } if (AC && AC.state==='suspended') AC.resume(); return AC; }
+function tone(f0, f1, dur, type, gain, when){
+  var ac = audio(); if (!ac) return; var t = ac.currentTime + (when||0);
+  var o = ac.createOscillator(), g = ac.createGain();
+  o.type = type||'sine'; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t+dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain||.3, t+.01); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+  o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+dur+.02);
+}
+var SFX = {
+  pop:   function(){ tone(520, 1400, .12, 'sine', .35); tone(900, 200, .08, 'triangle', .12, .02); },
+  wrong: function(){ tone(220, 140, .22, 'square', .12); },
+  word:  function(){ [523,659,784,1047].forEach(function(f,i){ tone(f, f, .18, 'triangle', .22, i*.09); }); },
+  star:  function(){ tone(1568, 2093, .25, 'sine', .18); },
+  tap:   function(){ tone(700, 900, .06, 'sine', .12); }
+};
+
+/* ---------------- speech: the browser's voice (espeak-ng on the Pi) ---------------- */
+var VOICE = null, CAN_SPEAK = 'speechSynthesis' in window;
+function pickVoice(){ var vs=[]; try { vs = speechSynthesis.getVoices()||[]; } catch(e){ return; }
+  var en = vs.filter(function(v){ return (v.lang||'').slice(0,2).toLowerCase()==='en'; });
+  function sc(v){ var n=v.name||'', s=0; if(/natural|neural/i.test(n))s+=8; if(/siri|samantha/i.test(n))s+=6; if(/google/i.test(n))s+=4; if(v.localService)s+=3; if(/compact/i.test(n))s-=5; return s; }
+  en.sort(function(a,b){ return sc(b)-sc(a); }); VOICE = en[0]||null; }
+if (CAN_SPEAK) { pickVoice(); try { speechSynthesis.onvoiceschanged = pickVoice; } catch(e){} }
+function say(text, opts){ if (!CAN_SPEAK) return; opts = opts||{};
+  try { var u = new SpeechSynthesisUtterance(text); u.rate = opts.rate||.85; u.pitch = opts.pitch||1.1; if (VOICE) u.voice = VOICE;
+        if (!opts.queue) speechSynthesis.cancel(); speechSynthesis.speak(u); } catch(e){} }
+function letterName(c){ return c.toUpperCase(); }
+
+/* ---------------- camera + motion grid ---------------- */
+var cam = document.getElementById('cam'), camNote = document.getElementById('camNote');
+var stream = null, grid = null;   // grid: {w,h,prev,motion,ctx,cv,k}
+var camReady = false;
+function camStart(){
+  if (stream || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    if (!stream) camNote.textContent = window.isSecureContext ? 'No camera on this device: tap the bubbles instead.' : 'The camera needs an https link (or localhost): tap the bubbles instead.';
+    return Promise.resolve(!!stream);
+  }
+  camNote.textContent = 'Asking for the camera…';
+  // Lens: Back asks for the rear camera (#153, sharper on most phones) without insisting, so a laptop
+  // or the Pi's single USB camera still answers. Both lenses face the players, so the picture stays
+  // mirrored either way (a phone standing in front of the TV looks at the kids just like the TV does).
+  var face = S.lens === 'back' ? 'environment' : 'user';
+  return navigator.mediaDevices.getUserMedia({video:{facingMode:face, width:{ideal:640}, height:{ideal:480}, frameRate:{ideal:30, max:30}}, audio:false})
+    .then(function(s){ stream = s; cam.srcObject = s; if (grid) grid.prev = null; return cam.play().catch(function(){}); })
+    .then(function(){ camReady = true; cam.classList.add('on'); document.body.classList.add('camon'); camNote.textContent = 'Camera on (' + (face==='environment' ? 'back' : 'front') + ' lens). You should see the players behind this menu. Wave: the sparkles follow your hand.'; return true; })
+    .catch(function(err){ camNote.textContent = 'Camera not allowed (' + (err && err.name || 'error') + '): tap the bubbles instead.'; S.cam='0'; SEG.oCam(); return false; });
+}
+function camStop(){ if (stream) { stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; } cam.srcObject = null; cam.classList.remove('on'); document.body.classList.remove('camon'); camReady = false; camNote.textContent=''; }
+function gridSetup(W, H){
+  var MAXC = 144, w, h; if (W >= H) { w = MAXC; h = Math.max(8, Math.round(MAXC*H/W)); } else { h = MAXC; w = Math.max(8, Math.round(MAXC*W/H)); }
+  if (grid && grid.w===w && grid.h===h) return;
+  var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  grid = {w:w, h:h, cv:cv, ctx:cv.getContext('2d', {willReadFrequently:true}), prev:null, motion:new Uint8Array(w*h), k:w/W, total:0, fresh:false};
+}
+var lastGrab = 0, gridFps = 0, gridFrames = 0, gridT0 = 0;
+function gridUpdate(now){
+  if (!camReady || !grid || cam.readyState < 2 || !cam.videoWidth) return;
+  if (now - lastGrab < 62) return;   // ~15 analyses per second is plenty, and kind to a Pi 3
+  lastGrab = now;
+  var g = grid, ctx = g.ctx, vw = cam.videoWidth, vh = cam.videoHeight;
+  // the same "cover" crop as the CSS video behind the game, mirrored, so grid x/y == screen x/y
+  var sc = Math.max(g.w/vw, g.h/vh), dw = vw*sc, dh = vh*sc, ox = (g.w-dw)/2, oy = (g.h-dh)/2;
+  ctx.save(); ctx.translate(g.w, 0); ctx.scale(-1, 1); ctx.drawImage(cam, ox, oy, dw, dh); ctx.restore();
+  var d = ctx.getImageData(0, 0, g.w, g.h).data, n = g.w*g.h, cur = new Uint8Array(n), thr = SENS[S.sens].diff, total = 0;
+  for (var i=0, j=0; i<n; i++, j+=4) cur[i] = (d[j]*3 + d[j+1]*6 + d[j+2]) / 10;
+  if (g.prev) { for (i=0; i<n; i++) { var m = Math.abs(cur[i]-g.prev[i]) > thr ? 1 : 0; g.motion[i] = m; total += m; } }
+  g.prev = cur; g.total = total/n; g.fresh = true;
+  gridFrames++; if (now - gridT0 > 1000) { gridFps = gridFrames; gridFrames = 0; gridT0 = now; }
+}
+// how much of a circle (screen px) is moving: 0..1
+function motionIn(cx, cy, r){
+  var g = grid; if (!g) return 0; var k = g.k, gx = cx*k, gy = cy*k, gr = Math.max(2, r*k), r2 = gr*gr;
+  var x0 = Math.max(0, Math.floor(gx-gr)), x1 = Math.min(g.w-1, Math.ceil(gx+gr)), y0 = Math.max(0, Math.floor(gy-gr)), y1 = Math.min(g.h-1, Math.ceil(gy+gr));
+  var cnt = 0, hit = 0;
+  for (var y=y0; y<=y1; y++) for (var x=x0; x<=x1; x++) { var dx=x-gx, dy=y-gy; if (dx*dx+dy*dy <= r2) { cnt++; hit += g.motion[y*g.w+x]; } }
+  return cnt ? hit/cnt : 0;
+}
+
+/* ---------------- the game ---------------- */
+var canvas = document.getElementById('play'), cx = canvas.getContext('2d');
+var lanesEl = document.getElementById('lanes'), menu = document.getElementById('menu'), endEl = document.getElementById('end');
+var toast = document.getElementById('toast'), backBtn = document.getElementById('back'), dbg = document.getElementById('dbg');
+var W = 0, H = 0, R = 1;           // css size and backing ratio
+var lanes = [], playing = false, particles = [], rings = [], flyers = [], sparkles = [];
+var lastFrame = 0, fps = 0, fpsN = 0, fpsT = 0;
+var FONT = getComputedStyle(document.body).fontFamily;
+
+function resize(){
+  W = window.innerWidth; H = window.innerHeight;
+  R = Math.min(window.devicePixelRatio||1, 1280/W, 2);   // cap the backing store: a Pi 3 at 1080p draws at 1280 wide
+  canvas.width = Math.round(W*R); canvas.height = Math.round(H*R);
+  gridSetup(W, H);
+  lanes.forEach(function(L){ laneRect(L); L.bubbles.forEach(function(b){ clampBubble(L, b); }); });
+}
+window.addEventListener('resize', resize);
+function laneRect(L){
+  var z = L.el.querySelector('.zone').getBoundingClientRect();
+  var pad = Math.max(10, Math.min(W,H)*.02);
+  L.zone = {x:z.left+pad, y:z.top+pad, w:Math.max(40, z.width-2*pad), h:Math.max(40, z.height-2*pad)};
+  L.rad = Math.max(22, Math.min(L.zone.w, L.zone.h) * (lanes.length>1 ? .12 : .095));
+  L.rad = Math.min(L.rad, 80*Math.max(1, Math.min(W,H)/700));
+}
+function clampBubble(L, b){ var z=L.zone, r=b.r; b.x = Math.min(Math.max(b.x, z.x+r), z.x+z.w-r); b.y = Math.min(Math.max(b.y, z.y+r), z.y+z.h-r); }
+
+function shuffle(a){ for (var i=a.length-1; i>0; i--) { var j=Math.floor(Math.random()*(i+1)), t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function pickWords(grade, n){
+  var pool = shuffle(WORDS[grade].slice()), out = [], seen = {};
+  for (var i=0; i<pool.length && out.length<n; i++) { if (!seen[pool[i][0]]) { seen[pool[i][0]]=1; out.push(pool[i]); } }
+  return out;
+}
+function distractors(word, n){
+  var abc = 'abcdefghijklmnopqrstuvwxyz'.split('').filter(function(c){ return word.indexOf(c)<0; });
+  return shuffle(abc).slice(0, n);
+}
+
+function makeLane(i, n){
+  var el = document.createElement('div'); el.className = 'lane'; el.style.setProperty('--c', COLORS[i]);
+  el.innerHTML = '<div class="head">' + (n>1 ? '<div class="who">PLAYER '+(i+1)+'</div>' : '') +
+    '<div class="pic"></div><div class="slots"></div><div class="row"><div class="stars"></div><button class="say" title="Hear the word">🔊</button></div></div><div class="zone"></div>';
+  lanesEl.appendChild(el);
+  var L = {i:i, el:el, color:COLORS[i], words:pickWords(S.grade, WORDS_PER_ROUND), wi:0, word:'', pic:'', pos:0, bubbles:[], mistakes:0,
+           stars:[], lastPop:0, lastAct:0, done:false, celebrating:0};
+  el.querySelector('.say').addEventListener('click', function(ev){ ev.stopPropagation(); SFX.tap(); say(L.word); bump(L); });
+  return L;
+}
+function bump(L){ var p = L.el.querySelector('.pic'); p.classList.add('bump'); setTimeout(function(){ p.classList.remove('bump'); }, 260); }
+function paintSlots(L){
+  var s = L.el.querySelector('.slots'), html = '';
+  for (var i=0; i<L.word.length; i++) html += '<div class="slot'+(i<L.pos?' done':i===L.pos?' next':'')+'">'+(i<L.pos?L.word[i]:'')+'</div>';
+  s.innerHTML = html;
+  var st = ''; for (i=0; i<WORDS_PER_ROUND; i++) st += i<L.stars.length ? '⭐' : '<span style="opacity:.3">☆</span>';
+  L.el.querySelector('.stars').innerHTML = st;
+}
+function alive(L){ return playing && lanes.indexOf(L) >= 0; }   // timers must not touch a lane the menu threw away
+function nextWord(L){
+  if (!alive(L)) return;
+  if (L.wi >= L.words.length) { L.done = true; L.el.querySelector('.pic').textContent = '🏆'; L.el.querySelector('.slots').innerHTML=''; L.bubbles = []; checkEnd(); return; }
+  var w = L.words[L.wi]; L.word = w[0]; L.pic = w[1]; L.pos = 0; L.mistakes = 0; L.lastAct = performance.now(); L.celebrating = 0;
+  L.el.querySelector('.pic').textContent = L.pic || '🗣️';   // a sight word has no picture: listen, or tap 🔊
+  paintSlots(L); spawnBubbles(L); bump(L);
+  setTimeout(function(){ if (alive(L)) say(L.word); }, lanes.length>1 ? L.i*900 : 150);
+}
+function spawnBubbles(L){
+  laneRect(L);
+  var letters = L.word.split('').concat(distractors(L.word, DISTRACT[S.grade])), z = L.zone, r = L.rad, out = [];
+  shuffle(letters).forEach(function(ch){
+    var best = null, bestD = -1;
+    for (var t=0; t<24; t++) {     // scatter: the candidate farthest from the others wins
+      var x = z.x + r + Math.random()*(z.w-2*r), y = z.y + r + Math.random()*(z.h-2*r), d = 1e9;
+      out.forEach(function(o){ d = Math.min(d, Math.hypot(o.x-x, o.y-y)); });
+      if (d > bestD) { bestD = d; best = {x:x, y:y}; }
+    }
+    var sp = Math.max(8, Math.min(z.w,z.h)*.04), a = Math.random()*Math.PI*2;
+    out.push({ch:ch, x:best.x, y:best.y, r:r, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, ph:Math.random()*6.28, hue:Math.random()*360,
+              hit:0, shake:0, wrongAt:-1e9, born:performance.now(), scale:0});
+  });
+  L.bubbles = out;
+}
+function popBubble(L, b, now){
+  L.pos++; L.lastPop = now; L.lastAct = now; SFX.pop();
+  L.bubbles.splice(L.bubbles.indexOf(b), 1);
+  burst(b.x, b.y, b.r, b.hue); rings.push({x:b.x, y:b.y, r:b.r, t:now});
+  var slot = L.el.querySelectorAll('.slot')[L.pos-1], tr = slot ? slot.getBoundingClientRect() : null;
+  if (tr) flyers.push({ch:b.ch, x:b.x, y:b.y, tx:tr.left+tr.width/2, ty:tr.top+tr.height/2, t:now, r:b.r, hue:b.hue, L:L});
+  else paintSlots(L);
+  if (L.pos >= L.word.length) {
+    L.celebrating = now; L.bubbles = [];
+    var stars = L.mistakes<=1 ? 3 : L.mistakes<=3 ? 2 : 1; L.stars.push(stars);
+    setTimeout(function(){ if (!alive(L)) return; SFX.word(); say(L.word + '!', {}); showToast(['Nice!','Wow!','Super!','Yes!','Great!'][Math.floor(Math.random()*5)]); confetti(L); }, 260);
+    setTimeout(function(){ if (alive(L)) SFX.star(); }, 900);
+    setTimeout(function(){ L.wi++; nextWord(L); }, 2300);
+  } else { setTimeout(function(){ if (alive(L)) say(letterName(b.ch), {rate:.9}); }, 40); }
+}
+function wrongBubble(L, b, now){
+  if (now - b.wrongAt < 900) return; b.wrongAt = now; b.shake = 1; L.mistakes++; L.lastAct = now; SFX.wrong();
+}
+function checkEnd(){
+  if (!lanes.every(function(L){ return L.done; })) return;
+  setTimeout(function(){
+    playing = false; backBtn.classList.remove('show');
+    var total = 0, html = '';
+    lanes.forEach(function(L){ var s = L.stars.reduce(function(a,b){ return a+b; }, 0); total += s;
+      html += '<div class="sc" style="--c:'+L.color+'">'+(lanes.length>1?'<div class="who">PLAYER '+(L.i+1)+'</div>':'')+'<div class="n">'+s+' ⭐</div><div class="s">'+L.words.map(function(w){return w[0];}).join(' · ')+'</div></div>'; });
+    document.getElementById('score').innerHTML = html;
+    document.getElementById('endTag').textContent = lanes.length>1 ? 'Team total: '+total+' stars!' : total+' stars out of '+(WORDS_PER_ROUND*3)+'!';
+    endEl.hidden = false; SFX.word(); say(lanes.length>1 ? 'Great job, both of you! '+total+' stars!' : 'Great job! You got '+total+' stars!');
+  }, 900);
+}
+function showToast(t){ toast.textContent = t; toast.classList.add('show'); setTimeout(function(){ toast.classList.remove('show'); }, 1100); }
+
+/* effects */
+function burst(x, y, r, hue){ for (var i=0; i<18; i++) { var a = Math.random()*6.283, s = r*(1+Math.random()*3);
+  particles.push({x:x, y:y, vx:Math.cos(a)*s, vy:Math.sin(a)*s-r, life:1, size:r*(.08+Math.random()*.14), hue:hue+Math.random()*60-30}); } }
+function confetti(L){ var z = L.zone; for (var i=0; i<40; i++) particles.push({x:z.x+Math.random()*z.w, y:z.y-20, vx:(Math.random()-.5)*120, vy:60+Math.random()*120, life:1.6, size:5+Math.random()*7, hue:Math.random()*360, conf:true}); }
+
+/* keep the phone awake while a round runs (#153): a phone that locks itself stops the camera and
+   drops a screen cast to the TV. Wake Lock exists on Android Chrome and iOS 16.4+; elsewhere (the
+   Pi's kiosk has no screen saver) this is a no-op. The lock is lost when the tab is hidden, so it is
+   taken again when the page comes back while a round or the score is on screen. */
+var wake = null;
+function wakeOn(){
+  if (wake || !navigator.wakeLock || !navigator.wakeLock.request) return;
+  navigator.wakeLock.request('screen').then(function(w){ wake = w; w.addEventListener('release', function(){ if (wake===w) wake = null; }); }).catch(function(){});
+}
+function wakeOff(){ if (wake) { var w = wake; wake = null; w.release().catch(function(){}); } }
+document.addEventListener('visibilitychange', function(){ if (document.visibilityState==='visible' && menu.hidden) wakeOn(); });
+
+/* start / stop */
+function startGame(){
+  audio(); SFX.tap(); wakeOn();
+  if (S.cam==='1' && !stream) camStart();
+  lanesEl.innerHTML = ''; lanes = []; particles = []; rings = []; flyers = []; sparkles = [];
+  var n = S.players==='2' ? 2 : 1;
+  for (var i=0; i<n; i++) lanes.push(makeLane(i, n));
+  menu.hidden = true; endEl.hidden = true; backBtn.classList.add('show'); playing = true;
+  resize(); lanes.forEach(function(L){ laneRect(L); nextWord(L); });
+  if (!KIOSK && document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(function(){});
+}
+function toMenu(){ playing = false; lanes = []; lanesEl.innerHTML = ''; backBtn.classList.remove('show'); endEl.hidden = true; menu.hidden = false; wakeOff(); try { speechSynthesis.cancel(); } catch(e){} }
+document.getElementById('start').addEventListener('click', startGame);
+document.getElementById('again').addEventListener('click', startGame);
+document.getElementById('toMenu').addEventListener('click', function(){ SFX.tap(); toMenu(); });
+backBtn.addEventListener('click', function(){ SFX.tap(); toMenu(); });
+window.addEventListener('keydown', function(e){ if (e.key==='Escape' && !castHelp.hidden) { castHelp.hidden = true; return; } if (e.key==='Escape' && playing) toMenu(); if ((e.key==='Enter'||e.key===' ') && !menu.hidden && castHelp.hidden) startGame(); if (e.key==='d') { DEBUG = !DEBUG; dbg.style.display = DEBUG?'block':'none'; } });
+
+/* tap / click fallback (also works alongside the camera) */
+function pointerPop(px, py){
+  if (!playing) return; var now = performance.now();
+  for (var li=0; li<lanes.length; li++) { var L = lanes[li];
+    for (var bi=0; bi<L.bubbles.length; bi++) { var b = L.bubbles[bi];
+      if (Math.hypot(b.x-px, b.y-py) <= b.r*1.15) { if (b.ch === L.word[L.pos]) popBubble(L, b, now); else wrongBubble(L, b, now); return; } } }
+}
+canvas.addEventListener('pointerdown', function(e){ audio(); pointerPop(e.clientX, e.clientY); });
+lanesEl.addEventListener('pointerdown', function(e){ if (e.target.closest('.say')) return; audio(); pointerPop(e.clientX, e.clientY); });
+lanesEl.style.pointerEvents = 'auto';
+
+/* ---------------- the frame ---------------- */
+function frame(now){
+  requestAnimationFrame(frame);
+  var dt = Math.min(.05, (now - lastFrame)/1000 || 0); lastFrame = now;
+  fpsN++; if (now - fpsT > 1000) { fps = fpsN; fpsN = 0; fpsT = now; }
+  gridUpdate(now);
+  cx.setTransform(R, 0, 0, R, 0, 0); cx.clearRect(0, 0, W, H);
+
+  // sparkles where the picture moves, so a kid can see the game sees them (menu too)
+  if (grid && grid.fresh && camReady) { grid.fresh = false; var g = grid, step = 3, k = 1/g.k, budget = 90;
+    for (var y=1; y<g.h-1 && budget>0; y+=step) for (var x=1; x<g.w-1 && budget>0; x+=step) if (g.motion[y*g.w+x] && g.motion[y*g.w+x+1]) { sparkles.push({x:x*k+Math.random()*k*step, y:y*k+Math.random()*k*step, life:.45, s:2+Math.random()*3}); budget--; } }
+  for (var i=sparkles.length-1; i>=0; i--) { var sp = sparkles[i]; sp.life -= dt; sp.y -= 30*dt; if (sp.life<=0) { sparkles.splice(i,1); continue; }
+    cx.globalAlpha = Math.min(1, sp.life*2.2)*.8; cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(sp.x, sp.y, sp.s, 0, 6.283); cx.fill(); }
+  cx.globalAlpha = 1;
+
+  if (playing) lanes.forEach(function(L){ stepLane(L, now, dt); drawLane(L, now); });
+  drawEffects(now, dt);
+  if (DEBUG) dbg.textContent = 'draw '+fps+' fps · grid '+(grid?grid.w+'×'+grid.h:'-')+' @ '+gridFps+' fps · moving '+(grid?Math.round(grid.total*100):0)+'% · cam '+(camReady?cam.videoWidth+'×'+cam.videoHeight:'off')+' · R '+R.toFixed(2)+' · sens '+S.sens;
+}
+function stepLane(L, now, dt){
+  var z = L.zone, moving = grid && camReady ? grid.total : 0, best = null, bestF = 0, F = SENS[S.sens].frac;
+  L.bubbles.forEach(function(b){
+    b.scale = Math.min(1, b.scale + dt*3); b.ph += dt*1.3; b.shake = Math.max(0, b.shake - dt*2.5);
+    b.x += b.vx*dt; b.y += b.vy*dt + Math.sin(b.ph)*8*dt;
+    if (b.x < z.x+b.r) { b.x = z.x+b.r; b.vx = Math.abs(b.vx); } if (b.x > z.x+z.w-b.r) { b.x = z.x+z.w-b.r; b.vx = -Math.abs(b.vx); }
+    if (b.y < z.y+b.r) { b.y = z.y+b.r; b.vy = Math.abs(b.vy); } if (b.y > z.y+z.h-b.r) { b.y = z.y+z.h-b.r; b.vy = -Math.abs(b.vy); }
+    if (camReady && grid && b.scale >= 1 && moving < .45) {   // a whole-picture change is not a hand
+      var f = motionIn(b.x, b.y, b.r*.9); b.hit = f >= F ? b.hit+1 : 0;
+      if (b.hit >= 2 && f > bestF) { bestF = f; best = b; }
+    } else b.hit = 0;
+  });
+  if (best && now - L.lastPop > 650) { if (best.ch === L.word[L.pos]) popBubble(L, best, now); else wrongBubble(L, best, now); }
+}
+function drawLane(L, now){
+  var need = L.word[L.pos], idle = now - L.lastAct > 7000;
+  L.bubbles.forEach(function(b){
+    var s = b.scale < 1 ? (1 - Math.pow(1-b.scale, 3)) : 1, r = b.r*s, wob = 1 + Math.sin(b.ph*2)*.03;
+    var sx = b.shake ? Math.sin(now/25)*b.r*.12*b.shake : 0;
+    cx.save(); cx.translate(b.x+sx, b.y); cx.scale(wob, 1/wob);
+    var gr = cx.createRadialGradient(-r*.35, -r*.4, r*.1, 0, 0, r);
+    var flash = b.shake > 0;
+    gr.addColorStop(0, flash ? '#ffb0a0' : 'hsla('+b.hue+',95%,85%,.95)'); gr.addColorStop(.7, flash ? '#e5534b' : 'hsla('+b.hue+',85%,62%,.9)'); gr.addColorStop(1, flash ? '#a02020' : 'hsla('+b.hue+',80%,45%,.95)');
+    cx.fillStyle = gr; cx.beginPath(); cx.arc(0, 0, r, 0, 6.283); cx.fill();
+    cx.strokeStyle = 'rgba(255,255,255,.75)'; cx.lineWidth = Math.max(2, r*.05); cx.stroke();
+    cx.fillStyle = 'rgba(255,255,255,.55)'; cx.beginPath(); cx.ellipse(-r*.35, -r*.45, r*.22, r*.14, -.6, 0, 6.283); cx.fill();
+    if (idle && b.ch === need) { cx.strokeStyle = 'rgba(255,255,255,'+(.5+.5*Math.sin(now/150))+')'; cx.lineWidth = r*.12; cx.beginPath(); cx.arc(0, 0, r*1.18, 0, 6.283); cx.stroke(); }
+    if (camReady && b.hit) { cx.strokeStyle = 'rgba(255,255,255,.9)'; cx.lineWidth = r*.1; cx.beginPath(); cx.arc(0, 0, r*1.08, 0, 6.283); cx.stroke(); }
+    cx.fillStyle = '#1b2a44'; cx.font = '900 '+Math.round(r*1.15)+'px '+FONT; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+    cx.fillText(b.ch.toUpperCase(), 0, r*.06); cx.restore();
+  });
+}
+function drawEffects(now, dt){
+  for (var i=rings.length-1; i>=0; i--) { var rg = rings[i], a = (now-rg.t)/350; if (a>=1) { rings.splice(i,1); continue; }
+    cx.globalAlpha = 1-a; cx.strokeStyle = '#fff'; cx.lineWidth = rg.r*.12*(1-a); cx.beginPath(); cx.arc(rg.x, rg.y, rg.r*(1+a*1.4), 0, 6.283); cx.stroke(); }
+  cx.globalAlpha = 1;
+  for (i=particles.length-1; i>=0; i--) { var p = particles[i]; p.life -= dt*(p.conf?.6:2.2); if (p.life<=0) { particles.splice(i,1); continue; }
+    p.vy += (p.conf?260:700)*dt; p.x += p.vx*dt; p.y += p.vy*dt; cx.globalAlpha = Math.min(1, p.life);
+    cx.fillStyle = 'hsl('+p.hue+',90%,'+(p.conf?60:75)+'%)';
+    if (p.conf) { cx.save(); cx.translate(p.x, p.y); cx.rotate(p.x/20); cx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2); cx.restore(); }
+    else { cx.beginPath(); cx.arc(p.x, p.y, p.size, 0, 6.283); cx.fill(); } }
+  cx.globalAlpha = 1;
+  for (i=flyers.length-1; i>=0; i--) { var f = flyers[i], t = (now-f.t)/420; if (t>=1) { flyers.splice(i,1); paintSlots(f.L); continue; }
+    var e = 1-Math.pow(1-t, 3), x = f.x+(f.tx-f.x)*e, y = f.y+(f.ty-f.y)*e - Math.sin(t*Math.PI)*f.r, r = f.r*(1-.5*e);
+    cx.fillStyle = 'hsl('+f.hue+',90%,70%)'; cx.beginPath(); cx.arc(x, y, r, 0, 6.283); cx.fill();
+    cx.fillStyle = '#1b2a44'; cx.font = '900 '+Math.round(r*1.15)+'px '+FONT; cx.textAlign='center'; cx.textBaseline='middle'; cx.fillText(f.ch.toUpperCase(), x, y+r*.06); }
+}
+
+/* boot */
+resize();
+if (DEBUG) dbg.style.display = 'block';
+if (S.cam==='1' && (KIOSK || Q.cam==='1')) camStart();     // the Pi and explicit links: no tap needed
+else if (S.cam==='1') camNote.textContent = 'Tap START to turn the camera on. Tapping a bubble always works too.';
+else camNote.textContent = 'Tap or click the bubbles.';
+requestAnimationFrame(frame);
+</script>
+<style id="bench-public-tvgame">
+/* the game turns off text selection on everything, which can stop a phone typing into the
+   passcode box or the feedback note */
+#bench-gate input,#bfb-card input,#bfb-card textarea{-webkit-user-select:text;user-select:text}
+</style>
+<script>
+/* The game listens on window for Enter/Space (START) and "d" (debug), so typing the passcode
+   started a round — and asked for the camera — behind the gate. Keys typed into a field stop
+   at the document; the field and its own handlers still get them. */
+document.addEventListener("keydown",function(e){
+  var t=e.target;
+  if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))e.stopPropagation();
+});
+</script><script id="bench-release">window.BENCH_RELEASE="tvgame 1.0.0+ca86857";</script>
+<a id="bench-release-pill" href="/releases.html#tvgame" title="release notes" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483000;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:#9aa4b2;background:rgba(20,23,28,.72);border:1px solid #2a3039;border-radius:999px;padding:5px 8px;text-decoration:none;opacity:.85">v1.0.0</a><!-- Public demo feedback bubble. Injected into every page of the demo site by
+     publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
+     touching the Bench or the tailnet). Submissions land in Netlify → Forms.
+     The hidden <form> below is what Netlify parses at deploy time to register the
+     form; the visible UI posts to "/" by AJAX with the same field names. -->
+<form name="demo-feedback" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="text" name="form-name" value="demo-feedback">
+  <input type="text" name="bot-field">
+  <input type="text" name="demo">
+  <input type="text" name="kind">
+  <input type="text" name="release">
+  <input type="text" name="contact">
+  <textarea name="message"></textarea>
+</form>
+<div id="bench-fb"></div>
+<script>
+(function () {
+  if (window.__benchFb) return; window.__benchFb = 1;
+  var Z = 2147483000, open = false, sending = false;
+  // Everyone shares one passcode, so a note is anonymous unless the tester says who they are.
+  // Hand each person a link like  https://…/?who=jane  and the name rides along automatically;
+  // it is remembered on that device, and they can still overwrite it in the box.
+  var WHO_KEY = 'bench-who';
+  var who = '';
+  try {
+    var q = new URLSearchParams(location.search).get('who');
+    if (q) { who = q.slice(0, 40); localStorage.setItem(WHO_KEY, who); }
+    else { who = localStorage.getItem(WHO_KEY) || ''; }
+  } catch (e) {}
+
+  var demo = (function () {
+    var p = location.pathname;
+    if (p.indexOf('/manito') === 0) return 'Manito Park App';
+    if (p.indexOf('/rover') === 0) return 'Rover Bot';
+    if (p.indexOf('/scam') === 0) return 'Voice AI Scam Filter';
+    return 'Demos home';
+  })();
+
+  var css = document.createElement('style');
+  css.textContent =
+    '#bfb-btn{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:' + Z + ';' +
+      'width:54px;height:54px;border-radius:50%;border:0;background:#c9a24b;color:#14171c;font-size:24px;' +
+      'line-height:1;cursor:pointer;box-shadow:0 3px 14px rgba(0,0,0,.45)}' +
+    '#bfb-btn:active{transform:scale(.95)}' +
+    '#bfb-wrap{position:fixed;inset:0;z-index:' + (Z + 1) + ';background:rgba(0,0,0,.6);display:flex;' +
+      'align-items:flex-end;justify-content:center;padding:16px}' +
+    '#bfb-card{width:100%;max-width:430px;background:#12161c;color:#e6e8ea;border:1px solid #262b33;' +
+      'border-radius:16px;padding:18px;max-height:88vh;overflow:auto;' +
+      'font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}' +
+    '#bfb-card h3{margin:0 0 3px;font-size:18px}' +
+    '#bfb-card p.sub{margin:0 0 13px;font-size:13px;color:#9aa4b2}' +
+    '#bfb-card label{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;' +
+      'color:#9aa4b2;margin:11px 0 4px}' +
+    '#bfb-card input,#bfb-card textarea,#bfb-card select{width:100%;background:#0d1014;color:#e6e8ea;' +
+      'border:1px solid #262b33;border-radius:10px;padding:11px 12px;font-size:16px}' +
+    '#bfb-card textarea{min-height:104px;resize:vertical}' +
+    '#bfb-row{display:flex;gap:9px;margin-top:14px}' +
+    '#bfb-row button{flex:1;padding:12px;border-radius:10px;font:600 14px system-ui,sans-serif;cursor:pointer}' +
+    '#bfb-cancel{background:transparent;color:#9aa4b2;border:1px solid #262b33}' +
+    '#bfb-send{background:#c9a24b;color:#14171c;border:0}' +
+    '#bfb-msg{font-size:13px;margin-top:10px;color:#9aa4b2}';
+  document.head.appendChild(css);
+
+  var btn = document.createElement('button');
+  btn.id = 'bfb-btn'; btn.type = 'button';
+  btn.setAttribute('aria-label', 'Send feedback');
+  btn.textContent = '💬';
+  document.body.appendChild(btn);
+
+  function close() { var w = document.getElementById('bfb-wrap'); if (w) w.remove(); open = false; }
+
+  btn.onclick = function () {
+    if (open) return close();
+    open = true;
+    var wrap = document.createElement('div');
+    wrap.id = 'bfb-wrap';
+    wrap.innerHTML =
+      '<div id="bfb-card">' +
+        '<h3>Tell us what you found</h3>' +
+        '<p class="sub">' + demo + ' — bugs, confusing bits, or things you wish it did.</p>' +
+        '<label>What kind of note is this?</label>' +
+        '<select id="bfb-kind">' +
+          '<option>Something is broken</option>' +
+          '<option>Something is confusing</option>' +
+          '<option>Idea / feature request</option>' +
+          '<option>It worked well</option>' +
+        '</select>' +
+        '<label>What happened?</label>' +
+        '<textarea id="bfb-text" placeholder="As specific as you can — what you tapped, what you expected, what you got."></textarea>' +
+        '<label>Who is this? (so we can follow up)</label>' +
+        '<input id="bfb-contact" autocomplete="off" placeholder="so we know who this came from">' +
+        '<div id="bfb-row"><button id="bfb-cancel" type="button">Cancel</button>' +
+        '<button id="bfb-send" type="button">Send</button></div>' +
+        '<div id="bfb-msg"></div>' +
+      '</div>';
+    document.body.appendChild(wrap);
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
+    document.getElementById('bfb-cancel').onclick = close;
+    if (who) document.getElementById('bfb-contact').value = who;
+    document.getElementById('bfb-text').focus();
+
+    document.getElementById('bfb-send').onclick = function () {
+      if (sending) return;
+      var text = document.getElementById('bfb-text').value.trim();
+      var msg = document.getElementById('bfb-msg');
+      if (text.length < 4) { msg.textContent = 'Add a little more detail first.'; return; }
+      sending = true; msg.textContent = 'Sending…';
+      var body = new URLSearchParams({
+        'form-name': 'demo-feedback',
+        'demo': demo,
+        'kind': document.getElementById('bfb-kind').value,
+        'release': String(window.BENCH_RELEASE || '').slice(0, 60),   // "phonics 1.0.0+eb48367", stamped by publish-demos-site.sh
+        'contact': document.getElementById('bfb-contact').value.slice(0, 120),
+        'message': text.slice(0, 4000)
+      }).toString();
+      fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body })
+        .then(function (r) {
+          sending = false;
+          if (!r.ok) throw new Error(r.status);
+          document.getElementById('bfb-card').innerHTML =
+            '<h3>Thank you — got it.</h3><p class="sub">That goes straight to the two of us building this.</p>' +
+            '<div id="bfb-row"><button id="bfb-send" type="button">Close</button></div>';
+          document.getElementById('bfb-send').onclick = close;
+        })
+        .catch(function () {
+          sending = false;
+          msg.textContent = 'Could not send — check your connection and try again.';
+        });
+    };
+  };
+})();
+</script></body>
+</html>
