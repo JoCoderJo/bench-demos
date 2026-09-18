@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="tvgame 1.0.0+ca86857" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
+<head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="tvgame 1.1.0+43ed5e3" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#0e1b33">
@@ -28,6 +28,18 @@
   grid about 144 cells wide and every cell is compared with the previous frame. A bubble pops when
   enough of ITS cells changed (a hand arriving), and never when the whole picture changed (someone
   walking through, a light switching on). No pose model, no library.
+
+  Math Pop (request #158) is the same page with a Game switch on the start screen (also ?game=math),
+  so the Pi kiosk keeps its one URL and the camera code is not copied. A sum sits where the picture
+  was (3 + 5 = ?, with apples to count at K), number bubbles drift, and the kid reaches into the
+  right answer. K adds and takes away within 5, 1st within 10, 2nd within 20. Same lanes, bubbles,
+  stars, voice ("three plus five"), 5 sums per round, 1 or 2 players.
+
+  Keys on the start screen (request #159: on the Pi the TV has no mouse, so Math could not be picked
+  and #158 "did not work"): Up/Down moves between the rows, Left/Right changes the choice on the
+  lit row, Enter (or Space) starts. The score screen takes Enter (play again) and Esc (menu) too.
+  A TV remote over HDMI-CEC sends the same arrow and OK keys. LM_GAME=math in pi/run.sh opens
+  the kiosk straight on Math.
 -->
 <style>
  :root{--p1:#ffb340;--p2:#5ee0a0;--ink:#fff;--sky1:#0e1b33;--sky2:#1d3f7a;--sky3:#2f77c9}
@@ -52,6 +64,15 @@
  .pic{font-size:clamp(56px,13vmin,150px);line-height:1.05;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45));
    transition:transform .25s}
  .pic.bump{transform:scale(1.18) rotate(-6deg)}
+ /* Math Pop (#158): the sum sits where the picture was, in text, so it is smaller than an emoji */
+ .pic.sum{font-size:clamp(30px,7vmin,84px);font-weight:900;letter-spacing:.04em;text-shadow:0 3px 0 rgba(0,0,0,.3);white-space:nowrap}
+ .pic.sum.bump{transform:scale(1.1)}
+ .count{font-size:clamp(18px,4vmin,44px);line-height:1.15;letter-spacing:.04em;min-height:0;margin:2px 0 0;
+   filter:drop-shadow(0 3px 5px rgba(0,0,0,.4))}
+ .count:empty{display:none}
+ .count .gone{opacity:.28;filter:grayscale(1)}
+ .count .op{font-weight:900;opacity:.9;margin:0 .2em}
+ .slot.wide{width:clamp(50px,9.6vmin,124px)}
  .slots{display:flex;justify-content:center;gap:clamp(4px,.9vmin,12px);margin:8px 0 4px;flex-wrap:wrap;
    pointer-events:auto}
  .slot{width:clamp(34px,6.6vmin,86px);height:clamp(44px,8vmin,104px);border-radius:14px;
@@ -92,6 +113,9 @@
    font-size:clamp(15px,2.6vmin,20px);padding:10px 4px;cursor:pointer;transition:background .15s}
  .seg button.on{background:#fff;color:#123}
  .seg button.p1.on{background:var(--p1)}.seg button.p2.on{background:var(--p2)}
+ /* the row the arrow keys are on (#159: the TV has no mouse) */
+ .opt.focus label{color:#ffd37a;opacity:1}
+ .opt.focus .seg{box-shadow:0 0 0 3px #ffd37a}
  .note{font-size:clamp(12px,2vmin,15px);opacity:.75;margin:2px 0 0 100px;text-align:left;min-height:1.2em}
  .big{display:block;width:100%;margin:20px 0 8px;border:0;border-radius:22px;padding:18px;font:inherit;font-weight:900;
    font-size:clamp(24px,5vmin,40px);color:#123;background:linear-gradient(180deg,#ffe08a,#ffb340);
@@ -131,8 +155,10 @@
 
 <div id="menu" class="screen">
  <div class="panel">
-  <h1>Spelling Pop</h1>
-  <div class="tag">Reach up and pop the letters to spell the word!</div>
+  <h1 id="title">Spelling Pop</h1>
+  <div class="tag" id="tagline">Reach up and pop the letters to spell the word!</div>
+  <div class="opt"><label>Game</label><div class="seg" id="oGame">
+   <button data-v="spell">🔤 Spelling</button><button data-v="math">🔢 Math</button></div></div>
   <div class="opt"><label>Players</label><div class="seg" id="oPlayers">
    <button class="p1" data-v="1">1 player</button><button class="p2" data-v="2">2 players</button></div></div>
   <div class="opt"><label>Grade</label><div class="seg" id="oGrade">
@@ -146,7 +172,7 @@
    <button data-v="low">Low</button><button data-v="med">Medium</button><button data-v="high">High</button></div></div>
   <button class="big" id="start">START</button>
   <button class="big ghost" id="castBtn">📺 Cast to TV</button>
-  <div class="small">Stand back so your whole arm is in the picture. Reach into a bubble to pop it.<br>Esc or ✕ comes back here.</div>
+  <div class="small">Stand back so your whole arm is in the picture. Reach into a bubble to pop it.<br>Arrow keys pick, Enter starts. Esc or ✕ comes back here.</div>
  </div>
 </div>
 
@@ -185,8 +211,48 @@ var WORDS = {
      ['pizza','🍕'],['robot','🤖'],['tiger','🐯'],['flower','🌸'],['rocket','🚀'],['candle','🕯️'],['koala','🐨'],['panda','🐼'],
      ['zebra','🦓'],['said',''],['they',''],['when',''],['what',''],['want',''],['because',''],['friend','']]
 };
-var DISTRACT = {K:2, 1:3, 2:4};          // extra wrong letters floating with the word's letters
-var WORDS_PER_ROUND = 5;
+var DISTRACT = {K:2, 1:3, 2:4};          // extra wrong letters (or wrong numbers) floating with the right ones
+var WORDS_PER_ROUND = 5;                 // words, or sums, per round
+
+/* ---------------- Math Pop (#158): one sum maker per grade, the levels from the dashboard's Math
+   card. K adds and takes away within 5 (with things to count), 1st within 10, 2nd within 20. The
+   wrong bubbles are numbers close to the answer, so the kid has to work it out, not just spot the
+   odd one. Skip counting (2nd grade) is left for later. ---------------- */
+var MATH_MAX = {K:5, 1:10, 2:20};
+var NUMWORDS = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen',
+                'fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty'];
+var COUNTERS = ['🍎','🍓','⭐','🐟','🎈','🍪','🐸','🚗'];
+var GAMES = {
+  spell: {title:'Spelling Pop', tag:'Reach up and pop the letters to spell the word!', hear:'Hear the word'},
+  math:  {title:'Math Pop',     tag:'Reach up and pop the right answer to the sum!',    hear:'Hear the sum'}
+};
+function rnd(lo, hi){ return lo + Math.floor(Math.random()*(hi-lo+1)); }
+function makeSum(grade, seen){
+  var max = MATH_MAX[grade], a, b, add, ans;
+  for (var t=0; t<40; t++) {
+    add = Math.random() < (grade==='K' ? .6 : .5);
+    if (add) { a = rnd(1, max-1); b = rnd(1, max-a); ans = a+b; }
+    else     { a = rnd(2, max);   b = rnd(1, a);     ans = a-b; }
+    var key = a + (add?'+':'-') + b; if (!seen[key]) { seen[key] = 1; break; }
+  }
+  var op = add ? '+' : '−', word = add ? 'plus' : (grade==='K' ? 'take away' : 'minus');
+  var emo = COUNTERS[rnd(0, COUNTERS.length-1)], count = '';
+  var rep = function(n, cls){ var s=''; for (var i=0;i<n;i++) s += cls ? '<span class="'+cls+'">'+emo+'</span>' : emo; return s; };
+  if (grade === 'K') count = add ? rep(a) + '<span class="op">+</span>' + rep(b) : rep(a-b) + rep(b, 'gone');   // things to count: two groups, or a group with some taken away
+  return {parts:[String(ans)], label:a+' '+op+' '+b+' = '+ans, pic:a+' '+op+' '+b+' = ?', picDone:a+' '+op+' '+b+' = '+ans,
+          sum:true, count:count, ans:ans, max:max,
+          sayQ:NUMWORDS[a]+' '+word+' '+NUMWORDS[b], sayDone:NUMWORDS[ans]+'! '+NUMWORDS[a]+' '+word+' '+NUMWORDS[b]+' is '+NUMWORDS[ans]};
+}
+// numbers near the answer, never the answer, all different, inside 0..max
+function numberDistractors(item, n){
+  var out = [], tries = 0, span = Math.max(3, n);
+  while (out.length < n && tries++ < 200) {
+    var v = item.ans + rnd(-span, span);
+    if (v < 0 || v > item.max || v === item.ans || out.indexOf(String(v)) >= 0) { if (tries > 60) span++; continue; }
+    out.push(String(v));
+  }
+  return out;
+}
 var SENS = {low:{diff:48, frac:.42}, med:{diff:32, frac:.30}, high:{diff:20, frac:.22}};
 var COLORS = ['#ffb340','#5ee0a0'];
 var Q = {}; location.search.slice(1).split('&').forEach(function(kv){var p=kv.split('='); if(p[0]) Q[decodeURIComponent(p[0])]=decodeURIComponent(p[1]||'1');});
@@ -221,20 +287,46 @@ document.getElementById('castBtn').addEventListener('click', function(){ SFX.tap
 document.getElementById('castClose').addEventListener('click', function(){ SFX.tap(); castHelp.hidden = true; });
 
 /* ---------------- settings (remembered on this device) ---------------- */
-var S = {players:'1', grade:'K', cam:'1', lens:'front', sens:'med'};
+var S = {game:'spell', players:'1', grade:'K', cam:'1', lens:'front', sens:'med'};
 try { var saved = JSON.parse(localStorage.getItem('spellingPop')||'{}'); for (var k in saved) if (k in S) S[k]=saved[k]; } catch(e){}
 if (Q.players) S.players = Q.players; if (Q.grade) S.grade = Q.grade; if (Q.cam) S.cam = Q.cam; if (Q.lens) S.lens = Q.lens; if (Q.sens) S.sens = Q.sens;
+if (Q.game) S.game = Q.game === 'math' ? 'math' : 'spell';   // ?game=math is the Math card's Play link
+if (!GAMES[S.game]) S.game = 'spell';
+function paintTitle(){ var g = GAMES[S.game]; document.getElementById('title').textContent = g.title; document.getElementById('tagline').textContent = g.tag; document.title = g.title + ' · Move to Learn'; }
 var SEG = {};   // id -> repaint, so a setting changed by code (camera refused) shows on the buttons
+var ROWS = [];  // the rows in menu order, for the arrow keys (#159): {id, el, bs, key}
 function seg(id, key, onchange){
   var el = document.getElementById(id), bs = el.querySelectorAll('button');
   function paint(){ bs.forEach(function(b){ b.classList.toggle('on', b.dataset.v === S[key]); }); }
   bs.forEach(function(b){ b.addEventListener('click', function(){ S[key]=b.dataset.v; paint(); save(); if (onchange) onchange(); }); });
-  paint(); SEG[id] = paint;
+  paint(); SEG[id] = paint; ROWS.push({id:id, el:el.closest('.opt'), bs:bs, key:key});
+}
+/* keys on the start screen (#159): the Pi's TV has no mouse, so without these Math (or 2 players,
+   or a grade) could not be picked there. Up/Down lights a row, Left/Right picks on it (a click on
+   the button, so it saves and swaps the camera like a tap), Enter starts. The lit row shows from
+   the start in the kiosk; on a phone or laptop it appears at the first arrow key. */
+var row = 0, rowShown = false;
+function focusRow(i){
+  row = (i + ROWS.length) % ROWS.length; rowShown = true;
+  ROWS.forEach(function(r, j){ r.el.classList.toggle('focus', j === row); });
+}
+function pickOnRow(dir){
+  if (!rowShown) { focusRow(row); return; }
+  var r = ROWS[row], bs = Array.prototype.slice.call(r.bs), i = -1;
+  bs.forEach(function(b, j){ if (b.dataset.v === S[r.key]) i = j; });
+  var b = bs[Math.min(bs.length-1, Math.max(0, i + dir))]; if (b && b.dataset.v !== S[r.key]) { SFX.tap(); b.click(); }
+}
+function menuKey(e){
+  var k = e.key;
+  if (k === 'ArrowUp' || k === 'ArrowDown') { focusRow(rowShown ? row + (k === 'ArrowDown' ? 1 : -1) : row); return true; }
+  if (k === 'ArrowLeft' || k === 'ArrowRight') { pickOnRow(k === 'ArrowRight' ? 1 : -1); return true; }
+  return false;
 }
 function save(){ try { localStorage.setItem('spellingPop', JSON.stringify(S)); } catch(e){} }
-seg('oPlayers','players'); seg('oGrade','grade'); seg('oSens','sens');
+seg('oGame','game', paintTitle); paintTitle(); seg('oPlayers','players'); seg('oGrade','grade'); seg('oSens','sens');
 seg('oCam','cam', function(){ if (S.cam==='1') camStart(); else camStop(); });
 seg('oLens','lens', function(){ if (stream) { camStop(); camStart(); } });   // swap the running camera straight away
+ROWS.sort(function(a, b){ return a.el.compareDocumentPosition(b.el) & 4 ? -1 : 1; });   // screen order, not the order above
 
 /* ---------------- sound: tiny synthesized pops, no files ---------------- */
 var AC = null;
@@ -343,30 +435,38 @@ function laneRect(L){
 function clampBubble(L, b){ var z=L.zone, r=b.r; b.x = Math.min(Math.max(b.x, z.x+r), z.x+z.w-r); b.y = Math.min(Math.max(b.y, z.y+r), z.y+z.h-r); }
 
 function shuffle(a){ for (var i=a.length-1; i>0; i--) { var j=Math.floor(Math.random()*(i+1)), t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
-function pickWords(grade, n){
-  var pool = shuffle(WORDS[grade].slice()), out = [], seen = {};
-  for (var i=0; i<pool.length && out.length<n; i++) { if (!seen[pool[i][0]]) { seen[pool[i][0]]=1; out.push(pool[i]); } }
+/* a round is a list of items; a word and a sum look the same to the lane:
+     parts     the bubbles to pop in order (letters; or the one answer)
+     label     what the score screen lists          pic / picDone   the big thing at the top, before and after
+     count     K math only: things to count         sayQ / sayDone  what the voice says at the start and at the end */
+function pickItems(grade, n){
+  var out = [], seen = {};
+  if (S.game === 'math') { for (var i=0; i<n; i++) out.push(makeSum(grade, seen)); return out; }
+  var pool = shuffle(WORDS[grade].slice());
+  for (i=0; i<pool.length && out.length<n; i++) { var w = pool[i]; if (seen[w[0]]) continue; seen[w[0]]=1;
+    out.push({parts:w[0].split(''), label:w[0], pic:w[1] || '🗣️', picDone:w[1] || '🗣️', sayQ:w[0], sayDone:w[0]+'!'}); }   // a sight word has no picture: listen, or tap 🔊
   return out;
 }
-function distractors(word, n){
-  var abc = 'abcdefghijklmnopqrstuvwxyz'.split('').filter(function(c){ return word.indexOf(c)<0; });
+function distractors(item, n){
+  if (item.sum) return numberDistractors(item, n);
+  var abc = 'abcdefghijklmnopqrstuvwxyz'.split('').filter(function(c){ return item.parts.indexOf(c)<0; });
   return shuffle(abc).slice(0, n);
 }
 
 function makeLane(i, n){
   var el = document.createElement('div'); el.className = 'lane'; el.style.setProperty('--c', COLORS[i]);
   el.innerHTML = '<div class="head">' + (n>1 ? '<div class="who">PLAYER '+(i+1)+'</div>' : '') +
-    '<div class="pic"></div><div class="slots"></div><div class="row"><div class="stars"></div><button class="say" title="Hear the word">🔊</button></div></div><div class="zone"></div>';
+    '<div class="pic'+(S.game==='math'?' sum':'')+'"></div><div class="count"></div><div class="slots"></div><div class="row"><div class="stars"></div><button class="say" title="'+GAMES[S.game].hear+'">🔊</button></div></div><div class="zone"></div>';
   lanesEl.appendChild(el);
-  var L = {i:i, el:el, color:COLORS[i], words:pickWords(S.grade, WORDS_PER_ROUND), wi:0, word:'', pic:'', pos:0, bubbles:[], mistakes:0,
+  var L = {i:i, el:el, color:COLORS[i], words:pickItems(S.grade, WORDS_PER_ROUND), wi:0, item:null, parts:[], pos:0, bubbles:[], mistakes:0,
            stars:[], lastPop:0, lastAct:0, done:false, celebrating:0};
-  el.querySelector('.say').addEventListener('click', function(ev){ ev.stopPropagation(); SFX.tap(); say(L.word); bump(L); });
+  el.querySelector('.say').addEventListener('click', function(ev){ ev.stopPropagation(); SFX.tap(); if (L.item) say(L.item.sayQ); bump(L); });
   return L;
 }
 function bump(L){ var p = L.el.querySelector('.pic'); p.classList.add('bump'); setTimeout(function(){ p.classList.remove('bump'); }, 260); }
 function paintSlots(L){
   var s = L.el.querySelector('.slots'), html = '';
-  for (var i=0; i<L.word.length; i++) html += '<div class="slot'+(i<L.pos?' done':i===L.pos?' next':'')+'">'+(i<L.pos?L.word[i]:'')+'</div>';
+  for (var i=0; i<L.parts.length; i++) html += '<div class="slot'+(i<L.pos?' done':i===L.pos?' next':'')+(L.parts[i].length>1?' wide':'')+'">'+(i<L.pos?L.parts[i]:'')+'</div>';
   s.innerHTML = html;
   var st = ''; for (i=0; i<WORDS_PER_ROUND; i++) st += i<L.stars.length ? '⭐' : '<span style="opacity:.3">☆</span>';
   L.el.querySelector('.stars').innerHTML = st;
@@ -374,15 +474,16 @@ function paintSlots(L){
 function alive(L){ return playing && lanes.indexOf(L) >= 0; }   // timers must not touch a lane the menu threw away
 function nextWord(L){
   if (!alive(L)) return;
-  if (L.wi >= L.words.length) { L.done = true; L.el.querySelector('.pic').textContent = '🏆'; L.el.querySelector('.slots').innerHTML=''; L.bubbles = []; checkEnd(); return; }
-  var w = L.words[L.wi]; L.word = w[0]; L.pic = w[1]; L.pos = 0; L.mistakes = 0; L.lastAct = performance.now(); L.celebrating = 0;
-  L.el.querySelector('.pic').textContent = L.pic || '🗣️';   // a sight word has no picture: listen, or tap 🔊
+  var pic = L.el.querySelector('.pic');
+  if (L.wi >= L.words.length) { L.done = true; pic.textContent = '🏆'; pic.classList.remove('sum'); L.el.querySelector('.count').innerHTML=''; L.el.querySelector('.slots').innerHTML=''; L.bubbles = []; checkEnd(); return; }
+  var it = L.words[L.wi]; L.item = it; L.parts = it.parts; L.pos = 0; L.mistakes = 0; L.lastAct = performance.now(); L.celebrating = 0;
+  pic.textContent = it.pic; L.el.querySelector('.count').innerHTML = it.count || '';
   paintSlots(L); spawnBubbles(L); bump(L);
-  setTimeout(function(){ if (alive(L)) say(L.word); }, lanes.length>1 ? L.i*900 : 150);
+  setTimeout(function(){ if (alive(L)) say(it.sayQ); }, lanes.length>1 ? L.i*900 : 150);
 }
 function spawnBubbles(L){
   laneRect(L);
-  var letters = L.word.split('').concat(distractors(L.word, DISTRACT[S.grade])), z = L.zone, r = L.rad, out = [];
+  var letters = L.parts.concat(distractors(L.item, DISTRACT[S.grade])), z = L.zone, r = L.rad, out = [];
   shuffle(letters).forEach(function(ch){
     var best = null, bestD = -1;
     for (var t=0; t<24; t++) {     // scatter: the candidate farthest from the others wins
@@ -403,10 +504,11 @@ function popBubble(L, b, now){
   var slot = L.el.querySelectorAll('.slot')[L.pos-1], tr = slot ? slot.getBoundingClientRect() : null;
   if (tr) flyers.push({ch:b.ch, x:b.x, y:b.y, tx:tr.left+tr.width/2, ty:tr.top+tr.height/2, t:now, r:b.r, hue:b.hue, L:L});
   else paintSlots(L);
-  if (L.pos >= L.word.length) {
-    L.celebrating = now; L.bubbles = [];
+  if (L.pos >= L.parts.length) {
+    L.celebrating = now; L.bubbles = []; var it = L.item;
     var stars = L.mistakes<=1 ? 3 : L.mistakes<=3 ? 2 : 1; L.stars.push(stars);
-    setTimeout(function(){ if (!alive(L)) return; SFX.word(); say(L.word + '!', {}); showToast(['Nice!','Wow!','Super!','Yes!','Great!'][Math.floor(Math.random()*5)]); confetti(L); }, 260);
+    setTimeout(function(){ if (!alive(L)) return; SFX.word(); say(it.sayDone, {}); L.el.querySelector('.pic').textContent = it.picDone;   // 3 + 5 = 8
+      showToast(['Nice!','Wow!','Super!','Yes!','Great!'][Math.floor(Math.random()*5)]); confetti(L); }, 260);
     setTimeout(function(){ if (alive(L)) SFX.star(); }, 900);
     setTimeout(function(){ L.wi++; nextWord(L); }, 2300);
   } else { setTimeout(function(){ if (alive(L)) say(letterName(b.ch), {rate:.9}); }, 40); }
@@ -420,7 +522,7 @@ function checkEnd(){
     playing = false; backBtn.classList.remove('show');
     var total = 0, html = '';
     lanes.forEach(function(L){ var s = L.stars.reduce(function(a,b){ return a+b; }, 0); total += s;
-      html += '<div class="sc" style="--c:'+L.color+'">'+(lanes.length>1?'<div class="who">PLAYER '+(L.i+1)+'</div>':'')+'<div class="n">'+s+' ⭐</div><div class="s">'+L.words.map(function(w){return w[0];}).join(' · ')+'</div></div>'; });
+      html += '<div class="sc" style="--c:'+L.color+'">'+(lanes.length>1?'<div class="who">PLAYER '+(L.i+1)+'</div>':'')+'<div class="n">'+s+' ⭐</div><div class="s">'+L.words.map(function(w){return w.label;}).join(' · ')+'</div></div>'; });
     document.getElementById('score').innerHTML = html;
     document.getElementById('endTag').textContent = lanes.length>1 ? 'Team total: '+total+' stars!' : total+' stars out of '+(WORDS_PER_ROUND*3)+'!';
     endEl.hidden = false; SFX.word(); say(lanes.length>1 ? 'Great job, both of you! '+total+' stars!' : 'Great job! You got '+total+' stars!');
@@ -461,14 +563,26 @@ document.getElementById('start').addEventListener('click', startGame);
 document.getElementById('again').addEventListener('click', startGame);
 document.getElementById('toMenu').addEventListener('click', function(){ SFX.tap(); toMenu(); });
 backBtn.addEventListener('click', function(){ SFX.tap(); toMenu(); });
-window.addEventListener('keydown', function(e){ if (e.key==='Escape' && !castHelp.hidden) { castHelp.hidden = true; return; } if (e.key==='Escape' && playing) toMenu(); if ((e.key==='Enter'||e.key===' ') && !menu.hidden && castHelp.hidden) startGame(); if (e.key==='d') { DEBUG = !DEBUG; dbg.style.display = DEBUG?'block':'none'; } });
+window.addEventListener('keydown', function(e){
+  if (e.key==='Escape' && !castHelp.hidden) { castHelp.hidden = true; return; }
+  if (!castHelp.hidden) return;
+  if (!menu.hidden) {                                     // start screen: arrows pick (#159), Enter starts
+    if (menuKey(e)) { e.preventDefault(); return; }
+    if (e.key==='Enter'||e.key===' ') { e.preventDefault(); startGame(); }
+  } else if (!endEl.hidden) {                             // score screen: Enter plays again, Esc goes to the menu
+    if (e.key==='Enter'||e.key===' ') { e.preventDefault(); startGame(); }
+    if (e.key==='Escape') { SFX.tap(); toMenu(); }
+  } else if (e.key==='Escape' && playing) toMenu();
+  if (e.key==='d') { DEBUG = !DEBUG; dbg.style.display = DEBUG?'block':'none'; }
+});
+if (KIOSK) focusRow(0);   // the TV shows the lit row from the start: the keys are the only way to pick there
 
 /* tap / click fallback (also works alongside the camera) */
 function pointerPop(px, py){
   if (!playing) return; var now = performance.now();
   for (var li=0; li<lanes.length; li++) { var L = lanes[li];
     for (var bi=0; bi<L.bubbles.length; bi++) { var b = L.bubbles[bi];
-      if (Math.hypot(b.x-px, b.y-py) <= b.r*1.15) { if (b.ch === L.word[L.pos]) popBubble(L, b, now); else wrongBubble(L, b, now); return; } } }
+      if (Math.hypot(b.x-px, b.y-py) <= b.r*1.15) { if (b.ch === L.parts[L.pos]) popBubble(L, b, now); else wrongBubble(L, b, now); return; } } }
 }
 canvas.addEventListener('pointerdown', function(e){ audio(); pointerPop(e.clientX, e.clientY); });
 lanesEl.addEventListener('pointerdown', function(e){ if (e.target.closest('.say')) return; audio(); pointerPop(e.clientX, e.clientY); });
@@ -505,10 +619,11 @@ function stepLane(L, now, dt){
       if (b.hit >= 2 && f > bestF) { bestF = f; best = b; }
     } else b.hit = 0;
   });
-  if (best && now - L.lastPop > 650) { if (best.ch === L.word[L.pos]) popBubble(L, best, now); else wrongBubble(L, best, now); }
+  if (best && now - L.lastPop > 650) { if (best.ch === L.parts[L.pos]) popBubble(L, best, now); else wrongBubble(L, best, now); }
 }
+function labelFont(ch, r){ return '900 '+Math.round(r*(ch.length>1 ? .82 : 1.15))+'px '+FONT; }   // two digits (Math Pop) need a smaller font
 function drawLane(L, now){
-  var need = L.word[L.pos], idle = now - L.lastAct > 7000;
+  var need = L.parts[L.pos], idle = now - L.lastAct > 7000;
   L.bubbles.forEach(function(b){
     var s = b.scale < 1 ? (1 - Math.pow(1-b.scale, 3)) : 1, r = b.r*s, wob = 1 + Math.sin(b.ph*2)*.03;
     var sx = b.shake ? Math.sin(now/25)*b.r*.12*b.shake : 0;
@@ -521,7 +636,7 @@ function drawLane(L, now){
     cx.fillStyle = 'rgba(255,255,255,.55)'; cx.beginPath(); cx.ellipse(-r*.35, -r*.45, r*.22, r*.14, -.6, 0, 6.283); cx.fill();
     if (idle && b.ch === need) { cx.strokeStyle = 'rgba(255,255,255,'+(.5+.5*Math.sin(now/150))+')'; cx.lineWidth = r*.12; cx.beginPath(); cx.arc(0, 0, r*1.18, 0, 6.283); cx.stroke(); }
     if (camReady && b.hit) { cx.strokeStyle = 'rgba(255,255,255,.9)'; cx.lineWidth = r*.1; cx.beginPath(); cx.arc(0, 0, r*1.08, 0, 6.283); cx.stroke(); }
-    cx.fillStyle = '#1b2a44'; cx.font = '900 '+Math.round(r*1.15)+'px '+FONT; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+    cx.fillStyle = '#1b2a44'; cx.font = labelFont(b.ch, r); cx.textAlign = 'center'; cx.textBaseline = 'middle';
     cx.fillText(b.ch.toUpperCase(), 0, r*.06); cx.restore();
   });
 }
@@ -538,7 +653,7 @@ function drawEffects(now, dt){
   for (i=flyers.length-1; i>=0; i--) { var f = flyers[i], t = (now-f.t)/420; if (t>=1) { flyers.splice(i,1); paintSlots(f.L); continue; }
     var e = 1-Math.pow(1-t, 3), x = f.x+(f.tx-f.x)*e, y = f.y+(f.ty-f.y)*e - Math.sin(t*Math.PI)*f.r, r = f.r*(1-.5*e);
     cx.fillStyle = 'hsl('+f.hue+',90%,70%)'; cx.beginPath(); cx.arc(x, y, r, 0, 6.283); cx.fill();
-    cx.fillStyle = '#1b2a44'; cx.font = '900 '+Math.round(r*1.15)+'px '+FONT; cx.textAlign='center'; cx.textBaseline='middle'; cx.fillText(f.ch.toUpperCase(), x, y+r*.06); }
+    cx.fillStyle = '#1b2a44'; cx.font = labelFont(f.ch, r); cx.textAlign='center'; cx.textBaseline='middle'; cx.fillText(f.ch.toUpperCase(), x, y+r*.06); }
 }
 
 /* boot */
@@ -562,8 +677,8 @@ document.addEventListener("keydown",function(e){
   var t=e.target;
   if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))e.stopPropagation();
 });
-</script><script id="bench-release">window.BENCH_RELEASE="tvgame 1.0.0+ca86857";</script>
-<a id="bench-release-pill" href="/releases.html#tvgame" title="release notes" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483000;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:#9aa4b2;background:rgba(20,23,28,.72);border:1px solid #2a3039;border-radius:999px;padding:5px 8px;text-decoration:none;opacity:.85">v1.0.0</a><!-- Public demo feedback bubble. Injected into every page of the demo site by
+</script><script id="bench-release">window.BENCH_RELEASE="tvgame 1.1.0+43ed5e3";</script>
+<a id="bench-release-pill" href="/releases.html#tvgame" title="release notes" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483000;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:#9aa4b2;background:rgba(20,23,28,.72);border:1px solid #2a3039;border-radius:999px;padding:5px 8px;text-decoration:none;opacity:.85">v1.1.0</a><!-- Public demo feedback bubble. Injected into every page of the demo site by
      publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
      touching the Bench or the tailnet). Submissions land in Netlify → Forms.
      The hidden <form> below is what Netlify parses at deploy time to register the
