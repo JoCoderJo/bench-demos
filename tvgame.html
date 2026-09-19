@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="tvgame 1.1.0+43ed5e3" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
+<head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="tvgame 1.1.0+1e67d49" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#0e1b33">
@@ -40,6 +40,11 @@
   lit row, Enter (or Space) starts. The score screen takes Enter (play again) and Esc (menu) too.
   A TV remote over HDMI-CEC sends the same arrow and OK keys. LM_GAME=math in pi/run.sh opens
   the kiosk straight on Math.
+
+  A camera that will not start (request #161: on a Windows laptop there was no picture and no word
+  why) says so in plain words with the browser's error name: under Camera on the menu, and on the
+  game screen when START asked for it. The failure turns Camera Off for this visit only and is not
+  saved, so the next visit tries the camera again.
 -->
 <style>
  :root{--p1:#ffb340;--p2:#5ee0a0;--ink:#fff;--sky1:#0e1b33;--sky2:#1d3f7a;--sky3:#2f77c9}
@@ -141,6 +146,11 @@
    font-weight:900;font-size:clamp(40px,11vmin,140px);color:#fff;text-shadow:0 6px 0 rgba(0,0,0,.3),0 0 30px rgba(255,200,80,.8);
    opacity:0;transition:opacity .25s,transform .25s}
  #toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+ /* #161: why the camera failed, on the game screen (the menu and its note are hidden by then); taps go through it */
+ #camMsg{position:absolute;left:50%;bottom:max(12px,3vh);transform:translateX(-50%);z-index:4;width:max-content;
+   max-width:min(92vw,720px);background:rgba(6,14,32,.9);border:2px solid #ffd37a;border-radius:16px;padding:10px 16px;
+   font-weight:800;font-size:clamp(14px,2.4vmin,20px);line-height:1.35;text-align:center;pointer-events:none;display:none}
+ #camMsg.show{display:block}
  body.kiosk{cursor:none}
 </style>
 </head>
@@ -152,6 +162,7 @@
 <button id="back" title="Menu" aria-label="Back to menu">✕</button>
 <div id="toast"></div>
 <div id="dbg"></div>
+<div id="camMsg"></div>
 
 <div id="menu" class="screen">
  <div class="panel">
@@ -298,7 +309,7 @@ var ROWS = [];  // the rows in menu order, for the arrow keys (#159): {id, el, b
 function seg(id, key, onchange){
   var el = document.getElementById(id), bs = el.querySelectorAll('button');
   function paint(){ bs.forEach(function(b){ b.classList.toggle('on', b.dataset.v === S[key]); }); }
-  bs.forEach(function(b){ b.addEventListener('click', function(){ S[key]=b.dataset.v; paint(); save(); if (onchange) onchange(); }); });
+  bs.forEach(function(b){ b.addEventListener('click', function(){ S[key]=b.dataset.v; if (key==='cam') camFailed = false; paint(); save(); if (onchange) onchange(); }); });
   paint(); SEG[id] = paint; ROWS.push({id:id, el:el.closest('.opt'), bs:bs, key:key});
 }
 /* keys on the start screen (#159): the Pi's TV has no mouse, so without these Math (or 2 players,
@@ -322,7 +333,10 @@ function menuKey(e){
   if (k === 'ArrowLeft' || k === 'ArrowRight') { pickOnRow(k === 'ArrowRight' ? 1 : -1); return true; }
   return false;
 }
-function save(){ try { localStorage.setItem('spellingPop', JSON.stringify(S)); } catch(e){} }
+// #161: a camera that failed shows Camera Off (camFailed), but that was not a tap, so it is saved as On:
+// before, the next tap on any row saved Off and every later visit started with the camera off
+var camFailed = false;
+function save(){ try { var o = {}; for (var k in S) o[k] = S[k]; if (camFailed) o.cam = '1'; localStorage.setItem('spellingPop', JSON.stringify(o)); } catch(e){} }
 seg('oGame','game', paintTitle); paintTitle(); seg('oPlayers','players'); seg('oGrade','grade'); seg('oSens','sens');
 seg('oCam','cam', function(){ if (S.cam==='1') camStart(); else camStop(); });
 seg('oLens','lens', function(){ if (stream) { camStop(); camStart(); } });   // swap the running camera straight away
@@ -362,9 +376,28 @@ function letterName(c){ return c.toUpperCase(); }
 var cam = document.getElementById('cam'), camNote = document.getElementById('camNote');
 var stream = null, grid = null;   // grid: {w,h,prev,motion,ctx,cv,k}
 var camReady = false;
+var camMsg = document.getElementById('camMsg'), camMsgT = 0;
+// why the camera did not start (#161): under Camera on the menu, and on the game screen when START asked
+// for it, since the menu is hidden by then. The browser's error name stays in the text so it can be reported.
+function camFail(text){
+  camNote.textContent = text;
+  if (!menu.hidden) return;
+  camMsg.textContent = '📷 ' + text; camMsg.classList.add('show');
+  clearTimeout(camMsgT); camMsgT = setTimeout(function(){ camMsg.classList.remove('show'); }, 12000);
+}
+function camWhy(err){
+  var n = err && err.name || 'Error';
+  if (n === 'NotAllowedError' || n === 'PermissionDeniedError' || n === 'SecurityError')
+    return 'Camera not allowed (' + n + '): allow it at the camera icon in the address bar (on Windows also Settings > Privacy > Camera), then tap Camera On. Tap the bubbles meanwhile.';
+  if (n === 'NotReadableError' || n === 'TrackStartError' || n === 'AbortError')
+    return 'The camera is busy (' + n + '): another app or browser tab is using it (Zoom, Teams, the Camera app, this game in another tab). Close it, then tap Camera On. Tap the bubbles meanwhile.';
+  if (n === 'NotFoundError' || n === 'DevicesNotFoundError')
+    return 'No webcam found (' + n + '): switch the laptop camera on (some have a camera key or slider) or plug one in, then tap Camera On. Tap the bubbles meanwhile.';
+  return 'The camera did not start (' + n + '): tap the bubbles instead.';
+}
 function camStart(){
   if (stream || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    if (!stream) camNote.textContent = window.isSecureContext ? 'No camera on this device: tap the bubbles instead.' : 'The camera needs an https link (or localhost): tap the bubbles instead.';
+    if (!stream) camFail(window.isSecureContext ? 'No camera on this device: tap the bubbles instead.' : 'The camera needs an https link (or localhost): tap the bubbles instead.');
     return Promise.resolve(!!stream);
   }
   camNote.textContent = 'Asking for the camera…';
@@ -375,7 +408,7 @@ function camStart(){
   return navigator.mediaDevices.getUserMedia({video:{facingMode:face, width:{ideal:640}, height:{ideal:480}, frameRate:{ideal:30, max:30}}, audio:false})
     .then(function(s){ stream = s; cam.srcObject = s; if (grid) grid.prev = null; return cam.play().catch(function(){}); })
     .then(function(){ camReady = true; cam.classList.add('on'); document.body.classList.add('camon'); camNote.textContent = 'Camera on (' + (face==='environment' ? 'back' : 'front') + ' lens). You should see the players behind this menu. Wave: the sparkles follow your hand.'; return true; })
-    .catch(function(err){ camNote.textContent = 'Camera not allowed (' + (err && err.name || 'error') + '): tap the bubbles instead.'; S.cam='0'; SEG.oCam(); return false; });
+    .catch(function(err){ camFail(camWhy(err)); S.cam='0'; camFailed = true; SEG.oCam(); return false; });
 }
 function camStop(){ if (stream) { stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; } cam.srcObject = null; cam.classList.remove('on'); document.body.classList.remove('camon'); camReady = false; camNote.textContent=''; }
 function gridSetup(W, H){
@@ -550,15 +583,15 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 /* start / stop */
 function startGame(){
   audio(); SFX.tap(); wakeOn();
-  if (S.cam==='1' && !stream) camStart();
   lanesEl.innerHTML = ''; lanes = []; particles = []; rings = []; flyers = []; sparkles = [];
   var n = S.players==='2' ? 2 : 1;
   for (var i=0; i<n; i++) lanes.push(makeLane(i, n));
   menu.hidden = true; endEl.hidden = true; backBtn.classList.add('show'); playing = true;
+  if (S.cam==='1' && !stream) camStart();   // after the menu hides, so a failure is told on the game screen (#161)
   resize(); lanes.forEach(function(L){ laneRect(L); nextWord(L); });
   if (!KIOSK && document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(function(){});
 }
-function toMenu(){ playing = false; lanes = []; lanesEl.innerHTML = ''; backBtn.classList.remove('show'); endEl.hidden = true; menu.hidden = false; wakeOff(); try { speechSynthesis.cancel(); } catch(e){} }
+function toMenu(){ playing = false; lanes = []; lanesEl.innerHTML = ''; backBtn.classList.remove('show'); camMsg.classList.remove('show'); endEl.hidden = true; menu.hidden = false; wakeOff(); try { speechSynthesis.cancel(); } catch(e){} }
 document.getElementById('start').addEventListener('click', startGame);
 document.getElementById('again').addEventListener('click', startGame);
 document.getElementById('toMenu').addEventListener('click', function(){ SFX.tap(); toMenu(); });
@@ -677,7 +710,7 @@ document.addEventListener("keydown",function(e){
   var t=e.target;
   if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))e.stopPropagation();
 });
-</script><script id="bench-release">window.BENCH_RELEASE="tvgame 1.1.0+43ed5e3";</script>
+</script><script id="bench-release">window.BENCH_RELEASE="tvgame 1.1.0+1e67d49";</script>
 <a id="bench-release-pill" href="/releases.html#tvgame" title="release notes" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483000;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:#9aa4b2;background:rgba(20,23,28,.72);border:1px solid #2a3039;border-radius:999px;padding:5px 8px;text-decoration:none;opacity:.85">v1.1.0</a><!-- Public demo feedback bubble. Injected into every page of the demo site by
      publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
      touching the Bench or the tailnet). Submissions land in Netlify → Forms.

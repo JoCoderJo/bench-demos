@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="rover 1.0.0+b632153" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script><meta charset="utf-8">
+<!DOCTYPE html><html lang="en"><head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="rover 1.0.0+815e14a" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Rover Bot Mission Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,8 +24,8 @@ h1 span{color:var(--brass)}
 .view{position:absolute;inset:0;overflow-y:auto;padding:12px 12px 20px;display:none}
 .view.on{display:block}
 #v-model{padding:0;overflow:hidden}
-#v-revs{padding:0;overflow:hidden}
-#v-revs iframe{width:100%;height:100%;border:0;display:block;background:#14171c}
+#v-revs,#v-live{padding:0;overflow:hidden}
+#v-revs iframe,#v-live iframe{width:100%;height:100%;border:0;display:block;background:#14171c}
 nav{flex:none;display:flex;background:#14171c;border-top:1px solid #343b47;padding-bottom:env(safe-area-inset-bottom)}
 nav button{flex:1;background:none;border:0;color:#6b7382;font-family:'IBM Plex Mono',monospace;
   font-size:10.5px;letter-spacing:.06em;padding:11px 0 9px;border-top:2px solid transparent}
@@ -409,6 +409,17 @@ nav button.on{color:var(--brass);border-top-color:var(--brass)}
     dashboard from the Bench app to use it — this copy is running off the drive.</div>
 </div>
 
+<!-- LIVE: the real rover — camera, map, telemetry and (for its driver) the joystick. Like REVS it
+     is the Bench's page in a frame (app/web/drive.html at /dash/drive); the Bench proxies the
+     rover's plain-http pages behind the login, so a USB/file:// copy cannot reach it and says so.
+     The frame is emptied on leaving the tab: no camera polling and no armed stick behind MODEL. -->
+<div class="view" id="v-live">
+  <iframe id="liveframe" title="Rover live" allow="fullscreen; screen-wake-lock"></iframe>   <!-- drive mode goes full screen and keeps the phone awake -->
+  <div id="liveoff" style="display:none;padding:18px;font-size:12.5px;line-height:1.6;color:var(--zinc)">
+    The live rover view comes through the Bench (<code>/dash/drive</code>). Open this dashboard from
+    the Bench app to use it — this copy is running off the drive.</div>
+</div>
+
 <div class="view" id="v-docs">
   <div class="docchips" id="docchips"></div>
   <div id="doc"></div>
@@ -422,6 +433,7 @@ nav button.on{color:var(--brass);border-top-color:var(--brass)}
 </div>
 <nav>
   <button class="on" data-v="dash" onclick="tab('dash')">DASH</button>
+  <button data-v="live" onclick="tab('live')">LIVE</button>
   <button data-v="model" onclick="tab('model')">MODEL</button>
   <button data-v="revs" onclick="tab('revs')">REVS</button>
   <button data-v="docs" onclick="tab('docs')">DOCS</button>
@@ -481,6 +493,15 @@ function tab(name){
   if(name==='model'&&!modelInit){modelInit=true;initModel();}
   if(name==='model'&&modelInit)resize3();
   if(name==='revs')openRevs();
+  setLive(name==='live');
+}
+// LIVE tab: the frame exists only while the tab is on show. Leaving it unloads the page — its
+// pagehide sends the rover an explicit stop, and the camera/state polling ends with it.
+function setLive(on){
+  const f=document.getElementById('liveframe');
+  if(!location.protocol.startsWith('http')){f.style.display='none';document.getElementById('liveoff').style.display=on?'block':'none';return}
+  if(on){if(!f.getAttribute('src'))f.src='/dash/drive'}
+  else if(f.getAttribute('src')){f.removeAttribute('src');try{f.contentWindow.location.replace('about:blank')}catch(e){}}
 }
 // REVS tab: load the explorer frame on first visit only (it pulls the rev manifest and STLs).
 // #revs deep-links straight to it; #revs/<state> hands the rest to the explorer's own hash
@@ -495,6 +516,8 @@ function openRevs(){
   }else{f.style.display='none';document.getElementById('revsoff').style.display='block';}
 }
 if(location.hash==='#revs'||location.hash.startsWith('#revs/'))tab('revs');
+if(location.hash==='#live')tab('live');
+addEventListener('hashchange',()=>{if(location.hash==='#live')tab('live')});
 // a #revs/<state> arriving while the page is open (a link tapped in the Bench, back/forward)
 // steers the already-loaded frame — same origin, so its hash is ours to set
 addEventListener('hashchange',()=>{if(!location.hash.startsWith('#revs'))return;tab('revs');
@@ -2507,7 +2530,7 @@ addEventListener("load",function(){
   });
   addEventListener("blur",function(){stop();});
 })();
-</script><script id="bench-release">window.BENCH_RELEASE="rover 1.0.0+b632153";</script>
+</script><script id="bench-release">window.BENCH_RELEASE="rover 1.0.0+815e14a";</script>
 <a id="bench-release-pill" href="/releases.html#rover" title="release notes" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483000;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:#9aa4b2;background:rgba(20,23,28,.72);border:1px solid #2a3039;border-radius:999px;padding:5px 8px;text-decoration:none;opacity:.85">v1.0.0</a><!-- Public demo feedback bubble. Injected into every page of the demo site by
      publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
      touching the Bench or the tailnet). Submissions land in Netlify → Forms.
