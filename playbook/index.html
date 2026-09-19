@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="playbook 1.0.0+c67a40b" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>The playbook — whiteboard</title>
+<style>
+ :root{--bg:#14171c;--tray:#1b1f26;--edge:#2a3039;--ink:#e6e8ea;--dim:#9aa4b2;
+       --brass:#c9a24b;--go:#3fb950;--warn:#d9a33a;--bad:#e5534b;--blue:#5f87ad;
+       --board:#fbfbf8;--pen:#1d3a8a;--motion:#c2410c;--chalk:#c9ced6}
+ *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+ html,body{height:100%}
+ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;
+      display:flex;flex-direction:column;overscroll-behavior:none}
+ button,select,input{font:inherit;color:inherit}
+ button{background:#232833;border:1px solid var(--edge);border-radius:9px;padding:8px 12px;min-height:40px;cursor:pointer}
+ button.on{border-color:var(--brass);color:var(--brass)}
+ button.go{background:#1f3a27;border-color:var(--go)}
+ button:disabled{opacity:.45;cursor:default}
+ select,input[type=text],input[type=number]{background:#10131a;border:1px solid var(--edge);border-radius:9px;padding:8px 10px;min-height:40px;width:100%}
+ header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--edge);
+        padding-top:calc(8px + env(safe-area-inset-top))}
+ header h1{font-size:17px;margin:0 6px 0 0;white-space:nowrap}
+ header label{color:var(--dim);font-size:12.5px;display:flex;align-items:center;gap:6px}
+ header select{width:auto}
+ .seg{display:inline-flex;border:1px solid var(--edge);border-radius:9px;overflow:hidden}
+ .seg button{border:0;border-radius:0;background:transparent;min-height:38px}
+ .seg button.on{background:#2b3140;color:var(--brass)}
+ .spacer{flex:1}
+ main{flex:1;display:flex;min-height:0}
+ #stage{flex:1;min-width:0;display:flex;flex-direction:column;padding:10px}
+ #fieldwrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+ #field{max-width:100%;max-height:100%;aspect-ratio:160/120;width:100%;background:var(--board);border-radius:10px;
+        border:3px solid var(--edge);touch-action:none;user-select:none;-webkit-user-select:none;display:block}
+ #field.illegal{border-color:var(--bad)}
+ #field.drawing{cursor:crosshair}
+ #simbar{display:flex;gap:10px;align-items:center;padding-top:8px}
+ #simbar input[type=range]{flex:1;min-width:0;accent-color:var(--brass);height:34px}
+ #clock{font:600 16px ui-monospace,monospace;min-width:78px;text-align:right}
+ #panel{width:340px;flex:none;border-left:1px solid var(--edge);overflow-y:auto;padding:10px;
+        padding-bottom:calc(16px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+ .tray{background:var(--tray);border:1px solid var(--edge);border-radius:12px;padding:11px;margin:0 0 10px}
+ .tray h2{font-size:12.5px;margin:0 0 8px;letter-spacing:.4px;text-transform:uppercase;color:var(--dim)}
+ #legal{position:sticky;top:0;z-index:2}                          /* the verdict stays in view while the panel scrolls */
+ #legal.ok{border-color:var(--go)} #legal.no{border-color:var(--bad)}
+ #legal .verdict{font-weight:700;font-size:16px}
+ #legal.ok .verdict{color:var(--go)} #legal.no .verdict{color:var(--bad)}
+ #legal ul{margin:6px 0 0;padding-left:18px;font-size:14px}
+ #legal li.w{color:var(--warn)}
+ #legal .count{color:var(--dim);font-size:13px;margin-top:6px}
+ .callbig{font-size:18px;font-weight:700;margin:0 0 8px;word-break:break-word}
+ .field2{display:grid;grid-template-columns:82px 1fr;gap:6px 8px;align-items:center;font-size:13px;color:var(--dim)}
+ .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+ .chips button{min-height:34px;padding:5px 10px;border-radius:999px;font-size:13px}
+ .rowbtns{display:flex;gap:8px;margin-top:10px}.rowbtns button{flex:1}
+ .tree{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+ .tree button{padding:6px 2px;min-height:46px;font-size:12px;line-height:1.15}
+ .tree button b{display:block;font-size:15px}
+ .tree.wide{grid-template-columns:repeat(3,1fr);margin-top:6px}
+ .hint{color:var(--dim);font-size:13px;margin:8px 0 0}
+ #msg{min-height:20px;font-size:13.5px;margin-top:8px;color:var(--go)} #msg.bad{color:var(--bad)}
+ /* field drawing (units are yards) */
+ .yl{stroke:var(--chalk);stroke-width:.12} .yl.los{stroke:var(--blue);stroke-width:.3}
+ .side{stroke:#8a929e;stroke-width:.35;fill:none} .hash{stroke:#aab1bb;stroke-width:.12}
+ .fnote{fill:#a3abb6;font-size:1.05px;font-family:system-ui,sans-serif}
+ .route{fill:none;stroke:var(--pen);stroke-width:.32;stroke-linejoin:round;stroke-linecap:round}
+ .route.block{stroke:#4b5563} .route.motion{stroke:var(--motion);stroke-dasharray:.7 .55}
+ .route.ghost{stroke:#9aa4b2;stroke-dasharray:.3 .4}
+ .tip{fill:var(--pen);stroke:none} .tip.motion{fill:var(--motion)}
+ .man circle,.man rect{fill:#fff;stroke:#111;stroke-width:.2}
+ .man text{font:700 1.15px system-ui,sans-serif;fill:#111;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+ .man .num{font:500 .72px system-ui,sans-serif;fill:#6b7280}
+ .man.cov circle{stroke-dasharray:.35 .25;stroke:#6b7280} .man.cov text{fill:#6b7280}
+ .man.bad circle,.man.bad rect{stroke:var(--bad);stroke-width:.34;fill:#fde8e6} .man.bad text{fill:#a1261f}
+ .man.sel circle,.man.sel rect{stroke:var(--brass);stroke-width:.4}
+ .man.shadow circle,.man.shadow rect{fill:none;stroke:#b8bec8;stroke-dasharray:.3 .3}
+ .man.shadow text{fill:#b8bec8}
+ .def text{font:700 1.1px system-ui,sans-serif;fill:#b42318;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+ .def path{fill:#fff;stroke:#b42318;stroke-width:.18} .def.sel path{stroke:var(--brass);stroke-width:.4}
+ #field .hit{fill:transparent!important;stroke:none!important}   /* the finger-sized target; must beat .man circle */
+ .handle{fill:#fff;stroke:var(--brass);stroke-width:.22} .handle.mid{fill:var(--brass);opacity:.55;stroke:none}
+ .handle.motion{stroke:var(--motion)}
+ /* the call sheet */
+ #sheet{position:fixed;inset:0;background:#0d1015;z-index:20;display:none;flex-direction:column}
+ #sheet.open{display:flex}
+ #sheetbar{display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--edge);
+           padding-top:calc(10px + env(safe-area-inset-top))}
+ #sheetbar h2{margin:0;font-size:18px} #sheetbar small{color:var(--dim)}
+ #sheetbody{flex:1;overflow:auto;padding:10px;-webkit-overflow-scrolling:touch}
+ table.sheet{border-collapse:separate;border-spacing:6px;min-width:100%}
+ table.sheet thead th{position:sticky;top:0;background:#0d1015;color:var(--brass);font-size:12.5px;text-transform:uppercase;letter-spacing:.4px;padding:6px;text-align:left;z-index:1}
+ table.sheet th.form{background:var(--tray);border:1px solid var(--edge);border-radius:10px;padding:10px;text-align:left;font-size:15px;vertical-align:top;min-width:120px}
+ table.sheet th.form small{display:block;color:var(--dim);font-weight:400}
+ table.sheet td{vertical-align:top;background:#12151b;border:1px solid var(--edge);border-radius:10px;padding:6px;min-width:150px}
+ .tile{margin:0 0 6px} .tile:last-child{margin:0}
+ .tile .open{display:block;width:100%;text-align:left;padding:6px;background:#1d2633;border-color:#31405a;position:relative}
+ .tile .art{display:block;width:100%;height:auto;background:#0f3d24;border-radius:6px;margin-bottom:5px}
+ .tile .no{position:absolute;top:9px;left:10px;font:700 12px ui-monospace,monospace;background:var(--brass);color:#111;border-radius:5px;padding:0 5px}
+ .tile .lv{position:absolute;top:9px;right:10px;font:600 10.5px ui-monospace,monospace;color:#cfe3d6}
+ .tile .nm{display:block;font-weight:600;font-size:13.5px;line-height:1.25}
+ .tile .tools{display:flex;gap:6px;margin-top:4px} .tile .tools button{flex:1;min-height:34px;padding:4px;font-size:12.5px}
+ .a-los{stroke:#7fb996;stroke-width:.25} .a-man{fill:#fff} .a-route{fill:none;stroke:#ffd84a;stroke-width:.45;stroke-linejoin:round}
+ .a-block{fill:none;stroke:#cbd5e1;stroke-width:.4} .a-motion{fill:none;stroke:#ff9d5c;stroke-width:.4;stroke-dasharray:.8 .6}
+ .sheet-empty{color:var(--dim);padding:30px;text-align:center}
+ @media(max-width:820px),(orientation:portrait){main{flex-direction:column;overflow-y:auto}#stage{flex:none}
+   #fieldwrap{flex:none}#panel{width:auto;border-left:0;border-top:1px solid var(--edge);overflow:visible}}
+</style>
+</head>
+<body>
+<header>
+ <h1>The playbook</h1>
+ <span class="seg" id="level" role="group" aria-label="Rule set">
+  <button data-v="hs">High school</button><button data-v="college">College</button></span>
+ <label>Ball <span class="seg" id="spot" role="group" aria-label="Ball spot">
+  <button data-v="L">L hash</button><button data-v="M">Mid</button><button data-v="R">R hash</button></span></label>
+ <label>Formation <select id="formation"></select></label>
+ <button id="flip">Flip</button>
+ <label>Defense <select id="defense"></select></label>
+ <span class="spacer"></span>
+ <button id="new">New play</button>
+ <button id="opensheet" class="on">Call sheet <span id="sheetcount"></span></button>
+</header>
+<main>
+ <section id="stage">
+  <div id="fieldwrap"><svg id="field" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The field"></svg></div>
+  <div id="simbar"><button id="simplay" class="go">Play</button><button id="simreset">Reset</button>
+   <input id="simscrub" type="range" aria-label="Time"><span id="clock">SET</span></div>
+ </section>
+ <aside id="panel">
+  <div class="tray" id="legal"></div>
+  <div class="tray" id="callbox">
+   <h2>Play call</h2>
+   <p class="callbig" id="callbig"></p>
+   <div class="field2">
+    <span>Formation</span><input type="text" id="c-formation" autocomplete="off">
+    <span>Motion</span><input type="text" id="c-motion" autocomplete="off" placeholder="X-motion bunch">
+    <span>Play</span><input type="text" id="c-play" autocomplete="off" placeholder="UNC">
+    <span>Tags</span><input type="text" id="c-tags" autocomplete="off" placeholder="T flat">
+    <span>Call it</span><input type="text" id="c-name" autocomplete="off" placeholder="built from the four above">
+   </div>
+   <div class="chips" id="situations"></div>
+   <div class="rowbtns"><button id="save" class="go">Save to sheet</button><button id="dupe">Duplicate</button></div>
+   <div id="msg" role="status"></div>
+  </div>
+  <div class="tray" id="inspector"></div>
+ </aside>
+</main>
+<div id="sheet" aria-hidden="true">
+ <div id="sheetbar"><h2>Call sheet</h2><small id="sheetsum"></small><span class="spacer"></span>
+  <button id="sheetedit">Edit</button><button id="export">Export</button><button id="import">Import</button>
+  <input id="importfile" type="file" accept=".json,application/json" hidden>
+  <button id="closesheet" class="on">Back to the board</button></div>
+ <div id="sheetbody"></div>
+</div>
+<script src="model.js"></script>
+<script src="rules.js"></script>
+<script src="sim.js"></script>
+<script src="callsheet.js"></script>
+<script src="board.js"></script>
+<script id="bench-release">window.BENCH_RELEASE="playbook 1.0.0+c67a40b";</script>
+<a id="bench-release-pill" href="/releases.html#playbook" title="release notes" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483000;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:#9aa4b2;background:rgba(20,23,28,.72);border:1px solid #2a3039;border-radius:999px;padding:5px 8px;text-decoration:none;opacity:.85">v1.0.0</a><!-- Public demo feedback bubble. Injected into every page of the demo site by
+     publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
+     touching the Bench or the tailnet). Submissions land in Netlify → Forms.
+     The hidden <form> below is what Netlify parses at deploy time to register the
+     form; the visible UI posts to "/" by AJAX with the same field names. -->
+<form name="demo-feedback" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="text" name="form-name" value="demo-feedback">
+  <input type="text" name="bot-field">
+  <input type="text" name="demo">
+  <input type="text" name="kind">
+  <input type="text" name="release">
+  <input type="text" name="contact">
+  <textarea name="message"></textarea>
+</form>
+<div id="bench-fb"></div>
+<script>
+(function () {
+  if (window.__benchFb) return; window.__benchFb = 1;
+  var Z = 2147483000, open = false, sending = false;
+  // Everyone shares one passcode, so a note is anonymous unless the tester says who they are.
+  // Hand each person a link like  https://…/?who=jane  and the name rides along automatically;
+  // it is remembered on that device, and they can still overwrite it in the box.
+  var WHO_KEY = 'bench-who';
+  var who = '';
+  try {
+    var q = new URLSearchParams(location.search).get('who');
+    if (q) { who = q.slice(0, 40); localStorage.setItem(WHO_KEY, who); }
+    else { who = localStorage.getItem(WHO_KEY) || ''; }
+  } catch (e) {}
+
+  var demo = (function () {
+    var p = location.pathname;
+    if (p.indexOf('/manito') === 0) return 'Manito Park App';
+    if (p.indexOf('/rover') === 0) return 'Rover Bot';
+    if (p.indexOf('/scam') === 0) return 'Voice AI Scam Filter';
+    return 'Demos home';
+  })();
+
+  var css = document.createElement('style');
+  css.textContent =
+    '#bfb-btn{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:' + Z + ';' +
+      'width:54px;height:54px;border-radius:50%;border:0;background:#c9a24b;color:#14171c;font-size:24px;' +
+      'line-height:1;cursor:pointer;box-shadow:0 3px 14px rgba(0,0,0,.45)}' +
+    '#bfb-btn:active{transform:scale(.95)}' +
+    '#bfb-wrap{position:fixed;inset:0;z-index:' + (Z + 1) + ';background:rgba(0,0,0,.6);display:flex;' +
+      'align-items:flex-end;justify-content:center;padding:16px}' +
+    '#bfb-card{width:100%;max-width:430px;background:#12161c;color:#e6e8ea;border:1px solid #262b33;' +
+      'border-radius:16px;padding:18px;max-height:88vh;overflow:auto;' +
+      'font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}' +
+    '#bfb-card h3{margin:0 0 3px;font-size:18px}' +
+    '#bfb-card p.sub{margin:0 0 13px;font-size:13px;color:#9aa4b2}' +
+    '#bfb-card label{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;' +
+      'color:#9aa4b2;margin:11px 0 4px}' +
+    '#bfb-card input,#bfb-card textarea,#bfb-card select{width:100%;background:#0d1014;color:#e6e8ea;' +
+      'border:1px solid #262b33;border-radius:10px;padding:11px 12px;font-size:16px}' +
+    '#bfb-card textarea{min-height:104px;resize:vertical}' +
+    '#bfb-row{display:flex;gap:9px;margin-top:14px}' +
+    '#bfb-row button{flex:1;padding:12px;border-radius:10px;font:600 14px system-ui,sans-serif;cursor:pointer}' +
+    '#bfb-cancel{background:transparent;color:#9aa4b2;border:1px solid #262b33}' +
+    '#bfb-send{background:#c9a24b;color:#14171c;border:0}' +
+    '#bfb-msg{font-size:13px;margin-top:10px;color:#9aa4b2}';
+  document.head.appendChild(css);
+
+  var btn = document.createElement('button');
+  btn.id = 'bfb-btn'; btn.type = 'button';
+  btn.setAttribute('aria-label', 'Send feedback');
+  btn.textContent = '💬';
+  document.body.appendChild(btn);
+
+  function close() { var w = document.getElementById('bfb-wrap'); if (w) w.remove(); open = false; }
+
+  btn.onclick = function () {
+    if (open) return close();
+    open = true;
+    var wrap = document.createElement('div');
+    wrap.id = 'bfb-wrap';
+    wrap.innerHTML =
+      '<div id="bfb-card">' +
+        '<h3>Tell us what you found</h3>' +
+        '<p class="sub">' + demo + ' — bugs, confusing bits, or things you wish it did.</p>' +
+        '<label>What kind of note is this?</label>' +
+        '<select id="bfb-kind">' +
+          '<option>Something is broken</option>' +
+          '<option>Something is confusing</option>' +
+          '<option>Idea / feature request</option>' +
+          '<option>It worked well</option>' +
+        '</select>' +
+        '<label>What happened?</label>' +
+        '<textarea id="bfb-text" placeholder="As specific as you can — what you tapped, what you expected, what you got."></textarea>' +
+        '<label>Who is this? (so we can follow up)</label>' +
+        '<input id="bfb-contact" autocomplete="off" placeholder="so we know who this came from">' +
+        '<div id="bfb-row"><button id="bfb-cancel" type="button">Cancel</button>' +
+        '<button id="bfb-send" type="button">Send</button></div>' +
+        '<div id="bfb-msg"></div>' +
+      '</div>';
+    document.body.appendChild(wrap);
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
+    document.getElementById('bfb-cancel').onclick = close;
+    if (who) document.getElementById('bfb-contact').value = who;
+    document.getElementById('bfb-text').focus();
+
+    document.getElementById('bfb-send').onclick = function () {
+      if (sending) return;
+      var text = document.getElementById('bfb-text').value.trim();
+      var msg = document.getElementById('bfb-msg');
+      if (text.length < 4) { msg.textContent = 'Add a little more detail first.'; return; }
+      sending = true; msg.textContent = 'Sending…';
+      var body = new URLSearchParams({
+        'form-name': 'demo-feedback',
+        'demo': demo,
+        'kind': document.getElementById('bfb-kind').value,
+        'release': String(window.BENCH_RELEASE || '').slice(0, 60),   // "phonics 1.0.0+eb48367", stamped by publish-demos-site.sh
+        'contact': document.getElementById('bfb-contact').value.slice(0, 120),
+        'message': text.slice(0, 4000)
+      }).toString();
+      fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body })
+        .then(function (r) {
+          sending = false;
+          if (!r.ok) throw new Error(r.status);
+          document.getElementById('bfb-card').innerHTML =
+            '<h3>Thank you — got it.</h3><p class="sub">That goes straight to the two of us building this.</p>' +
+            '<div id="bfb-row"><button id="bfb-send" type="button">Close</button></div>';
+          document.getElementById('bfb-send').onclick = close;
+        })
+        .catch(function () {
+          sending = false;
+          msg.textContent = 'Could not send — check your connection and try again.';
+        });
+    };
+  };
+})();
+</script></body>
+</html>
