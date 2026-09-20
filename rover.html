@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="rover 1.0.0+815e14a" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script><meta charset="utf-8">
+<!DOCTYPE html><html lang="en"><head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="rover 1.0.0+f8ff38f" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Rover Bot Mission Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,6 +26,11 @@ h1 span{color:var(--brass)}
 #v-model{padding:0;overflow:hidden}
 #v-revs,#v-live{padding:0;overflow:hidden}
 #v-revs iframe,#v-live iframe{width:100%;height:100%;border:0;display:block;background:#14171c}
+/* SHEET: a project chip row over the framed section sheet — the frame takes what is left */
+#v-sheet{padding:0;overflow:hidden}
+#v-sheet.on{display:flex;flex-direction:column}
+#v-sheet .docchips{flex:none;margin:0;padding:8px 10px;border-bottom:1px solid #343b47;background:#1f232b}
+#v-sheet iframe{flex:1;min-height:0;width:100%;border:0;display:block;background:#14171c}
 nav{flex:none;display:flex;background:#14171c;border-top:1px solid #343b47;padding-bottom:env(safe-area-inset-bottom)}
 nav button{flex:1;background:none;border:0;color:#6b7382;font-family:'IBM Plex Mono',monospace;
   font-size:10.5px;letter-spacing:.06em;padding:11px 0 9px;border-top:2px solid transparent}
@@ -420,6 +425,20 @@ nav button.on{color:var(--brass);border-top-color:var(--brass)}
     the Bench app to use it — this copy is running off the drive.</div>
 </div>
 
+<!-- SHEET: the section sheet (tools/sections.py, drawn on every commit) — the assembly cut open,
+     every overlap the clash gate measures painted red, the rev kit per printed part. It was a card
+     of its own out on the Bench (/dash/sections/); since request #168 it lives here, framed like
+     REVS and LIVE, one chip per project in this repo that has a sheet. The pages are still served
+     by the Bench — they are ~1 MB of inlined PNG each — so a USB/file:// copy says so. -->
+<div class="view" id="v-sheet">
+  <div class="docchips" id="sheetchips"></div>
+  <iframe id="sheetframe" title="Section sheet"></iframe>
+  <div id="sheetoff" style="display:none;padding:18px;font-size:12.5px;line-height:1.6;color:var(--zinc)">
+    The section sheet is drawn on every commit (<code>tools/sections.py</code>) and served by the
+    Bench (<code>/dash/sections/</code>). Open this dashboard from the Bench app to read it — this
+    copy is running off the drive.</div>
+</div>
+
 <div class="view" id="v-docs">
   <div class="docchips" id="docchips"></div>
   <div id="doc"></div>
@@ -436,6 +455,7 @@ nav button.on{color:var(--brass);border-top-color:var(--brass)}
   <button data-v="live" onclick="tab('live')">LIVE</button>
   <button data-v="model" onclick="tab('model')">MODEL</button>
   <button data-v="revs" onclick="tab('revs')">REVS</button>
+  <button data-v="sheet" onclick="tab('sheet')">SHEET</button>
   <button data-v="docs" onclick="tab('docs')">DOCS</button>
   <button data-v="stock" onclick="tab('stock')">STOCK</button>
 </nav>
@@ -461,9 +481,9 @@ const GITLOG=[], REVS=[], KIT=[], BUILT={}, ISSUES=[], FILES=[];
       +E(p.file)+' ×'+E(p.qty)
       +(p.changed?' <span style="color:var(--brass)">'+(p.new?'new in':'changed in')+' rev '+E(k.model_rev)+' — reprint</span>':'')
       +'<em>'+E(p.label)+(p.changed?'':' · same solid since rev '+E(p.rev))+'</em></div></li>'));
-    // the section sheet is served by the Bench (/dash/sections/); a file:// copy has no server
-    if(k.sheet&&/^https?:$/.test(location.protocol))ka.insertAdjacentHTML('beforeend',
-      '<button class="art" onclick="location.href=\'/dash/sections/'+E(k.project)+'.html\'">▶ SECTION SHEET · '+E(k.project)+' cut open, clashes in red</button>');
+    // the section sheet opens in this dashboard's SHEET tab now (request #168), not out on the Bench
+    if(k.sheet)ka.insertAdjacentHTML('beforeend',
+      '<button class="art" onclick="openSheet(\''+E(k.project)+'\')">▶ SECTION SHEET · '+E(k.project)+' cut open, clashes in red</button>');
   });
   const gl=document.getElementById('gitlog');
   GITLOG.forEach(c=>gl.insertAdjacentHTML('beforeend',
@@ -493,6 +513,7 @@ function tab(name){
   if(name==='model'&&!modelInit){modelInit=true;initModel();}
   if(name==='model'&&modelInit)resize3();
   if(name==='revs')openRevs();
+  if(name==='sheet')loadSheet();
   setLive(name==='live');
 }
 // LIVE tab: the frame exists only while the tab is on show. Leaving it unloads the page — its
@@ -515,9 +536,36 @@ function openRevs(){
     f.src='/dash/revs'+st;
   }else{f.style.display='none';document.getElementById('revsoff').style.display='block';}
 }
+// SHEET tab: the section sheet of one project, framed. The Bench serves the pages sections.py
+// publishes (/dash/sections/<project>.html) — until request #168 they were a card of their own
+// out on the Bench, and the sheet is a rover-project page, so it is read here now. One chip per
+// project in this repo that has a sheet (KIT[].sheet); the frame loads on first visit and only
+// when the chosen project changes. #sheet and #sheet/<project> deep-link it.
+let sheetProj='',sheetWant='';
+function openSheet(project){sheetWant=project||'';tab('sheet');}
+function loadSheet(){
+  const box=document.getElementById('sheetchips'),f=document.getElementById('sheetframe'),
+        off=document.getElementById('sheetoff'),list=(KIT||[]).filter(k=>k.sheet).map(k=>k.project);
+  const want=list.includes(sheetWant)?sheetWant:(list.includes(sheetProj)?sheetProj
+             :(list.includes('rover-drive')?'rover-drive':list[0]));
+  sheetWant='';
+  if(!list.length||!location.protocol.startsWith('http')){
+    f.style.display='none';box.style.display='none';off.style.display='block';
+    if(!list.length&&location.protocol.startsWith('http'))
+      off.textContent='No section sheet in this release yet — tools/sections.py draws one per project on every commit.';
+    return;
+  }
+  if(!box.children.length)list.forEach(p=>{
+    const b=document.createElement('button');b.className='chip';b.textContent=p;
+    b.onclick=()=>openSheet(p);box.appendChild(b);});
+  document.querySelectorAll('#sheetchips .chip').forEach(c=>c.classList.toggle('on',c.textContent===want));
+  if(want!==sheetProj){sheetProj=want;f.src='/dash/sections/'+encodeURIComponent(want)+'.html';}
+}
 if(location.hash==='#revs'||location.hash.startsWith('#revs/'))tab('revs');
 if(location.hash==='#live')tab('live');
-addEventListener('hashchange',()=>{if(location.hash==='#live')tab('live')});
+if(location.hash==='#sheet'||location.hash.startsWith('#sheet/'))openSheet(location.hash.slice(7));
+addEventListener('hashchange',()=>{if(location.hash==='#live')tab('live');
+  if(location.hash==='#sheet'||location.hash.startsWith('#sheet/'))openSheet(location.hash.slice(7));});
 // a #revs/<state> arriving while the page is open (a link tapped in the Bench, back/forward)
 // steers the already-loaded frame — same origin, so its hash is ours to set
 addEventListener('hashchange',()=>{if(!location.hash.startsWith('#revs'))return;tab('revs');
@@ -2530,7 +2578,7 @@ addEventListener("load",function(){
   });
   addEventListener("blur",function(){stop();});
 })();
-</script><script id="bench-release">window.BENCH_RELEASE="rover 1.0.0+815e14a";</script>
+</script><script id="bench-release">window.BENCH_RELEASE="rover 1.0.0+f8ff38f";</script>
 <a id="bench-release-pill" href="/releases.html#rover" title="release notes" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483000;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:#9aa4b2;background:rgba(20,23,28,.72);border:1px solid #2a3039;border-radius:999px;padding:5px 8px;text-decoration:none;opacity:.85">v1.0.0</a><!-- Public demo feedback bubble. Injected into every page of the demo site by
      publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
      touching the Bench or the tailnet). Submissions land in Netlify → Forms.
