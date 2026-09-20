@@ -49,14 +49,30 @@
     'Empty':       [sk('X', 1, -18, 0), sk('F', 4, -12, -1), sk('T', 22, -7, -1), sk('Y', 88, 9, -1), sk('Z', 2, 17, 0), sk('Q', 12, 0, -5)]
   };
 
-  // Defense, for the picture and an 11-player count only (no defensive rules in this card).
-  function df(id, x, y) { return { id: id, label: id.replace(/\d+$/, ''), x: x, y: y }; }
+  // Defense (#166): a picture, an 11-player count, and a coverage tag on every defender, like the
+  // coverage art in Madden. No defensive rules and no movement yet: the focus is the offense.
+  //   cover = { type:'rush' }
+  //         | { type:'zone', zone:'flat'|'hook'|'third'|'half', side:'L'|'M'|'R', x? }   x = a hook's landmark, from the ball
+  //         | { type:'man', on:1|2|3|'back' }   the receiver counted from the sideline on the defender's own side, or a back
+  //         | { type:'man', id:'X' }            a player the coach picked
+  // A man target is worked out from where everyone lines up when it is drawn (coverage() below), so it
+  // survives a new formation, motion and a flip. A defender with no tag (an old saved play) draws plain.
+  var RUSH = { type: 'rush' };
+  function zone(kind, side, x) { var z = { type: 'zone', zone: kind, side: side }; if (x != null) z.x = x; return z; }
+  function manOn(n) { return { type: 'man', on: n }; }
+  function df(id, x, y, cover) { return { id: id, label: id.replace(/\d+$/, ''), x: x, y: y, cover: cover }; }
+  var DEFAULT_DEFENSE = '4-3 Cover 3';
   var DEFENSES = {
     'None': [],
-    '4-3 Cover 3': [df('E1', -4.5, 1), df('T1', -1.5, 1), df('T2', 1.5, 1), df('E2', 4.5, 1), df('S', -5, 4.5), df('M', 0, 4.5), df('W', 5, 4.5),
-                    df('C1', -16, 7), df('C2', 16, 7), df('SS', 7, 8), df('FS', 0, 13)],
-    '4-2-5 Cover 2': [df('E1', -4.5, 1), df('T1', -1.5, 1), df('T2', 1.5, 1), df('E2', 4.5, 1), df('M', -2.5, 4.5), df('W', 2.5, 4.5),
-                      df('N', -9, 4), df('C1', -16, 5), df('C2', 16, 5), df('SS', -8, 12), df('FS', 8, 12)]
+    '4-3 Cover 3': [df('E1', -4.5, 1, RUSH), df('T1', -1.5, 1, RUSH), df('T2', 1.5, 1, RUSH), df('E2', 4.5, 1, RUSH),
+                    df('S', -5, 4.5, zone('flat', 'L')), df('M', 0, 4.5, zone('hook', 'L', -4.5)), df('W', 5, 4.5, zone('hook', 'R', 4.5)),
+                    df('C1', -16, 7, zone('third', 'L')), df('C2', 16, 7, zone('third', 'R')), df('SS', 7, 8, zone('flat', 'R')), df('FS', 0, 13, zone('third', 'M'))],
+    '4-2-5 Cover 2': [df('E1', -4.5, 1, RUSH), df('T1', -1.5, 1, RUSH), df('T2', 1.5, 1, RUSH), df('E2', 4.5, 1, RUSH),
+                      df('M', -2.5, 4.5, zone('hook', 'M', 0)), df('W', 2.5, 4.5, zone('hook', 'R', 8)), df('N', -9, 4, zone('hook', 'L', -8)),
+                      df('C1', -16, 5, zone('flat', 'L')), df('C2', 16, 5, zone('flat', 'R')), df('SS', -8, 12, zone('half', 'L')), df('FS', 8, 12, zone('half', 'R'))],
+    '4-2-5 Cover 1': [df('E1', -4.5, 1, RUSH), df('T1', -1.5, 1, RUSH), df('T2', 1.5, 1, RUSH), df('E2', 4.5, 1, RUSH),
+                      df('M', -2.5, 4.5, manOn('back')), df('W', 2.5, 4.5, zone('hook', 'M', 0)), df('N', -9, 5, manOn(2)),
+                      df('C1', -16, 6, manOn(1)), df('C2', 16, 6, manOn(1)), df('SS', 8, 7, manOn(2)), df('FS', 0, 14, zone('third', 'M'))]
   };
 
   // ---- the route tree ---------------------------------------------------------------------------
@@ -101,7 +117,12 @@
     var bx = ballX(level, spot);
     return Math.min(Math.max(x, SIDELINE_ROOM - bx), FIELD.width - SIDELINE_ROOM - bx);
   }
-  function newPlay(formation, level, spot) {
+  function setDefense(play, name) {                     // a preset scheme, pulled inbounds for this hash
+    play.defenseName = name;
+    play.defense = clone(DEFENSES[name] || []).map(function (d) { d.x = clampX(d.x, play.level, play.ball); return d; });
+    return play;
+  }
+  function newPlay(formation, level, spot, defense) {   // every new play starts against a scheme (#166)
     var f = FORMATIONS[formation] ? formation : 'Trips Left';
     var players = line().concat(clone(FORMATIONS[f]));
     players.forEach(function (p) {
@@ -109,9 +130,9 @@
       p.route = p.num >= 50 && p.num <= 79 ? buildRoute(p, 'block') : null;
       p.motion = null;
     });
-    return { id: '', level: level || 'hs', ball: spot || 'M', formation: f, situations: [],
+    return setDefense({ id: '', level: level || 'hs', ball: spot || 'M', formation: f, situations: [],
              call: { formation: f, motion: '', play: '', tags: '' }, name: '', nameEdited: false,
-             players: players, defense: [], notes: '' };
+             players: players, defense: [], notes: '' }, DEFENSES[defense] ? defense : DEFAULT_DEFENSE);
   }
   function setFormation(play, formation) {              // keeps the call and the sheet slots, resets the 11
     var fresh = newPlay(formation, play.level, play.ball);
@@ -131,7 +152,13 @@
       if (p.route) p.route.pts = fl(p.route.pts);
       if (p.motion) p.motion.pts = fl(p.motion.pts);
     });
-    (play.defense || []).forEach(function (d) { d.x = -d.x; });
+    (play.defense || []).forEach(function (d) {
+      d.x = -d.x;
+      if (d.cover && d.cover.type === 'zone') {
+        d.cover.side = d.cover.side === 'L' ? 'R' : d.cover.side === 'R' ? 'L' : 'M';
+        if (d.cover.x != null) d.cover.x = -d.cover.x;
+      }
+    });
     var sw = function (s) { return String(s || '').replace(/\b(Left|Right)\b/g, function (m) { return m === 'Left' ? 'Right' : 'Left'; }); };
     play.formation = sw(play.formation); play.call.formation = sw(play.call.formation);
     play.ball = play.ball === 'L' ? 'R' : play.ball === 'R' ? 'L' : 'M';
@@ -147,6 +174,91 @@
   function suggestMotion(play) {                        // "X-motion" for whoever has a motion path
     var m = play.players.filter(function (p) { return p.motion && p.motion.pts.length; });
     return m.map(function (p) { return p.label + '-motion'; }).join(' ');
+  }
+  // The dynamic call (#165): "X Hitch, T Flat" for every route picked off the tree. A lineman's
+  // block is the default and a drawn route has no name, so neither is a tag.
+  function suggestTags(play) {
+    return play.players.filter(function (p) {
+      return p.route && routeDef(p.route.type) && !(p.route.type === 'block' && p.num >= 50 && p.num <= 79);
+    }).map(function (p) { return p.label + ' ' + routeDef(p.route.type).name; }).join(', ');
+  }
+  // Call with what suggestTags() said BEFORE the change: Tags follow the routes while they are
+  // empty or still what the board wrote, and are left alone once the coach typed his own.
+  function keepTags(play, was) {
+    var t = String(play.call.tags || '').trim();
+    if (!t || t === was) play.call.tags = suggestTags(play);
+    return play;
+  }
+
+  // ---- coverage (#166) ----------------------------------------------------------------------------
+  var ZONES = { flat: 'Flat', hook: 'Hook', third: 'Deep third', half: 'Deep half' };
+  var SIDES = { L: 'left', M: 'middle', R: 'right' };
+  function zoneName(c) {
+    if (c.zone === 'third' && c.side === 'M') return 'Deep middle';
+    return (ZONES[c.zone] || c.zone) + ' ' + (SIDES[c.side] || '');
+  }
+  // The box a zone covers, in yards from the ball: { x, y } is its middle. The deep zones split the
+  // FIELD (thirds, halves), so they shift with the hash; the underneath zones go with the ball.
+  function zoneShape(c, level, spot) {
+    var W = FIELD.width, bx = ballX(level, spot), lo, hi, y0, y1, k;
+    if (c.zone === 'third' || c.zone === 'half') {
+      k = c.zone === 'third' ? 3 : 2;
+      lo = c.side === 'L' ? 0 : c.side === 'R' ? W - W / k : W / k;
+      hi = lo + W / k; y0 = c.zone === 'third' ? 14 : 13; y1 = 26;
+    } else {
+      var w = c.zone === 'flat' ? 11 : 7.5;
+      var mid = bx + (c.zone === 'flat' ? (c.side === 'L' ? -15.5 : 15.5) : c.x != null ? c.x : c.side === 'L' ? -5 : c.side === 'R' ? 5 : 0);
+      mid = Math.min(Math.max(mid, w / 2), W - w / 2);  // a flat on the short side stops at the sideline
+      lo = mid - w / 2; hi = mid + w / 2; y0 = c.zone === 'flat' ? 1 : 5; y1 = c.zone === 'flat' ? 7 : 11;
+    }
+    lo += 0.4; hi -= 0.4;
+    return { x: (lo + hi) / 2 - bx, y: (y0 + y1) / 2, w: hi - lo, h: y1 - y0 };
+  }
+  // The zone a defender would take if the coach tags him from where he stands.
+  function zoneFor(d, kind, level, spot) {
+    var fx = ballX(level, spot) + d.x, W = FIELD.width;
+    if (kind === 'third') return zone(kind, fx < W / 3 ? 'L' : fx > 2 * W / 3 ? 'R' : 'M');
+    if (kind === 'hook') return zone(kind, d.x < -2 ? 'L' : d.x > 2 ? 'R' : 'M', Math.round(Math.min(Math.max(d.x, -10), 10) * 2) / 2);
+    return zone(kind, (kind === 'half' ? fx < W / 2 : d.x < 0) ? 'L' : 'R');
+  }
+  // Who can be covered man to man: everybody but the five with a lineman's number and the quarterback.
+  function receivers(play) {
+    return play.players.filter(function (p) { return !(p.num >= 50 && p.num <= 79) && p.id !== 'Q'; });
+  }
+  // Every defender's job, worked out from the alignment: { id: { type, target, shape, text } }.
+  // target = the offensive player's id (man), shape = zoneShape (zone). First the defenders who were
+  // given a man by name or by count (a corner takes #1 on his side), then whoever is left takes the
+  // nearest receiver nobody has yet.
+  function coverage(play) {
+    var out = {}, taken = {}, rec = receivers(play), defs = play.defense || [], label = {};
+    var at = {}; rec.forEach(function (p) { at[p.id] = snapPos(p); label[p.id] = p.label; });
+    function back(p) { return Math.abs(at[p.id].x) <= 5 && at[p.id].y <= -2; }
+    function nearest(d, list) {
+      return list.filter(function (p) { return !taken[p.id]; }).sort(function (a, b) {
+        return Math.hypot(at[a.id].x - d.x, at[a.id].y - d.y) - Math.hypot(at[b.id].x - d.x, at[b.id].y - d.y);
+      })[0] || null;
+    }
+    function give(d, p) { if (p) taken[p.id] = 1; out[d.id] = { type: 'man', target: p ? p.id : null, shape: null, text: p ? 'Man on ' + label[p.id] : 'Man, nobody left to take' }; }
+    var men = defs.filter(function (d) { return d.cover && d.cover.type === 'man'; }), late = [];
+    men.filter(function (d) { return d.cover.id; }).forEach(function (d) {
+      var p = rec.filter(function (r) { return r.id === d.cover.id && !taken[r.id]; })[0];
+      if (p) give(d, p); else late.push(d);
+    });
+    men.filter(function (d) { return !d.cover.id; }).forEach(function (d) {
+      var side = d.x < 0 ? -1 : 1, p = null;
+      if (d.cover.on === 'back') p = nearest(d, rec.filter(back));
+      else if (d.cover.on) p = rec.filter(function (r) { return !back(r) && (at[r.id].x < 0 ? -1 : 1) === side; })
+        .sort(function (a, b) { return Math.abs(at[b.id].x) - Math.abs(at[a.id].x); })[d.cover.on - 1] || null;
+      if (p && !taken[p.id]) give(d, p); else late.push(d);
+    });
+    late.forEach(function (d) { give(d, nearest(d, rec)); });
+    defs.forEach(function (d) {
+      if (out[d.id]) return;
+      if (d.cover && d.cover.type === 'zone') out[d.id] = { type: 'zone', target: null, shape: zoneShape(d.cover, play.level, play.ball), text: 'Zone: ' + zoneName(d.cover).trim().toLowerCase() };
+      else if (d.cover && d.cover.type === 'rush') out[d.id] = { type: 'rush', target: null, shape: null, text: 'Rush' };
+      else out[d.id] = { type: null, target: null, shape: null, text: 'no tag' };
+    });
+    return out;
   }
 
   // ---- paths ------------------------------------------------------------------------------------
@@ -179,10 +291,12 @@
   }
 
   var api = { FIELD: FIELD, LEVELS: LEVELS, SPOTS: SPOTS, SITUATIONS: SITUATIONS, SIDELINE_ROOM: SIDELINE_ROOM,
-    FORMATIONS: FORMATIONS, DEFENSES: DEFENSES, ROUTES: ROUTES,
+    FORMATIONS: FORMATIONS, DEFENSES: DEFENSES, DEFAULT_DEFENSE: DEFAULT_DEFENSE, ZONES: ZONES, ROUTES: ROUTES,
     ballX: ballX, clampX: clampX, snapPos: snapPos, outSign: outSign, buildRoute: buildRoute, defaultMotion: defaultMotion,
     routeName: routeName, routeDef: routeDef, clone: clone, newPlay: newPlay, setFormation: setFormation, moveBall: moveBall,
     flipPlay: flipPlay, callString: callString, playName: playName, suggestMotion: suggestMotion,
+    suggestTags: suggestTags, keepTags: keepTags,
+    setDefense: setDefense, zoneName: zoneName, zoneShape: zoneShape, zoneFor: zoneFor, receivers: receivers, coverage: coverage,
     pathLength: pathLength, pointAt: pointAt, simplify: simplify };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.PBModel = api;

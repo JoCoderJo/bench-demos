@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="playbook 1.0.0+c67a40b" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
+<head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="playbook 1.0.0+9f840a6" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -50,6 +50,11 @@
  #legal li.w{color:var(--warn)}
  #legal .count{color:var(--dim);font-size:13px;margin-top:6px}
  .callbig{font-size:18px;font-weight:700;margin:0 0 8px;word-break:break-word}
+ #strip{display:contents}                                         /* only a box in portrait, see the bottom */
+ #callrow{display:flex;gap:8px;align-items:center;margin:0 0 8px}
+ #callrow .callbig{flex:1;min-width:0;margin:0}
+ #callrow button{flex:none}
+ #callopen,#legal .why{display:none}
  .field2{display:grid;grid-template-columns:82px 1fr;gap:6px 8px;align-items:center;font-size:13px;color:var(--dim)}
  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
  .chips button{min-height:34px;padding:5px 10px;border-radius:999px;font-size:13px}
@@ -57,7 +62,15 @@
  .tree{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
  .tree button{padding:6px 2px;min-height:46px;font-size:12px;line-height:1.15}
  .tree button b{display:block;font-size:15px}
- .tree.wide{grid-template-columns:repeat(3,1fr);margin-top:6px}
+ /* the popup beside the player you tapped (#165); board.js places it */
+ #pop{position:fixed;z-index:15;width:272px;background:var(--tray);border:1px solid var(--brass);border-radius:12px;
+      padding:8px;box-shadow:0 8px 28px rgba(0,0,0,.55)}
+ #pop[hidden]{display:none}
+ #pop h2{font-size:12.5px;margin:0 2px;letter-spacing:.4px;text-transform:uppercase;color:var(--dim)}
+ #pop h2 b{color:var(--brass);font-size:15px}
+ #pop .tree{margin-top:6px}
+ #pop .tree button{min-height:42px}
+ #pop .tree.two{grid-template-columns:1fr 1fr}
  .hint{color:var(--dim);font-size:13px;margin:8px 0 0}
  #msg{min-height:20px;font-size:13.5px;margin-top:8px;color:var(--go)} #msg.bad{color:var(--bad)}
  /* field drawing (units are yards) */
@@ -78,6 +91,13 @@
  .man.shadow text{fill:#b8bec8}
  .def text{font:700 1.1px system-ui,sans-serif;fill:#b42318;text-anchor:middle;dominant-baseline:central;pointer-events:none}
  .def path{fill:#fff;stroke:#b42318;stroke-width:.18} .def.sel path{stroke:var(--brass);stroke-width:.4}
+ /* coverage art (#166): faint, under the routes. Zones by colour, man = dotted line to his receiver, rush = arrow */
+ .zone{stroke-width:.1;fill-opacity:.13;stroke-opacity:.45;pointer-events:none} .zone.sel{fill-opacity:.3;stroke-opacity:.9}
+ .zone.flat{fill:#0ea5e9;stroke:#0ea5e9} .zone.hook{fill:#eab308;stroke:#ca8a04} .zone.third,.zone.half{fill:#4f46e5;stroke:#4f46e5}
+ .drop,.manline,.rush{fill:none;stroke-width:.16;opacity:.45;pointer-events:none;stroke-linecap:round}
+ .drop{stroke-dasharray:.5 .45} .drop.flat{stroke:#0ea5e9} .drop.hook{stroke:#ca8a04} .drop.third,.drop.half{stroke:#4f46e5}
+ .manline{stroke:#b42318;stroke-dasharray:.12 .42;stroke-width:.24} .rush{stroke:#b42318} .tip.rush{fill:#b42318;opacity:.5}
+ .drop.sel,.manline.sel,.rush.sel,.tip.rush.sel{opacity:1}
  #field .hit{fill:transparent!important;stroke:none!important}   /* the finger-sized target; must beat .man circle */
  .handle{fill:#fff;stroke:var(--brass);stroke-width:.22} .handle.mid{fill:var(--brass);opacity:.55;stroke:none}
  .handle.motion{stroke:var(--motion)}
@@ -102,9 +122,27 @@
  .tile .tools{display:flex;gap:6px;margin-top:4px} .tile .tools button{flex:1;min-height:34px;padding:4px;font-size:12.5px}
  .a-los{stroke:#7fb996;stroke-width:.25} .a-man{fill:#fff} .a-route{fill:none;stroke:#ffd84a;stroke-width:.45;stroke-linejoin:round}
  .a-block{fill:none;stroke:#cbd5e1;stroke-width:.4} .a-motion{fill:none;stroke:#ff9d5c;stroke-width:.4;stroke-dasharray:.8 .6}
+ .a-zone{fill:#fff;fill-opacity:.1;stroke:none} .a-manline{stroke:#ff9a8f;stroke-width:.2;stroke-dasharray:.3 .5;opacity:.7} .a-def{fill:none;stroke:#ff9a8f;stroke-width:.25}
  .sheet-empty{color:var(--dim);padding:30px;text-align:center}
+ /* iPad portrait and phones (#165): the call line, Save and the verdict are a strip pinned above the field;
+    the call fields drop down from it, so nothing you need while drawing is under the field */
  @media(max-width:820px),(orientation:portrait){main{flex-direction:column;overflow-y:auto}#stage{flex:none}
-   #fieldwrap{flex:none}#panel{width:auto;border-left:0;border-top:1px solid var(--edge);overflow:visible}}
+   #fieldwrap{flex:none}#panel{display:contents}
+   #strip{display:flex;flex-direction:column;order:-1;position:sticky;top:0;z-index:6;background:var(--bg);padding:8px 10px 0}
+   #inspector{margin:0 10px calc(16px + env(safe-area-inset-bottom))}
+   #callbox{order:-1;position:relative;z-index:3;padding:8px 11px;margin-bottom:6px}   /* its drop-down goes over the verdict */
+   #callbox h2{display:none} #callrow{margin:0} #callopen{display:block}
+   #callmore{display:none;position:absolute;left:-1px;right:-1px;top:calc(100% + 4px);background:var(--tray);
+             border:1px solid var(--brass);border-radius:12px;padding:11px;box-shadow:0 8px 28px rgba(0,0,0,.55)}
+   #callbox.open #callmore{display:block}
+   #msg{min-height:0;margin-top:0} #msg:not(:empty){margin-top:6px}
+   #legal{position:static;padding:6px 11px;margin:0;cursor:pointer}
+   #legal .verdict{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+   #legal .why{display:inline;font-weight:400;color:var(--ink)}
+   #legal ul,#legal .count,#legal .long{display:none}
+   #legal.open .verdict{white-space:normal} #legal.open ul,#legal.open .count{display:block} #legal.open .long{display:inline}}
+ @media(max-width:560px){.callbig{font-size:15px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+   #pop{width:244px;padding:6px}#pop .tree{gap:4px;margin-top:4px}#pop .tree button{min-height:36px;font-size:11px}}
 </style>
 </head>
 <body>
@@ -117,6 +155,7 @@
  <label>Formation <select id="formation"></select></label>
  <button id="flip">Flip</button>
  <label>Defense <select id="defense"></select></label>
+ <button id="showdef" aria-pressed="false">Hide defense</button>
  <span class="spacer"></span>
  <button id="new">New play</button>
  <button id="opensheet" class="on">Call sheet <span id="sheetcount"></span></button>
@@ -128,10 +167,14 @@
    <input id="simscrub" type="range" aria-label="Time"><span id="clock">SET</span></div>
  </section>
  <aside id="panel">
+  <div id="strip">
   <div class="tray" id="legal"></div>
   <div class="tray" id="callbox">
    <h2>Play call</h2>
-   <p class="callbig" id="callbig"></p>
+   <div id="callrow"><p class="callbig" id="callbig"></p>
+    <button id="callopen" aria-expanded="false" aria-controls="callmore">Call &#9662;</button>
+    <button id="save" class="go">Save to sheet</button></div>
+   <div id="callmore">
    <div class="field2">
     <span>Formation</span><input type="text" id="c-formation" autocomplete="off">
     <span>Motion</span><input type="text" id="c-motion" autocomplete="off" placeholder="X-motion bunch">
@@ -140,12 +183,15 @@
     <span>Call it</span><input type="text" id="c-name" autocomplete="off" placeholder="built from the four above">
    </div>
    <div class="chips" id="situations"></div>
-   <div class="rowbtns"><button id="save" class="go">Save to sheet</button><button id="dupe">Duplicate</button></div>
+   <div class="rowbtns"><button id="dupe">Duplicate</button></div>
+   </div>
    <div id="msg" role="status"></div>
+  </div>
   </div>
   <div class="tray" id="inspector"></div>
  </aside>
 </main>
+<div id="pop" role="dialog" aria-label="Routes and motion" hidden></div>
 <div id="sheet" aria-hidden="true">
  <div id="sheetbar"><h2>Call sheet</h2><small id="sheetsum"></small><span class="spacer"></span>
   <button id="sheetedit">Edit</button><button id="export">Export</button><button id="import">Import</button>
@@ -158,7 +204,7 @@
 <script src="sim.js"></script>
 <script src="callsheet.js"></script>
 <script src="board.js"></script>
-<script id="bench-release">window.BENCH_RELEASE="playbook 1.0.0+c67a40b";</script>
+<script id="bench-release">window.BENCH_RELEASE="playbook 1.0.0+9f840a6";</script>
 <a id="bench-release-pill" href="/releases.html#playbook" title="release notes" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483000;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:#9aa4b2;background:rgba(20,23,28,.72);border:1px solid #2a3039;border-radius:999px;padding:5px 8px;text-decoration:none;opacity:.85">v1.0.0</a><!-- Public demo feedback bubble. Injected into every page of the demo site by
      publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
      touching the Bench or the tailnet). Submissions land in Netlify → Forms.

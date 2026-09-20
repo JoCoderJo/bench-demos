@@ -87,7 +87,8 @@
 
   // ---- play art: a small picture of the play, as an SVG string ----------------------------------
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; }); }
-  function artSVG(play) {
+  // defense = true draws the scheme with it (#166): zones, man lines and the defenders, all faint.
+  function artSVG(play, defense) {
     var W = 44, top = 20, bottom = -9, xs = [];
     play.players.forEach(function (p) { xs.push(M.snapPos(p).x); xs.push(p.x); });
     var mid = xs.length ? (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2 : 0;
@@ -95,6 +96,19 @@
     function Y(y) { return (top - Math.min(y, top - 0.5)).toFixed(2); }
     var s = '<svg class="art" viewBox="0 0 ' + W + ' ' + (top - bottom) + '" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
       '<line x1="0" x2="' + W + '" y1="' + Y(0) + '" y2="' + Y(0) + '" class="a-los"/>';
+    if (defense && play.defense && play.defense.length) {
+      var jobs = M.coverage(play), spot = {};
+      play.players.forEach(function (p) { spot[p.id] = M.snapPos(p); });
+      play.defense.forEach(function (d) {
+        var job = jobs[d.id], z = job.shape, t = job.target && spot[job.target];
+        if (z) s += '<rect class="a-zone" x="' + X(z.x - z.w / 2) + '" y="' + (top - z.y - z.h / 2).toFixed(2) + '" width="' + z.w.toFixed(2) + '" height="' + z.h.toFixed(2) + '" rx="2"/>';
+        if (t) s += '<line class="a-manline" x1="' + X(d.x) + '" y1="' + Y(d.y) + '" x2="' + X(t.x) + '" y2="' + Y(t.y) + '"/>';
+      });
+      play.defense.forEach(function (d) {
+        var x = +X(d.x), y = +Y(d.y);
+        s += '<path class="a-def" d="M' + (x - 0.8).toFixed(2) + ' ' + (y - 0.7).toFixed(2) + 'L' + (x + 0.8).toFixed(2) + ' ' + (y - 0.7).toFixed(2) + 'L' + x.toFixed(2) + ' ' + (y + 0.8).toFixed(2) + 'Z"/>';
+      });
+    }
     play.players.forEach(function (p) {
       var sp = M.snapPos(p);
       function poly(ox, oy, pts, cls) {
@@ -110,8 +124,8 @@
   }
 
   // ---- the sheet on screen (browser only) -------------------------------------------------------
-  // handlers: { open(play), duplicate(play), remove(play) }
-  function render(container, store, editing, handlers) {
+  // handlers: { open(play), duplicate(play), remove(play) }; defense = draw each play's scheme on its card
+  function render(container, store, editing, handlers, defense) {
     var g = grid(store);
     if (!g.rows.length) {
       container.innerHTML = '<p class="sheet-empty">No plays yet. Build one on the board and press <b>Save to sheet</b>.</p>';
@@ -122,7 +136,7 @@
       h += '<tr><th class="form">' + esc(row.formation) + '<small>' + row.count + ' play' + (row.count === 1 ? '' : 's') + '</small></th>';
       g.cols.forEach(function (c) {
         h += '<td>' + (row.cells[c] || []).map(function (p) {
-          return '<div class="tile" data-id="' + esc(p.id) + '"><button class="open" data-act="open">' + artSVG(p) +
+          return '<div class="tile" data-id="' + esc(p.id) + '"><button class="open" data-act="open">' + artSVG(p, defense) +
             '<span class="no">' + esc(p.no) + '</span><span class="nm">' + esc(p.name) + '</span>' +
             '<span class="lv">' + esc(M.LEVELS[p.level === 'college' ? 'college' : 'hs'].book) + '</span></button>' +
             (editing ? '<span class="tools"><button data-act="duplicate">Duplicate</button><button data-act="remove">Delete</button></span>' : '') + '</div>';
