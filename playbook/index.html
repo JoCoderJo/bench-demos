@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="playbook 1.0.0+9f840a6" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
+<head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="playbook 1.0.0+011584f" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -94,6 +94,7 @@
  /* coverage art (#166): faint, under the routes. Zones by colour, man = dotted line to his receiver, rush = arrow */
  .zone{stroke-width:.1;fill-opacity:.13;stroke-opacity:.45;pointer-events:none} .zone.sel{fill-opacity:.3;stroke-opacity:.9}
  .zone.flat{fill:#0ea5e9;stroke:#0ea5e9} .zone.hook{fill:#eab308;stroke:#ca8a04} .zone.third,.zone.half{fill:#4f46e5;stroke:#4f46e5}
+ .zone.quarter{fill:#7c3aed;stroke:#7c3aed} .drop.quarter{stroke:#7c3aed}   /* #167: Cover 4 and Cover 6 */
  .drop,.manline,.rush{fill:none;stroke-width:.16;opacity:.45;pointer-events:none;stroke-linecap:round}
  .drop{stroke-dasharray:.5 .45} .drop.flat{stroke:#0ea5e9} .drop.hook{stroke:#ca8a04} .drop.third,.drop.half{stroke:#4f46e5}
  .manline{stroke:#b42318;stroke-dasharray:.12 .42;stroke-width:.24} .rush{stroke:#b42318} .tip.rush{fill:#b42318;opacity:.5}
@@ -204,7 +205,7 @@
 <script src="sim.js"></script>
 <script src="callsheet.js"></script>
 <script src="board.js"></script>
-<script id="bench-release">window.BENCH_RELEASE="playbook 1.0.0+9f840a6";</script>
+<script id="bench-release">window.BENCH_RELEASE="playbook 1.0.0+011584f";</script>
 <a id="bench-release-pill" href="/releases.html#playbook" title="release notes" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483000;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:#9aa4b2;background:rgba(20,23,28,.72);border:1px solid #2a3039;border-radius:999px;padding:5px 8px;text-decoration:none;opacity:.85">v1.0.0</a><!-- Public demo feedback bubble. Injected into every page of the demo site by
      publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
      touching the Bench or the tailnet). Submissions land in Netlify → Forms.

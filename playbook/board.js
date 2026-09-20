@@ -7,6 +7,8 @@
 // #166: every defender's coverage is drawn with the offense (zones as faint boxes under the routes,
 // man coverage as a dotted line to his receiver, a rush as a short arrow), and Hide defense takes
 // the defenders and their art off the board at any time. That switch is kept per device, not in the play.
+// #167: when the play runs the defenders move too (sim.js defensePositionsAt), and the Defense list is
+// grouped by front.
 (function () {
   'use strict';
   var M = window.PBModel, R = window.PBRules, S = window.PBSim, C = window.PBSheet;
@@ -26,7 +28,7 @@
   var drag = null, lastTap = { h: '', at: 0 };
   var pop = null, legalOpen = false;                    // id of the player whose popup is up; the verdict unfolded (portrait)
   var TAP_SLOP = 8;                                     // px a finger may wander and still be a tap, not a drag
-  var simPos = null, res = R.check(play), editingSheet = false, sim;
+  var simPos = null, simDef = null, res = R.check(play), editingSheet = false, sim;
   var showDef = true;                                   // the defense and its coverage art are on the board
   try { showDef = localStorage.getItem(SHOWDEF) !== '0'; } catch (e) { /* private mode: it starts shown */ }
 
@@ -100,7 +102,8 @@
     });
     var jobs = showDef ? M.coverage(play) : {};
     if (showDef) play.defense.forEach(function (d) {
-      var x = +X(d.x), y = +Y(d.y), job = jobs[d.id], on = sel && sel.kind === 'd' && sel.id === d.id ? ' sel' : '';
+      var here = simDef && simDef[d.id] || d;            // where he is right now: the simulator moves him (#167)
+      var x = +X(here.x), y = +Y(here.y), job = jobs[d.id], on = sel && sel.kind === 'd' && sel.id === d.id ? ' sel' : '';
       if (job.type === 'zone') {
         var z = job.shape, r = n(Math.min(z.h / 2, 3));
         cov += '<rect class="zone ' + esc(d.cover.zone) + on + '" x="' + X(z.x - z.w / 2) + '" y="' + Y(z.y + z.h / 2) + '" width="' + n(z.w) + '" height="' + n(z.h) + '" rx="' + r + '"/>' +
@@ -108,12 +111,12 @@
       } else if (job.type === 'man' && job.target) {
         var t = man(job.target), tp = simPos ? simPos[t.id] : M.snapPos(t);
         cov += '<line class="manline' + on + '" x1="' + n(x) + '" y1="' + n(y) + '" x2="' + X(tp.x) + '" y2="' + Y(tp.y) + '"/>';
-      } else if (job.type === 'rush') {
+      } else if (job.type === 'rush' && !simDef) {
         cov += '<line class="rush' + on + '" x1="' + n(x) + '" y1="' + n(y) + '" x2="' + X(d.x * 0.8) + '" y2="' + Y(-1.6) + '"/>' + tip(d.x, d.y, [[-d.x * 0.2, -1.6 - d.y]], 'arrow', 'rush' + on);
       }
       defs += '<g class="def' + (sel && sel.kind === 'd' && sel.id === d.id ? ' sel' : '') + '"><path d="M' + n(x - 0.95) + ' ' + n(y - 0.8) + 'L' + n(x + 0.95) + ' ' + n(y - 0.8) + 'L' + n(x) + ' ' + n(y + 0.95) + 'Z"/>' +
         '<text x="' + n(x) + '" y="' + n(y - 0.2) + '" style="font-size:.8px">' + esc(d.label) + '</text>' +
-        '<circle class="hit" data-d="' + esc(d.id) + '" cx="' + n(x) + '" cy="' + n(y) + '" r="1.5"/></g>';
+        (simDef ? '' : '<circle class="hit" data-d="' + esc(d.id) + '" cx="' + n(x) + '" cy="' + n(y) + '" r="1.5"/>') + '</g>';
     });
     var p = selMan();
     if (p && !simPos) {
@@ -201,12 +204,12 @@
         '<div class="rowbtns">' + cb('man', 'Man') + cb('zone', 'Zone') + cb('rush', 'Rush') + '</div>' +
         (kind === 'man' ? '<div class="tree" style="margin-top:8px"><button data-m="" class="' + (d.cover.id ? '' : 'on') + '">Auto</button>' +
           M.receivers(play).map(function (r) { return '<button data-m="' + esc(r.id) + '" class="' + (d.cover.id === r.id ? 'on' : '') + '"><b>' + esc(r.label) + '</b></button>'; }).join('') + '</div>' : '') +
-        (kind === 'zone' ? '<div class="tree" style="margin-top:8px;grid-template-columns:repeat(4,1fr)">' + Object.keys(M.ZONES).map(function (k) {
+        (kind === 'zone' ? '<div class="tree" style="margin-top:8px">' + Object.keys(M.ZONES).map(function (k) {
           return '<button data-z="' + k + '" class="' + (d.cover.zone === k ? 'on' : '') + '">' + esc(M.ZONES[k]) + '</button>'; }).join('') + '</div>' : '') +
         '<div class="rowbtns"><button data-a="removedef">Remove defender</button></div>' +
         '<p class="hint">' + (kind === 'man' ? 'Auto takes the receiver his alignment gives him (a corner gets the widest man on his side) and follows a new formation, motion and Flip. Pick a letter to lock him on that player.'
           : kind === 'zone' ? 'The zone is set from where he stands: drag him, then pick the zone again to move it.'
-          : 'Tag him Man, Zone or Rush. The offense is the focus for now: defenders do not move when the play runs.') + '</p>';
+          : 'Tag him Man, Zone or Rush. When the play runs a rusher goes at the quarterback, a zone defender drops and closes on routes near his zone, and a man defender runs with his receiver.') + '</p>';
     } else {
       h = '<h2>Players</h2><p class="hint" style="margin-top:0">Tap a player and his routes and motion pop up beside him. Drag anyone to move him: the rules are checked as you drag.</p>' +
         '<div class="rowbtns"><button data-a="addman">Add player</button><button data-a="adddef">Add defender</button></div>';
@@ -404,7 +407,9 @@
 
   // ---- the bar and the call ---------------------------------------------------------------------
   el('formation').innerHTML = '<option value="">Custom</option>' + Object.keys(M.FORMATIONS).map(function (f) { return '<option>' + esc(f) + '</option>'; }).join('');
-  el('defense').innerHTML = '<option value="">Custom</option>' + Object.keys(M.DEFENSES).map(function (f) { return '<option>' + esc(f) + '</option>'; }).join('');
+  el('defense').innerHTML = '<option value="">Custom</option><option>None</option>' + M.DEFENSE_GROUPS.map(function (g) {   // grouped by front (#167)
+    return '<optgroup label="' + esc(g.front) + '">' + g.names.map(function (f) { return '<option>' + esc(f) + '</option>'; }).join('') + '</optgroup>';
+  }).join('');
   el('level').addEventListener('click', function (e) { var v = e.target.getAttribute('data-v'); if (v) { sim.reset(); M.moveBall(play, v, play.ball); renderAll(); } });
   el('spot').addEventListener('click', function (e) { var v = e.target.getAttribute('data-v'); if (v) { sim.reset(); M.moveBall(play, play.level, v); renderAll(); } });
   el('formation').addEventListener('change', function () {
@@ -502,7 +507,7 @@
 
   // ---- the simulator ----------------------------------------------------------------------------
   sim = S.attach({ getPlay: function () { return play; }, button: el('simplay'), scrub: el('simscrub'), clock: el('clock'),
-    onFrame: function (pos) { simPos = pos; drawPlay(); } });
+    onFrame: function (pos, t) { simPos = pos; simDef = pos ? S.defensePositionsAt(play, t) : null; drawPlay(); } });
   el('simreset').addEventListener('click', function () { sim.reset(); });
 
   renderAll();

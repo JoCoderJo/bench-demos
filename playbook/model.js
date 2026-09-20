@@ -50,30 +50,87 @@
   };
 
   // Defense (#166): a picture, an 11-player count, and a coverage tag on every defender, like the
-  // coverage art in Madden. No defensive rules and no movement yet: the focus is the offense.
+  // coverage art in Madden. #167: the defenders move when the play runs (sim.js works that out from
+  // the same tags), and the list of calls is built below from fronts times coverage shells.
   //   cover = { type:'rush' }
-  //         | { type:'zone', zone:'flat'|'hook'|'third'|'half', side:'L'|'M'|'R', x? }   x = a hook's landmark, from the ball
+  //         | { type:'zone', zone:'flat'|'hook'|'third'|'half'|'quarter', side:'L'|'M'|'R', x?, inside? }
+  //           x = a hook's landmark, from the ball; inside = the quarter next to the middle of the field
   //         | { type:'man', on:1|2|3|'back' }   the receiver counted from the sideline on the defender's own side, or a back
   //         | { type:'man', id:'X' }            a player the coach picked
+  //   pos = 'DL'|'LB'|'DB': how fast he is in the simulator. A defender without one is judged by where he stands.
   // A man target is worked out from where everyone lines up when it is drawn (coverage() below), so it
   // survives a new formation, motion and a flip. A defender with no tag (an old saved play) draws plain.
   var RUSH = { type: 'rush' };
   function zone(kind, side, x) { var z = { type: 'zone', zone: kind, side: side }; if (x != null) z.x = x; return z; }
+  function quarter(side, inside) { var z = zone('quarter', side); if (inside) z.inside = true; return z; }
   function manOn(n) { return { type: 'man', on: n }; }
-  function df(id, x, y, cover) { return { id: id, label: id.replace(/\d+$/, ''), x: x, y: y, cover: cover }; }
+  function df(id, x, y, cover, pos) { return { id: id, label: id.replace(/\d+$/, ''), x: x, y: y, cover: cover, pos: pos }; }
   var DEFAULT_DEFENSE = '4-3 Cover 3';
-  var DEFENSES = {
-    'None': [],
-    '4-3 Cover 3': [df('E1', -4.5, 1, RUSH), df('T1', -1.5, 1, RUSH), df('T2', 1.5, 1, RUSH), df('E2', 4.5, 1, RUSH),
-                    df('S', -5, 4.5, zone('flat', 'L')), df('M', 0, 4.5, zone('hook', 'L', -4.5)), df('W', 5, 4.5, zone('hook', 'R', 4.5)),
-                    df('C1', -16, 7, zone('third', 'L')), df('C2', 16, 7, zone('third', 'R')), df('SS', 7, 8, zone('flat', 'R')), df('FS', 0, 13, zone('third', 'M'))],
-    '4-2-5 Cover 2': [df('E1', -4.5, 1, RUSH), df('T1', -1.5, 1, RUSH), df('T2', 1.5, 1, RUSH), df('E2', 4.5, 1, RUSH),
-                      df('M', -2.5, 4.5, zone('hook', 'M', 0)), df('W', 2.5, 4.5, zone('hook', 'R', 8)), df('N', -9, 4, zone('hook', 'L', -8)),
-                      df('C1', -16, 5, zone('flat', 'L')), df('C2', 16, 5, zone('flat', 'R')), df('SS', -8, 12, zone('half', 'L')), df('FS', 8, 12, zone('half', 'R'))],
-    '4-2-5 Cover 1': [df('E1', -4.5, 1, RUSH), df('T1', -1.5, 1, RUSH), df('T2', 1.5, 1, RUSH), df('E2', 4.5, 1, RUSH),
-                      df('M', -2.5, 4.5, manOn('back')), df('W', 2.5, 4.5, zone('hook', 'M', 0)), df('N', -9, 5, manOn(2)),
-                      df('C1', -16, 6, manOn(1)), df('C2', 16, 6, manOn(1)), df('SS', 8, 7, manOn(2)), df('FS', 0, 14, zone('third', 'M'))]
+
+  // A front is who rushes and the three men underneath, left to right: [id, x, y, pos]. The corners and
+  // the two safeties come from the shell. 3-4 and 3-3-5 send a linebacker as the fourth rusher.
+  function dl(id, x) { return [id, x, 1, 'DL']; }
+  var FRONTS = {
+    '4-3':   { rush: [dl('E1', -4.5), dl('T1', -1.5), dl('T2', 1.5), dl('E2', 4.5)],
+               under: [['S', -5, 4.5, 'LB'], ['M', 0, 4.5, 'LB'], ['W', 5, 4.5, 'LB']] },
+    '3-4':   { rush: [dl('E1', -3.5), dl('NT', 0), dl('E2', 3.5), ['J', 5.5, 1.5, 'LB']],
+               under: [['S', -5.5, 3, 'LB'], ['M', -1.5, 4.5, 'LB'], ['B', 1.5, 4.5, 'LB']] },
+    '4-2-5': { rush: [dl('E1', -4.5), dl('T1', -1.5), dl('T2', 1.5), dl('E2', 4.5)],
+               under: [['N', -9, 4.5, 'DB'], ['M', -2.5, 4.5, 'LB'], ['W', 2.5, 4.5, 'LB']] },
+    '3-3-5': { rush: [dl('E1', -3.5), dl('NT', 0), dl('E2', 3.5), ['M', 0, 4.5, 'LB']],
+               under: [['N', -8, 4.5, 'DB'], ['S', -3.5, 4.5, 'LB'], ['W', 3.5, 4.5, 'LB']] },
+    'Dime':  { rush: [dl('E1', -4.5), dl('T1', -1.5), dl('T2', 1.5), dl('E2', 4.5)],
+               under: [['N', -9, 4.5, 'DB'], ['M', 0, 4.5, 'LB'], ['D', 9, 4.5, 'DB']] }
   };
+  // A shell is the job of the three underneath (left, middle, right) and where the four backs line up.
+  var SHELLS = {
+    'Cover 1':  { under: [manOn(2), manOn('back'), zone('hook', 'M', 0)],
+                  C1: [-16, 6, manOn(1)], C2: [16, 6, manOn(1)], SS: [8, 7, manOn(2)], FS: [0, 14, zone('third', 'M')] },
+    'Cover 2':  { under: [zone('hook', 'L', -8), zone('hook', 'M', 0), zone('hook', 'R', 8)],
+                  C1: [-16, 5, zone('flat', 'L')], C2: [16, 5, zone('flat', 'R')], SS: [-8, 12, zone('half', 'L')], FS: [8, 12, zone('half', 'R')] },
+    'Tampa 2':  { under: [zone('hook', 'L', -6), zone('third', 'M'), zone('hook', 'R', 6)],   // the Mike runs down the middle
+                  C1: [-16, 5, zone('flat', 'L')], C2: [16, 5, zone('flat', 'R')], SS: [-8, 12, zone('half', 'L')], FS: [8, 12, zone('half', 'R')] },
+    '2-man':    { under: [manOn(2), manOn('back'), manOn(2)],
+                  C1: [-16, 4, manOn(1)], C2: [16, 4, manOn(1)], SS: [-8, 12, zone('half', 'L')], FS: [8, 12, zone('half', 'R')] },
+    'Cover 3':  { under: [zone('flat', 'L'), zone('hook', 'L', -4.5), zone('hook', 'R', 4.5)],
+                  C1: [-16, 7, zone('third', 'L')], C2: [16, 7, zone('third', 'R')], SS: [7, 8, zone('flat', 'R')], FS: [0, 13, zone('third', 'M')] },
+    'Cover 4':  { under: [zone('hook', 'L', -8), zone('hook', 'M', 0), zone('hook', 'R', 8)],
+                  C1: [-16, 7, quarter('L')], C2: [16, 7, quarter('R')], SS: [-6, 10, quarter('L', true)], FS: [6, 10, quarter('R', true)] },
+    'Cover 6':  { under: [zone('hook', 'L', -8), zone('hook', 'M', 0), zone('hook', 'R', 7)],  // quarters to the left, a half to the right
+                  C1: [-16, 7, quarter('L')], C2: [16, 5, zone('flat', 'R')], SS: [-6, 10, quarter('L', true)], FS: [8, 12, zone('half', 'R')] },
+    'Cover 0 blitz':        { under: [manOn(2), RUSH, RUSH],
+                  C1: [-16, 5, manOn(1)], C2: [16, 5, manOn(1)], SS: [7, 6, manOn(2)], FS: [-1, 8, manOn('back')] },
+    'fire zone Cover 3':    { under: [RUSH, zone('hook', 'M', 0), zone('hook', 'R', 8)],       // five come, three under, three deep
+                  C1: [-16, 7, zone('third', 'L')], C2: [16, 7, zone('third', 'R')], SS: [-7, 7, zone('hook', 'L', -8)], FS: [0, 13, zone('third', 'M')] },
+    'Nickel blitz Cover 1': { under: [RUSH, manOn('back'), manOn(2)],
+                  C1: [-16, 6, manOn(1)], C2: [16, 6, manOn(1)], SS: [-8, 7, manOn(2)], FS: [0, 14, zone('third', 'M')] }
+  };
+  function scheme(front, shell) {
+    var f = FRONTS[front], s = SHELLS[shell];
+    return f.rush.map(function (r) { return df(r[0], r[1], r[2], RUSH, r[3]); })
+      .concat(f.under.map(function (u, i) { return df(u[0], u[1], u[2], s.under[i], u[3]); }))
+      .concat(['C1', 'C2', 'SS', 'FS'].map(function (id) { return df(id, s[id][0], s[id][1], s[id][2], 'DB'); }));
+  }
+  function goalLine(fs) {                               // 6-2: six down, two linebackers, three backs up tight
+    return [-5.5, -3.3, -1.1, 1.1, 3.3, 5.5].map(function (x, i) { return df((i === 0 || i === 5 ? 'E' : 'T') + (i === 5 ? 2 : i || 1), x, 1, RUSH, 'DL'); })
+      .concat([df('M', -2.5, 3.5, manOn(2), 'LB'), df('W', 2.5, 3.5, manOn(2), 'LB'),
+               df('C1', -12, 3, manOn(1), 'DB'), df('C2', 12, 3, manOn(1), 'DB'), df('FS', 0, 6, fs, 'DB')]);
+  }
+  // The list (#167), grouped by front for the picker. "Sam" only names who comes in the fire zone.
+  var DEFENSES = { 'None': [] }, DEFENSE_GROUPS = [];
+  [['4-3', ['Cover 1', 'Cover 2', 'Tampa 2', 'Cover 3', 'Cover 4', 'Cover 6', 'Sam fire zone Cover 3', 'Cover 0 blitz']],
+   ['3-4', ['Cover 1', 'Cover 2', 'Cover 3', 'Cover 4', 'Sam fire zone Cover 3']],
+   ['4-2-5', ['Cover 1', 'Cover 2', '2-man', 'Cover 3', 'Cover 4', 'Cover 6', 'Nickel blitz Cover 1']],
+   ['3-3-5', ['Cover 1', 'Cover 3', 'Cover 0 blitz']],
+   ['Dime', ['2-man', 'Cover 4', 'Cover 0 blitz']]].forEach(function (g) {
+    DEFENSE_GROUPS.push({ front: g[0], names: g[1].map(function (call) {
+      DEFENSES[g[0] + ' ' + call] = scheme(g[0], call.replace(/^Sam /, ''));
+      return g[0] + ' ' + call;
+    }) });
+  });
+  DEFENSES['Goal line Cover 0'] = goalLine(manOn('back'));
+  DEFENSES['Goal line Cover 1'] = goalLine(zone('hook', 'M', 0));           // the safety is free in the short middle
+  DEFENSE_GROUPS.push({ front: 'Goal line', names: ['Goal line Cover 0', 'Goal line Cover 1'] });
 
   // ---- the route tree ---------------------------------------------------------------------------
   // out = +1 when "outside" is the offense's right, -1 when it is the left. Distances in yards from
@@ -191,17 +248,21 @@
   }
 
   // ---- coverage (#166) ----------------------------------------------------------------------------
-  var ZONES = { flat: 'Flat', hook: 'Hook', third: 'Deep third', half: 'Deep half' };
+  var ZONES = { flat: 'Flat', hook: 'Hook', third: 'Deep third', half: 'Deep half', quarter: 'Deep quarter' };
   var SIDES = { L: 'left', M: 'middle', R: 'right' };
   function zoneName(c) {
     if (c.zone === 'third' && c.side === 'M') return 'Deep middle';
+    if (c.zone === 'quarter') return (c.inside ? 'Inside quarter ' : 'Outside quarter ') + (SIDES[c.side] || '');
     return (ZONES[c.zone] || c.zone) + ' ' + (SIDES[c.side] || '');
   }
   // The box a zone covers, in yards from the ball: { x, y } is its middle. The deep zones split the
   // FIELD (thirds, halves), so they shift with the hash; the underneath zones go with the ball.
   function zoneShape(c, level, spot) {
     var W = FIELD.width, bx = ballX(level, spot), lo, hi, y0, y1, k;
-    if (c.zone === 'third' || c.zone === 'half') {
+    if (c.zone === 'quarter') {
+      lo = (c.side === 'L' ? (c.inside ? 1 : 0) : (c.inside ? 2 : 3)) * W / 4;
+      hi = lo + W / 4; y0 = 12; y1 = 26;
+    } else if (c.zone === 'third' || c.zone === 'half') {
       k = c.zone === 'third' ? 3 : 2;
       lo = c.side === 'L' ? 0 : c.side === 'R' ? W - W / k : W / k;
       hi = lo + W / k; y0 = c.zone === 'third' ? 14 : 13; y1 = 26;
@@ -218,6 +279,7 @@
   function zoneFor(d, kind, level, spot) {
     var fx = ballX(level, spot) + d.x, W = FIELD.width;
     if (kind === 'third') return zone(kind, fx < W / 3 ? 'L' : fx > 2 * W / 3 ? 'R' : 'M');
+    if (kind === 'quarter') return quarter(fx < W / 2 ? 'L' : 'R', fx >= W / 4 && fx <= 3 * W / 4);
     if (kind === 'hook') return zone(kind, d.x < -2 ? 'L' : d.x > 2 ? 'R' : 'M', Math.round(Math.min(Math.max(d.x, -10), 10) * 2) / 2);
     return zone(kind, (kind === 'half' ? fx < W / 2 : d.x < 0) ? 'L' : 'R');
   }
@@ -291,7 +353,7 @@
   }
 
   var api = { FIELD: FIELD, LEVELS: LEVELS, SPOTS: SPOTS, SITUATIONS: SITUATIONS, SIDELINE_ROOM: SIDELINE_ROOM,
-    FORMATIONS: FORMATIONS, DEFENSES: DEFENSES, DEFAULT_DEFENSE: DEFAULT_DEFENSE, ZONES: ZONES, ROUTES: ROUTES,
+    FORMATIONS: FORMATIONS, DEFENSES: DEFENSES, DEFENSE_GROUPS: DEFENSE_GROUPS, DEFAULT_DEFENSE: DEFAULT_DEFENSE, ZONES: ZONES, ROUTES: ROUTES,
     ballX: ballX, clampX: clampX, snapPos: snapPos, outSign: outSign, buildRoute: buildRoute, defaultMotion: defaultMotion,
     routeName: routeName, routeDef: routeDef, clone: clone, newPlay: newPlay, setFormation: setFormation, moveBall: moveBall,
     flipPlay: flipPlay, callString: callString, playName: playName, suggestMotion: suggestMotion,
