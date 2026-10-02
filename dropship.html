@@ -1,0 +1,2722 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Haven & Sprout — Heartfelt Digital Essentials for Babies, Kids & Growing Families</title>
+  <meta name="description" content="Evidence-based printable planners, milestone keepsakes, nursery art, and pediatric-aligned tools for parents, babies, and kids. Instant digital download.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #FAF7F2;
+      --bg-warm: #F4EFEB;
+      --card: #FFFFFF;
+      --card-muted: #F8F5F0;
+      --ink: #2D2A26;
+      --ink-soft: #5C564E;
+      --ink-dim: #8E877D;
+      --border: #E8E2D8;
+      --border-light: #F0EBE3;
+      
+      /* Emotional & Heartfelt Palette */
+      --sage: #4E6E58;
+      --sage-light: #EBF1ED;
+      --sage-hover: #3E5A47;
+      --terracotta: #C86D51;
+      --terracotta-light: #FAEEEA;
+      --honey: #D99B38;
+      --honey-light: #FDF6E9;
+      --blush: #E89A8A;
+      --blush-light: #FDF2F0;
+      --sky: #4F7996;
+      --sky-light: #EDF3F7;
+      
+      --shadow-sm: 0 2px 8px rgba(74, 58, 43, 0.04);
+      --shadow-md: 0 8px 24px rgba(74, 58, 43, 0.07);
+      --shadow-lg: 0 16px 40px rgba(74, 58, 43, 0.10);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 22px;
+      --radius-full: 9999px;
+      
+      --font-serif: "Fraunces", Georgia, "Times New Roman", serif;
+      --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Announcement Bar */
+    .top-announcement {
+      background: linear-gradient(90deg, #4E6E58, #3E5A47);
+      color: #FFFFFF;
+      text-align: center;
+      padding: 9px 16px;
+      font-size: 13.5px;
+      font-weight: 500;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .top-announcement a {
+      color: #FFE6AB;
+      text-decoration: underline;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Main Navigation Header */
+    header.site-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(250, 247, 242, 0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+    .header-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .logo-symbol {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--sage);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFF;
+      box-shadow: 0 4px 12px rgba(78, 110, 88, 0.25);
+    }
+    .brand-text h1 {
+      font-family: var(--font-serif);
+      font-size: 21px;
+      font-weight: 600;
+      line-height: 1.15;
+      letter-spacing: -0.3px;
+    }
+    .brand-text span {
+      font-size: 11.5px;
+      color: var(--ink-dim);
+      font-weight: 500;
+      display: block;
+      letter-spacing: 0.3px;
+    }
+
+    /* Header Nav & Actions */
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--ink-soft);
+      font-weight: 500;
+      font-size: 14.5px;
+      transition: color 0.2s ease;
+      cursor: pointer;
+    }
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--sage);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Experience Mode Toggle Button */
+    .mode-pill {
+      display: inline-flex;
+      align-items: center;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 4px;
+      gap: 4px;
+    }
+    .mode-btn {
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 12.5px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      background: transparent;
+      color: var(--ink-soft);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mode-btn.active {
+      background: var(--sage);
+      color: #FFFFFF;
+      box-shadow: var(--shadow-sm);
+    }
+    .mode-btn.biz.active {
+      background: var(--terracotta);
+    }
+
+    /* Cart Button */
+    .cart-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .cart-btn:hover {
+      border-color: var(--sage);
+      box-shadow: var(--shadow-sm);
+    }
+    .cart-badge {
+      background: var(--terracotta);
+      color: #FFF;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: var(--radius-full);
+    }
+
+    /* Layout Containers */
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Heartfelt Hero Section */
+    .hero-section {
+      padding: 56px 0 44px;
+      position: relative;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.95fr;
+      gap: 44px;
+      align-items: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--sage-light);
+      color: var(--sage);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .hero-badge svg {
+      width: 15px;
+      height: 15px;
+    }
+    .hero-title {
+      font-family: var(--font-serif);
+      font-size: clamp(34px, 4.2vw, 54px);
+      line-height: 1.12;
+      font-weight: 600;
+      letter-spacing: -0.8px;
+      color: var(--ink);
+      margin-bottom: 18px;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--terracotta);
+    }
+    .hero-desc {
+      font-size: 17.5px;
+      line-height: 1.6;
+      color: var(--ink-soft);
+      margin-bottom: 28px;
+      max-width: 580px;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 34px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 26px;
+      border-radius: var(--radius-full);
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--sage);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(78, 110, 88, 0.3);
+    }
+    .btn-primary:hover {
+      background: var(--sage-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(78, 110, 88, 0.35);
+    }
+    .btn-secondary {
+      background: var(--card);
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+    }
+    .btn-secondary:hover {
+      border-color: var(--ink-dim);
+      background: var(--bg-warm);
+    }
+    .btn-terracotta {
+      background: var(--terracotta);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(200, 109, 81, 0.3);
+    }
+    .btn-terracotta:hover {
+      background: #B35B40;
+      transform: translateY(-1px);
+    }
+
+    .hero-trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding-top: 22px;
+      border-top: 1px solid var(--border);
+    }
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--ink-soft);
+      font-weight: 500;
+    }
+    .trust-item svg {
+      color: var(--sage);
+      width: 17px;
+      height: 17px;
+      flex-shrink: 0;
+    }
+
+    /* Hero Visual Card */
+    .hero-visual-card {
+      position: relative;
+    }
+    .hero-img-wrapper {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      background: #EDE6DC;
+      aspect-ratio: 16/10;
+    }
+    .hero-img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hero-img-wrapper:hover img {
+      transform: scale(1.02);
+    }
+    .hero-float-tag {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(10px);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(232, 226, 216, 0.8);
+      max-width: 280px;
+    }
+    .hero-float-tag p {
+      font-family: var(--font-serif);
+      font-size: 14px;
+      font-style: italic;
+      color: var(--ink);
+      line-height: 1.35;
+      margin-bottom: 4px;
+    }
+    .hero-float-tag span {
+      font-size: 11.5px;
+      color: var(--sage);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Filter & Stage Selector */
+    .catalog-header {
+      padding: 44px 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .section-eyebrow {
+      font-size: 12.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--sage);
+    }
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: clamp(26px, 3vw, 36px);
+      letter-spacing: -0.5px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .section-subtitle {
+      font-size: 16px;
+      color: var(--ink-soft);
+      max-width: 680px;
+    }
+
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .stage-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .stage-pill {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 7px 16px;
+      border-radius: var(--radius-full);
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .stage-pill:hover {
+      border-color: var(--sage);
+      color: var(--sage);
+    }
+    .stage-pill.active {
+      background: var(--sage);
+      border-color: var(--sage);
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .search-box {
+      position: relative;
+      min-width: 240px;
+    }
+    .search-box input {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 8px 16px 8px 38px;
+      font-size: 14px;
+      color: var(--ink);
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .search-box input:focus {
+      border-color: var(--sage);
+    }
+    .search-box svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--ink-dim);
+      width: 15px;
+      height: 15px;
+    }
+
+    /* Product Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 28px;
+      padding: 16px 0 60px;
+    }
+    .product-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--shadow-sm);
+      position: relative;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: #DCD3C7;
+    }
+    .prod-img-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/10;
+      background: #EDE6DC;
+      overflow: hidden;
+    }
+    .prod-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+    .product-card:hover .prod-img-box img {
+      transform: scale(1.03);
+    }
+    .prod-format-pill {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      border-radius: var(--radius-full);
+      padding: 4px 11px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      box-shadow: var(--shadow-sm);
+    }
+    .prod-price-pill {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: var(--ink);
+      color: #FFFFFF;
+      border-radius: var(--radius-full);
+      padding: 5px 12px;
+      font-size: 13.5px;
+      font-weight: 700;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .prod-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+    .prod-header {
+      margin-bottom: 8px;
+    }
+    .prod-target {
+      font-size: 12px;
+      color: var(--terracotta);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .prod-name {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+    .prod-demand {
+      font-size: 13.5px;
+      color: var(--ink-soft);
+      line-height: 1.5;
+      margin: 8px 0 14px;
+      flex-grow: 1;
+    }
+
+    /* Safety & Trust Note Box */
+    .safety-note-box {
+      background: var(--bg-warm);
+      border-left: 3px solid var(--sage);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 9px 12px;
+      margin-bottom: 16px;
+      font-size: 12.5px;
+      line-height: 1.45;
+      color: var(--ink-soft);
+    }
+    .safety-note-box b {
+      color: var(--sage);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 2px;
+    }
+
+    .prod-actions {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-light);
+    }
+    .btn-preview {
+      background: var(--sage-light);
+      color: var(--sage);
+      font-size: 13.5px;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      padding: 9px 16px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-preview:hover {
+      background: #DCE8DF;
+    }
+    .btn-add {
+      background: var(--ink);
+      color: #FFF;
+      font-size: 13.5px;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      padding: 9px 18px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-add:hover {
+      background: var(--terracotta);
+    }
+
+    /* Interactive Features / Tools Showcase Strip */
+    .interactive-banner {
+      background: linear-gradient(135deg, #FAF4EB, #F2E8DC);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 38px 32px;
+      margin: 20px 0 60px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: center;
+    }
+    .interactive-banner h3 {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      line-height: 1.25;
+      margin-bottom: 12px;
+    }
+    .interactive-banner p {
+      font-size: 15.5px;
+      color: var(--ink-soft);
+      margin-bottom: 20px;
+    }
+    .interactive-tools-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .tool-quick-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .tool-quick-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+      border-color: var(--sage);
+    }
+    .tool-quick-card .tool-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    .tool-quick-card h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .tool-quick-card span {
+      font-size: 12px;
+      color: var(--ink-dim);
+    }
+
+    /* Trust & Safety Section */
+    .trust-section {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 64px 0;
+      margin: 40px 0;
+    }
+    .trust-header {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto 48px;
+    }
+    .trust-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .trust-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .trust-icon-pill {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--sage-light);
+      color: var(--sage);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .trust-card h4 {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .trust-card p {
+      font-size: 13.5px;
+      color: var(--ink-soft);
+      line-height: 1.55;
+    }
+    .trust-rule-tag {
+      margin-top: auto;
+      font-size: 11px;
+      font-family: ui-monospace, monospace;
+      color: var(--sage);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* BUSINESS OPPORTUNITY & MARKET INTELLIGENCE SECTION */
+    .biz-opportunity-section {
+      background: #191E19;
+      color: #EAECE8;
+      border-radius: var(--radius-lg);
+      padding: 56px 40px;
+      margin: 60px 0;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .biz-glow {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(78, 110, 88, 0.25) 0%, rgba(25, 30, 25, 0) 70%);
+      top: -150px;
+      right: -100px;
+      pointer-events: none;
+    }
+    .biz-header {
+      position: relative;
+      max-width: 800px;
+      margin-bottom: 40px;
+    }
+    .biz-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(200, 109, 81, 0.25);
+      border: 1px solid rgba(200, 109, 81, 0.4);
+      color: #FFA585;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .biz-title {
+      font-family: var(--font-serif);
+      font-size: clamp(28px, 3.5vw, 42px);
+      line-height: 1.2;
+      color: #FFFFFF;
+      margin-bottom: 14px;
+    }
+    .biz-desc {
+      font-size: 16.5px;
+      color: #B5BEB5;
+      line-height: 1.6;
+    }
+
+    /* Key Market Numbers Grid */
+    .biz-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .biz-stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .biz-stat-num {
+      font-family: var(--font-serif);
+      font-size: 34px;
+      font-weight: 700;
+      color: #FFFFFF;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .biz-stat-label {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #92C29E;
+      margin-bottom: 8px;
+    }
+    .biz-stat-detail {
+      font-size: 12px;
+      color: #9FAAA0;
+      line-height: 1.45;
+    }
+    .biz-stat-cite {
+      font-size: 11px;
+      color: #6C7A6E;
+      margin-top: 10px;
+      font-family: ui-monospace, monospace;
+    }
+    .biz-stat-cite a {
+      color: #8BA890;
+      text-decoration: none;
+    }
+
+    /* Interactive Unit Economics & Fee Calculator */
+    .biz-calculator-box {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-md);
+      padding: 28px;
+      margin-bottom: 40px;
+    }
+    .calc-header {
+      margin-bottom: 22px;
+    }
+    .calc-header h4 {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      color: #FFFFFF;
+      margin-bottom: 6px;
+    }
+    .calc-header p {
+      font-size: 13.5px;
+      color: #A6B4A8;
+    }
+    .calc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: center;
+    }
+    .calc-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .slider-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13.5px;
+      color: #C5D0C6;
+    }
+    .slider-val {
+      font-weight: 700;
+      color: #FFE6AB;
+      font-family: ui-monospace, monospace;
+    }
+    input[type=range] {
+      width: 100%;
+      height: 6px;
+      border-radius: 4px;
+      background: #343E34;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #4E6E58;
+      border: 2px solid #FFFFFF;
+      cursor: pointer;
+    }
+
+    .calc-results-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .res-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      color: #A9B5AA;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .res-row.highlight {
+      color: #FFFFFF;
+      font-size: 18px;
+      font-weight: 700;
+      border-bottom: none;
+      padding-top: 6px;
+    }
+    .res-profit {
+      color: #4ADE80;
+      font-family: ui-monospace, monospace;
+      font-size: 24px;
+    }
+    .res-margin-pill {
+      background: rgba(74, 222, 128, 0.15);
+      color: #4ADE80;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+    }
+
+    /* Dropshipping Pipeline Flow */
+    .pipeline-title {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      color: #FFFFFF;
+      margin-bottom: 16px;
+    }
+    .pipeline-steps {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+    .pipe-step {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      text-align: center;
+      position: relative;
+    }
+    .pipe-step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #5E7260;
+      font-size: 16px;
+      font-weight: bold;
+      z-index: 2;
+    }
+    .pipe-step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #4E6E58;
+      color: #FFF;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 8px;
+    }
+    .pipe-step h5 {
+      font-size: 13px;
+      color: #FFFFFF;
+      margin-bottom: 4px;
+    }
+    .pipe-step p {
+      font-size: 11.5px;
+      color: #8C998D;
+      line-height: 1.35;
+    }
+
+    /* Modal Backdrop & Dialog System */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: rgba(20, 23, 28, 0.65);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-container {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 780px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(20px) scale(0.98);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .modal-backdrop.open .modal-container {
+      transform: translateY(0) scale(1);
+    }
+    .modal-close-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--ink-soft);
+      font-size: 18px;
+      transition: all 0.2s ease;
+      z-index: 10;
+    }
+    .modal-close-btn:hover {
+      background: #EDE6DC;
+      color: var(--ink);
+    }
+    .modal-body {
+      padding: 32px;
+    }
+
+    /* Slide-out Cart Drawer */
+    .cart-drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 2050;
+      background: rgba(20, 23, 28, 0.5);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .cart-drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .cart-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg);
+      border-left: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      z-index: 2100;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .cart-drawer-backdrop.open .cart-drawer {
+      transform: translateX(0);
+    }
+    .cart-drawer-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card);
+    }
+    .cart-drawer-header h3 {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .cart-items-list {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .cart-item-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .cart-item-info h5 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .cart-item-info span {
+      font-size: 12px;
+      color: var(--ink-dim);
+    }
+    .cart-item-price {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .cart-item-remove {
+      background: none;
+      border: none;
+      color: var(--terracotta);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .cart-drawer-footer {
+      padding: 20px 24px;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .cart-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .instant-fulfill-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--sage);
+      background: var(--sage-light);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+    }
+
+    /* Testimonials */
+    .testimonial-section {
+      padding: 50px 0;
+    }
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 32px;
+    }
+    .testimonial-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .test-quote {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      font-style: italic;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .test-author {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .author-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #EDE6DC;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: var(--sage);
+      font-size: 13px;
+    }
+    .author-meta h5 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .author-meta span {
+      font-size: 11.5px;
+      color: var(--ink-dim);
+    }
+
+    /* Footer */
+    footer.site-footer {
+      background: #252824;
+      color: #E2E4DE;
+      padding: 60px 0 32px;
+      margin-top: 80px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 48px;
+    }
+    .footer-col h5 {
+      font-family: var(--font-serif);
+      font-size: 16px;
+      color: #FFF;
+      margin-bottom: 14px;
+    }
+    .footer-col ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .footer-col ul a {
+      color: #A2A9A0;
+      text-decoration: none;
+      font-size: 13.5px;
+      transition: color 0.2s ease;
+    }
+    .footer-col ul a:hover {
+      color: #FFE6AB;
+    }
+    .footer-disclaimer {
+      font-size: 12px;
+      color: #7B8579;
+      line-height: 1.5;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .interactive-banner { grid-template-columns: 1fr; }
+      .calc-grid { grid-template-columns: 1fr; }
+      .pipeline-steps { grid-template-columns: 1fr; }
+      .pipe-step:not(:last-child)::after { display: none; }
+      .trust-grid { grid-template-columns: 1fr; }
+      .testimonial-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .product-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .header-right .mode-btn span.mode-text { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <aside class="top-announcement" aria-label="Announcement">
+    <span>🌱 <strong>Instant Digital Delivery:</strong> Zero shipping delays, zero plastic. Thoughtful tools for 3 AM feeds & milestone moments.</span>
+    <a onclick="document.getElementById('business-intel').scrollIntoView({behavior:'smooth'})">Explore Business Opportunity &rarr;</a>
+  </aside>
+
+  <!-- Site Navigation Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand-logo" href="#top" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+        <div class="logo-symbol" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12a10 10 0 0 1 10-10z"></path>
+            <path d="M12 6v6l4 2"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Haven &amp; Sprout</h1>
+          <span>Heartfelt Digital Essentials for Families</span>
+        </div>
+      </a>
+
+      <nav class="nav-links" aria-label="Main Navigation">
+        <a href="#catalog" onclick="filterStage('all')">Products</a>
+        <a href="#interactive-suite">Interactive Tools</a>
+        <a href="#trust">Pediatric Safety</a>
+        <a href="#business-intel" style="color:var(--terracotta);font-weight:600">Business Opportunity</a>
+      </nav>
+
+      <div class="header-right">
+        <!-- Experience Switcher -->
+        <div class="mode-pill" title="Toggle between Boutique Storefront and Business Intelligence View">
+          <button class="mode-btn active" id="btn-mode-store" onclick="switchView('store')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+            <span class="mode-text">Store</span>
+          </button>
+          <button class="mode-btn biz" id="btn-mode-biz" onclick="switchView('biz')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            <span class="mode-text">Market Intel</span>
+          </button>
+        </div>
+
+        <!-- Cart Button -->
+        <button class="cart-btn" onclick="openCartDrawer()" aria-label="View shopping cart">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          <span class="cart-badge" id="cart-count">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- STOREFRONT VIEW CONTENT -->
+  <main id="storefront-content">
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="top">
+      <div class="container">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <div class="hero-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              <span>Designed with Pediatric Heart &amp; Rigorous Safety</span>
+            </div>
+            <h2 class="hero-title">
+              For <em>3 AM feeds</em>, wonder-filled firsts, and every tender step in between.
+            </h2>
+            <p class="hero-desc">
+              Thoughtful printable planners, milestone cards, nursery art, and daily trackers crafted to bring quiet calm and doctor-aligned confidence to modern parenting.
+            </p>
+            <div class="hero-actions">
+              <a href="#catalog" class="btn btn-primary">
+                Explore the Catalog
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
+              </a>
+              <button class="btn btn-secondary" onclick="openInteractiveDemo('sleep-feed-log')">
+                Try Interactive Baby Log
+              </button>
+            </div>
+            <div class="hero-trust-row">
+              <div class="trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>AAP 2022 Safe Sleep Aligned</span>
+              </div>
+              <div class="trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>CDC Nutrition &amp; Feeding Rules</span>
+              </div>
+              <div class="trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Instant PDF &amp; Sheets Vault</span>
+              </div>
+              <div class="trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>100% Offline Client Privacy</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero Image -->
+          <div class="hero-visual-card">
+            <div class="hero-img-wrapper">
+              <img src="/assets/dropship/hero.jpg" onerror="this.src='images/hero.jpg'" alt="Loving parents holding newborn baby gently in sunlit nursery">
+            </div>
+            <div class="hero-float-tag">
+              <p>&ldquo;The 3 AM feeding log gave us a shared brain when we were running on empty.&rdquo;</p>
+              <span>Sarah &amp; Mark &bull; Parents to Leo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Catalog Header & Filter Navigation -->
+    <section class="container" id="catalog">
+      <div class="catalog-header">
+        <div>
+          <span class="section-eyebrow">The Digital Boutique</span>
+          <h3 class="section-title">Essentials for Every Stage of Little Beginnings</h3>
+          <p class="section-subtitle">
+            Every file is instantly delivered in printable PDF, Google Sheets, or Canva format. Zero clutter, zero plastic, ready the moment you click.
+          </p>
+        </div>
+
+        <div class="filter-bar">
+          <div class="stage-pills" id="stage-filter-pills">
+            <button class="stage-pill active" onclick="filterStage('all')">All Products (10)</button>
+            <button class="stage-pill" onclick="filterStage('expecting')">Expecting &amp; Registry</button>
+            <button class="stage-pill" onclick="filterStage('newborn')">Newborn (0–6m)</button>
+            <button class="stage-pill" onclick="filterStage('solids')">Starting Solids (6–12m)</button>
+            <button class="stage-pill" onclick="filterStage('toddler')">Toddlers (1–4y)</button>
+            <button class="stage-pill" onclick="filterStage('postpartum')">Postpartum Care</button>
+          </div>
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="catalog-search" placeholder="Search products, stages, topics..." oninput="handleSearch(this.value)">
+          </div>
+        </div>
+      </div>
+
+      <!-- The 10 Product Cards Grid -->
+      <div class="product-grid" id="product-container">
+        <!-- Rendered dynamically by JavaScript -->
+      </div>
+    </section>
+
+    <!-- Interactive Suite Quick Banner -->
+    <section class="container" id="interactive-suite">
+      <div class="interactive-banner">
+        <div>
+          <span class="section-eyebrow" style="color:var(--terracotta)">Hands-On Experience</span>
+          <h3>Try the Digital Tools in Action</h3>
+          <p>
+            Experience how our digital downloads work before you buy. Play with the newborn feeding log, preview woodland wall art inside a nursery, flip milestone cards, or test the toddler star board.
+          </p>
+          <button class="btn btn-terracotta" onclick="openInteractiveDemo('nursery-art')">
+            Launch Nursery Art Visualizer
+          </button>
+        </div>
+        <div class="interactive-tools-grid">
+          <div class="tool-quick-card" onclick="openInteractiveDemo('sleep-feed-log')">
+            <div class="tool-icon" style="background:#EBF1ED;color:#4E6E58">🍼</div>
+            <h4>24h Sleep &amp; Feed Log</h4>
+            <span>Interactive diaper &amp; sleep tracker</span>
+          </div>
+          <div class="tool-quick-card" onclick="openInteractiveDemo('milestone-cards')">
+            <div class="tool-icon" style="background:#FDF6E9;color:#D99B38">✨</div>
+            <h4>Milestone Card Deck</h4>
+            <span>3D flipping keepsakes</span>
+          </div>
+          <div class="tool-quick-card" onclick="openInteractiveDemo('solids-planner')">
+            <div class="tool-icon" style="background:#FAEEEA;color:#C86D51">🥑</div>
+            <h4>100 First Foods Tracker</h4>
+            <span>Allergen checkmarks &amp; pediatric rules</span>
+          </div>
+          <div class="tool-quick-card" onclick="openInteractiveDemo('toddler-charts')">
+            <div class="tool-icon" style="background:#EDF3F7;color:#4F7996">⭐</div>
+            <h4>Toddler Star Board</h4>
+            <span>Sparkle chimes &amp; daily habits</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust & Pediatric Safety Section -->
+    <section class="trust-section" id="trust">
+      <div class="container">
+        <div class="trust-header">
+          <span class="section-eyebrow">Medical &amp; Ethical Foundation</span>
+          <h3 class="section-title">The Trust &amp; Safety Charter</h3>
+          <p class="section-subtitle">
+            Generic printable shops often scrape internet hacks or publish dangerous sleep gimmicks. We follow pediatric medical consensus word for word.
+          </p>
+        </div>
+
+        <div class="trust-grid">
+          <div class="trust-card">
+            <div class="trust-icon-pill">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            <h4>AAP 2022 Infant Safe Sleep</h4>
+            <p>Every mention of baby sleep strictly follows the American Academy of Pediatrics: back to sleep, flat non-inclined surface, bare crib, and zero weighted sleepwear.</p>
+            <span class="trust-rule-tag">Rule: AAP 2022 &bull; CPSC Safe Sleep Act</span>
+          </div>
+
+          <div class="trust-card">
+            <div class="trust-icon-pill" style="background:var(--terracotta-light);color:var(--terracotta)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12a10 10 0 0 1 10-10z"></path><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+            </div>
+            <h4>No Shaming &bull; No Deadlines</h4>
+            <p>Milestone printables celebrate moments, they never diagnose delays. We provide zero &ldquo;should by&rdquo; deadlines, linking directly to CDC Act Early checklists.</p>
+            <span class="trust-rule-tag">Rule: CDC Learn The Signs</span>
+          </div>
+
+          <div class="trust-card">
+            <div class="trust-icon-pill" style="background:var(--sky-light);color:var(--sky)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
+            <h4>Strict Child Privacy (COPPA)</h4>
+            <p>Our trackers run offline or inside the parent's private Google account. We collect zero data regarding children and never ask for baby photos or names.</p>
+            <span class="trust-rule-tag">Rule: FTC COPPA Compliance</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Heartfelt Family Stories & Reviews -->
+    <section class="container testimonial-section">
+      <div style="text-align:center;max-width:680px;margin:0 auto">
+        <span class="section-eyebrow">Real Parent Stories</span>
+        <h3 class="section-title">Tested in the Quiet Hours of Parenting</h3>
+        <p class="section-subtitle">Read how these gentle tools brought relief when it mattered most.</p>
+      </div>
+
+      <div class="testimonial-grid">
+        <div class="testimonial-card">
+          <p class="test-quote">&ldquo;At 3:17 AM with our two-week-old crying and my partner and I running on 40 minutes of sleep, the Newborn Feed &amp; Sleep Log gave us a shared brain. We didn't have to argue about who fed him last or when the wet diaper happened.&rdquo;</p>
+          <div class="test-author">
+            <div class="author-avatar">SM</div>
+            <div class="author-meta">
+              <h5>Sarah &amp; Mark K.</h5>
+              <span>Parents to 3-month-old Leo</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <p class="test-quote">&ldquo;The Starting Solids tracker turned what felt like a high-stress medical obstacle course into a joyful family ritual. Checking off each food with my daughter was the highlight of our mornings.&rdquo;</p>
+          <div class="test-author">
+            <div class="author-avatar" style="color:var(--terracotta)">EM</div>
+            <div class="author-meta">
+              <h5>Elena M.</h5>
+              <span>Mom of 9-month-old Maya</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <p class="test-quote">&ldquo;The postpartum planner reminded my partner how to support me without me having to explain it through tears. That hotline button and the gentle affirmations felt like a warm hand on my shoulder.&rdquo;</p>
+          <div class="test-author">
+            <div class="author-avatar" style="color:var(--sky)">CT</div>
+            <div class="author-meta">
+              <h5>Chloe T.</h5>
+              <span>Mom to twins, Portland OR</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BUSINESS OPPORTUNITY & MARKET INTELLIGENCE VIEW / SECTION -->
+  <section class="container" id="business-intel">
+    <div class="biz-opportunity-section">
+      <div class="biz-glow"></div>
+
+      <div class="biz-header">
+        <div class="biz-tag">Operator &amp; Investor Overview</div>
+        <h3 class="biz-title">The Digital Dropshipping Opportunity: Baby &amp; Parenting</h3>
+        <p class="biz-desc">
+          By pairing high emotional urgency and predictable life transitions with zero-inventory digital fulfillment and verified pediatric safety, this business model commands 90%+ net margins while eliminating physical supply chain fragility.
+        </p>
+      </div>
+
+      <!-- Core Market Numbers -->
+      <div class="biz-stats-grid">
+        <div class="biz-stat-card">
+          <div class="biz-stat-num">3.63M</div>
+          <div class="biz-stat-label">US Annual Births</div>
+          <p class="biz-stat-detail">A recurring, guaranteed fresh cohort of first-year parents every single year in need of immediate solutions.</p>
+          <div class="biz-stat-cite">CDC / NCHS Vital Statistics (2024)</div>
+        </div>
+
+        <div class="biz-stat-card">
+          <div class="biz-stat-num">$320.7B</div>
+          <div class="biz-stat-label">Global Baby Market</div>
+          <p class="biz-stat-detail">Growing at 5.9% CAGR through 2030. Digital products ride the exact same wave of parental spending without manufacturing overhead.</p>
+          <div class="biz-stat-cite">Grand View Research Report</div>
+        </div>
+
+        <div class="biz-stat-card">
+          <div class="biz-stat-num">89.6M</div>
+          <div class="biz-stat-label">Active Etsy Buyers</div>
+          <p class="biz-stat-detail">$10.9B in marketplace transactions. Massive ready-made organic search intent for printable planners and nursery decor.</p>
+          <div class="biz-stat-cite">Etsy Inc. Annual Filings</div>
+        </div>
+
+        <div class="biz-stat-card">
+          <div class="biz-stat-num">27.5 Yrs</div>
+          <div class="biz-stat-label">Mean First-Mother Age</div>
+          <p class="biz-stat-detail">Older, educated first-time mothers with disposable income who actively research and demand evidence-based tools over gimmicks.</p>
+          <div class="biz-stat-cite">CDC / NCHS National Births Report</div>
+        </div>
+      </div>
+
+      <!-- Interactive Unit Economics & Profit Simulator -->
+      <div class="biz-calculator-box">
+        <div class="calc-header">
+          <h4>Interactive Unit Economics &amp; Payout Calculator</h4>
+          <p>
+            Simulate your monthly sales volume and average price point based on real Etsy / payment gateway fee schedules:
+            <code>$0.20 listing fee + 6.5% transaction fee + 3.0% + $0.25 processing</code>.
+          </p>
+        </div>
+
+        <div class="calc-grid">
+          <div class="calc-controls">
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Average Order Value (AOV):</span>
+                <span class="slider-val" id="lbl-aov">$12.00</span>
+              </div>
+              <input type="range" id="slider-aov" min="3" max="50" step="1" value="12" oninput="updateBizCalc()">
+              <small style="color:#8A9A8C;font-size:11.5px">From $3 single checklists to $39 full mini-courses</small>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Monthly Orders / Sales Volume:</span>
+                <span class="slider-val" id="lbl-volume">450 sales</span>
+              </div>
+              <input type="range" id="slider-volume" min="50" max="3000" step="50" value="450" oninput="updateBizCalc()">
+              <small style="color:#8A9A8C;font-size:11.5px">Traffic from organic Etsy SEO, Pinterest pins, and parenting reels</small>
+            </div>
+
+            <div style="background:rgba(255,255,255,0.05);padding:12px;border-radius:8px;font-size:12.5px;color:#A9B7AA">
+              💡 <strong>The Bundle Advantage:</strong> Flat fees take 25% of a $3 sale, but only 9.8% of a $15 bundle. Packaging multi-packs expands net seller take-home significantly.
+            </div>
+          </div>
+
+          <div class="calc-results-card">
+            <div class="res-row">
+              <span>Gross Monthly Revenue</span>
+              <span id="res-gross" style="color:#FFF;font-weight:600">$5,400.00</span>
+            </div>
+            <div class="res-row">
+              <span>Platform &amp; Payment Fees</span>
+              <span id="res-fees" style="color:#FA7070">-$580.50</span>
+            </div>
+            <div class="res-row">
+              <span>COGS (Cost of Digital Goods)</span>
+              <span style="color:#4ADE80">$0.00 (Zero Inventory)</span>
+            </div>
+            <div class="res-row highlight">
+              <span>Estimated Net Payout</span>
+              <div style="text-align:right">
+                <div class="res-profit" id="res-net">$4,819.50</div>
+                <span class="res-margin-pill" id="res-margin">89.2% Net Margin</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Automated Fulfillment Pipeline -->
+      <div>
+        <h4 class="pipeline-title">Automated Digital Fulfillment Architecture</h4>
+        <div class="pipeline-steps">
+          <div class="pipe-step">
+            <div class="pipe-step-num">1</div>
+            <h5>Discovery</h5>
+            <p>Parent finds Pinterest pin or Etsy search for &ldquo;Newborn Sleep Log&rdquo;</p>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-step-num">2</div>
+            <h5>Checkout</h5>
+            <p>1-click Stripe or Etsy checkout with instant payment verification</p>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-step-num">3</div>
+            <h5>Fulfillment</h5>
+            <p>Automated webhook immediately renders customized PDF &amp; Google Sheet copy</p>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-step-num">4</div>
+            <h5>Instant Vault</h5>
+            <p>Buyer receives immediate download screen &amp; automated backup email</p>
+          </div>
+          <div class="pipe-step">
+            <div class="pipe-step-num">5</div>
+            <h5>Retention LTV</h5>
+            <p>Automated milestone check-in at 6 months offers Solids Planner upsell</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="brand-logo" style="color:#FFF;margin-bottom:14px">
+            <div class="logo-symbol" style="background:var(--sage)">🌱</div>
+            <div class="brand-text">
+              <h1 style="color:#FFF">Haven &amp; Sprout</h1>
+              <span style="color:#9FAAA0">Digital Drop Shipping Studio</span>
+            </div>
+          </div>
+          <p style="font-size:13.5px;color:#A9B5AA;line-height:1.6">
+            Empowering parents, comforting babies, and nurturing families through evidence-based, beautiful digital printables.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h5>Product Lines</h5>
+          <ul>
+            <li><a onclick="filterStage('newborn')">Newborn Care Logs</a></li>
+            <li><a onclick="filterStage('expecting')">Hospital &amp; Registry Checklists</a></li>
+            <li><a onclick="filterStage('solids')">Starting Solids Trackers</a></li>
+            <li><a onclick="filterStage('toddler')">Toddler Routine Charts</a></li>
+            <li><a onclick="filterStage('postpartum')">Postpartum Recovery</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Clinical &amp; Safety</h5>
+          <ul>
+            <li><a href="#trust">AAP 2022 Sleep Guidelines</a></li>
+            <li><a href="#trust">CPSC Safe Sleep Compliance</a></li>
+            <li><a href="#trust">CDC Nutrition Standards</a></li>
+            <li><a href="#trust">COPPA Privacy Guarantee</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Support &amp; Hotlines</h5>
+          <ul>
+            <li><a href="tel:18338526262">Maternal Mental Health (1-833-TLC-MAMA)</a></li>
+            <li><a href="tel:18002221222">National Poison Help (1-800-222-1222)</a></li>
+            <li><a href="tel:988">988 Suicide &amp; Crisis Lifeline</a></li>
+            <li><a href="#business-intel">Operator Dashboard</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-disclaimer">
+        <div>&copy; 2026 Haven &amp; Sprout Studio. All rights reserved. Built for Bench Demo System.</div>
+        <div><strong>Medical Disclaimer:</strong> Informational tools only; does not constitute medical advice or diagnosis. Always consult your pediatrician.</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- DYNAMIC INTERACTIVE MODAL BACKDROP -->
+  <div class="modal-backdrop" id="interactive-modal" onclick="closeInteractiveDemo(event)">
+    <div class="modal-container" id="modal-box" onclick="event.stopPropagation()">
+      <button class="modal-close-btn" onclick="closeInteractiveDemo(null)" aria-label="Close dialog">&times;</button>
+      <div class="modal-body" id="modal-content">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE-OUT CART DRAWER -->
+  <div class="cart-drawer-backdrop" id="cart-drawer-backdrop" onclick="closeCartDrawer(event)">
+    <div class="cart-drawer" onclick="event.stopPropagation()">
+      <div class="cart-drawer-header">
+        <h3>Your Digital Vault (<span id="drawer-cart-count">0</span>)</h3>
+        <button class="modal-close-btn" style="position:static" onclick="closeCartDrawer(null)">&times;</button>
+      </div>
+      
+      <div class="cart-items-list" id="cart-items-container">
+        <!-- Cart items injected dynamically -->
+      </div>
+
+      <div class="cart-drawer-footer">
+        <div class="instant-fulfill-badge">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>Instant Download &bull; PDF, Google Sheets &amp; Canva</span>
+        </div>
+        <div class="cart-total-row">
+          <span>Subtotal:</span>
+          <span id="cart-total-amount">$0.00</span>
+        </div>
+        <button class="btn btn-terracotta" style="width:100%" onclick="checkoutCart()">
+          Complete Order &amp; Access Vault
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP STATE & INTERACTIVITY SCRIPT -->
+  <script>
+    // Product Catalog Data directly from data/products.json & enhanced with imagery
+    const PRODUCTS = [
+      {
+        id: "sleep-feed-log",
+        name: "Newborn Sleep & Feeding Log",
+        stage: "newborn",
+        format: "Printable PDF + Google Sheets",
+        price: 6.50,
+        priceBand: "$4 – $9",
+        parent: "Parents of a 0–6 month old & night-shift helpers",
+        demand: "Every newborn parent is asked about feeds, sleep, and wet diapers at pediatric visits. 3.63M US births annually.",
+        image: "/assets/dropship/tracker.jpg",
+        fallbackImg: "images/tracker.jpg",
+        care: "medium",
+        safety: "A structured tracking log: it records without medical claims. Matches AAP 2022 Safe Sleep strictly.",
+        demoType: "log"
+      },
+      {
+        id: "milestone-cards",
+        name: "Baby Milestone Keepsake Cards",
+        stage: "solids",
+        format: "Printable 40-Card Set + High-Res PNGs",
+        price: 8.00,
+        priceBand: "$5 – $12",
+        parent: "Expecting and new parents; baby-shower gift buyers",
+        demand: "Gift purchase favorite in front of Etsy's 89.6M active buyers. Celebrates moments with warmth.",
+        image: "/assets/dropship/milestones.jpg",
+        fallbackImg: "images/milestones.jpg",
+        care: "low",
+        safety: "Celebrates moments (\"first smile\", \"first giggle\"); never sets rigid age deadlines. References CDC checklists.",
+        demoType: "cards"
+      },
+      {
+        id: "nursery-art",
+        name: "Woodland Botanical Nursery Art Set",
+        stage: "expecting",
+        format: "Printable Art (6 Prints in 5 Aspect Ratios)",
+        price: 12.00,
+        priceBand: "$6 – $15",
+        parent: "Parents designing nursery; baby-shower hosts",
+        demand: "Nursery design is part of a $320B spending category. Printable art is the low-cost, zero-plastic favorite.",
+        image: "/assets/dropship/nursery.jpg",
+        fallbackImg: "images/nursery.jpg",
+        care: "low",
+        safety: "Original watercolor artwork only. Safe hanging guidelines included (never mount heavy glass over crib).",
+        demoType: "nursery"
+      },
+      {
+        id: "solids-planner",
+        name: "Starting Solids & 100 Foods Tracker",
+        stage: "solids",
+        format: "Printable PDF Guide + First-Foods Matrix",
+        price: 9.50,
+        priceBand: "$7 – $15",
+        parent: "Parents of 5–12 month olds starting table food",
+        demand: "Research-minded first-time parents look for structured meal plans and safe allergen schedules.",
+        image: "/assets/dropship/tracker.jpg",
+        fallbackImg: "images/tracker.jpg",
+        care: "high",
+        safety: "Adheres to CDC & AAP guidelines: solids at ~6 months, no honey under 12 months, choking hazards detailed.",
+        demoType: "solids"
+      },
+      {
+        id: "registry-bundle",
+        name: "Hospital Bag & Nesting Registry Bundle",
+        stage: "expecting",
+        format: "Printable + Editable Canva Template",
+        price: 5.00,
+        priceBand: "$3 – $8",
+        parent: "Third-trimester parents & baby shower planners",
+        demand: "Purchased once per pregnancy at a predictable nesting window. High organic search volume.",
+        image: "/assets/dropship/hero.jpg",
+        fallbackImg: "images/hero.jpg",
+        care: "medium",
+        safety: "Registry checklist never includes banned items (inclined sleepers or padded crib bumpers per CPSC).",
+        demoType: "checklist"
+      },
+      {
+        id: "baby-budget",
+        name: "First-Year Baby Budget & Cost Planner",
+        stage: "expecting",
+        format: "Google Sheets / Excel Template",
+        price: 11.00,
+        priceBand: "$8 – $15",
+        parent: "Expecting couples planning leave & care costs",
+        demand: "USDA estimates raising a child at $233,610; parents want realistic first-year cash-flow forecasting.",
+        image: "/assets/dropship/tracker.jpg",
+        fallbackImg: "images/tracker.jpg",
+        care: "low",
+        safety: "Organizational planning template, not financial advice. All cost baselines cite USDA benchmarks.",
+        demoType: "budget"
+      },
+      {
+        id: "caregiver-sheets",
+        name: "Babysitter & Caregiver Handoff Pack",
+        stage: "newborn",
+        format: "Fillable Emergency PDF Pack",
+        price: 4.50,
+        priceBand: "$3 – $7",
+        parent: "Parents handing over to sitters, grandparents, or daycare",
+        demand: "Returning to work and first date nights are universal handoff points. High conversion bundle item.",
+        image: "/assets/dropship/tracker.jpg",
+        fallbackImg: "images/tracker.jpg",
+        care: "medium",
+        safety: "Pre-printed with Poison Help (1-800-222-1222) and AAP Safe Sleep checklist for sitters.",
+        demoType: "caregiver"
+      },
+      {
+        id: "postpartum-planner",
+        name: "Postpartum Recovery & Self-Care Journal",
+        stage: "postpartum",
+        format: "Printable + Tablet (GoodNotes) Planner",
+        price: 9.00,
+        priceBand: "$7 – $14",
+        parent: "Mothers in the first 12 weeks postpartum & partners",
+        demand: "1 in 8 new mothers experience postpartum depression symptoms. Recovery tools are deeply needed.",
+        image: "/assets/dropship/hero.jpg",
+        fallbackImg: "images/hero.jpg",
+        care: "high",
+        safety: "Compassionate support tool. Prominently prints National Maternal Mental Health Hotline (1-833-TLC-MAMA).",
+        demoType: "postpartum"
+      },
+      {
+        id: "newborn-course",
+        name: "Newborn Basics 30-Day Masterclass",
+        stage: "newborn",
+        format: "Digital Video Modules + Audio Guide + Notes",
+        price: 39.00,
+        priceBand: "$29 – $79",
+        parent: "First-time parents wanting doctor-approved calm",
+        demand: "Highest margin asset; older parents invest in trusted, evidence-based preparation.",
+        image: "/assets/dropship/hero.jpg",
+        fallbackImg: "images/hero.jpg",
+        care: "high",
+        safety: "Reviewed by pediatric RNs and IBCLC lactation consultants. Cites AAP sleep and CDC feeding guidelines.",
+        demoType: "course"
+      },
+      {
+        id: "toddler-charts",
+        name: "Toddler Routine & Morning/Night Star Board",
+        stage: "toddler",
+        format: "Printable Charts + Interactive Reward Cards",
+        price: 6.00,
+        priceBand: "$4 – $9",
+        parent: "Parents of 18 month to 4 year olds",
+        demand: "Extends customer lifetime value (LTV) for 3–4 years beyond infancy.",
+        image: "/assets/dropship/routine.jpg",
+        fallbackImg: "images/routine.jpg",
+        care: "low",
+        safety: "Positive reinforcement; no shaming language; connection over compliance.",
+        demoType: "routine"
+      }
+    ];
+
+    // Web Audio Sound Synthesizer for gentle chimes
+    let audioCtx = null;
+    function playChime(freq = 523.25, type = "sine", duration = 0.35) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        // AudioContext disabled or blocked; silent fallback
+      }
+    }
+
+    // State Variables
+    let cart = [];
+    let currentFilter = 'all';
+    let searchQuery = '';
+
+    // Render Product Cards
+    function renderProducts() {
+      const container = document.getElementById('product-container');
+      const filtered = PRODUCTS.filter(p => {
+        const matchesStage = currentFilter === 'all' || p.stage === currentFilter;
+        const matchesSearch = searchQuery === '' || 
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          p.demand.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.parent.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesStage && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 48px 20px; color: var(--ink-dim);">
+            <p style="font-size: 18px; margin-bottom: 8px;">No products match your search.</p>
+            <button class="btn btn-secondary" onclick="filterStage('all'); document.getElementById('catalog-search').value=''; handleSearch('')">Clear Filters</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(prod => `
+        <article class="product-card" id="card-${prod.id}">
+          <div class="prod-img-box">
+            <img src="${prod.image}" onerror="this.src='${prod.fallbackImg}'" alt="${prod.name}">
+            <span class="prod-format-pill">${prod.format}</span>
+            <span class="prod-price-pill">$${prod.price.toFixed(2)}</span>
+          </div>
+          <div class="prod-body">
+            <div class="prod-header">
+              <span class="prod-target">${prod.parent}</span>
+              <h4 class="prod-name">${prod.name}</h4>
+            </div>
+            <p class="prod-demand">${prod.demand}</p>
+            <div class="safety-note-box">
+              <b>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Pediatric Safety Standard
+              </b>
+              ${prod.safety}
+            </div>
+            <div class="prod-actions">
+              <button class="btn-preview" onclick="openInteractiveDemo('${prod.id}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                Try Live Tool
+              </button>
+              <button class="btn-add" onclick="addToCart('${prod.id}')">
+                Add to Cart &bull; $${prod.price.toFixed(2)}
+              </button>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    // Filter by Stage
+    function filterStage(stage) {
+      currentFilter = stage;
+      const pills = document.querySelectorAll('#stage-filter-pills .stage-pill');
+      pills.forEach(p => p.classList.remove('active'));
+      const activeBtn = Array.from(pills).find(p => p.getAttribute('onclick')?.includes(stage));
+      if (activeBtn) activeBtn.classList.add('active');
+      renderProducts();
+    }
+
+    // Live Search
+    function handleSearch(val) {
+      searchQuery = val.trim();
+      renderProducts();
+    }
+
+    // Cart Management
+    function addToCart(productId) {
+      const prod = PRODUCTS.find(p => p.id === productId);
+      if (!prod) return;
+      cart.push(prod);
+      playChime(659.25, "sine", 0.25); // E note chime
+      updateCartUI();
+      openCartDrawer();
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const badge = document.getElementById('cart-count');
+      const drawerCount = document.getElementById('drawer-cart-count');
+      const totalAmount = document.getElementById('cart-total-amount');
+      const listContainer = document.getElementById('cart-items-container');
+
+      badge.textContent = cart.length;
+      drawerCount.textContent = cart.length;
+
+      const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
+      totalAmount.textContent = `$${subtotal.toFixed(2)}`;
+
+      if (cart.length === 0) {
+        listContainer.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--ink-dim);">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:12px"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <p style="font-size:15px">Your digital vault is empty.</p>
+            <small>Add any gentle tool from our catalog.</small>
+          </div>
+        `;
+      } else {
+        listContainer.innerHTML = cart.map((item, idx) => `
+          <div class="cart-item-card">
+            <div class="cart-item-info">
+              <h5>${item.name}</h5>
+              <span>${item.format}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span class="cart-item-price">$${item.price.toFixed(2)}</span>
+              <button class="cart-item-remove" onclick="removeFromCart(${idx})" title="Remove item">&times;</button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function openCartDrawer() {
+      document.getElementById('cart-drawer-backdrop').classList.add('open');
+    }
+    function closeCartDrawer(e) {
+      if (!e || e.target.id === 'cart-drawer-backdrop' || e.target.classList.contains('modal-close-btn')) {
+        document.getElementById('cart-drawer-backdrop').classList.remove('open');
+      }
+    }
+
+    function checkoutCart() {
+      if (cart.length === 0) {
+        alert("Your cart is empty. Please select a product first!");
+        return;
+      }
+      playChime(880, "sine", 0.4); // High A chime
+      closeCartDrawer(null);
+
+      // Open Order Confirmation & Download Vault modal
+      const modal = document.getElementById('interactive-modal');
+      const content = document.getElementById('modal-content');
+      const purchased = [...cart];
+      
+      content.innerHTML = `
+        <div style="text-align:center;padding:10px 0 24px">
+          <div style="width:60px;height:60px;background:var(--sage-light);color:var(--sage);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <h3 style="font-family:var(--font-serif);font-size:28px;margin-bottom:8px">Your Digital Vault is Ready!</h3>
+          <p style="color:var(--ink-soft);font-size:15px;max-width:500px;margin:0 auto 24px">
+            Thank you for trusting Haven &amp; Sprout. Zero waiting, zero shipping boxes: your clean, high-resolution printable files and interactive templates are ready for instant download below.
+          </p>
+
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;text-align:left;display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+            ${purchased.map(item => `
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-light)">
+                <div>
+                  <h5 style="font-size:15px;margin-bottom:2px">${item.name}</h5>
+                  <span style="font-size:12px;color:var(--ink-dim)">${item.format}</span>
+                </div>
+                <button class="btn btn-primary" style="padding:7px 16px;font-size:13px" onclick="simulateDownload('${item.name}')">
+                  Download PDF &rarr;
+                </button>
+              </div>
+            `).join('')}
+          </div>
+
+          <button class="btn btn-secondary" onclick="closeInteractiveDemo(null); cart=[]; updateCartUI();">
+            Return to Storefront
+          </button>
+        </div>
+      `;
+      modal.classList.add('open');
+    }
+
+    function simulateDownload(name) {
+      playChime(783.99, "triangle", 0.3);
+      const text = `Haven & Sprout Digital Download\nProduct: ${name}\nCertified AAP & CDC Aligned\nThank you for choosing gentle parenting essentials.`;
+      const blob = new Blob([text], {type: "text/plain"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${name.replace(/\s+/g, '_')}_HavenSprout.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // View Switcher: Boutique Storefront vs Business Intelligence
+    function switchView(mode) {
+      const storeBtn = document.getElementById('btn-mode-store');
+      const bizBtn = document.getElementById('btn-mode-biz');
+      if (mode === 'biz') {
+        storeBtn.classList.remove('active');
+        bizBtn.classList.add('active');
+        document.getElementById('business-intel').scrollIntoView({behavior: 'smooth'});
+      } else {
+        bizBtn.classList.remove('active');
+        storeBtn.classList.add('active');
+        window.scrollTo({top: 0, behavior: 'smooth'});
+      }
+    }
+
+    // Business Intelligence Calculator Updates
+    function updateBizCalc() {
+      const aov = parseFloat(document.getElementById('slider-aov').value);
+      const volume = parseInt(document.getElementById('slider-volume').value);
+
+      document.getElementById('lbl-aov').textContent = `$${aov.toFixed(2)}`;
+      document.getElementById('lbl-volume').textContent = `${volume.toLocaleString()} sales`;
+
+      const gross = aov * volume;
+      // Etsy Fee Schedule: $0.20 listing + 6.5% transaction + 3% + $0.25 processing
+      const listingFees = volume * 0.20;
+      const transactionFees = gross * 0.065;
+      const processingFees = (gross * 0.03) + (volume * 0.25);
+      const totalFees = listingFees + transactionFees + processingFees;
+      const net = gross - totalFees;
+      const margin = (net / gross) * 100;
+
+      document.getElementById('res-gross').textContent = `$${gross.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      document.getElementById('res-fees').textContent = `-$${totalFees.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      document.getElementById('res-net').textContent = `$${net.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      document.getElementById('res-margin').textContent = `${margin.toFixed(1)}% Net Margin`;
+    }
+
+    // INTERACTIVE TOOLS & PRODUCT DEMOS MODAL SYSTEM
+    function openInteractiveDemo(productId) {
+      const modal = document.getElementById('interactive-modal');
+      const content = document.getElementById('modal-content');
+      playChime(523.25, "sine", 0.2);
+
+      switch (productId) {
+        case 'sleep-feed-log':
+          content.innerHTML = renderSleepFeedLogDemo();
+          break;
+        case 'milestone-cards':
+          content.innerHTML = renderMilestoneCardsDemo();
+          break;
+        case 'nursery-art':
+          content.innerHTML = renderNurseryArtVisualizerDemo();
+          break;
+        case 'solids-planner':
+          content.innerHTML = renderSolidsPlannerDemo();
+          break;
+        case 'registry-bundle':
+          content.innerHTML = renderRegistryChecklistDemo();
+          break;
+        case 'baby-budget':
+          content.innerHTML = renderBabyBudgetDemo();
+          break;
+        case 'caregiver-sheets':
+          content.innerHTML = renderCaregiverSheetDemo();
+          break;
+        case 'postpartum-planner':
+          content.innerHTML = renderPostpartumHubDemo();
+          break;
+        case 'toddler-charts':
+          content.innerHTML = renderToddlerRoutineDemo();
+          break;
+        default:
+          content.innerHTML = renderGenericProductModal(productId);
+          break;
+      }
+
+      modal.classList.add('open');
+    }
+
+    function closeInteractiveDemo(e) {
+      if (!e || e.target.id === 'interactive-modal' || e.target.classList.contains('modal-close-btn')) {
+        document.getElementById('interactive-modal').classList.remove('open');
+      }
+    }
+
+    /* 1. Interactive Newborn Feed & Sleep Log */
+    let logEntries = [
+      { time: "08:15 AM", type: "Feeding", detail: "Nursing: Left side (15 min)", diaper: "Wet" },
+      { time: "09:30 AM", type: "Sleep", detail: "Morning Nap (1h 15m) &bull; Crib", diaper: "Clean" },
+      { time: "11:00 AM", type: "Feeding", detail: "Bottle: 3.5 oz pumped milk", diaper: "Dirty (Soft yellow)" }
+    ];
+
+    function renderSleepFeedLogDemo() {
+      return `
+        <div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+            <span style="font-size:26px">🍼</span>
+            <div>
+              <h3 style="font-family:var(--font-serif);font-size:22px">24h Newborn Care &amp; Pediatric Log</h3>
+              <span style="font-size:12.5px;color:var(--sage);font-weight:600">AAP 2022 Safe-Sleep Aligned &bull; Printable &amp; Google Sheet Format</span>
+            </div>
+          </div>
+          <p style="font-size:14px;color:var(--ink-soft);margin-bottom:18px">
+            Log feedings, sleep duration, and diapers in real-time. Instantly totals metrics to present directly to your pediatrician at checkups.
+          </p>
+
+          <!-- Quick Action Buttons -->
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px">
+            <button class="btn btn-secondary" style="padding:7px 14px;font-size:13px" onclick="addDemoLogEntry('Feeding', 'Nursing: Both sides (20 min)', 'Wet')">+ Log Nursing</button>
+            <button class="btn btn-secondary" style="padding:7px 14px;font-size:13px" onclick="addDemoLogEntry('Feeding', 'Bottle: 4 oz formula', 'Clean')">+ Log Bottle</button>
+            <button class="btn btn-secondary" style="padding:7px 14px;font-size:13px" onclick="addDemoLogEntry('Sleep', 'Crib Nap (45m) on back', 'Clean')">+ Log Nap</button>
+            <button class="btn btn-secondary" style="padding:7px 14px;font-size:13px" onclick="addDemoLogEntry('Diaper', 'Diaper Change', 'Wet & Dirty')">+ Log Diaper</button>
+          </div>
+
+          <!-- Entries Table -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;margin-bottom:18px">
+            <table style="width:100%;border-collapse:collapse;font-size:13.5px">
+              <thead style="background:var(--bg-warm);border-bottom:1px solid var(--border)">
+                <tr>
+                  <th style="padding:10px 14px;text-align:left">Time</th>
+                  <th style="padding:10px 14px;text-align:left">Activity</th>
+                  <th style="padding:10px 14px;text-align:left">Details</th>
+                  <th style="padding:10px 14px;text-align:left">Diaper</th>
+                </tr>
+              </thead>
+              <tbody id="demo-log-tbody">
+                ${logEntries.map(e => `
+                  <tr style="border-bottom:1px solid var(--border-light)">
+                    <td style="padding:10px 14px;font-weight:600">${e.time}</td>
+                    <td style="padding:10px 14px"><span style="background:var(--sage-light);color:var(--sage);padding:2px 8px;border-radius:var(--radius-full);font-size:11.5px;font-weight:600">${e.type}</span></td>
+                    <td style="padding:10px 14px">${e.detail}</td>
+                    <td style="padding:10px 14px">${e.diaper}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pediatrician Summary Card -->
+          <div style="background:var(--sage-light);border:1px solid #C8DEC9;border-radius:var(--radius-md);padding:14px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+            <div>
+              <h5 style="color:var(--sage);font-size:13.5px;font-weight:700">24-Hour Pediatric Summary:</h5>
+              <span style="font-size:13px;color:var(--ink)">Total Feeds: <strong>8</strong> &bull; Total Sleep: <strong>14.5 hrs</strong> &bull; Wet Diapers: <strong>6</strong> (Healthy Hydration)</span>
+            </div>
+            <button class="btn btn-primary" style="padding:7px 16px;font-size:13px" onclick="addToCart('sleep-feed-log')">
+              Get Printable Log ($6.50)
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function addDemoLogEntry(type, detail, diaper) {
+      playChime(600, "sine", 0.15);
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      logEntries.unshift({ time: timeStr, type, detail, diaper });
+      const tbody = document.getElementById('demo-log-tbody');
+      if (tbody) {
+        tbody.innerHTML = logEntries.map(e => `
+          <tr style="border-bottom:1px solid var(--border-light)">
+            <td style="padding:10px 14px;font-weight:600">${e.time}</td>
+            <td style="padding:10px 14px"><span style="background:var(--sage-light);color:var(--sage);padding:2px 8px;border-radius:var(--radius-full);font-size:11.5px;font-weight:600">${e.type}</span></td>
+            <td style="padding:10px 14px">${e.detail}</td>
+            <td style="padding:10px 14px">${e.diaper}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    /* 2. Interactive Milestone Cards Flipper */
+    const MILESTONES = [
+      { front: "Hello World", sub: "I have arrived with so much love", back: "Birth Stats & First Day Home Memory" },
+      { front: "First Social Smile", sub: "Not gas this time! Real joy.", back: "Date of first smile & who made baby laugh" },
+      { front: "Slept 5 Hours", sub: "A quiet miracle in the night", back: "Sleep notes & happy parent celebration" },
+      { front: "Today I Rolled Over", sub: "Tummy to back exploration", back: "CDC note: time to transition out of swaddle!" }
+    ];
+    let activeCardIdx = 0;
+    let cardFlipped = false;
+
+    function renderMilestoneCardsDemo() {
+      const card = MILESTONES[activeCardIdx];
+      return `
+        <div style="text-align:center">
+          <span style="font-size:24px">✨</span>
+          <h3 style="font-family:var(--font-serif);font-size:24px;margin-bottom:4px">Baby Milestone Keepsake Deck</h3>
+          <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:20px">
+            40 hand-lettered cards. Tap card to flip between front photo prop and back memory journal.
+          </p>
+
+          <div style="perspective:1000px;max-width:320px;height:240px;margin:0 auto 20px;cursor:pointer" onclick="toggleCardFlip()">
+            <div id="flippable-card" style="width:100%;height:100%;border-radius:var(--radius-md);background:var(--card);border:2px solid var(--border);box-shadow:var(--shadow-md);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;transition:transform 0.5s cubic-bezier(0.16,1,0.3,1);transform:${cardFlipped ? 'rotateY(180deg)' : 'rotateY(0)'}">
+              ${cardFlipped ? `
+                <div style="transform:rotateY(180deg)">
+                  <span style="font-size:12px;color:var(--sage);font-weight:700;text-transform:uppercase">Back &bull; Memory Journal</span>
+                  <h4 style="font-family:var(--font-serif);font-size:18px;margin:8px 0">${card.back}</h4>
+                  <p style="font-size:12.5px;color:var(--ink-dim)">Date: October 2026<br>Weight &bull; Milestones &bull; Little quirks</p>
+                  <small style="color:var(--terracotta);display:block;margin-top:10px;font-size:11px">Tap to flip back</small>
+                </div>
+              ` : `
+                <div>
+                  <span style="font-size:12px;color:var(--terracotta);font-weight:700;text-transform:uppercase">Milestone Card</span>
+                  <h4 style="font-family:var(--font-serif);font-size:24px;margin:8px 0;color:var(--ink)">${card.front}</h4>
+                  <p style="font-size:14px;color:var(--ink-soft)">${card.sub}</p>
+                  <small style="color:var(--sage);display:block;margin-top:12px;font-size:11.5px">🌿 Tap to flip &amp; write memory</small>
+                </div>
+              `}
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:center;gap:12px;margin-bottom:20px">
+            <button class="btn btn-secondary" onclick="cycleCard(-1)">&larr; Previous Card</button>
+            <button class="btn btn-secondary" onclick="cycleCard(1)">Next Card &rarr;</button>
+          </div>
+
+          <button class="btn btn-primary" onclick="addToCart('milestone-cards')">
+            Get Full 40-Card Printable Deck ($8.00)
+          </button>
+        </div>
+      `;
+    }
+
+    function toggleCardFlip() {
+      playChime(650, "sine", 0.2);
+      cardFlipped = !cardFlipped;
+      document.getElementById('modal-content').innerHTML = renderMilestoneCardsDemo();
+    }
+
+    function cycleCard(direction) {
+      playChime(550, "sine", 0.15);
+      activeCardIdx = (activeCardIdx + direction + MILESTONES.length) % MILESTONES.length;
+      cardFlipped = false;
+      document.getElementById('modal-content').innerHTML = renderMilestoneCardsDemo();
+    }
+
+    /* 3. Interactive Nursery Wall Art Visualizer */
+    let wallColor = '#EBF1ED';
+    let frameFinish = '#C9A24B';
+
+    function renderNurseryArtVisualizerDemo() {
+      return `
+        <div>
+          <div style="text-align:center;margin-bottom:16px">
+            <span style="font-size:24px">🎨</span>
+            <h3 style="font-family:var(--font-serif);font-size:22px">Nursery Wall Art Visualizer</h3>
+            <p style="font-size:13.5px;color:var(--ink-soft)">
+              Preview how our original woodland animal watercolors look in your baby's nursery before printing.
+            </p>
+          </div>
+
+          <!-- Wall Canvas Mockup -->
+          <div style="background:${wallColor};border:1px solid var(--border);border-radius:var(--radius-md);padding:30px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:220px;margin-bottom:18px;transition:background 0.3s ease">
+            <div style="display:flex;gap:14px;justify-content:center;align-items:center">
+              <div style="width:75px;height:100px;background:#FFF;border:4px solid ${frameFinish};box-shadow:var(--shadow-sm);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:22px">
+                🦌
+              </div>
+              <div style="width:75px;height:100px;background:#FFF;border:4px solid ${frameFinish};box-shadow:var(--shadow-sm);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:22px">
+                🐰
+              </div>
+              <div style="width:75px;height:100px;background:#FFF;border:4px solid ${frameFinish};box-shadow:var(--shadow-sm);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:22px">
+                🦊
+              </div>
+            </div>
+            <div style="margin-top:20px;width:160px;height:35px;background:#C8B7A6;border-radius:6px 6px 0 0;box-shadow:var(--shadow-sm);display:flex;align-items:center;justify-content:center;font-size:10.5px;color:#FFF;font-weight:600">
+              Baby Crib (CPSC Safety Clear)
+            </div>
+          </div>
+
+          <!-- Color Customizers -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+            <div>
+              <span style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">Nursery Wall Color:</span>
+              <div style="display:flex;gap:8px">
+                <button onclick="setWallColor('#EBF1ED')" style="width:28px;height:28px;border-radius:50%;background:#EBF1ED;border:2px solid #FFF;box-shadow:var(--shadow-sm);cursor:pointer" title="Soft Sage"></button>
+                <button onclick="setWallColor('#FAEEEA')" style="width:28px;height:28px;border-radius:50%;background:#FAEEEA;border:2px solid #FFF;box-shadow:var(--shadow-sm);cursor:pointer" title="Pale Peach"></button>
+                <button onclick="setWallColor('#F4EFEB')" style="width:28px;height:28px;border-radius:50%;background:#F4EFEB;border:2px solid #FFF;box-shadow:var(--shadow-sm);cursor:pointer" title="Warm Alabaster"></button>
+                <button onclick="setWallColor('#EDF3F7')" style="width:28px;height:28px;border-radius:50%;background:#EDF3F7;border:2px solid #FFF;box-shadow:var(--shadow-sm);cursor:pointer" title="Mist Blue"></button>
+              </div>
+            </div>
+            <div>
+              <span style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">Frame Finish:</span>
+              <div style="display:flex;gap:8px">
+                <button onclick="setFrameFinish('#C9A24B')" style="width:28px;height:28px;border-radius:50%;background:#C9A24B;border:2px solid #FFF;box-shadow:var(--shadow-sm);cursor:pointer" title="Warm Brass"></button>
+                <button onclick="setFrameFinish('#D1C2A5')" style="width:28px;height:28px;border-radius:50%;background:#D1C2A5;border:2px solid #FFF;box-shadow:var(--shadow-sm);cursor:pointer" title="Natural Light Oak"></button>
+                <button onclick="setFrameFinish('#FFFFFF')" style="width:28px;height:28px;border-radius:50%;background:#FFFFFF;border:2px solid #CCC;box-shadow:var(--shadow-sm);cursor:pointer" title="Clean White"></button>
+                <button onclick="setFrameFinish('#2D2A26')" style="width:28px;height:28px;border-radius:50%;background:#2D2A26;border:2px solid #FFF;box-shadow:var(--shadow-sm);cursor:pointer" title="Matte Charcoal"></button>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:var(--bg-warm);padding:10px 14px;border-radius:var(--radius-sm);font-size:12px;color:var(--ink-soft);margin-bottom:18px">
+            ⚠️ <strong>Pediatric Safety Notice:</strong> Never hang glass-front frames directly over a sleeping child's crib. Anchor all wall fixtures securely into wall studs out of baby's reach.
+          </div>
+
+          <div style="text-align:center">
+            <button class="btn btn-primary" onclick="addToCart('nursery-art')">
+              Get Printable 6-Piece Art Set ($12.00)
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function setWallColor(color) {
+      wallColor = color;
+      document.getElementById('modal-content').innerHTML = renderNurseryArtVisualizerDemo();
+    }
+    function setFrameFinish(color) {
+      frameFinish = color;
+      document.getElementById('modal-content').innerHTML = renderNurseryArtVisualizerDemo();
+    }
+
+    /* 4. Interactive Starting Solids & 100 Foods Tracker */
+    let foodChecks = {
+      avocado: [true, true, false],
+      sweet_potato: [true, false, false],
+      banana: [true, true, true],
+      peanut_butter: [true, false, false],
+      egg: [false, false, false]
+    };
+
+    function renderSolidsPlannerDemo() {
+      return `
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <span style="font-size:24px">🥑</span>
+            <div>
+              <h3 style="font-family:var(--font-serif);font-size:22px">Starting Solids &amp; 100 First Foods Matrix</h3>
+              <span style="font-size:12.5px;color:var(--sage);font-weight:600">CDC &bull; AAP Aligned &bull; Registered Dietitian Reviewed</span>
+            </div>
+          </div>
+          <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:16px">
+            Track first tastes, repeat exposures (3-try rule), and watch for allergen sensitivities.
+          </p>
+
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;margin-bottom:16px">
+            <h5 style="font-size:14px;margin-bottom:10px">First Foods Exposure Grid:</h5>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              ${[
+                { id: 'avocado', name: 'Avocado (Pureed / Spear)', type: 'Gentle Veggie' },
+                { id: 'sweet_potato', name: 'Sweet Potato (Steamed)', type: 'Gentle Veggie' },
+                { id: 'banana', name: 'Banana (Mashed)', type: 'Fruit' },
+                { id: 'peanut_butter', name: 'Smooth Peanut Butter (Thinned)', type: 'Major Allergen ⚠️' },
+                { id: 'egg', name: 'Hard Boiled Egg (Pureed)', type: 'Major Allergen ⚠️' }
+              ].map(f => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-light);font-size:13px">
+                  <div>
+                    <strong>${f.name}</strong> <span style="font-size:11px;color:var(--ink-dim)">(${f.type})</span>
+                  </div>
+                  <div style="display:flex;gap:6px">
+                    <button onclick="toggleFood('${f.id}', 0)" style="padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:${foodChecks[f.id][0] ? 'var(--sage)' : '#FFF'};color:${foodChecks[f.id][0] ? '#FFF' : 'var(--ink)'};cursor:pointer;font-size:11px">1st</button>
+                    <button onclick="toggleFood('${f.id}', 1)" style="padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:${foodChecks[f.id][1] ? 'var(--sage)' : '#FFF'};color:${foodChecks[f.id][1] ? '#FFF' : 'var(--ink)'};cursor:pointer;font-size:11px">2nd</button>
+                    <button onclick="toggleFood('${f.id}', 2)" style="padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:${foodChecks[f.id][2] ? 'var(--sage)' : '#FFF'};color:${foodChecks[f.id][2] ? '#FFF' : 'var(--ink)'};cursor:pointer;font-size:11px">3rd</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div style="background:var(--terracotta-light);border:1px solid #E8B4A5;padding:12px;border-radius:var(--radius-sm);font-size:12.5px;color:var(--ink);margin-bottom:18px">
+            🛑 <strong>Absolute CDC Safety Rules:</strong> Zero honey before age 12 months (infant botulism risk). Grapes &amp; cherry tomatoes must always be cut lengthwise into quarters. Introduce common allergens one at a time.
+          </div>
+
+          <div style="text-align:center">
+            <button class="btn btn-primary" onclick="addToCart('solids-planner')">
+              Get Complete 100 Foods Printable Tracker ($9.50)
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleFood(id, idx) {
+      playChime(500, "sine", 0.15);
+      foodChecks[id][idx] = !foodChecks[id][idx];
+      document.getElementById('modal-content').innerHTML = renderSolidsPlannerDemo();
+    }
+
+    /* 5. Toddler Routine Star Board Demo */
+    let starsEarned = 5;
+    function renderToddlerRoutineDemo() {
+      return `
+        <div style="text-align:center">
+          <span style="font-size:26px">⭐</span>
+          <h3 style="font-family:var(--font-serif);font-size:24px;margin-bottom:4px">Toddler Routine &amp; Star Board</h3>
+          <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:16px">
+            Positive reinforcement, screen-free routine habits for 18m to 4 year olds. Click stars to celebrate!
+          </p>
+
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:18px;margin-bottom:18px;text-align:left">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+              <h5 style="font-size:15px">Daily Routines:</h5>
+              <span style="background:var(--honey-light);color:var(--honey);font-weight:700;padding:3px 10px;border-radius:var(--radius-full);font-size:13px">
+                🌟 ${starsEarned} Stars Earned Today!
+              </span>
+            </div>
+
+            ${[
+              'Brush Teeth (Morning)', 'Get Dressed All by Myself', 'Wash Hands Before Eating',
+              'Tidy Up Toys After Play', 'Brush Teeth & Pyjamas (Night)', 'Gentle Storytime in Bed'
+            ].map((task, i) => `
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-light);font-size:13.5px">
+                <span>${task}</span>
+                <button onclick="awardStar()" style="background:none;border:none;font-size:20px;cursor:pointer;color:${i < starsEarned ? '#D99B38' : '#D0C8BC'};transition:transform 0.2s" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+                  ★
+                </button>
+              </div>
+            `).join('')}
+          </div>
+
+          <p style="font-size:12.5px;color:var(--sage);font-weight:600;margin-bottom:16px">
+            🎉 Reward Target: 5 Stars = Extra bedtime story &amp; trip to the playground!
+          </p>
+
+          <button class="btn btn-primary" onclick="addToCart('toddler-charts')">
+            Get Printable Routine Board &amp; Cards ($6.00)
+          </button>
+        </div>
+      `;
+    }
+
+    function awardStar() {
+      starsEarned = Math.min(6, starsEarned + 1);
+      playChime(800 + (starsEarned * 60), "triangle", 0.3);
+      document.getElementById('modal-content').innerHTML = renderToddlerRoutineDemo();
+    }
+
+    /* Generic / Other Product Demos */
+    function renderRegistryChecklistDemo() {
+      return `
+        <div>
+          <h3 style="font-family:var(--font-serif);font-size:22px;margin-bottom:8px">Hospital Bag &amp; Baby Registry Checklist</h3>
+          <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:16px">Printable &amp; editable Canva checklist organized by Mom, Baby, Partner, and Labor Room.</p>
+          <div style="background:var(--bg-warm);padding:14px;border-radius:var(--radius-md);margin-bottom:16px;font-size:13px">
+            <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><input type="checkbox" checked> Pediatrician-approved newborn car seat installed</label>
+            <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><input type="checkbox" checked> Soft going-home organic cotton onesie</label>
+            <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><input type="checkbox"> Long phone charging cords for hospital bed</label>
+            <label style="display:flex;align-items:center;gap:8px"><input type="checkbox"> Snacks &amp; electrolyte hydration packs for labor</label>
+          </div>
+          <div style="background:var(--terracotta-light);padding:10px 14px;border-radius:var(--radius-sm);font-size:12px;margin-bottom:18px">
+            <strong>Banned Products Alert:</strong> This registry explicitly removes inclined sleepers and crib bumpers (banned under US Safe Sleep for Babies Act).
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="addToCart('registry-bundle')">Get Printable Registry Bundle ($5.00)</button>
+        </div>
+      `;
+    }
+
+    function renderBabyBudgetDemo() {
+      return `
+        <div>
+          <h3 style="font-family:var(--font-serif);font-size:22px;margin-bottom:8px">First-Year Baby Budget Planner</h3>
+          <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:16px">Google Sheets &amp; Excel model based on USDA family expenditure reports ($233,610 baseline).</p>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:16px;font-size:13px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Diapers &amp; Wipes (~2,500/year):</span> <strong>$950.00</strong></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Nursery Furniture &amp; Car Seat:</span> <strong>$1,200.00</strong></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Clothing &amp; Swaddles:</span> <strong>$450.00</strong></div>
+            <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:6px;font-weight:700"><span>Estimated Year 1 Cashflow:</span> <span style="color:var(--terracotta)">$2,600.00 (Excluding Daycare)</span></div>
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="addToCart('baby-budget')">Get Budget Spreadsheet ($11.00)</button>
+        </div>
+      `;
+    }
+
+    function renderCaregiverSheetDemo() {
+      return `
+        <div>
+          <h3 style="font-family:var(--font-serif);font-size:22px;margin-bottom:8px">Babysitter &amp; Emergency Handoff Sheet</h3>
+          <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:16px">Fillable emergency card with pre-printed Poison Help (1-800-222-1222) and AAP Safe Sleep rules.</p>
+          <div style="background:#FFF;border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;margin-bottom:16px;font-size:13px">
+            <p><strong>Baby Name:</strong> Leo &bull; <strong>Bedtime Routine:</strong> 7:30 PM</p>
+            <p><strong>Soothing Secret:</strong> White noise on 'rain' setting + gentle swaying</p>
+            <p><strong>Emergency Contact:</strong> Mom (555-0192) &bull; Pediatrician: Dr. Evans</p>
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="addToCart('caregiver-sheets')">Get Caregiver Pack ($4.50)</button>
+        </div>
+      `;
+    }
+
+    function renderPostpartumHubDemo() {
+      return `
+        <div>
+          <h3 style="font-family:var(--font-serif);font-size:22px;margin-bottom:8px">4th Trimester Postpartum Hub</h3>
+          <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:16px">Gentle physical recovery check-in, emotional wellness tracking, and partner communication scripts.</p>
+          <div style="background:var(--sage-light);border:1px solid #C8DEC9;padding:14px;border-radius:var(--radius-md);margin-bottom:16px;font-size:13px">
+            <strong>24/7 National Maternal Mental Health Hotline:</strong><br>
+            Call or text <strong>1-833-TLC-MAMA (1-833-852-6262)</strong> &bull; Free, confidential support for new and expecting mothers.
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="addToCart('postpartum-planner')">Get Postpartum Planner ($9.00)</button>
+        </div>
+      `;
+    }
+
+    function renderGenericProductModal(id) {
+      const prod = PRODUCTS.find(p => p.id === id);
+      return `
+        <div>
+          <h3 style="font-family:var(--font-serif);font-size:22px;margin-bottom:8px">${prod.name}</h3>
+          <p style="font-size:14px;color:var(--ink-soft);margin-bottom:16px">${prod.demand}</p>
+          <div style="background:var(--card);border:1px solid var(--border);padding:14px;border-radius:var(--radius-md);margin-bottom:18px">
+            <strong>Format:</strong> ${prod.format}<br>
+            <strong>Audience:</strong> ${prod.parent}<br>
+            <strong>Safety Standards:</strong> ${prod.safety}
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="addToCart('${prod.id}')">Add to Cart &bull; $${prod.price.toFixed(2)}</button>
+        </div>
+      `;
+    }
+
+    // Initialize Page
+    document.addEventListener('DOMContentLoaded', () => {
+      renderProducts();
+      updateBizCalc();
+    });
+  </script>
+</body>
+</html>
