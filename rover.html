@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="rover 1.0.0+89b17f2" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script><meta charset="utf-8">
+<!DOCTYPE html><html lang="en"><head><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="rover 1.0.0+c3cf377" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Rover Bot Mission Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,8 +24,8 @@ h1 span{color:var(--brass)}
 .view{position:absolute;inset:0;overflow-y:auto;padding:12px 12px 20px;display:none}
 .view.on{display:block}
 #v-model{padding:0;overflow:hidden}
-#v-revs,#v-live,#v-maps{padding:0;overflow:hidden}
-#v-revs iframe,#v-live iframe,#v-maps iframe{width:100%;height:100%;border:0;display:block;background:#14171c}
+#v-revs,#v-live,#v-maps,#v-gates{padding:0;overflow:hidden}
+#v-revs iframe,#v-live iframe,#v-maps iframe,#v-gates iframe{width:100%;height:100%;border:0;display:block;background:#14171c}
 /* SHEET: a project chip row over the framed section sheet — the frame takes what is left */
 #v-sheet{padding:0;overflow:hidden}
 #v-sheet.on{display:flex;flex-direction:column}
@@ -425,6 +425,16 @@ nav button.on{color:var(--brass);border-top-color:var(--brass)}
     the Bench app to use it — this copy is running off the drive.</div>
 </div>
 
+<!-- GATES: where each roadmap gate stands — the rules, every run the rover logged, and the laptop's
+     own check from the recordings (app/web/gates.html at /dash/gates, in a frame like MAPS; data
+     from bench-app gates-sync.py). Works with the rover off, not from a USB/file:// copy. -->
+<div class="view" id="v-gates">
+  <iframe id="gatesframe" title="Rover gates"></iframe>
+  <div id="gatesoff" style="display:none;padding:18px;font-size:12.5px;line-height:1.6;color:var(--zinc)">
+    The gate scorecard comes through the Bench (<code>/dash/gates</code>). Open this dashboard from
+    the Bench app to use it — this copy is running off the drive.</div>
+</div>
+
 <!-- LIVE: the real rover — camera, map, telemetry and (for its driver) the joystick. Like REVS it
      is the Bench's page in a frame (app/web/drive.html at /dash/drive); the Bench proxies the
      rover's plain-http pages behind the login, so a USB/file:// copy cannot reach it and says so.
@@ -465,6 +475,7 @@ nav button.on{color:var(--brass);border-top-color:var(--brass)}
   <button class="on" data-v="dash" onclick="tab('dash')">DASH</button>
   <button data-v="live" onclick="tab('live')">LIVE</button>
   <button data-v="maps" onclick="tab('maps')">MAPS</button>
+  <button data-v="gates" onclick="tab('gates')">GATES</button>
   <button data-v="model" onclick="tab('model')">MODEL</button>
   <button data-v="revs" onclick="tab('revs')">REVS</button>
   <button data-v="sheet" onclick="tab('sheet')">SHEET</button>
@@ -526,6 +537,7 @@ function tab(name){
   if(name==='model'&&modelInit)resize3();
   if(name==='revs')openRevs();
   if(name==='maps')openMaps();
+  if(name==='gates')openGates();
   if(name==='sheet')loadSheet();
   setLive(name==='live');
 }
@@ -544,6 +556,14 @@ function openMaps(){
   const f=document.getElementById('mapsframe');
   if(location.protocol.startsWith('http'))f.src='/dash/maps';
   else{f.style.display='none';document.getElementById('mapsoff').style.display='block';}
+}
+// GATES tab: the Bench's gate scorecard, loaded on first visit (#gates deep-links to it).
+let gatesInit=false;
+function openGates(){
+  if(gatesInit)return;gatesInit=true;
+  const f=document.getElementById('gatesframe');
+  if(location.protocol.startsWith('http'))f.src='/dash/gates';
+  else{f.style.display='none';document.getElementById('gatesoff').style.display='block';}
 }
 // REVS tab: load the explorer frame on first visit only (it pulls the rev manifest and STLs).
 // #revs deep-links straight to it; #revs/<state> hands the rest to the explorer's own hash
@@ -585,8 +605,9 @@ function loadSheet(){
 if(location.hash==='#revs'||location.hash.startsWith('#revs/'))tab('revs');
 if(location.hash==='#live')tab('live');
 if(location.hash==='#maps')tab('maps');
+if(location.hash==='#gates')tab('gates');
 if(location.hash==='#sheet'||location.hash.startsWith('#sheet/'))openSheet(location.hash.slice(7));
-addEventListener('hashchange',()=>{if(location.hash==='#live')tab('live');if(location.hash==='#maps')tab('maps');
+addEventListener('hashchange',()=>{if(location.hash==='#live')tab('live');if(location.hash==='#maps')tab('maps');if(location.hash==='#gates')tab('gates');
   if(location.hash==='#sheet'||location.hash.startsWith('#sheet/'))openSheet(location.hash.slice(7));});
 // a #revs/<state> arriving while the page is open (a link tapped in the Bench, back/forward)
 // steers the already-loaded frame — same origin, so its hash is ours to set
@@ -2600,7 +2621,7 @@ addEventListener("load",function(){
   });
   addEventListener("blur",function(){stop();});
 })();
-</script><script id="bench-release">window.BENCH_RELEASE="rover 1.0.0+89b17f2";</script>
+</script><script id="bench-release">window.BENCH_RELEASE="rover 1.0.0+c3cf377";</script>
 <a id="bench-release-pill" href="/releases.html#rover" title="release notes" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483000;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:#9aa4b2;background:rgba(20,23,28,.72);border:1px solid #2a3039;border-radius:999px;padding:5px 8px;text-decoration:none;opacity:.85">v1.0.0</a><!-- Public demo feedback bubble. Injected into every page of the demo site by
      publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
      touching the Bench or the tailnet). Submissions land in Netlify → Forms.
