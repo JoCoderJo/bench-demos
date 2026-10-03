@@ -1,0 +1,7 @@
+<!doctype html><meta charset="utf-8"><title>Not found</title>
+<script>
+/* GitHub Pages has no rewrites: Manito is a single-page app, so a deep link like /manito/stop/3
+   lands here. Send it to the app; anything else goes to the chooser. */
+var p = location.pathname;
+location.replace(p.indexOf('/manito/') === 0 ? '/manito/' : '/');
+</script>
