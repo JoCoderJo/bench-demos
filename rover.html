@@ -2639,6 +2639,10 @@ addEventListener("load",function(){
 <div id="bench-fb"></div>
 <script>
 (function () {
+  // 2026-10-03: the demos moved to GitHub Pages, which has no form backend (this posts to Netlify
+  // Forms) and the laptop's Funnel is off, so there is nowhere for a message to go. Off the Netlify
+  // host the button is not shown at all, rather than offering a form that cannot send.
+  if (!/\.netlify\.app$/.test(location.hostname) && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return;
   if (window.__benchFb) return; window.__benchFb = 1;
   var Z = 2147483000, open = false, sending = false;
   // Everyone shares one passcode, so a note is anonymous unless the tester says who they are.
