@@ -1,0 +1,808 @@
+{
+ "built": "2026-10-05 02:05",
+ "clients": [
+  {
+   "id": "c1",
+   "name": "Sarah Thompson",
+   "phone": "(555) 234-8901",
+   "email": "sarah.t@example.com",
+   "naturalLevel": "Level 6 (Dark Blonde)",
+   "hairProfile": "Fine texture, high density, normal porosity",
+   "patchTest": "Clear / Verified Aug 2026",
+   "status": "Needs Review",
+   "lastVisit": "2026-08-19",
+   "notes": "Pulls warm underlying gold. Prefers soft root melt into bright neutral ends. Referred Jessica Miller.",
+   "history": [
+    {
+     "date": "2026-08-19",
+     "service": "Full highlight, root melt and gloss",
+     "price": 287,
+     "productCost": 22.4,
+     "formula": "Root Melt: Shades EQ 07NA (15g) + 07N (15g) + Processing Sol (30g). Highlight: Flash Lift + 20 vol. Gloss: Shades EQ 09N (15g) + 09GI (15g) + Processing Sol (30g).",
+     "outcome": "Client loved it"
+    },
+    {
+     "date": "2026-06-10",
+     "service": "Partial highlight & gloss",
+     "price": 195,
+     "productCost": 16.5,
+     "formula": "Highlight: Flash Lift 20 vol. Gloss: Shades EQ 09N (20g) + 09V (10g).",
+     "outcome": "Perfect"
+    },
+    {
+     "date": "2026-03-24",
+     "service": "Full balayage & tone",
+     "price": 275,
+     "productCost": 21.0,
+     "formula": "Balayage 30 vol. Gloss: Shades EQ 08N + 09GI.",
+     "outcome": "Too warm"
+    }
+   ]
+  },
+  {
+   "id": "c2",
+   "name": "Jessica Miller",
+   "phone": "(555) 876-5432",
+   "email": "jessica.m@example.com",
+   "naturalLevel": "Level 6 (Dark Blonde)",
+   "hairProfile": "Medium texture, medium density, porous ends from old highlights",
+   "patchTest": "Completed 48hr prior \u00b7 Negative / Clear",
+   "status": "New Client",
+   "lastVisit": "None (First Visit Today)",
+   "notes": "Referred by Sarah Thompson. Starting level 6 root with 1.5 in regrowth. Mids level 7 brassy, ends level 8. Target: Level 8 neutral beige blonde with dimension.",
+   "history": []
+  },
+  {
+   "id": "c3",
+   "name": "Maya Lin",
+   "phone": "(555) 345-6789",
+   "email": "maya.lin@example.com",
+   "naturalLevel": "Level 3 (Dark Brown)",
+   "hairProfile": "Coarse, thick, medium-high porosity on lightened balayage sections",
+   "patchTest": "Verified 2025",
+   "status": "Overdue 4 weeks",
+   "lastVisit": "2026-06-14",
+   "notes": "Balayage client on 10-12 week cycle. Currently at 16 weeks. Tone has washed out to warm brassy gold.",
+   "history": [
+    {
+     "date": "2026-06-14",
+     "service": "Tone & Gloss + Blowout",
+     "price": 115,
+     "productCost": 14.8,
+     "formula": "Shades EQ 07NB (20g) + 08GG (10g) + Processing Sol (30g)",
+     "outcome": "Client loved it"
+    },
+    {
+     "date": "2026-03-02",
+     "service": "Custom Balayage & Glaze",
+     "price": 285,
+     "productCost": 24.2,
+     "formula": "Freehand clay lightener 30 vol + Olaplex. Gloss: 07NCH + 08GI.",
+     "outcome": "Perfect"
+    }
+   ]
+  },
+  {
+   "id": "c4",
+   "name": "Emily Davis",
+   "phone": "(555) 456-7890",
+   "email": "emily.davis@example.com",
+   "naturalLevel": "Level 7 (Medium Blonde)",
+   "hairProfile": "Fine, high elasticity, low porosity roots, medium ends",
+   "patchTest": "Clear",
+   "status": "Scheduled",
+   "lastVisit": "2026-07-28",
+   "notes": "Standard Wella client. Uses Koleston Perfect for roots and Color Touch for gloss.",
+   "history": [
+    {
+     "date": "2026-07-28",
+     "service": "Root retouch & gloss refresh",
+     "price": 165,
+     "productCost": 15.2,
+     "formula": "Root: Wella Koleston Perfect 7/1 (30g) + 7/0 (15g) + 20 vol (45g). Gloss: Wella Color Touch 8/71 (30g) + 1.9% Emulsion (60g).",
+     "outcome": "Perfect"
+    },
+    {
+     "date": "2026-05-18",
+     "service": "Root touch & tonal glaze",
+     "price": 165,
+     "productCost": 14.9,
+     "formula": "Koleston 7/1 (35g) + 7/0 (10g) + 20 vol. Gloss: 8/71 + 9/16.",
+     "outcome": "Perfect"
+    }
+   ]
+  },
+  {
+   "id": "c5",
+   "name": "Chloe Bennett",
+   "phone": "(555) 567-8901",
+   "email": "chloe.b@example.com",
+   "naturalLevel": "Level 5 (Light Brown)",
+   "hairProfile": "Medium density, fine strand, high porosity ends",
+   "patchTest": "Clear",
+   "status": "Scheduled",
+   "lastVisit": "2026-07-12",
+   "notes": "Loves lived-in bright face-framing foilayage. Uses Schwarzkopf BlondMe.",
+   "history": [
+    {
+     "date": "2026-07-12",
+     "service": "Lived-in blonde foilayage",
+     "price": 320,
+     "productCost": 26.5,
+     "formula": "BlondMe Premium Lightener 20 vol. Toner: Igora Vibrance 9.5-1 (25g) + 9-4 (10g) + Gel Activator 1.9% (35g).",
+     "outcome": "Client loved it"
+    }
+   ]
+  },
+  {
+   "id": "c6",
+   "name": "Olivia Garcia",
+   "phone": "(555) 678-9012",
+   "email": "olivia.g@example.com",
+   "naturalLevel": "Level 5 with 60% resistant grey at hairline & crown",
+   "hairProfile": "Coarse, resistant cuticle, low porosity at roots",
+   "patchTest": "Clear",
+   "status": "Scheduled",
+   "lastVisit": "2026-08-25",
+   "notes": "Requires double pigment NN series for complete stubborn grey coverage. 20 vol developer mandatory.",
+   "history": [
+    {
+     "date": "2026-08-25",
+     "service": "Grey coverage root touch & glaze",
+     "price": 145,
+     "productCost": 12.8,
+     "formula": "Redken Color Gels Lacquers 6NN (30g) + 6N (15g) + 20 vol Pro-Oxide (45g). Glaze: Shades EQ 06N (20g) + 07NB (20g).",
+     "outcome": "Added neutral"
+    }
+   ]
+  },
+  {
+   "id": "c7",
+   "name": "Marcus Vance",
+   "phone": "(555) 789-0123",
+   "email": "marcus.v@example.com",
+   "naturalLevel": "Level 5 with 40% pepper-and-salt grey",
+   "hairProfile": "Short, coarse, virgin hair",
+   "patchTest": "Clear",
+   "status": "Active",
+   "lastVisit": "2026-09-08",
+   "notes": "Quick men's grey blending at shampoo bowl. Low maintenance.",
+   "history": [
+    {
+     "date": "2026-09-08",
+     "service": "Men's grey camo blending",
+     "price": 65,
+     "productCost": 6.5,
+     "formula": "Redken Brews Color Camo 5NA (30g) + 10 vol (30g) for 5 min.",
+     "outcome": "Perfect"
+    }
+   ]
+  },
+  {
+   "id": "c8",
+   "name": "Sophia Martinez",
+   "phone": "(555) 890-1234",
+   "email": "sophia.m@example.com",
+   "naturalLevel": "Level 5 (Light Brown)",
+   "hairProfile": "Thick, wavy, normal porosity",
+   "patchTest": "Clear",
+   "status": "Active",
+   "lastVisit": "2026-08-04",
+   "notes": "Vibrant copper balayage lover. Needs warm gold-copper deposit to stay luminous.",
+   "history": [
+    {
+     "date": "2026-08-04",
+     "service": "Copper dimensional balayage",
+     "price": 240,
+     "productCost": 21.0,
+     "formula": "Balayage 20 vol + Wella Color Touch 7/43 (25g) + 8/4 (15g) + 1.9% Emulsion (80g).",
+     "outcome": "Needed more lift on ends"
+    }
+   ]
+  },
+  {
+   "id": "c9",
+   "name": "Lauren Hayes",
+   "phone": "(555) 901-2345",
+   "email": "lauren.h@example.com",
+   "naturalLevel": "Level 6 natural, all-over Level 10 Platinum",
+   "hairProfile": "Fine, fragile, high porosity on ends, 1.25 inch regrowth",
+   "patchTest": "Clear",
+   "status": "Overdue 6 weeks",
+   "lastVisit": "2026-06-02",
+   "notes": "Overdue platinum retouch! Danger of banding due to regrowth exceeding 0.5 inch.",
+   "history": [
+    {
+     "date": "2026-06-02",
+     "service": "Platinum on-scalp retouch & tone",
+     "price": 210,
+     "productCost": 22.0,
+     "formula": "Redken Flash Lift + 20 vol (on scalp with Olaplex). Toner: Shades EQ 010VV (15g) + 010P (15g) + Clear (15g).",
+     "outcome": "Perfect"
+    }
+   ]
+  },
+  {
+   "id": "c10",
+   "name": "Ava Jenkins",
+   "phone": "(555) 012-3456",
+   "email": "ava.j@example.com",
+   "naturalLevel": "Level 4 (Medium Brown)",
+   "hairProfile": "Silky, low porosity, natural shine",
+   "patchTest": "Clear",
+   "status": "Active",
+   "lastVisit": "2026-09-15",
+   "notes": "Rich chocolate brunette gloss every 6 weeks.",
+   "history": [
+    {
+     "date": "2026-09-15",
+     "service": "Brunette dimensional gloss & blowout",
+     "price": 135,
+     "productCost": 13.5,
+     "formula": "Shades EQ 06NB (25g) + 06Ch (15g) + Processing Sol (40g).",
+     "outcome": "Perfect"
+    }
+   ]
+  },
+  {
+   "id": "c11",
+   "name": "Rachel Green",
+   "phone": "(555) 123-4567",
+   "email": "rachel.g@example.com",
+   "naturalLevel": "Level 7 (Blonde)",
+   "hairProfile": "Fine density, delicate elasticity",
+   "patchTest": "Clear",
+   "status": "Overdue 8 weeks",
+   "lastVisit": "2026-05-18",
+   "notes": "Babylights and root smudge. 8 weeks past usual touch-up date.",
+   "history": [
+    {
+     "date": "2026-05-18",
+     "service": "Full babylights & root smudge",
+     "price": 295,
+     "productCost": 24.5,
+     "formula": "Flash Lift 15 vol. Smudge: Shades EQ 07NA (20g). Gloss: 09GB + 09GI.",
+     "outcome": "Client loved it"
+    }
+   ]
+  },
+  {
+   "id": "c12",
+   "name": "Hannah Cole",
+   "phone": "(555) 234-5678",
+   "email": "hannah.c@example.com",
+   "naturalLevel": "Level 6 (Dark Blonde)",
+   "hairProfile": "Medium curl, normal porosity",
+   "patchTest": "Clear",
+   "status": "Active",
+   "lastVisit": "2026-08-30",
+   "notes": "Warm honey tones complement warm skin undertone.",
+   "history": [
+    {
+     "date": "2026-08-30",
+     "service": "Warm honey balayage refresh",
+     "price": 260,
+     "productCost": 21.0,
+     "formula": "Shades EQ 08WG (20g) + 09GB (20g) + Processing Sol (40g).",
+     "outcome": "Too cool initially, adjusted warmer"
+    }
+   ]
+  },
+  {
+   "id": "c13",
+   "name": "Grace Kim",
+   "phone": "(555) 345-6780",
+   "email": "grace.k@example.com",
+   "naturalLevel": "Level 2 (Darkest Brown / Asian virgin)",
+   "hairProfile": "Coarse, thick, strong cuticle resistance, stubborn red-orange underlying pigment",
+   "patchTest": "Clear",
+   "status": "Active",
+   "lastVisit": "2026-09-02",
+   "notes": "Lifted to caramel beige level 7 with 30 vol and bond builder. Requires blue/green ash neutralizing background.",
+   "history": [
+    {
+     "date": "2026-09-02",
+     "service": "Virgin lift & caramel balayage",
+     "price": 310,
+     "productCost": 28.0,
+     "formula": "BlondMe 30 vol + bond builder. Gloss: Shades EQ 07NCH (25g) + 08GG (15g).",
+     "outcome": "Client loved it"
+    }
+   ]
+  },
+  {
+   "id": "c14",
+   "name": "Zoe Taylor",
+   "phone": "(555) 456-7891",
+   "email": "zoe.t@example.com",
+   "naturalLevel": "Level 5 natural, box dye black (Level 2) on lengths",
+   "hairProfile": "Compromised ends, uneven porosity, chemical buildup",
+   "patchTest": "Clear (PPD test performed)",
+   "status": "Active",
+   "lastVisit": "2026-08-11",
+   "notes": "Color correction project. Multi-session plan agreed. Started with color reducer + gentle cleanse bath.",
+   "history": [
+    {
+     "date": "2026-08-11",
+     "service": "Color correction stage 1: mineral/box dye removal",
+     "price": 375,
+     "productCost": 38.0,
+     "formula": "Color reducer 45 min, gentle lightener bath 10 vol with bond rebuilder. Toned with Shades EQ 06NA + 07N.",
+     "outcome": "Changed developer"
+    }
+   ]
+  },
+  {
+   "id": "c15",
+   "name": "Emma Wilson",
+   "phone": "(555) 567-8902",
+   "email": "emma.w@example.com",
+   "naturalLevel": "Level 8 (Light Natural Blonde)",
+   "hairProfile": "Very fine, healthy, bridal styling",
+   "patchTest": "Clear",
+   "status": "Active",
+   "lastVisit": "2026-09-22",
+   "notes": "Bridal trial color. Gentle acid glaze to enhance shine and reflection without lifting base.",
+   "history": [
+    {
+     "date": "2026-09-22",
+     "service": "Bridal gloss & blowout",
+     "price": 180,
+     "productCost": 15.0,
+     "formula": "Shades EQ 09V (10g) + 09GB (10g) + Crystal Clear (20g) + Processing Sol (40g).",
+     "outcome": "Perfect"
+    }
+   ]
+  }
+ ],
+ "rules": [
+  {
+   "kind": "do",
+   "topic": "Level & Tone System",
+   "text": "Never use an ash toner darker than the achieved underlying level, or hair will absorb excessive green/muddy drabness.",
+   "source": "Learn card: Level & Tone System"
+  },
+  {
+   "kind": "do",
+   "topic": "Level & Tone System",
+   "text": "When: At consultation to diagnose natural depth and set realistic lift boundaries.",
+   "source": "Learn card: Level & Tone System"
+  },
+  {
+   "kind": "do",
+   "topic": "Underlying Pigment & Neutralization",
+   "text": "For a true level 8 beige from a level 6 base, lift to pale yellow (level 9) and tone back, rather than fighting orange at level 7 with more ash.",
+   "source": "Learn card: Underlying Pigment & Neutralization"
+  },
+  {
+   "kind": "do",
+   "topic": "Underlying Pigment & Neutralization",
+   "text": "When: Whenever lifting hair past natural level to anticipate and neutralize brassiness.",
+   "source": "Learn card: Underlying Pigment & Neutralization"
+  },
+  {
+   "kind": "do",
+   "topic": "Developer Volumes & Hydrogen Peroxide Dynamics",
+   "text": "Acidic demi-permanents (e.g. Shades EQ with its Processing Solution) stay on the acid side, so they deposit tone without lifting natural pigment. There is no developer volume to choose.",
+   "source": "Learn card: Developer Volumes & Hydrogen Peroxide Dynamics"
+  },
+  {
+   "kind": "do",
+   "topic": "Developer Volumes & Hydrogen Peroxide Dynamics",
+   "text": "When: Selecting oxidation strength for lift vs. deposit-only services.",
+   "source": "Learn card: Developer Volumes & Hydrogen Peroxide Dynamics"
+  },
+  {
+   "kind": "do",
+   "topic": "Porosity, Cuticle Integrity & Fillers",
+   "text": "Use an equalizing porosity spray or acidic clear glaze as a buffer before running toner through fragile, high-porosity ends.",
+   "source": "Learn card: Porosity, Cuticle Integrity & Fillers"
+  },
+  {
+   "kind": "do",
+   "topic": "Porosity, Cuticle Integrity & Fillers",
+   "text": "When: When taking over-processed or lightened hair back to darker shades or uneven lengths.",
+   "source": "Learn card: Porosity, Cuticle Integrity & Fillers"
+  },
+  {
+   "kind": "do",
+   "topic": "Resistant Grey Hair Coverage Chemistry",
+   "text": "Apply to the most resistant grey areas first (usually hairline or temple) and allow full 35-45 minutes processing time without rushing.",
+   "source": "Learn card: Resistant Grey Hair Coverage Chemistry"
+  },
+  {
+   "kind": "do",
+   "topic": "Resistant Grey Hair Coverage Chemistry",
+   "text": "When: When clients present with >30% unpigmented white hair and coarse cuticles.",
+   "source": "Learn card: Resistant Grey Hair Coverage Chemistry"
+  },
+  {
+   "kind": "do",
+   "topic": "Toning & Glazing Science (Acidic vs Alkaline)",
+   "text": "Use acidic liquid glosses on damp hair after foilayage to guarantee virgin regrowth does not lift or shift brassy.",
+   "source": "Learn card: Toning & Glazing Science (Acidic vs Alkaline)"
+  },
+  {
+   "kind": "do",
+   "topic": "Toning & Glazing Science (Acidic vs Alkaline)",
+   "text": "When: Post-lightening refining, shadow routing, and gloss refreshing.",
+   "source": "Learn card: Toning & Glazing Science (Acidic vs Alkaline)"
+  },
+  {
+   "kind": "do",
+   "topic": "Metallic Salts, Henna & Box Dye Incompatibilities",
+   "text": "If the history is unknown, run the 1:20 test on a cut strand (1 oz 20 vol + 20 drops 28% ammonia, 30 minutes). For box dye, strand test the darkest band and plan the lift around it.",
+   "source": "Learn card: Metallic Salts, Henna & Box Dye Incompatibilities"
+  },
+  {
+   "kind": "do",
+   "topic": "Metallic Salts, Henna & Box Dye Incompatibilities",
+   "text": "When: New client consultation and chemical history intake.",
+   "source": "Learn card: Metallic Salts, Henna & Box Dye Incompatibilities"
+  },
+  {
+   "kind": "do",
+   "topic": "Strand & Patch Testing Protocols",
+   "text": "Never waive patch tests for clients reporting previous tingling, itching, or allergic reactions to hair color or dark cosmetics.",
+   "source": "Learn card: Strand & Patch Testing Protocols"
+  },
+  {
+   "kind": "do",
+   "topic": "Strand & Patch Testing Protocols",
+   "text": "When: 48 hours prior to any oxidative service or when testing chemical tolerance.",
+   "source": "Learn card: Strand & Patch Testing Protocols"
+  },
+  {
+   "kind": "do",
+   "topic": "Bond Builders & Chemical Protection",
+   "text": "A bond builder is not permission to go higher or longer. Follow the maker's dose (some slow the lift), keep the saturation even, and let the strand test decide.",
+   "source": "Learn card: Bond Builders & Chemical Protection"
+  },
+  {
+   "kind": "do",
+   "topic": "Bond Builders & Chemical Protection",
+   "text": "When: During high-lift lightening, platinum transformations, and color corrections.",
+   "source": "Learn card: Bond Builders & Chemical Protection"
+  },
+  {
+   "kind": "do",
+   "topic": "Post-Color Maintenance & Longevity",
+   "text": "Instruct clients to wait 48 hours before their first home shampoo and use heat protection below 320\u00b0F (160\u00b0C) on lightened blondes.",
+   "source": "Learn card: Post-Color Maintenance & Longevity"
+  },
+  {
+   "kind": "do",
+   "topic": "Post-Color Maintenance & Longevity",
+   "text": "When: Client checkout, retail recommendation, and aftercare game planning.",
+   "source": "Learn card: Post-Color Maintenance & Longevity"
+  },
+  {
+   "kind": "dont",
+   "topic": "Lightening over henna",
+   "text": "Never lighten over suspected compound henna or metallic salts before a strand test passes.",
+   "source": "Learn card: Metallic Salts, Henna & Box Dye"
+  },
+  {
+   "kind": "dont",
+   "topic": "Colour lifting colour",
+   "text": "Don't expect tint to lift artificial colour: use lightener or a colour remover.",
+   "source": "Learn card: Developer Volumes"
+  },
+  {
+   "kind": "dont",
+   "topic": "On-scalp developer",
+   "text": "Don't put more than 20 vol lightener on the scalp.",
+   "source": "Learn card: Developer Volumes"
+  },
+  {
+   "kind": "dont",
+   "topic": "Patch test",
+   "text": "Don't colour a new client or a returning one after 6+ months without a 48 h patch test on file.",
+   "source": "Learn card: Strand & Patch Tests"
+  }
+ ],
+ "combos": [
+  {
+   "brand": "Redken",
+   "start_level": "Level 6 (Dark Blonde)",
+   "start_pigment": "",
+   "target": "Full highlight, root melt and gloss",
+   "formula": "Root Melt: Shades EQ 07NA (15g) + 07N (15g) + Processing Sol (30g). Highlight: Flash Lift + 20 vol. Gloss: Shades EQ 09N (15g) + 09GI (15g) + Processing Sol (30g).",
+   "result": "Client loved it",
+   "rating": 5,
+   "source": "Sample salon: Sarah Thompson, 2026-08-19"
+  },
+  {
+   "brand": "Redken",
+   "start_level": "Level 6 (Dark Blonde)",
+   "start_pigment": "",
+   "target": "Partial highlight & gloss",
+   "formula": "Highlight: Flash Lift 20 vol. Gloss: Shades EQ 09N (20g) + 09V (10g).",
+   "result": "Perfect",
+   "rating": 5,
+   "source": "Sample salon: Sarah Thompson, 2026-06-10"
+  },
+  {
+   "brand": "Redken",
+   "start_level": "Level 6 (Dark Blonde)",
+   "start_pigment": "",
+   "target": "Full balayage & tone",
+   "formula": "Balayage 30 vol. Gloss: Shades EQ 08N + 09GI.",
+   "result": "Too warm",
+   "rating": 2,
+   "source": "Sample salon: Sarah Thompson, 2026-03-24"
+  },
+  {
+   "brand": "Redken",
+   "start_level": "Level 3 (Dark Brown)",
+   "start_pigment": "",
+   "target": "Tone & Gloss + Blowout",
+   "formula": "Shades EQ 07NB (20g) + 08GG (10g) + Processing Sol (30g)",
+   "result": "Client loved it",
+   "rating": 5,
+   "source": "Sample salon: Maya Lin, 2026-06-14"
+  },
+  {
+   "brand": "",
+   "start_level": "Level 3 (Dark Brown)",
+   "start_pigment": "",
+   "target": "Custom Balayage & Glaze",
+   "formula": "Freehand clay lightener 30 vol + Olaplex. Gloss: 07NCH + 08GI.",
+   "result": "Perfect",
+   "rating": 5,
+   "source": "Sample salon: Maya Lin, 2026-03-02"
+  },
+  {
+   "brand": "Wella",
+   "start_level": "Level 7 (Medium Blonde)",
+   "start_pigment": "",
+   "target": "Root retouch & gloss refresh",
+   "formula": "Root: Wella Koleston Perfect 7/1 (30g) + 7/0 (15g) + 20 vol (45g). Gloss: Wella Color Touch 8/71 (30g) + 1.9% Emulsion (60g).",
+   "result": "Perfect",
+   "rating": 5,
+   "source": "Sample salon: Emily Davis, 2026-07-28"
+  },
+  {
+   "brand": "Wella",
+   "start_level": "Level 7 (Medium Blonde)",
+   "start_pigment": "",
+   "target": "Root touch & tonal glaze",
+   "formula": "Koleston 7/1 (35g) + 7/0 (10g) + 20 vol. Gloss: 8/71 + 9/16.",
+   "result": "Perfect",
+   "rating": 5,
+   "source": "Sample salon: Emily Davis, 2026-05-18"
+  },
+  {
+   "brand": "Schwarzkopf",
+   "start_level": "Level 5 (Light Brown)",
+   "start_pigment": "",
+   "target": "Lived-in blonde foilayage",
+   "formula": "BlondMe Premium Lightener 20 vol. Toner: Igora Vibrance 9.5-1 (25g) + 9-4 (10g) + Gel Activator 1.9% (35g).",
+   "result": "Client loved it",
+   "rating": 5,
+   "source": "Sample salon: Chloe Bennett, 2026-07-12"
+  },
+  {
+   "brand": "Redken",
+   "start_level": "Level 5 with 60% resistant grey at hairline & crown",
+   "start_pigment": "",
+   "target": "Grey coverage root touch & glaze",
+   "formula": "Redken Color Gels Lacquers 6NN (30g) + 6N (15g) + 20 vol Pro-Oxide (45g). Glaze: Shades EQ 06N (20g) + 07NB (20g).",
+   "result": "Added neutral",
+   "rating": 3,
+   "source": "Sample salon: Olivia Garcia, 2026-08-25"
+  },
+  {
+   "brand": "Redken",
+   "start_level": "Level 5 with 40% pepper-and-salt grey",
+   "start_pigment": "",
+   "target": "Men's grey camo blending",
+   "formula": "Redken Brews Color Camo 5NA (30g) + 10 vol (30g) for 5 min.",
+   "result": "Perfect",
+   "rating": 5,
+   "source": "Sample salon: Marcus Vance, 2026-09-08"
+  },
+  {
+   "brand": "Wella",
+   "start_level": "Level 5 (Light Brown)",
+   "start_pigment": "",
+   "target": "Copper dimensional balayage",
+   "formula": "Balayage 20 vol + Wella Color Touch 7/43 (25g) + 8/4 (15g) + 1.9% Emulsion (80g).",
+   "result": "Needed more lift on ends",
+   "rating": 2,
+   "source": "Sample salon: Sophia Martinez, 2026-08-04"
+  },
+  {
+   "brand": "Redken",
+   "start_level": "Level 6 natural, all-over Level 10 Platinum",
+   "start_pigment": "",
+   "target": "Platinum on-scalp retouch & tone",
+   "formula": "Redken Flash Lift + 20 vol (on scalp with Olaplex). Toner: Shades EQ 010VV (15g) + 010P (15g) + Clear (15g).",
+   "result": "Perfect",
+   "rating": 5,
+   "source": "Sample salon: Lauren Hayes, 2026-06-02"
+  },
+  {
+   "brand": "Redken",
+   "start_level": "Level 4 (Medium Brown)",
+   "start_pigment": "",
+   "target": "Brunette dimensional gloss & blowout",
+   "formula": "Shades EQ 06NB (25g) + 06Ch (15g) + Processing Sol (40g).",
+   "result": "Perfect",
+   "rating": 5,
+   "source": "Sample salon: Ava Jenkins, 2026-09-15"
+  },
+  {
+   "brand": "Redken",
+   "start_level": "Level 7 (Blonde)",
+   "start_pigment": "",
+   "target": "Full babylights & root smudge",
+   "formula": "Flash Lift 15 vol. Smudge: Shades EQ 07NA (20g). Gloss: 09GB + 09GI.",
+   "result": "Client loved it",
+   "rating": 5,
+   "source": "Sample salon: Rachel Green, 2026-05-18"
+  },
+  {
+   "brand": "Redken",
+   "start_level": "Level 6 (Dark Blonde)",
+   "start_pigment": "",
+   "target": "Warm honey balayage refresh",
+   "formula": "Shades EQ 08WG (20g) + 09GB (20g) + Processing Sol (40g).",
+   "result": "Too cool initially, adjusted warmer",
+   "rating": 2,
+   "source": "Sample salon: Hannah Cole, 2026-08-30"
+  },
+  {
+   "brand": "Redken",
+   "start_level": "Level 2 (Darkest Brown / Asian virgin)",
+   "start_pigment": "",
+   "target": "Virgin lift & caramel balayage",
+   "formula": "BlondMe 30 vol + bond builder. Gloss: Shades EQ 07NCH (25g) + 08GG (15g).",
+   "result": "Client loved it",
+   "rating": 5,
+   "source": "Sample salon: Grace Kim, 2026-09-02"
+  },
+  {
+   "brand": "Redken",
+   "start_level": "Level 5 natural, box dye black (Level 2) on lengths",
+   "start_pigment": "",
+   "target": "Color correction stage 1: mineral/box dye removal",
+   "formula": "Color reducer 45 min, gentle lightener bath 10 vol with bond rebuilder. Toned with Shades EQ 06NA + 07N.",
+   "result": "Changed developer",
+   "rating": 3,
+   "source": "Sample salon: Zoe Taylor, 2026-08-11"
+  },
+  {
+   "brand": "Redken",
+   "start_level": "Level 8 (Light Natural Blonde)",
+   "start_pigment": "",
+   "target": "Bridal gloss & blowout",
+   "formula": "Shades EQ 09V (10g) + 09GB (10g) + Crystal Clear (20g) + Processing Sol (40g).",
+   "result": "Perfect",
+   "rating": 5,
+   "source": "Sample salon: Emma Wilson, 2026-09-22"
+  }
+ ],
+ "products": [
+  {
+   "brand": "Redken",
+   "line": "Shades EQ",
+   "shade": "09N",
+   "size": 60,
+   "unit": "g",
+   "unit_cost": 9.0,
+   "on_hand": 3,
+   "reorder_at": 2
+  },
+  {
+   "brand": "Redken",
+   "line": "Shades EQ",
+   "shade": "09GI",
+   "size": 60,
+   "unit": "g",
+   "unit_cost": 9.0,
+   "on_hand": 1,
+   "reorder_at": 2
+  },
+  {
+   "brand": "Redken",
+   "line": "Shades EQ",
+   "shade": "09V",
+   "size": 60,
+   "unit": "g",
+   "unit_cost": 9.0,
+   "on_hand": 2,
+   "reorder_at": 2
+  },
+  {
+   "brand": "Redken",
+   "line": "Shades EQ",
+   "shade": "07NA",
+   "size": 60,
+   "unit": "g",
+   "unit_cost": 9.0,
+   "on_hand": 2,
+   "reorder_at": 2
+  },
+  {
+   "brand": "Redken",
+   "line": "Shades EQ",
+   "shade": "Processing Solution",
+   "size": 1000,
+   "unit": "ml",
+   "unit_cost": 22.0,
+   "on_hand": 1,
+   "reorder_at": 1
+  },
+  {
+   "brand": "Redken",
+   "line": "Flash Lift",
+   "shade": "Lightener",
+   "size": 500,
+   "unit": "g",
+   "unit_cost": 38.0,
+   "on_hand": 1,
+   "reorder_at": 1
+  },
+  {
+   "brand": "Redken",
+   "line": "Pro-Oxide",
+   "shade": "20 vol",
+   "size": 1000,
+   "unit": "ml",
+   "unit_cost": 14.0,
+   "on_hand": 2,
+   "reorder_at": 1
+  },
+  {
+   "brand": "Redken",
+   "line": "Color Gels Lacquers",
+   "shade": "6NN",
+   "size": 60,
+   "unit": "g",
+   "unit_cost": 11.0,
+   "on_hand": 0,
+   "reorder_at": 1
+  },
+  {
+   "brand": "Wella",
+   "line": "Koleston Perfect",
+   "shade": "7/1",
+   "size": 60,
+   "unit": "g",
+   "unit_cost": 10.0,
+   "on_hand": 2,
+   "reorder_at": 1
+  },
+  {
+   "brand": "Wella",
+   "line": "Color Touch",
+   "shade": "8/71",
+   "size": 60,
+   "unit": "g",
+   "unit_cost": 9.5,
+   "on_hand": 1,
+   "reorder_at": 1
+  },
+  {
+   "brand": "Schwarzkopf",
+   "line": "Igora Vibrance",
+   "shade": "9,5-1",
+   "size": 60,
+   "unit": "g",
+   "unit_cost": 10.0,
+   "on_hand": 1,
+   "reorder_at": 2
+  },
+  {
+   "brand": "Schwarzkopf",
+   "line": "BlondMe",
+   "shade": "Premium Lightener 9+",
+   "size": 450,
+   "unit": "g",
+   "unit_cost": 34.0,
+   "on_hand": 1,
+   "reorder_at": 1
+  }
+ ]
+}
