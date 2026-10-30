@@ -1,0 +1,107 @@
+{
+ "_doc": "Kids tablet settings \u2014 ONE file is the whole state. The Bench/laptop pushes this with the bundle; the launcher reads it from the tablet agent (/api/settings) and the agent applies the hardware parts (brightness, volume, rotation, screen sleep). Edits made on the tablet (parent gate) are saved as overrides in the agent's state dir and survive bundle updates. v2 (2026-10-25): kids[] profiles with per-kid tiles + daily minutes, budget rules; `child` is the fallback when kids is empty.",
+ "version": 2,
+ "child": {
+  "name": "",
+  "avatar": "frog"
+ },
+ "kids": [
+  {
+   "id": "kid1",
+   "name": "",
+   "age": 4,
+   "avatar": "frog",
+   "apps_allowed": [
+    "phonics-friends",
+    "letters",
+    "draw",
+    "yoto"
+   ],
+   "budget_min": 45
+  },
+  {
+   "id": "kid2",
+   "name": "",
+   "age": 6,
+   "avatar": "fox",
+   "apps_allowed": null,
+   "budget_min": 60
+  }
+ ],
+ "budget": {
+  "enabled": true,
+  "exempt_apps": [
+   "yoto"
+  ],
+  "grace_min": 15,
+  "reset_hour": 5,
+  "count_home": false
+ },
+ "pin": "1234",
+ "screen": {
+  "brightness": 70,
+  "rotation": "right",
+  "theme": "sky",
+  "tile_size": "medium",
+  "sleep_after_min": 0
+ },
+ "sound": {
+  "volume": 40,
+  "max_volume": 80,
+  "tap_sounds": true,
+  "output": "lineout",
+  "eq": {
+   "enabled": true,
+   "bass_db": 0,
+   "treble_db": 0,
+   "highpass_hz": 170,
+   "preamp_db": 0
+  }
+ },
+ "apps": {
+  "allowed": [
+   "phonics-friends",
+   "camera",
+   "count",
+   "draw",
+   "example-tap",
+   "letters",
+   "maker-light",
+   "pbs-kids",
+   "show-tell",
+   "stories",
+   "words",
+   "yoto"
+  ],
+  "order": [
+   "phonics-friends",
+   "letters",
+   "stories",
+   "draw",
+   "camera",
+   "count",
+   "example-tap",
+   "maker-light",
+   "pbs-kids",
+   "show-tell",
+   "words",
+   "yoto"
+  ]
+ },
+ "bedtime": {
+  "enabled": false,
+  "start": "19:30",
+  "end": "07:00"
+ },
+ "kiosk": {
+  "home_button": "tap",
+  "parent_hold_ms": 1500,
+  "show_clock": true,
+  "clock_24h": false,
+  "kid_volume": true
+ },
+ "bench": {
+  "url": "https://bench.tail81b22c.ts.net",
+  "updates": "manual"
+ }
+}

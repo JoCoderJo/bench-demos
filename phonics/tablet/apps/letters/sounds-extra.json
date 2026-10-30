@@ -1,0 +1,33 @@
+{
+  "_doc": "Multi-letter sounds beyond tools/sounds.json (which stays the demo's list). Same shape: ipa, kind, word, tip. A recording goes in demo/audio/human/<key>.wav via tools/record-sounds.py; until then the card plays only its word and stays out of the quiz. `emoji` is the picture on the card.",
+  "order": ["qu", "ng", "wh", "ph", "ai", "ay", "ea", "oa", "ow", "ou", "oi", "oy", "igh", "ar", "or", "er", "ur", "ir", "ue", "ew", "aw"],
+  "sounds": {
+    "qu":  { "ipa": "kw", "kind": "cluster",    "word": "queen", "emoji": "👸", "tip": "Two sounds quickly, k then w… kw." },
+    "ng":  { "ipa": "ŋ",  "kind": "continuous", "word": "ring",  "emoji": "💍", "tip": "The sound at the end of ring. Hum it through your nose… nnng." },
+    "wh":  { "ipa": "w",  "kind": "glide",      "word": "whale", "emoji": "🐳", "tip": "Same as w: round your lips and let it go… wh." },
+    "ph":  { "ipa": "f",  "kind": "continuous", "word": "phone", "emoji": "📞", "tip": "Same as f: top teeth on bottom lip, blow… ffff." },
+    "ai":  { "ipa": "eɪ", "kind": "vowel",      "word": "rain",  "emoji": "🌧️", "tip": "Say the letter name A… ai." },
+    "ay":  { "ipa": "eɪ", "kind": "vowel",      "word": "day",   "emoji": "☀️", "tip": "Same sound as ai, at the end of a word… ay." },
+    "ea":  { "ipa": "iː", "kind": "vowel",      "word": "leaf",  "emoji": "🍃", "tip": "Same as ee, smile and say… eee." },
+    "oa":  { "ipa": "oʊ", "kind": "vowel",      "word": "goat",  "emoji": "🐐", "tip": "Say the letter name O… oa." },
+    "ow":  { "ipa": "aʊ", "kind": "vowel",      "word": "cow",   "emoji": "🐮", "tip": "Like ouch!… ow." },
+    "ou":  { "ipa": "aʊ", "kind": "vowel",      "word": "cloud", "emoji": "☁️", "tip": "Same as ow… ou." },
+    "oi":  { "ipa": "ɔɪ", "kind": "vowel",      "word": "coin",  "emoji": "🪙", "tip": "oi! Round lips then smile… oi." },
+    "oy":  { "ipa": "ɔɪ", "kind": "vowel",      "word": "toy",   "emoji": "🧸", "tip": "Same as oi, at the end of a word… oy." },
+    "igh": { "ipa": "aɪ", "kind": "vowel",      "word": "light", "emoji": "💡", "tip": "Say the letter name I… igh." },
+    "ar":  { "ipa": "ɑːr","kind": "vowel",      "word": "car",   "emoji": "🚗", "tip": "Open wide like at the doctor… ar." },
+    "or":  { "ipa": "ɔːr","kind": "vowel",      "word": "fork",  "emoji": "🍴", "tip": "Round lips… or." },
+    "er":  { "ipa": "ɜːr","kind": "vowel",      "word": "fern",  "emoji": "🌿", "tip": "A lazy sound in the middle of your mouth… er." },
+    "ur":  { "ipa": "ɜːr","kind": "vowel",      "word": "fur",   "emoji": "🐻", "tip": "Same as er… ur." },
+    "ir":  { "ipa": "ɜːr","kind": "vowel",      "word": "bird",  "emoji": "🐦", "tip": "Same as er… ir." },
+    "ue":  { "ipa": "uː", "kind": "vowel",      "word": "blue",  "emoji": "🔵", "tip": "Same as oo… ue." },
+    "ew":  { "ipa": "uː", "kind": "vowel",      "word": "new",   "emoji": "✨", "tip": "Same as oo… ew." },
+    "aw":  { "ipa": "ɔː", "kind": "vowel",      "word": "saw",   "emoji": "🪚", "tip": "Open and round… aw." }
+  },
+  "blends": [
+    ["bl", "blue", "🔵"], ["br", "bread", "🍞"], ["cl", "clock", "⏰"], ["cr", "crab", "🦀"], ["dr", "drum", "🥁"],
+    ["fl", "flag", "🚩"], ["fr", "frog", "🐸"], ["gl", "glue", "🧴"], ["gr", "green", "🟢"], ["pl", "plane", "✈️"],
+    ["pr", "present", "🎁"], ["sc", "scarf", "🧣"], ["sk", "skate", "⛸️"], ["sl", "slide", "🛝"], ["sm", "smile", "😊"],
+    ["sn", "snake", "🐍"], ["sp", "spoon", "🥄"], ["st", "star", "⭐"], ["sw", "swim", "🏊"], ["tr", "tree", "🌳"], ["tw", "twins", "👯"]
+  ]
+}

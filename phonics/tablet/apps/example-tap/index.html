@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Tap the Frog</title>
+<!-- tablet/apps/example-tap — the smallest game that uses the launcher bridge (see tablet/apps/README.md).
+     Copy this folder to start a new game. Offline, no network, finger-sized targets. -->
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#bfe8ff,#eaf7e5);font:22px system-ui,sans-serif;color:#1d2a3a;touch-action:none}
+#bar{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;gap:14px;padding:12px 18px;font-weight:700}
+#score{margin-left:auto;font-size:30px;font-variant-numeric:tabular-nums}
+#done{padding:10px 18px;border-radius:14px;border:0;background:#1d2a3a;color:#fff;font:inherit;font-weight:700}
+#frog{position:absolute;width:150px;height:150px;border-radius:50%;background:#3fb950;display:grid;place-items:center;font-size:92px;
+  box-shadow:0 12px 30px rgba(0,0,0,.2);transition:transform .08s}
+#frog:active{transform:scale(.9)}
+</style></head><body>
+<div id="bar"><span id="hi">Tap the frog!</span><span id="score">0</span><button id="done">Done</button></div>
+<div id="frog">🐸</div>
+<script>
+'use strict';
+let score=0,name='';
+const frog=document.getElementById('frog'),out=document.getElementById('score');
+// the launcher says hello with the child's name; nothing breaks if it never does (opened on its own)
+window.addEventListener('message',e=>{const d=e.data||{};if(d.kt==='hello'&&d.child&&d.child.name){name=d.child.name;document.getElementById('hi').textContent='Tap the frog, '+name+'!';}});
+function place(){const w=innerWidth-170,h=innerHeight-240;frog.style.left=(10+Math.random()*w)+'px';frog.style.top=(80+Math.random()*h)+'px';}
+frog.addEventListener('pointerdown',e=>{e.preventDefault();score++;out.textContent=score;place();
+  parent.postMessage({kt:'blip',f:500+Math.min(score,20)*25},'*');
+  if(score%10===0)parent.postMessage({kt:'toast',text:(name?name+', ':'')+score+' frogs!'},'*');});
+document.getElementById('done').onclick=()=>parent.postMessage({kt:'home'},'*');
+place();
+</script></body></html>

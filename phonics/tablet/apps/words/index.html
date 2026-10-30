@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Word Builder</title>
+<!-- tablet/apps/words — Word Builder, three ways to play with the same words (S3a, 2026-10-25):
+       Build       hear a word, see its picture, tap (or drag) the letters into the slots. Wrong letters shake and
+                   the friend sounds the word out, one vouched-for letter clip per slot; after two misses the
+                   letters show faintly as a guide.
+       Change it   a word family (-at, -an …): the ending stays, tap a first letter, hear whether it makes a word.
+       Which word? hear a word, tap it from three — sight reading, pictures only after the answer.
+     Tap-first (D-009): nothing needs a mic or a drag. Words are real human recordings, prompts are Piper whole
+     sentences made once by make-voice.py, isolated letter sounds come from build.py's vouched-for tiers (D-010).
+     Progress (stars, words built, family words found) is per kid: /api/store/words/<kid>/progress.json via the
+     launcher's hello message (D-008), localStorage when opened on a laptop. window.WB exposes read-only state for
+     tablet/tests/words_dom.py. -->
+<style>
+:root{--ink:#1d2a3a;--dim:#5b6b80;--card:#fff;--accent:#ff8a3d;--ok:#3fb950;--bad:#e05a4f;--teal:#26a69a;--r:22px;--shadow:0 8px 24px rgba(20,40,80,.16)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(160deg,#c9f2ec,#f2fffd);color:var(--ink);font:20px system-ui,sans-serif;touch-action:manipulation}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+#bar{display:flex;align-items:center;gap:10px;padding:10px 18px;height:72px}
+#bar h1{font-size:24px;margin:0 6px 0 0}
+.tabs{display:flex;background:rgba(0,0,0,.08);border-radius:30px;padding:4px;gap:2px}
+.tabs button{padding:9px 18px;border-radius:26px;font-weight:700;font-size:17px;white-space:nowrap}
+.tabs button.on{background:var(--card);box-shadow:var(--shadow)}
+#who{margin-left:auto;color:var(--dim);font-size:16px;font-weight:600}
+#stars{font-size:22px;min-width:90px;text-align:right}
+.screen{position:absolute;inset:72px 0 0 0;display:none;flex-direction:column;align-items:center;gap:18px;padding:8px 30px 20px}
+.screen.on{display:flex}
+.msg{font-size:24px;color:var(--dim);min-height:30px;text-align:center}
+/* word card: picture + speaker + hint */
+.top{display:flex;align-items:center;gap:26px}
+.pic{width:170px;height:170px;border-radius:36px;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;font-size:110px;line-height:1}
+.pic.small{width:120px;height:120px;font-size:76px;border-radius:28px}
+.round{width:96px;height:96px;border-radius:50%;background:var(--accent);color:#fff;font-size:44px;display:grid;place-items:center;box-shadow:var(--shadow)}
+.round.alt{background:var(--teal)}
+.round:active,.tile:active,.chip:active,.card:active,.fw:active{transform:scale(.94)}
+/* slots + letter bank */
+.slots{display:flex;gap:14px;min-height:112px}
+.slot{width:96px;height:112px;border-radius:20px;background:rgba(255,255,255,.55);border:4px dashed rgba(29,42,58,.25);display:grid;place-items:center;font-size:62px;font-weight:800;position:relative}
+.slot.wide{width:132px}
+.slot.full{background:var(--card);border-style:solid;border-color:transparent;box-shadow:var(--shadow)}
+.slot.fixed{background:#e8f6f4;border-style:solid;border-color:transparent;color:var(--teal)}
+.slot.good{background:#dff7e3;border-color:var(--ok);animation:pop .35s}
+.slot.nope{animation:shake .4s;border-color:var(--bad)}
+.slot.now{box-shadow:0 0 0 5px var(--accent),var(--shadow)}
+.slot .ghost{position:absolute;inset:0;display:grid;place-items:center;opacity:.22;pointer-events:none}
+.bank{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;min-height:104px;max-width:1100px}
+.tile{width:92px;height:104px;border-radius:20px;background:var(--card);box-shadow:var(--shadow);font-size:58px;font-weight:800;display:grid;place-items:center;border-bottom:6px solid var(--teal);touch-action:none;transition:transform .1s}
+.tile.wide{width:128px}
+.tile.used{visibility:hidden}
+.tile.drag{position:fixed;z-index:9;pointer-events:none;transform:scale(1.1);transition:none;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.tile.vowel{border-bottom-color:#e0564f}
+@keyframes pop{50%{transform:scale(1.1)}}
+@keyframes shake{20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-8px)}80%{transform:translateX(8px)}}
+/* family */
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;max-width:1100px}
+.chip{padding:10px 18px;border-radius:24px;background:rgba(255,255,255,.7);font-weight:800;font-size:22px;box-shadow:var(--shadow)}
+.chip.on{background:var(--teal);color:#fff}
+.found{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;max-width:1100px}
+.fw{width:150px;height:96px;border-radius:20px;background:rgba(255,255,255,.45);display:flex;align-items:center;justify-content:center;gap:10px;font-size:30px;font-weight:800;color:rgba(29,42,58,.35)}
+.fw.got{background:var(--card);box-shadow:var(--shadow);color:var(--ink)}
+.fw.got.new{animation:pop .4s}
+.fw span{font-size:34px;filter:grayscale(1);opacity:.5}
+.fw.got span{filter:none;opacity:1}
+/* which word */
+#choices{display:flex;gap:26px}
+.card{width:250px;height:220px;border-radius:var(--r);background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:64px;font-weight:800;border-bottom:6px solid var(--teal);transition:transform .1s;letter-spacing:.02em}
+.card.long{font-size:48px}
+.card .e{font-size:44px;min-height:52px}
+.card.good{background:#dff7e3;animation:pop .35s}
+.card.nope{animation:shake .4s}
+.card.show{outline:5px solid var(--ok)}
+</style></head><body>
+<div id="bar"><h1>Words</h1>
+  <div class="tabs" id="tabs"><button data-tab="build" class="on">Build</button><button data-tab="family">Change it</button><button data-tab="which">Which word?</button></div>
+  <div id="who"></div><div id="stars"></div></div>
+
+<div class="screen on" id="build">
+  <div class="top"><div class="pic" id="bPic">⭐</div><button class="round" id="bPlay" aria-label="hear the word">🔊</button><button class="round alt" id="bHint" aria-label="sound it out">👂</button></div>
+  <div class="slots" id="slots"></div>
+  <div class="bank" id="bank"></div>
+  <div class="msg" id="bMsg"></div>
+</div>
+
+<div class="screen" id="family">
+  <div class="chips" id="rimes"></div>
+  <div class="top"><div class="pic small" id="fPic">⭐</div><div class="slots" id="fSlots"></div><button class="round" id="fPlay" aria-label="hear it">🔊</button></div>
+  <div class="bank" id="fBank"></div>
+  <div class="found" id="found"></div>
+  <div class="msg" id="fMsg"></div>
+</div>
+
+<div class="screen" id="which">
+  <div class="top"><button class="round" id="wPlay" aria-label="hear the word">🔊</button><div style="font-size:28px;font-weight:700">Which word is this?</div></div>
+  <div id="choices"></div>
+  <div class="msg" id="wMsg"></div>
+</div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LIVE=location.protocol.startsWith('http');
+const DIGRAPHS=['sh','th','ch','ck','ee','oo','qu'];
+const VOWELS='aeiou';
+let DATA=null,tab='build',kid={id:'default',name:'',age:5},prog={stars:0,built:{},found:{}},seq=0,audio=null,progLoaded=false;
+const kt=m=>{try{parent.postMessage(m,'*');}catch(e){}};
+const WB={get state(){return {tab,target:build.word,tokens:build.tokens,rime:fam.rime,answer:which.ans&&which.ans.w,stars:prog.stars,kid:kid.id};}};
+window.WB=WB;
+
+// ---------- the launcher tells us who is playing (D-008); progress follows the kid
+let helloResolve;const hello=new Promise(r=>helloResolve=r);
+window.addEventListener('message',e=>{const d=e.data||{};if(d.kt!=='hello')return;
+  const prev=kid.id;
+  if(d.kid&&d.kid.id)kid={id:d.kid.id,name:d.kid.name||'',age:+d.kid.age||5};else if(d.child&&d.child.name)kid.name=d.child.name;
+  helloResolve();
+  if(progLoaded&&kid.id!==prev)loadProg();   // hello came after the 700 ms grace, or the kid changed: progress follows the kid
+});
+function progKey(){return 'words.progress.'+kid.id;}
+async function loadProg(){
+  let p=null;
+  if(LIVE){try{const r=await fetch('/api/store/words/'+encodeURIComponent(kid.id)+'/progress.json',{cache:'no-store'});if(r.ok)p=await r.json();}catch(e){}}
+  if(!p){try{p=JSON.parse(localStorage.getItem(progKey())||'null');}catch(e){}}
+  if(p&&typeof p==='object')prog={stars:+p.stars||0,built:p.built||{},found:p.found||{}};
+  drawStars();
+}
+let saveT=null;
+function saveProg(){clearTimeout(saveT);saveT=setTimeout(async()=>{
+  const body=JSON.stringify(prog);
+  try{localStorage.setItem(progKey(),body);}catch(e){}
+  if(LIVE){try{await fetch('/api/store/words/'+encodeURIComponent(kid.id)+'/progress.json',{method:'PUT',headers:{'Content-Type':'application/json'},body});}catch(e){}}
+},400);}
+function star(n){prog.stars+=n||1;drawStars();saveProg();kt({kt:'blip',f:720});}
+function drawStars(){$('stars').textContent=prog.stars?('⭐'.repeat(Math.min(prog.stars,5))+(prog.stars>5?' '+prog.stars:'')):'';$('who').textContent=kid.name||'';}
+
+// ---------- audio: one player, a new sequence cancels the old one
+function stopAudio(){seq++;if(audio){try{audio.pause();}catch(e){}audio=null;}}
+function play(src){return new Promise(res=>{if(!src){res(false);return;}const a=new Audio(src);audio=a;a.onended=()=>res(true);a.onerror=()=>res(false);const p=a.play();if(p&&p.catch)p.catch(()=>res(false));});}
+async function playList(list,gap,onEach){const my=++seq;for(let i=0;i<list.length;i++){if(my!==seq)return false;if(onEach)onEach(i);await play(list[i]);if(my!==seq)return false;if(gap&&i<list.length-1)await wait(gap);}if(onEach&&my===seq)onEach(-1);return my===seq;}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const V=k=>DATA.voice[k]||null;
+const shuffle=a=>a.slice().sort(()=>Math.random()-.5);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+
+// ---------- words → graphemes, so "ship" is s·h→sh, i, p and the hint plays the right sounds
+function tokens(w){const out=[];for(let i=0;i<w.length;){const d=DIGRAPHS.find(g=>w.startsWith(g,i));if(d){out.push(d);i+=d.length;}else{out.push(w[i]);i++;}}return out;}
+function level(){const a=kid.age||5,s=prog.stars;if(a<=4&&s<12)return 1;if(a>=7||s>=24)return 3;return a>=6||s>=8?2:1;}
+function allFamilyWords(){return DATA.families.flatMap(f=>f.words);}
+function knownWords(){return new Set(DATA.sight.map(s=>s.w).concat(allFamilyWords().map(w=>w.w)));}
+
+// ---------- BUILD
+const build={word:null,tokens:[],item:null,misses:0,slots:[],placed:[],last:null,busy:false};
+function buildPool(){
+  const L=level(),fam=allFamilyWords();
+  if(L===1)return fam;
+  if(L===2)return fam.concat(DATA.sight.filter(s=>s.pic&&s.w.length<=4));
+  return DATA.sight.filter(s=>s.w.length<=6);
+}
+function newWord(){
+  stopAudio();
+  const pool=buildPool().filter(w=>w.w!==build.last);
+  const it=pick(pool);build.item=it;build.word=it.w;build.last=it.w;build.tokens=tokens(it.w);build.misses=0;
+  build.placed=build.tokens.map(()=>null);build.busy=false;
+  $('bPic').textContent=it.emoji;$('bMsg').textContent='';
+  // bank: the word's graphemes + distractor letters, more of them at higher levels
+  const nd=[1,2,3][level()-1],letters='abcdefghijklmnopqrstuvwxyz'.split('').filter(c=>!it.w.includes(c));
+  const bank=shuffle(build.tokens.concat(shuffle(letters).slice(0,nd)));
+  $('slots').innerHTML=build.tokens.map((t,i)=>'<div class="slot'+(t.length>1?' wide':'')+'" data-i="'+i+'"><span class="ch"></span></div>').join('');
+  $('bank').innerHTML=bank.map((t,i)=>'<button class="tile'+(t.length>1?' wide':'')+(VOWELS.includes(t[0])?' vowel':'')+'" data-t="'+E(t)+'" data-b="'+i+'">'+E(t)+'</button>').join('');
+  $('slots').querySelectorAll('.slot').forEach(s=>s.onclick=()=>{if(!build.busy)unplace(+s.dataset.i);});
+  $('bank').querySelectorAll('.tile').forEach(wireTile);
+  playList([V('build'),it.clip].filter(Boolean),250);
+}
+function slotEl(i){return $('slots').querySelector('.slot[data-i="'+i+'"]');}
+function place(tile,i){
+  if(build.busy)return;      // the board is being checked or celebrated: taps wait
+  if(i==null){i=build.placed.indexOf(null);if(i<0)return;}
+  if(build.placed[i])unplace(i);
+  build.placed[i]=tile;tile.classList.add('used');
+  const s=slotEl(i);s.classList.add('full');s.querySelector('.ch').textContent=tile.dataset.t;
+  kt({kt:'blip',f:520});
+  if(build.placed.every(Boolean))setTimeout(check,120);
+}
+function unplace(i){
+  const t=build.placed[i];if(!t)return;
+  build.placed[i]=null;t.classList.remove('used');
+  const s=slotEl(i);s.classList.remove('full','good','nope');s.querySelector('.ch').textContent='';
+}
+async function check(){
+  const got=build.placed.map(t=>t.dataset.t),ok=got.join('')===build.word,word=build.word;
+  stopAudio();build.busy=true;
+  if(ok){
+    build.placed.forEach((t,i)=>slotEl(i).classList.add('good'));
+    prog.built[build.word]=(prog.built[build.word]||0)+1;star(1);
+    $('bMsg').textContent=['Yes!','You built it!','Great reading'+(kid.name?', '+kid.name:'')+'!','Super!'][prog.stars%4];
+    await playList([V('yes'),build.item.clip].filter(Boolean),120);   // interrupted or not, the next word still comes
+    await wait(900);
+    if(build.word!==word)return;                 // newWord already happened some other way
+    if(tab==='build')newWord();else{build.word=null;build.busy=false;}   // off the tab: a fresh word when it comes back
+    return;
+  }
+  build.misses++;
+  const wrong=got.map((t,i)=>t!==build.tokens[i]?i:-1).filter(i=>i>=0);
+  wrong.forEach(i=>{const s=slotEl(i);s.classList.remove('nope');void s.offsetWidth;s.classList.add('nope');});
+  kt({kt:'blip',f:220});$('bMsg').textContent=build.misses>=2?'Here it is, faintly — try again':'Listen to the sounds…';
+  await play(V('again'));
+  await soundOut();
+  if(build.word!==word)return;
+  wrong.forEach(i=>unplace(i));
+  build.busy=false;
+  if(build.misses>=2)build.tokens.forEach((t,i)=>{const s=slotEl(i);if(!s.querySelector('.ghost')){const g=document.createElement('span');g.className='ghost';g.textContent=t;s.appendChild(g);}});
+}
+async function soundOut(){
+  // one vouched-for clip per grapheme, slot by slot, then the whole word (a grapheme with no clip is skipped, never synthesised)
+  const steps=build.tokens.map((t,i)=>({src:DATA.sounds[t],i})).filter(s=>s.src);
+  const ok=await playList(steps.map(s=>s.src),140,k=>{$('slots').querySelectorAll('.slot').forEach(s=>s.classList.remove('now'));if(k>=0)slotEl(steps[k].i).classList.add('now');});
+  if(ok){await wait(200);await play(build.item.clip);}
+}
+$('bPlay').onclick=()=>{if(build.busy)return;stopAudio();play(build.item&&build.item.clip);};
+$('bHint').onclick=()=>{if(build.busy)return;stopAudio();soundOut();};
+
+// tiles: tap = into the next empty slot (the rule); drag = onto a chosen slot (a bonus)
+let drag=null;
+function wireTile(t){
+  t.addEventListener('pointerdown',e=>{if(t.classList.contains('used'))return;drag={t,x0:e.clientX,y0:e.clientY,moved:false,ghost:null,id:e.pointerId};try{t.setPointerCapture(e.pointerId);}catch(x){}});
+  t.addEventListener('pointermove',e=>{const d=drag;if(!d||d.t!==t)return;const dx=e.clientX-d.x0,dy=e.clientY-d.y0;
+    if(!d.moved&&Math.hypot(dx,dy)<10)return;
+    if(!d.moved){d.moved=true;d.ghost=t.cloneNode(true);d.ghost.classList.add('drag');document.body.appendChild(d.ghost);const r=t.getBoundingClientRect();d.ox=e.clientX-r.left;d.oy=e.clientY-r.top;t.style.opacity='.3';}
+    d.ghost.style.left=(e.clientX-d.ox)+'px';d.ghost.style.top=(e.clientY-d.oy)+'px';});
+  const up=e=>{const d=drag;if(!d||d.t!==t)return;drag=null;try{t.releasePointerCapture(d.id);}catch(x){}
+    if(d.ghost){d.ghost.remove();t.style.opacity='';
+      const under=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList&&el.classList.contains('slot')&&el.closest('#slots'));
+      if(under)place(t,+under.dataset.i);return;}
+    place(t,null);};
+  t.addEventListener('pointerup',up);
+  t.addEventListener('pointercancel',()=>{const d=drag;if(!d)return;drag=null;if(d.ghost)d.ghost.remove();t.style.opacity='';});
+}
+
+// ---------- CHANGE IT (word families): the rime stays, the first letter changes
+const fam={rime:null,f:null,busy:false};
+function drawRimes(){
+  $('rimes').innerHTML=DATA.families.map(f=>'<button class="chip'+(f.rime===fam.rime?' on':'')+'" data-rime="'+E(f.rime)+'">-'+E(f.rime)+'</button>').join('');
+  $('rimes').querySelectorAll('.chip').forEach(c=>c.onclick=()=>openFamily(c.dataset.rime));
+}
+function openFamily(rime){
+  stopAudio();fam.rime=rime;fam.f=DATA.families.find(f=>f.rime===rime);fam.busy=false;drawRimes();
+  const f=fam.f,found=new Set(prog.found[rime]||[]);
+  const onsets=f.words.map(w=>w.w.slice(0,w.w.length-rime.length));
+  const known=knownWords();
+  const bad=shuffle('bcdfghjklmnprstvwz'.split('').filter(c=>!onsets.includes(c)&&!known.has(c+rime))).slice(0,2);
+  $('fPic').textContent=f.words[0].emoji;$('fMsg').textContent='Tap a letter to make a word';
+  $('fSlots').innerHTML='<div class="slot" id="onset"><span class="ch"></span></div>'+tokens(rime).map(t=>'<div class="slot fixed'+(t.length>1?' wide':'')+'"><span class="ch">'+E(t)+'</span></div>').join('');
+  $('fBank').innerHTML=shuffle(onsets.concat(bad)).map(t=>'<button class="tile'+(t.length>1?' wide':'')+'" data-t="'+E(t)+'">'+E(t)+'</button>').join('');
+  $('fBank').querySelectorAll('.tile').forEach(t=>t.onclick=()=>tryOnset(t));
+  $('found').innerHTML=f.words.map(w=>'<div class="fw'+(found.has(w.w)?' got':'')+'" data-w="'+E(w.w)+'"><span>'+E(w.emoji)+'</span>'+E(w.w)+'</div>').join('');
+  $('found').querySelectorAll('.fw.got').forEach(c=>c.onclick=()=>{stopAudio();const w=f.words.find(x=>x.w===c.dataset.w);play(w.clip);});
+  if(!found.size)play(V('change'));
+}
+async function tryOnset(tile){
+  if(fam.busy)return;fam.busy=true;stopAudio();
+  const f=fam.f,t=tile.dataset.t,word=t+f.rime,slot=$('onset');
+  slot.classList.add('full');slot.querySelector('.ch').textContent=t;
+  const w=f.words.find(x=>x.w===word);
+  if(w){
+    slot.classList.add('good');$('fPic').textContent=w.emoji;
+    const found=new Set(prog.found[f.rime]||[]),isNew=!found.has(word);
+    found.add(word);prog.found[f.rime]=[...found];
+    const card=$('found').querySelector('.fw[data-w="'+word+'"]');if(card){card.classList.add('got');if(isNew)card.classList.add('new');card.onclick=()=>{stopAudio();play(w.clip);};}
+    $('fMsg').textContent=isNew?'A new word: '+word+'!':word;
+    if(isNew)star(1);else saveProg();
+    const done=await playList([w.clip].concat(isNew?[V('hooray')]:[]).filter(Boolean),150);
+    if(fam.f!==f)return;
+    if(done&&found.size===f.words.length){$('fMsg').textContent='You found every word in -'+f.rime+'!';await play(V('allfound'));}
+  }else{
+    slot.classList.remove('nope');void slot.offsetWidth;slot.classList.add('nope');kt({kt:'blip',f:220});
+    $('fMsg').textContent='"'+word+'" is not a word yet — try another letter';
+    await play(V('notword'));
+  }
+  await wait(500);
+  if(fam.f!==f)return;    // the child opened another family meanwhile; openFamily drew it fresh
+  slot.classList.remove('full','good','nope');slot.querySelector('.ch').textContent='';fam.busy=false;
+}
+$('fPlay').onclick=()=>{stopAudio();const got=(prog.found[fam.rime]||[]).map(w=>fam.f.words.find(x=>x.w===w)).filter(Boolean);playList((got.length?got:fam.f.words).map(w=>w.clip),380);};
+
+// ---------- WHICH WORD? sight reading: hear it, tap it; the picture appears only after the answer
+const which={ans:null,opts:[],tries:0};
+function whichPool(){const L=level();return L===1?allFamilyWords():DATA.sight.filter(s=>s.w.length<=(L===2?4:7));}
+function nextWhich(){
+  stopAudio();$('wMsg').textContent='';which.tries=0;
+  const pool=whichPool(),ans=pick(pool);
+  // tempting choices: same family first, then same length
+  const fams=DATA.families.find(f=>f.words.some(w=>w.w===ans.w));
+  let others=fams?shuffle(fams.words.filter(w=>w.w!==ans.w)):[];
+  if(others.length<2)others=others.concat(shuffle(pool.filter(w=>w.w!==ans.w&&!others.includes(w)&&w.w.length===ans.w.length)));
+  if(others.length<2)others=others.concat(shuffle(pool.filter(w=>w.w!==ans.w&&!others.includes(w))));
+  which.ans=ans;which.opts=shuffle([ans].concat(others.slice(0,2)));
+  $('choices').innerHTML=which.opts.map(w=>'<button class="card'+(w.w.length>4?' long':'')+'" data-w="'+E(w.w)+'"><span class="e"></span>'+E(w.w)+'</button>').join('');
+  $('choices').querySelectorAll('.card').forEach(c=>c.onclick=()=>answer(c));
+  setTimeout(()=>which.ans===ans&&playList([V('which'),ans.clip].filter(Boolean),200),300);
+}
+$('wPlay').onclick=()=>{if(which.ans){stopAudio();play(which.ans.clip);}};
+async function answer(c){
+  const a=which.ans;if(!a||c.classList.contains('nope'))return;
+  if(c.dataset.w===a.w){
+    which.ans=null;c.classList.add('good');c.querySelector('.e').textContent=a.emoji;star(1);
+    $('wMsg').textContent=['Yes!','That is it!','Great reading!','You got it'+(kid.name?', '+kid.name:'')+'!'][prog.stars%4];
+    stopAudio();await playList([V('great'),a.clip].filter(Boolean),120);await wait(400);nextWhich();
+  }else{
+    which.tries++;c.classList.remove('nope');void c.offsetWidth;c.classList.add('nope');kt({kt:'blip',f:220});
+    $('wMsg').textContent=which.tries>=2?'It is this one':'Listen again…';
+    stopAudio();
+    if(which.tries>=2){const r=$('choices').querySelector('.card[data-w="'+a.w+'"]');if(r){r.classList.add('show');r.querySelector('.e').textContent=a.emoji;}await play(V('thisone'));}
+    play(a.clip);
+  }
+}
+
+// ---------- tabs
+$('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;$('tabs').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  ['build','family','which'].forEach(id=>$(id).classList.toggle('on',id===tab));stopAudio();kt({kt:'blip',f:520});
+  if(tab==='build'&&!build.word)newWord();if(tab==='family'&&!fam.rime)openFamily(DATA.families[0].rime);if(tab==='which')nextWhich();});
+
+async function init(){
+  DATA=await (await fetch('data.json')).json();
+  await Promise.race([hello,wait(700)]);   // the launcher's hello names the kid; alone on a laptop we are "default"
+  await loadProg();progLoaded=true;
+  drawRimes();newWord();
+}
+init();
+</script></body></html>

@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Camera</title>
+<!--
+  tablet/apps/camera — the photo booth (PLAN.md §8, D-017). Live picture from the tablet's two IMX219 cameras, hats and
+  glasses the child drags onto the picture, a shutter with a 3-2-1 countdown, and a per-kid gallery.
+
+  Frames come from the camera helper on the tablet itself, livecam.py, bound to 127.0.0.1:8095 ONLY (libcamera `cam` →
+  FIFO → JPEG → MJPEG); this page is served by the launcher (127.0.0.1:8090). Nothing reaches the network.
+  One camera streams at a time (both sensors share the camss capture path), so Front/Rear stops one and starts the other.
+  Colour: the sensor runs libcamera's "uncalibrated" tuning (grey-world AWB, no colour matrix), so one 3×3 matrix +
+  brightness/contrast is applied here — as a CSS/SVG filter on the live view and as the same numbers on the saved picture.
+  Pictures: /snap.jpg (a full frame, not the preview) → turned/mirrored as on screen → colour → stickers baked in →
+  JPEG + thumbnail in the per-kid store /api/store/camera/<kid>/<id>.jpg (+ <id>.t.jpg). On a laptop (file://) a
+  localStorage fallback keeps a few pictures so the page can be tried without the tablet.
+-->
+<style>
+  :root { --bg:#0f1318; --panel:#1b222c; --ink:#eef2f6; --dim:#93a0b0; --on:#5c6bc0; --warn:#ff8a80; --ok:#43b581; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--ink); font:18px/1.3 system-ui, sans-serif; overflow:hidden; touch-action:none; }
+  button { font:inherit; color:inherit; background:#2a3340; border:0; border-radius:16px; padding:0 18px; min-height:64px; min-width:64px; font-size:20px; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+  button.on { background:var(--on); }
+  button:disabled { opacity:.45; }
+  button:active { transform:scale(.96); }
+  .screen { position:fixed; inset:0; display:none; }
+  .screen.on { display:flex; }
+
+  /* ---- camera screen: stage + a control column (landscape) / control row (portrait) */
+  #cam { flex-direction:row; }
+  #stage { flex:1; min-width:0; min-height:0; display:flex; align-items:center; justify-content:center; padding:10px; position:relative; }
+  #box { position:relative; background:#000; border-radius:18px; overflow:hidden; }
+  #live { position:absolute; left:50%; top:50%; transform-origin:center; display:block; }
+  #stk { position:absolute; inset:0; }
+  .s { position:absolute; left:0; top:0; transform-origin:center; line-height:1; white-space:nowrap; touch-action:none; }
+  .s.sel { outline:3px dashed rgba(255,255,255,.85); outline-offset:6px; border-radius:8px; }
+  .s .x { position:absolute; right:-22px; top:-22px; width:44px; height:44px; border-radius:50%; background:#e05a4f; color:#fff; font-size:22px; display:none; align-items:center; justify-content:center; line-height:1; }
+  .s.sel .x { display:flex; }
+  .s svg { display:block; width:100%; height:auto; }
+  #veil { position:absolute; inset:0; display:none; align-items:center; justify-content:center; text-align:center; padding:24px; background:rgba(0,0,0,.72); font-size:22px; }
+  #box.busy #veil, #box.off #veil { display:flex; }
+  #box.off #veil { color:var(--warn); }
+  #count { position:absolute; inset:0; display:none; align-items:center; justify-content:center; font-size:200px; font-weight:800; color:#fff; text-shadow:0 6px 30px rgba(0,0,0,.6); }
+  #count.on { display:flex; }
+  #flash { position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; transition:opacity .35s; }
+  #flash.on { opacity:1; transition:none; }
+  #side { width:150px; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:12px 10px; gap:10px; background:var(--panel); }
+  #side .grp { display:flex; flex-direction:column; align-items:center; gap:10px; width:100%; }
+  #side button { width:100%; }
+  #shutter { width:108px; height:108px; min-height:108px; border-radius:50%; background:#fff; border:8px solid #c9d2dc; padding:0; }
+  #shutter:active { background:#e6ebf0; }
+  #shutter.go { background:var(--ok); border-color:#2d7a56; }
+  #st { color:var(--dim); font-size:13px; text-align:center; min-height:2.6em; }
+  .badge { background:#e05a4f; color:#fff; border-radius:12px; font-size:14px; padding:2px 8px; min-width:24px; }
+  #camsw { display:flex; flex-direction:column; gap:8px; width:100%; }
+  #camsw button { font-size:17px; min-height:56px; }
+
+  /* sticker drawer slides over the bottom of the stage */
+  #drawer { position:absolute; left:12px; right:12px; bottom:12px; background:rgba(27,34,44,.96); border-radius:18px; padding:10px; display:none; flex-direction:column; gap:8px; max-height:46%; }
+  #drawer.on { display:flex; }
+  #colpanel { position:absolute; left:12px; right:12px; bottom:12px; background:rgba(27,34,44,.96); border-radius:18px; padding:10px 14px; display:none; flex-direction:column; gap:4px; max-height:70%; overflow-y:auto; touch-action:pan-y; }
+  #colpanel.on { display:flex; }
+  #colpanel .row { display:flex; gap:8px; align-items:center; }
+  #colpanel .row h3 { margin:0; font-size:15px; color:var(--dim); font-weight:600; flex:1; }
+  .sl { display:grid; grid-template-columns:110px 1fr 56px; align-items:center; gap:12px; min-height:52px; font-size:17px; }
+  .sl b { text-align:right; font-variant-numeric:tabular-nums; color:var(--dim); font-weight:600; }
+  .sl input[type=range] { width:100%; height:44px; margin:0; accent-color:var(--on); touch-action:none; }
+  #drawer .row { display:flex; gap:8px; align-items:center; }
+  #drawer .row h3 { margin:0; font-size:16px; color:var(--dim); font-weight:600; flex:1; }
+  #shelf { display:flex; gap:10px; overflow-x:auto; overflow-y:hidden; padding:4px 2px 8px; touch-action:pan-x; }
+  .pick { flex:none; width:84px; height:84px; border-radius:16px; background:#2a3340; display:flex; align-items:center; justify-content:center; font-size:52px; line-height:1; padding:6px; }
+  .pick svg { width:64px; height:64px; }
+  .pick:active { background:var(--on); }
+
+  /* ---- gallery */
+  #gal { flex-direction:column; background:#f3f5f9; color:#1d2a3a; }
+  #gal header, #big header { display:flex; align-items:center; gap:12px; padding:12px 18px; background:#fff; box-shadow:0 6px 20px rgba(20,40,80,.12); }
+  #gal h1, #big h1 { font-size:24px; margin:0; flex:1; }
+  #gal header button, #big header button { background:#e9eef4; color:#1d2a3a; }
+  #gal header button.go, #big header button.go { background:#1d2a3a; color:#fff; }
+  #grid { flex:1; overflow-y:auto; padding:18px; display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px; align-content:start; touch-action:pan-y; }
+  .card { background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 6px 20px rgba(20,40,80,.12); aspect-ratio:4/3; display:flex; align-items:center; justify-content:center; }
+  .card img { width:100%; height:100%; object-fit:cover; display:block; }
+  #empty { grid-column:1/-1; text-align:center; color:#5b6b80; padding:60px 20px; font-size:22px; }
+  #big { flex-direction:column; background:#000; }
+  #big header { background:#141a22; color:#eef2f6; }
+  #big header button { background:#2a3340; color:#eef2f6; }
+  #big header button.warn { background:#5a2a26; }
+  #big header button.warn.arm { background:#e05a4f; }
+  #bigimg { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; }
+  #bigimg img { max-width:100%; max-height:100%; }
+
+  @media (orientation: portrait) {
+    #cam { flex-direction:column; }
+    #side { width:100%; flex-direction:row; padding:10px 12px; }
+    #side .grp { flex-direction:row; width:auto; }
+    #side button { width:auto; }
+    #camsw { flex-direction:row; width:auto; }
+    #st { display:none; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="ccm" color-interpolation-filters="sRGB"><feColorMatrix id="ccmM" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/></filter>
+</svg>
+
+<!-- ===== camera ===== -->
+<div class="screen on" id="cam">
+  <div id="stage">
+    <div id="box">
+      <img id="live" alt="">
+      <div id="stk"></div>
+      <div id="veil">starting camera…</div>
+      <div id="count"></div>
+      <div id="flash"></div>
+    </div>
+    <div id="colpanel">
+      <div class="row"><h3>Colour — Auto follows the room's light; move a slider to set it yourself (kept per camera).</h3>
+        <button id="bAuto" style="min-height:52px;font-size:16px">Auto: on</button>
+        <button id="bColReset" style="min-height:52px;font-size:16px">Reset</button>
+        <button id="bColX" style="min-height:52px;font-size:16px">Close</button></div>
+      <div id="sliders"></div>
+    </div>
+    <div id="drawer">
+      <div class="row"><h3>Hats, glasses and friends — tap one, then drag it. Two fingers make it bigger or turn it.</h3>
+        <button id="bClear" style="min-height:52px;font-size:16px">Clear all</button>
+        <button id="bDrawerX" style="min-height:52px;font-size:16px">Close</button></div>
+      <div id="shelf"></div>
+    </div>
+  </div>
+  <div id="side">
+    <div class="grp">
+      <div id="camsw"><button data-cam="front">🙂 Front</button><button data-cam="rear">🌳 Rear</button></div>
+      <button id="bStick">🎩 Dress up</button>
+      <button id="bRot">↻ 0°</button>
+      <button id="bMir">⇔ Mirror</button>
+      <button id="bCol">🎨 Colour</button>
+    </div>
+    <div class="grp">
+      <button id="shutter" aria-label="Take a picture"></button>
+      <div id="st">…</div>
+    </div>
+    <div class="grp">
+      <button id="bGal">🖼 Pictures <span class="badge" id="nPics">0</span></button>
+      <button id="bDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== gallery ===== -->
+<div class="screen" id="gal">
+  <header><h1 id="galTitle">My pictures</h1><button id="bGalCam" class="go">📷 Camera</button><button id="bGalDone">Done</button></header>
+  <div id="grid"></div>
+</div>
+
+<!-- ===== one picture ===== -->
+<div class="screen" id="big">
+  <header><button id="bBigBack">‹ Back</button><h1 id="bigTitle"></h1><button id="bBigDel" class="warn">🗑 Delete</button></header>
+  <div id="bigimg"><img id="bigpic" alt=""></div>
+</div>
+
+<script src="pico.js"></script>
+<script>
+(() => {
+'use strict';
+const HELPER = 'http://127.0.0.1:8095';
+const LIVE = location.protocol.startsWith('http');          // served by the launcher: the store exists
+const $ = id => document.getElementById(id);
+const box = $('box'), live = $('live'), stkLayer = $('stk'), veil = $('veil');
+live.crossOrigin = 'anonymous';          // the helper sends Access-Control-Allow-Origin, so the face finder may read the frames
+
+/* ---------- colour: auto white balance + levels measured from the live picture, or Joe's sliders; one matrix for the
+   preview (SVG filter) and the saved picture (pixel loop). The sensor runs libcamera's "uncalibrated" tuning: grey-world
+   AWB only, no colour matrix, hazy lifted blacks, and the cast changes with the room's light (Joe, 2026-10-26: fixed numbers
+   came out "very light and slightly grey/green" → auto by default, manual controls on request). */
+const CCM = [[1.60, -0.45, -0.15], [-0.30, 1.55, -0.25], [0.00, -0.55, 1.55]];   // IMX219-style colour matrix, daylight-ish
+const COL_DEF = { auto: true, wbR: 1.08, wbB: 1.10, gain: 1.25, off: -20, sat: 1.25 };
+const tune = { wb: [1.08, 1.0, 1.10], gain: 1.25, off: -20, dark: 0, n: 0 }; // what auto measured (eased)
+let CM = [];
+function colFor(cam) { if (!V.col) V.col = {}; if (!V.col[cam]) V.col[cam] = Object.assign({}, COL_DEF); return V.col[cam]; }
+function colourMatrix(wb, gain, off, sat) {                             // rows r,g,b: [m00 m01 m02 off]
+  const L = [0.2126, 0.7152, 0.0722];
+  const S = [0, 1, 2].map(i => [0, 1, 2].map(j => (1 - sat) * L[j] + (i === j ? sat : 0)));
+  const m = [0, 1, 2].map(i => [0, 1, 2].map(j => { let v = 0; for (let k = 0; k < 3; k++) v += S[i][k] * CCM[k][j]; return v * wb[j]; }));
+  return m.map(r => [r[0] * gain, r[1] * gain, r[2] * gain, off]);
+}
+function current() {                                                    // the numbers in force right now
+  const c = active ? colFor(active) : COL_DEF;
+  // in the dark, auto also eases the saturation toward 1 (noise and the green cast are what saturation would amplify)
+  return c.auto ? { wb: tune.wb, gain: tune.gain, off: tune.off, sat: 1 + (c.sat - 1) * (1 - 0.6 * tune.dark), auto: true } : { wb: [c.wbR, 1, c.wbB], gain: c.gain, off: c.off, sat: c.sat, auto: false };
+}
+function setColour() {
+  const c = current();
+  CM = colourMatrix(c.wb, c.gain, c.off, c.sat);
+  $('ccmM').setAttribute('values', CM.map(r => `${r[0].toFixed(4)} ${r[1].toFixed(4)} ${r[2].toFixed(4)} 0 ${(r[3] / 255).toFixed(4)}`).join('  ') + '  0 0 0 1 0');
+  syncColourUI();
+}
+live.style.filter = 'url(#ccm)';
+function applyColour(img) {                                             // ImageData in place, same numbers as the preview
+  const d = img.data, [r0, r1, r2] = CM;
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i], g = d[i + 1], b = d[i + 2];
+    d[i]     = r0[0] * r + r0[1] * g + r0[2] * b + r0[3];
+    d[i + 1] = r1[0] * r + r1[1] * g + r1[2] * b + r1[3];
+    d[i + 2] = r2[0] * r + r2[1] * g + r2[2] * b + r2[3];
+  }
+  return img;
+}
+const measureCanvas = document.createElement('canvas'); measureCanvas.width = 48; measureCanvas.height = 36;
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+function measure(bmp) {
+  const x = measureCanvas.getContext('2d', { willReadFrequently: true });
+  x.drawImage(bmp, 0, 0, 48, 36);
+  const d = x.getImageData(0, 0, 48, 36).data, n = d.length / 4;
+  let sr = 0, sg = 0, sb = 0, sl = 0; const px = [];
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i], g = d[i + 1], b = d[i + 2], l = 0.2126 * r + 0.7152 * g + 0.0722 * b; sr += r; sg += g; sb += b; sl += l; px.push([r, g, b, l]);
+  }
+  px.sort((a, b) => b[3] - a[3]);
+  const hi = px[Math.floor(n * 0.02)][3], mean = sl / n, top = px.slice(0, Math.max(8, Math.floor(n * 0.1)));
+  const tr = top.reduce((s, p) => s + p[0], 0) / top.length, tg = top.reduce((s, p) => s + p[1], 0) / top.length, tb = top.reduce((s, p) => s + p[2], 0) / top.length;
+  // low light: the sensor's gain runs up and the Bayer pattern's double green takes over ("heavy green", Joe 2026-10-26).
+  // dark = 0 in normal light → 1 when very dark: trust the grey-world mean over the (noisy) bright patch, allow stronger
+  // white-balance gains, and tone the saturation down (see setColour)
+  const dark = clamp((75 - mean) / 55, 0, 1), wG = 0.5 + 0.5 * dark, wbMax = 1.7 + 1.0 * dark;
+  const wbR = clamp(wG * (sg / Math.max(1, sr)) + (1 - wG) * (tg / Math.max(1, tr)), 0.75, wbMax);
+  const wbB = clamp(wG * (sg / Math.max(1, sb)) + (1 - wG) * (tg / Math.max(1, tb)), 0.75, wbMax);
+  // levels: the bright end (98 %) goes to ~235 and the mean to ~125; a flat scene cannot push the gain past 1.8
+  const gain = clamp((235 - 125) / Math.max(40, hi - mean), 0.9, 1.8), off = clamp(125 - mean * gain, -80, 60);
+  return { wb: [wbR, 1, wbB], gain, off, dark };
+}
+let tuning = false;
+async function tuneLoop() {
+  if (helperUp && active && !taking && !switching && !tuning && colFor(active).auto) {
+    tuning = true;
+    try {
+      const blob = await (await fetch(HELPER + '/snap.jpg?t=' + Date.now(), { cache: 'no-store' })).blob();
+      const m = measure(await createImageBitmap(blob));
+      const a = tune.n === 0 ? 1 : 0.25;                                   // first measurement lands at once, then eased
+      tune.wb = tune.wb.map((v, i) => v + (m.wb[i] - v) * a); tune.gain += (m.gain - tune.gain) * a; tune.off += (m.off - tune.off) * a; tune.dark += (m.dark - tune.dark) * a; tune.n++;
+      setColour();
+    } catch (e) {}
+    tuning = false;
+  }
+  setTimeout(tuneLoop, 1500);
+}
+/* the Colour panel: Auto, then five sliders; touching a slider takes over from auto (starting from auto's numbers) */
+const SLIDERS = { wbR: ['Red', 0.6, 1.8, 0.01], wbB: ['Blue', 0.6, 1.8, 0.01], off: ['Brightness', -90, 90, 1], gain: ['Contrast', 0.7, 2.2, 0.01], sat: ['Colour', 0.4, 2.2, 0.01] };
+for (const [k, [label, min, max, step]] of Object.entries(SLIDERS)) {
+  const row = document.createElement('label'); row.className = 'sl';
+  row.innerHTML = `<span>${label}</span><input type="range" data-k="${k}" min="${min}" max="${max}" step="${step}"><b></b>`;
+  $('sliders').appendChild(row);
+  row.querySelector('input').addEventListener('input', ev => {
+    if (!active) return;
+    const c = colFor(active);
+    if (c.auto && k !== 'sat') { c.wbR = tune.wb[0]; c.wbB = tune.wb[2]; c.gain = tune.gain; c.off = tune.off; c.auto = false; }
+    c[k] = +ev.target.value; saveV(); setColour();
+  });
+}
+function syncColourUI() {
+  if (!$('colpanel').classList.contains('on')) return;
+  const c = current();
+  $('bAuto').classList.toggle('on', c.auto); $('bAuto').textContent = c.auto ? 'Auto: on' : 'Auto: off';
+  const vals = { wbR: c.wb[0], wbB: c.wb[2], off: c.off, gain: c.gain, sat: c.sat };
+  document.querySelectorAll('#sliders input').forEach(i => { if (document.activeElement !== i) i.value = vals[i.dataset.k]; i.parentElement.querySelector('b').textContent = (+vals[i.dataset.k]).toFixed(i.dataset.k === 'off' ? 0 : 2); });
+}
+$('bCol').onclick = () => { const on = $('colpanel').classList.toggle('on'); $('bCol').classList.toggle('on', on); if (on) { $('drawer').classList.remove('on'); $('bStick').classList.remove('on'); } syncColourUI(); };
+$('bColX').onclick = () => { $('colpanel').classList.remove('on'); $('bCol').classList.remove('on'); };
+$('bAuto').onclick = () => { if (!active) return; const c = colFor(active); c.auto = !c.auto; if (c.auto) tune.n = 0; saveV(); setColour(); };
+$('bColReset').onclick = () => { if (!active) return; V.col[active] = Object.assign({}, COL_DEF); tune.n = 0; saveV(); setColour(); };
+
+/* ---------- view settings per camera (shared with the earlier plain viewer) ---------- */
+let V;
+try { V = JSON.parse(localStorage.getItem('kt-camera-view') || 'null'); } catch (e) { V = null; }
+if (!V || !V.rot) V = { rot: { front: 180, rear: 180 }, mir: { front: true, rear: false } };   // the sensors sit upside down in the pod
+const saveV = () => { try { localStorage.setItem('kt-camera-view', JSON.stringify(V)); } catch (e) {} };
+
+/* ---------- who is playing (bridge hello) ---------- */
+let kid = { id: 'default', name: '' }, caps = { camera: true };
+window.addEventListener('message', e => {
+  const d = e.data || {};
+  if (d.kt !== 'hello') return;
+  const prev = kid.id;
+  if (d.kid && d.kid.id) kid = { id: String(d.kid.id), name: d.kid.name || '' }; else if (d.child && d.child.name) kid.name = d.child.name;
+  if (d.caps) caps = d.caps;
+  if (kid.id !== prev) refreshCount();
+  $('galTitle').textContent = kid.name ? `${kid.name}'s pictures` : 'My pictures';
+});
+const blip = f => { try { parent.postMessage({ kt: 'blip', f }, '*'); } catch (e) {} };
+const toast = text => { try { parent.postMessage({ kt: 'toast', text }, '*'); } catch (e) {} };
+
+/* ---------- the live box: fit, rotate, mirror ---------- */
+let active = null, switching = false, helperUp = false, frameW = 640, frameH = 480;
+function fit() {
+  const stage = $('stage'), W = stage.clientWidth - 20, H = stage.clientHeight - 20;
+  const rot = active ? (V.rot[active] || 0) : 0, turned = rot % 180 !== 0;
+  const ar = frameW / frameH;
+  let bw, bh;
+  if (!turned) { bw = Math.min(W, H * ar); bh = bw / ar; } else { bh = Math.min(H, W * ar); bw = bh / ar; }
+  box.style.width = bw + 'px'; box.style.height = bh + 'px';
+  const iw = turned ? bh : bw, ih = turned ? bw : bh;
+  live.style.width = iw + 'px'; live.style.height = ih + 'px';
+  live.style.transform = `translate(-50%,-50%) rotate(${rot}deg) scaleX(${active && V.mir[active] ? -1 : 1})`;
+  renderStickers();
+}
+function syncButtons() {
+  document.querySelectorAll('[data-cam]').forEach(b => b.classList.toggle('on', b.dataset.cam === active));
+  $('bRot').textContent = '↻ ' + (active ? (V.rot[active] || 0) : 0) + '°';
+  $('bMir').classList.toggle('on', !!(active && V.mir[active]));
+}
+function stream() { live.src = HELPER + '/stream?t=' + Date.now(); }
+async function select(key) {
+  if (switching || key === active) return;
+  switching = true; box.classList.add('busy'); veil.textContent = 'switching camera…';
+  document.querySelectorAll('[data-cam]').forEach(b => b.disabled = true);
+  try {
+    const r = await fetch(HELPER + '/select/' + key, { method: 'POST' });
+    if (r.ok) { active = key; tune.n = 0; syncButtons(); setColour(); fit(); live.removeAttribute('src'); setTimeout(stream, 900); }
+  } catch (e) {}
+  setTimeout(() => { switching = false; box.classList.remove('busy'); document.querySelectorAll('[data-cam]').forEach(b => b.disabled = false); }, 1500);
+}
+document.querySelectorAll('[data-cam]').forEach(b => b.onclick = () => select(b.dataset.cam));
+$('bRot').onclick = () => { if (!active) return; V.rot[active] = ((V.rot[active] || 0) + 90) % 360; saveV(); syncButtons(); fit(); };
+$('bMir').onclick = () => { if (!active) return; V.mir[active] = !V.mir[active]; saveV(); syncButtons(); fit(); };
+window.addEventListener('resize', fit);
+live.onerror = () => { if (helperUp && active) setTimeout(stream, 1500); };
+
+async function poll() {
+  try {
+    const j = await (await fetch(HELPER + '/status', { cache: 'no-store' })).json();
+    if (!helperUp) { helperUp = true; box.classList.remove('off'); }
+    const c = j.camera;
+    if (c && c.size) { frameW = c.size[0]; frameH = c.size[1]; }
+    if (j.active && j.active !== active && !switching) { active = j.active; tune.n = 0; syncButtons(); setColour(); fit(); stream(); }
+    $('st').textContent = c ? (c.alive ? `${c.size[0]}×${c.size[1]} · ${c.read_fps} fps` + (face.on ? ' · 😀 face' : '') : 'starting camera…') : 'no camera selected';
+    if (c && !c.alive && !switching) { box.classList.add('busy'); veil.textContent = c.last_error ? 'camera trouble: ' + c.last_error : 'starting camera…'; }
+    else if (!switching) box.classList.remove('busy');
+  } catch (e) {
+    helperUp = false; active = null; syncButtons();
+    box.classList.add('off'); veil.textContent = caps.camera === false ? 'This tablet has no cameras.' : 'The camera helper is not running on this tablet (livecam.py on port 8095).';
+    $('st').textContent = 'helper offline';
+  }
+  setTimeout(poll, 2000);
+}
+
+/* ---------- stickers ---------- */
+// kind 'e' = emoji (Noto Color Emoji is on the tablet), kind 'v' = inline SVG drawn here (no image assets, works offline)
+const SVGS = {
+  tophat: { ar: 0.9, svg: '<svg viewBox="0 0 100 90"><rect x="22" y="6" width="56" height="58" rx="6" fill="#1b1b1f"/><rect x="22" y="48" width="56" height="10" fill="#c4302b"/><ellipse cx="50" cy="70" rx="46" ry="12" fill="#1b1b1f"/><ellipse cx="50" cy="66" rx="46" ry="11" fill="#2b2b31"/></svg>' },
+  party:  { ar: 1.05, svg: '<svg viewBox="0 0 100 105"><polygon points="50,2 90,92 10,92" fill="#ff5f8f"/><polygon points="50,2 70,48 30,48" fill="#ffd166"/><circle cx="50" cy="6" r="7" fill="#ffd166"/><circle cx="36" cy="70" r="5" fill="#fff"/><circle cx="62" cy="60" r="5" fill="#fff"/><circle cx="52" cy="84" r="5" fill="#fff"/><ellipse cx="50" cy="94" rx="42" ry="8" fill="#e04a78"/></svg>' },
+  crown:  { ar: 0.75, svg: '<svg viewBox="0 0 100 75"><polygon points="8,65 8,20 30,42 50,8 70,42 92,20 92,65" fill="#f5c542"/><rect x="8" y="58" width="84" height="12" fill="#d9a521"/><circle cx="50" cy="12" r="6" fill="#e3473a"/><circle cx="8" cy="20" r="5" fill="#3a8fe0"/><circle cx="92" cy="20" r="5" fill="#3a8fe0"/><circle cx="30" cy="62" r="4" fill="#e3473a"/><circle cx="50" cy="62" r="4" fill="#3bc46a"/><circle cx="70" cy="62" r="4" fill="#e3473a"/></svg>' },
+  glasses:{ ar: 0.42, svg: '<svg viewBox="0 0 100 42"><circle cx="24" cy="22" r="17" fill="none" stroke="#222" stroke-width="5"/><circle cx="76" cy="22" r="17" fill="none" stroke="#222" stroke-width="5"/><line x1="41" y1="20" x2="59" y2="20" stroke="#222" stroke-width="5"/><line x1="7" y1="18" x2="0" y2="14" stroke="#222" stroke-width="5"/><line x1="93" y1="18" x2="100" y2="14" stroke="#222" stroke-width="5"/></svg>' },
+  shades: { ar: 0.4, svg: '<svg viewBox="0 0 100 40"><path d="M2 8h96v8h-6c0 14-8 22-20 22s-20-8-22-18c-2 10-10 18-22 18S8 30 8 16H2z" fill="#1a1a1a"/><path d="M14 16h28c0 12-6 18-14 18S14 28 14 16z" fill="#3a7bd5" opacity=".7"/><path d="M58 16h28c0 12-6 18-14 18S58 28 58 16z" fill="#3a7bd5" opacity=".7"/></svg>' },
+  stars:  { ar: 0.45, svg: '<svg viewBox="0 0 100 45"><polygon points="24,2 30,16 45,17 33,27 37,42 24,34 11,42 15,27 3,17 18,16" fill="#ff5f8f" stroke="#222" stroke-width="3"/><polygon points="76,2 82,16 97,17 85,27 89,42 76,34 63,42 67,27 55,17 70,16" fill="#ff5f8f" stroke="#222" stroke-width="3"/><line x1="43" y1="22" x2="57" y2="22" stroke="#222" stroke-width="4"/></svg>' },
+  stache: { ar: 0.4, svg: '<svg viewBox="0 0 100 40"><path d="M50 14c-8-10-20-12-30-6S6 24 2 30c10-2 18 2 26 2s14-6 22-12c8 6 14 12 22 12s16-4 26-2c-4-6-8-16-18-22s-22-4-30 6z" fill="#3b2a20"/></svg>' },
+  bow:    { ar: 0.6, svg: '<svg viewBox="0 0 100 60"><path d="M50 30L8 8v44z" fill="#e3473a"/><path d="M50 30l42-22v44z" fill="#e3473a"/><path d="M50 30L8 8v44z" fill="#000" opacity=".12"/><rect x="40" y="20" width="20" height="20" rx="5" fill="#b8302a"/></svg>' },
+  cat:    { ar: 0.6, svg: '<svg viewBox="0 0 100 60"><polygon points="6,58 14,4 46,40" fill="#444"/><polygon points="94,58 86,4 54,40" fill="#444"/><polygon points="14,52 18,18 40,40" fill="#f3a6b8"/><polygon points="86,52 82,18 60,40" fill="#f3a6b8"/></svg>' },
+  horn:   { ar: 1.6, svg: '<svg viewBox="0 0 50 80"><polygon points="25,2 44,78 6,78" fill="#ffd166"/><polygon points="25,2 36,46 14,46" fill="#fff" opacity=".35"/><path d="M10 64h30M13 50h24M16 36h18M19 22h12" stroke="#f09a3e" stroke-width="4" fill="none"/></svg>' },
+};
+// how a sticker sits on a found face: dy = offset of its centre from the face centre in face sizes, w = width in face sizes
+const ANCHOR = {
+  hat:   { dy: -0.72, w: 1.25 },   // on top of the head
+  eyes:  { dy: -0.10, w: 1.15 },   // across the eyes
+  mouth: { dy:  0.32, w: 0.70 },   // under the nose
+  chin:  { dy:  0.62, w: 0.70 },   // a bow tie at the neck
+  ears:  { dy: -0.60, w: 1.30 },   // cat ears
+  horn:  { dy: -0.95, w: 0.45 },   // unicorn horn
+};
+const ANCHOR_OF = { tophat: 'hat', party: 'hat', crown: 'hat', cat: 'ears', horn: 'horn', glasses: 'eyes', shades: 'eyes', stars: 'eyes', stache: 'mouth', bow: 'chin',
+  '🎩': 'hat', '👒': 'hat', '🧢': 'hat', '🎓': 'hat', '👑': 'hat', '👓': 'eyes', '🕶️': 'eyes', '🥸': 'eyes', '🎀': 'hat' };
+const SHELF = [
+  ['v', 'tophat'], ['v', 'party'], ['v', 'crown'], ['v', 'cat'], ['v', 'horn'], ['e', '🎩'], ['e', '👒'], ['e', '🧢'], ['e', '🎓'], ['e', '👑'],
+  ['v', 'glasses'], ['v', 'shades'], ['v', 'stars'], ['e', '👓'], ['e', '🕶️'], ['e', '🥸'], ['v', 'stache'], ['v', 'bow'], ['e', '🎀'],
+  ['e', '🦋'], ['e', '🌸'], ['e', '⭐'], ['e', '❤️'], ['e', '🐶'], ['e', '🐸'], ['e', '🦄'], ['e', '🌈'], ['e', '🎈'],
+];
+const EMOJI_W = 1.25;             // Noto Color Emoji glyph width ≈ 1.25 × font size (measured); keeps DOM and canvas the same size
+let stickers = [], selId = null, nextId = 1;
+for (const [kind, v] of SHELF) {
+  const b = document.createElement('button'); b.className = 'pick';
+  b.innerHTML = kind === 'e' ? v : SVGS[v].svg;
+  b.onclick = () => addSticker(kind, v);
+  $('shelf').appendChild(b);
+}
+function addSticker(kind, v) {
+  const anchor = ANCHOR_OF[v] || null;
+  const s = { id: nextId++, kind, v, x: 0.5, y: kind === 'v' && /glasses|shades|stars|stache|bow/.test(v) ? 0.5 : 0.28, w: 0.34, r: 0,
+              anchor, adx: 0, ady: 0, ascale: 1 };           // adx/ady/ascale: the child's own nudge, kept relative to the face
+  if (kind === 'e' && /[👓🕶🥸🎀]/.test(v)) s.y = 0.5;
+  stickers.push(s); selId = s.id; placeOnFace(s); renderStickers(); blip(700);
+}
+// put an anchored sticker on the tracked face (box fractions). The face is {cx, cy, s} in box fractions, s = face width.
+function placeOnFace(s) {
+  if (!s.anchor || !face.on) return;
+  const a = ANCHOR[s.anchor], bw = box.clientWidth || 1, bh = box.clientHeight || 1, fs = face.s;   // fs: face width as a fraction of box width
+  s.w = a.w * fs * s.ascale;
+  s.x = face.cx + s.adx * fs;
+  s.y = face.cy + (a.dy * fs * s.ascale + s.ady * fs) * (bw / bh);  // face size is in box-width units; y is in box-height units
+}
+function stickerAR(s) { return s.kind === 'v' ? SVGS[s.v].ar : 1; }
+function renderStickers() {
+  const bw = box.clientWidth, bh = box.clientHeight;
+  stkLayer.innerHTML = '';
+  for (const s of stickers) {
+    const d = document.createElement('div'); d.className = 's' + (s.id === selId ? ' sel' : ''); d.dataset.id = s.id;
+    const w = s.w * bw;
+    d.style.width = w + 'px';
+    if (s.kind === 'e') { d.style.fontSize = (w / EMOJI_W) + 'px'; d.style.fontFamily = '"Noto Color Emoji", sans-serif'; d.textContent = s.v; d.style.textAlign = 'center'; }
+    else d.innerHTML = SVGS[s.v].svg;
+    const h = s.kind === 'e' ? w / EMOJI_W : w * stickerAR(s);
+    d.style.transform = `translate(${s.x * bw - w / 2}px, ${s.y * bh - h / 2}px) rotate(${s.r}deg)`;
+    const x = document.createElement('div'); x.className = 'x'; x.textContent = '✕';
+    x.addEventListener('pointerdown', ev => { ev.stopPropagation(); stickers = stickers.filter(t => t.id !== s.id); selId = null; renderStickers(); blip(300); });
+    d.appendChild(x);
+    stkLayer.appendChild(d);
+  }
+}
+// one finger drags the sticker, two fingers scale and turn it; a tap on the picture itself deselects
+const ptrs = new Map(); let gest = null;
+stkLayer.addEventListener('pointerdown', ev => {
+  const el = ev.target.closest('.s');
+  try { stkLayer.setPointerCapture(ev.pointerId); } catch (e) {}   // synthetic events have no active pointer
+  ptrs.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+  if (el) {
+    const s = stickers.find(t => t.id === +el.dataset.id);
+    if (ptrs.size === 1) { selId = s.id; stickers = stickers.filter(t => t !== s).concat([s]); renderStickers(); gest = { s, mode: 'drag', x: s.x, y: s.y, px: ev.clientX, py: ev.clientY }; }
+  } else if (ptrs.size === 1) { selId = null; renderStickers(); gest = null; }
+  if (ptrs.size === 2 && selId != null) {
+    const s = stickers.find(t => t.id === selId), [a, b] = [...ptrs.values()];
+    gest = { s, mode: 'pinch', w: s.w, r: s.r, x: s.x, y: s.y, d0: Math.hypot(b.x - a.x, b.y - a.y), a0: Math.atan2(b.y - a.y, b.x - a.x), cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2 };
+  }
+});
+stkLayer.addEventListener('pointermove', ev => {
+  if (!ptrs.has(ev.pointerId) || !gest) return;
+  ptrs.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+  const bw = box.clientWidth, bh = box.clientHeight, s = gest.s;
+  if (gest.mode === 'drag' && ptrs.size === 1) {
+    s.x = Math.min(1.1, Math.max(-0.1, gest.x + (ev.clientX - gest.px) / bw));
+    s.y = Math.min(1.1, Math.max(-0.1, gest.y + (ev.clientY - gest.py) / bh));
+  } else if (gest.mode === 'pinch' && ptrs.size === 2) {
+    const [a, b] = [...ptrs.values()], d = Math.hypot(b.x - a.x, b.y - a.y), ang = Math.atan2(b.y - a.y, b.x - a.x);
+    s.w = Math.min(1.5, Math.max(0.08, gest.w * d / gest.d0));
+    s.r = gest.r + (ang - gest.a0) * 180 / Math.PI;
+    s.x = gest.x + ((a.x + b.x) / 2 - gest.cx) / bw; s.y = gest.y + ((a.y + b.y) / 2 - gest.cy) / bh;
+  }
+  if (s.anchor && face.on) {                                        // remember the nudge relative to the face, so it follows
+    const a = ANCHOR[s.anchor], fs = face.s;
+    s.ascale = s.w / (a.w * fs);
+    s.adx = (s.x - face.cx) / fs;
+    s.ady = (s.y - face.cy) * (bh / bw) / fs - a.dy * s.ascale;
+  }
+  renderStickers();
+});
+const up = ev => { ptrs.delete(ev.pointerId); if (ptrs.size === 0) gest = null; else if (ptrs.size === 1 && gest && gest.mode === 'pinch') { const p = [...ptrs.values()][0]; gest = { s: gest.s, mode: 'drag', x: gest.s.x, y: gest.s.y, px: p.x, py: p.y }; } };
+stkLayer.addEventListener('pointerup', up); stkLayer.addEventListener('pointercancel', up);
+$('bStick').onclick = () => { $('drawer').classList.toggle('on'); $('bStick').classList.toggle('on', $('drawer').classList.contains('on')); };
+$('bDrawerX').onclick = () => { $('drawer').classList.remove('on'); $('bStick').classList.remove('on'); };
+$('bClear').onclick = () => { stickers = []; selId = null; renderStickers(); blip(300); };
+
+/* ---------- face finder: pico.js on a small copy of the live picture, hats and glasses follow the face ---------- */
+const face = { on: false, cx: 0.5, cy: 0.4, s: 0.3, seen: 0, fps: 0, err: '' };
+let picoClassify = null, picoMemory = null, faceSrc = 'img';          // 'img' = draw the live <img>; 'snap' = fetch /snap.jpg if the img is tainted
+const faceCanvas = document.createElement('canvas');
+fetch('facefinder').then(r => r.arrayBuffer()).then(b => { picoClassify = pico.unpack_cascade(new Uint8Array(b)); picoMemory = pico.instantiate_detection_memory(4); })
+  .catch(e => { face.err = 'no face finder: ' + e; });
+function faceFrame(src) {
+  // draw the picture as shown (turned + mirrored) into a small canvas, so detections are already in box fractions
+  const rot = V.rot[active] || 0, mir = !!V.mir[active], turned = rot % 180 !== 0;
+  const long = 192, short = Math.round(long * Math.min(frameW, frameH) / Math.max(frameW, frameH));
+  const aw = turned ? short : long, ah = turned ? long : short;
+  faceCanvas.width = aw; faceCanvas.height = ah;
+  const x = faceCanvas.getContext('2d', { willReadFrequently: true });
+  const iw = turned ? ah : aw, ih = turned ? aw : ah;
+  x.save(); x.translate(aw / 2, ah / 2); x.rotate(rot * Math.PI / 180); x.scale(mir ? -1 : 1, 1); x.drawImage(src, -iw / 2, -ih / 2, iw, ih); x.restore();
+  const d = x.getImageData(0, 0, aw, ah).data, g = new Uint8Array(aw * ah);
+  for (let i = 0, k = 0; i < d.length; i += 4, k++) g[k] = (2 * d[i] + 7 * d[i + 1] + d[i + 2]) / 10;
+  return { pixels: g, nrows: ah, ncols: aw, ldim: aw };
+}
+function findFace(img) {
+  let dets = pico.run_cascade(img, picoClassify, { shiftfactor: 0.1, minsize: Math.round(img.nrows * 0.18), maxsize: Math.round(img.nrows * 1.0), scalefactor: 1.1 });
+  dets = picoMemory(dets);
+  dets = pico.cluster_detections(dets, 0.2);
+  let best = null;
+  for (const d of dets) if (d[3] > FACE_Q && (!best || d[3] > best[3])) best = d;
+  return best ? { cx: best[1] / img.ncols, cy: best[0] / img.nrows, s: best[2] / img.ncols * 0.95 } : null;
+}
+const FACE_Q = 20;                                                     // pico score over 4 remembered frames; lower = more eager
+let facing = false, faceT = 0, faceN = 0;
+async function faceLoop() {
+  const due = Date.now();
+  if (picoClassify && helperUp && active && !taking && !switching && !facing && live.naturalWidth > 0) {   // an MJPEG <img> never reports complete
+    facing = true;
+    try {
+      let src = live;
+      if (faceSrc === 'snap') src = await createImageBitmap(await (await fetch(HELPER + '/snap.jpg?t=' + Date.now(), { cache: 'no-store' })).blob());
+      let img;
+      try { img = faceFrame(src); }
+      catch (e) { if (faceSrc === 'img') { faceSrc = 'snap'; face.err = 'live image is cross-origin, using snapshots'; } throw e; }
+      const f = findFace(img);
+      if (f) {
+        const a = face.on ? 0.45 : 1;                                   // ease, but land at once when the face first appears
+        face.cx += (f.cx - face.cx) * a; face.cy += (f.cy - face.cy) * a; face.s += (f.s - face.s) * a;
+        face.on = true; face.seen = Date.now();
+      } else if (Date.now() - face.seen > 2000) face.on = false;      // after 2 s without a face the stickers just stay put
+      if (face.on) { for (const s of stickers) placeOnFace(s); renderStickers(); }
+      faceN++; if (due - faceT > 2000) { face.fps = faceN / ((due - faceT) / 1000); faceT = due; faceN = 0; }
+    } catch (e) { face.err = String(e).slice(0, 80); }
+    facing = false;
+  }
+  setTimeout(faceLoop, Math.max(40, 160 - (Date.now() - due)));          // ~6 passes a second on the UNO Q, less if it is slow
+}
+
+/* ---------- pictures: capture ---------- */
+function svgImage(key, w, h) {
+  return new Promise(res => {
+    const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null);
+    im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(SVGS[key].svg.replace('<svg ', `<svg xmlns="http://www.w3.org/2000/svg" width="${Math.round(w)}" height="${Math.round(h)}" `));
+  });
+}
+function shutterSound() {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)(), n = ac.createBufferSource(), b = ac.createBuffer(1, ac.sampleRate * 0.08, ac.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
+    const g = ac.createGain(); g.gain.value = 0.5; n.buffer = b; n.connect(g).connect(ac.destination); n.start();
+    setTimeout(() => ac.close(), 400);
+  } catch (e) {}
+}
+async function takePicture() {
+  if (!active || !helperUp || taking) return;
+  taking = true; $('shutter').disabled = true;
+  const cnt = $('count');
+  for (const n of [3, 2, 1]) { cnt.textContent = n; cnt.classList.add('on'); blip(n === 1 ? 900 : 600); await sleep(800); }
+  cnt.textContent = '😀'; await sleep(250); cnt.classList.remove('on');
+  let ok = false;
+  try {
+    const blob = await (await fetch(HELPER + '/snap.jpg?t=' + Date.now(), { cache: 'no-store' })).blob();
+    const bmp = await createImageBitmap(blob);
+    $('flash').classList.add('on'); shutterSound(); setTimeout(() => $('flash').classList.remove('on'), 60);
+    const rot = V.rot[active] || 0, mir = !!V.mir[active], turned = rot % 180 !== 0;
+    const W = turned ? bmp.height : bmp.width, H = turned ? bmp.width : bmp.height;
+    const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+    x.save(); x.translate(W / 2, H / 2); x.rotate(rot * Math.PI / 180); x.scale(mir ? -1 : 1, 1); x.drawImage(bmp, -bmp.width / 2, -bmp.height / 2); x.restore();
+    x.putImageData(applyColour(x.getImageData(0, 0, W, H)), 0, 0);
+    for (const s of stickers) {                                     // same fractions as on screen; the box shows the whole frame
+      const w = s.w * W, cx = s.x * W, cy = s.y * H;
+      x.save(); x.translate(cx, cy); x.rotate(s.r * Math.PI / 180);
+      if (s.kind === 'e') { x.font = `${w / EMOJI_W}px "Noto Color Emoji", sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(s.v, 0, w / EMOJI_W * 0.06); }
+      else { const h = w * stickerAR(s), im = await svgImage(s.v, w, h); if (im) x.drawImage(im, -w / 2, -h / 2, w, h); }
+      x.restore();
+    }
+    const jpg = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.9));
+    const t = document.createElement('canvas'); t.width = 240; t.height = Math.round(240 * H / W); t.getContext('2d').drawImage(c, 0, 0, t.width, t.height);
+    const thumb = await new Promise(r => t.toBlob(r, 'image/jpeg', 0.8));
+    const id = String(Date.now());
+    ok = await store.put(id, jpg, thumb);
+    if (ok) { toast('Picture saved!'); blip(1000); refreshCount(); }
+  } catch (e) { console.warn('capture failed', e); }
+  if (!ok) toast('Could not take the picture');
+  taking = false; $('shutter').disabled = false;
+}
+let taking = false;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+$('shutter').onclick = takePicture;
+
+/* ---------- pictures: store (per kid on the tablet, localStorage on a laptop) ---------- */
+const store = {
+  base() { return '/api/store/camera/' + encodeURIComponent(kid.id) + '/'; },
+  async list() {                                                     // → [{id, url, thumb}] newest first
+    if (LIVE) {
+      try {
+        const r = await fetch(this.base(), { cache: 'no-store' }); if (!r.ok) return [];
+        const j = await r.json(), names = new Set((Array.isArray(j) ? j : (j.files || [])).map(e => typeof e === 'string' ? e : e.name));
+        return [...names].filter(n => /^\d+\.jpg$/.test(n)).map(n => n.slice(0, -4)).sort((a, b) => b - a)
+          .map(id => ({ id, url: this.base() + id + '.jpg', thumb: this.base() + (names.has(id + '.t.jpg') ? id + '.t.jpg' : id + '.jpg') }));
+      } catch (e) { return []; }
+    }
+    const l = this._ls(); return Object.keys(l).sort((a, b) => b - a).map(id => ({ id, url: l[id].full, thumb: l[id].thumb }));
+  },
+  async put(id, jpg, thumb) {
+    if (LIVE) {
+      try {
+        const a = await fetch(this.base() + id + '.jpg', { method: 'PUT', body: jpg });
+        const b = await fetch(this.base() + id + '.t.jpg', { method: 'PUT', body: thumb });
+        return a.ok && b.ok;
+      } catch (e) { return false; }
+    }
+    const l = this._ls(), ids = Object.keys(l).sort(); while (ids.length >= 4) delete l[ids.shift()];   // a laptop keeps four
+    l[id] = { full: await dataUrl(jpg), thumb: await dataUrl(thumb) };
+    try { localStorage.setItem('camera.' + kid.id, JSON.stringify(l)); return true; } catch (e) { return false; }
+  },
+  async del(id) {
+    if (LIVE) { try { await fetch(this.base() + id + '.jpg', { method: 'DELETE' }); await fetch(this.base() + id + '.t.jpg', { method: 'DELETE' }); } catch (e) {} return; }
+    const l = this._ls(); delete l[id]; try { localStorage.setItem('camera.' + kid.id, JSON.stringify(l)); } catch (e) {}
+  },
+  _ls() { try { return JSON.parse(localStorage.getItem('camera.' + kid.id) || '{}'); } catch (e) { return {}; } },
+};
+const dataUrl = blob => new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(blob); });
+async function refreshCount() { const l = await store.list(); $('nPics').textContent = l.length; return l; }
+
+/* ---------- gallery + one picture ---------- */
+const show = id => { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); if (id === 'cam') fit(); };
+let bigId = null;
+async function openGallery() {
+  show('gal');
+  const l = await refreshCount(), g = $('grid'); g.innerHTML = '';
+  if (!l.length) { g.innerHTML = '<div id="empty">No pictures yet — tap the big white button to take one!</div>'; return; }
+  for (const p of l) {
+    const c = document.createElement('div'); c.className = 'card';
+    const im = document.createElement('img'); im.src = p.thumb + (LIVE ? '?' + Date.now() : ''); im.alt = ''; c.appendChild(im);
+    c.onclick = () => { bigId = p.id; $('bigpic').src = p.url + (LIVE ? '?' + Date.now() : ''); $('bigTitle').textContent = new Date(+p.id).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }); $('bBigDel').classList.remove('arm'); $('bBigDel').textContent = '🗑 Delete'; show('big'); };
+    g.appendChild(c);
+  }
+}
+$('bGal').onclick = openGallery;
+$('bGalCam').onclick = () => show('cam');
+$('bBigBack').onclick = openGallery;
+let armT = null;
+$('bBigDel').onclick = async () => {
+  const b = $('bBigDel');
+  if (!b.classList.contains('arm')) { b.classList.add('arm'); b.textContent = 'Tap again to delete'; clearTimeout(armT); armT = setTimeout(() => { b.classList.remove('arm'); b.textContent = '🗑 Delete'; }, 3000); return; }
+  await store.del(bigId); blip(300); openGallery();
+};
+const home = () => { try { parent.postMessage({ kt: 'home' }, '*'); } catch (e) {} };
+$('bDone').onclick = home; $('bGalDone').onclick = home;
+
+/* ---------- go ---------- */
+setColour(); syncButtons(); fit(); poll(); refreshCount(); setTimeout(tuneLoop, 600); setTimeout(faceLoop, 1200);
+// test hook (tests/camera_dom.py)
+window.KTCAM = { get state() { return { active, helperUp, stickers: stickers.map(s => ({ kind: s.kind, v: s.v, x: +s.x.toFixed(3), y: +s.y.toFixed(3), w: +s.w.toFixed(3), r: Math.round(s.r), anchor: s.anchor })), kid: kid.id, taking, tuned: tune.n }; }, addSticker, takePicture, select, get CM() { return CM; }, get tune() { return tune; }, measure, get face() { return Object.assign({ src: faceSrc }, face); }, get col() { return active ? colFor(active) : null; } };
+})();
+</script>
+</body>
+</html>

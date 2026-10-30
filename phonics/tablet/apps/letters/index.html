@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Letter Sounds</title>
+<!-- tablet/apps/letters — four dimensions of phonics on one screen:
+       Letters · Two letters (digraphs, vowel teams) · Blends (two letter sounds slid together) · Word families.
+     Explore: tap a card, hear it, hear its word. Find it: hear one, tap the right card (words in a family for
+     the families tab). Only vouched-for recordings make a sound (see build.py); a card without one plays its word
+     and shows a little microphone until it is recorded with tools/record-sounds.py. -->
+<style>
+:root{--ink:#1d2a3a;--dim:#5b6b80;--card:#fff;--accent:#ff8a3d;--ok:#3fb950;--bad:#e05a4f;--r:22px;--shadow:0 8px 24px rgba(20,40,80,.16)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(160deg,#ffe9c7,#fff7ea);color:var(--ink);font:20px system-ui,sans-serif;touch-action:manipulation}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+#bar{display:flex;align-items:center;gap:10px;padding:10px 18px;height:72px}
+#bar h1{font-size:24px;margin:0;margin-right:6px}
+.tabs{display:flex;background:rgba(0,0,0,.08);border-radius:30px;padding:4px;gap:2px}
+.tabs button{padding:9px 16px;border-radius:26px;font-weight:700;font-size:17px;white-space:nowrap}
+.tabs button.on{background:var(--card);box-shadow:var(--shadow)}
+#stars{margin-left:auto;font-size:22px;min-width:90px;text-align:right}
+.screen{position:absolute;inset:72px 0 0 0;display:none}
+.screen.on{display:block}
+#grid{height:100%;overflow-y:auto;padding:6px 18px 30px;display:grid;grid-template-columns:repeat(8,1fr);gap:12px;align-content:start;touch-action:pan-y;scrollbar-width:none}
+#grid::-webkit-scrollbar{display:none}
+#grid.fam{grid-template-columns:repeat(5,1fr)}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:transform .1s;position:relative}
+.card:active{transform:scale(.93)}
+.card .l{font-size:46px;font-weight:800;line-height:1;letter-spacing:-.02em}
+.card .l.long{font-size:34px}
+.card .e{font-size:26px}
+.card.continuous{border-bottom:6px solid #4fa3e3}.card.vowel{border-bottom:6px solid #e0564f}.card.stop{border-bottom:6px solid #3fb950}
+.card.breath,.card.glide,.card.cluster{border-bottom:6px solid #c08cff}.card.blend{border-bottom:6px solid #ffb300}.card.family{border-bottom:6px solid #26a69a;aspect-ratio:1.4/1}
+.card.family .l{font-size:40px}.card.family .e{font-size:20px;letter-spacing:4px}
+.card.nosound{background:#f4efe6;opacity:.75}
+.card.nosound::after{content:"🎙";position:absolute;right:8px;top:6px;font-size:16px;opacity:.7}
+/* big card */
+#big{position:fixed;inset:0;background:rgba(20,30,50,.55);display:none;align-items:center;justify-content:center;z-index:5}
+#big.on{display:flex}
+#bigCard{background:var(--card);border-radius:36px;box-shadow:0 20px 60px rgba(0,0,0,.35);width:760px;max-width:94vw;padding:24px 30px 22px;display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;align-items:center}
+#bigL{font-size:170px;font-weight:800;line-height:1;text-align:center}
+#bigL.long{font-size:120px}
+#bigE{font-size:110px;text-align:center;line-height:1}
+#bigW{font-size:38px;font-weight:700;text-align:center;grid-column:2}
+#bigParts{grid-column:1;display:flex;justify-content:center;gap:10px}
+#bigParts button,#bigWords button{font-size:34px;font-weight:800;padding:8px 20px;border-radius:18px;background:#fff1e4;border-bottom:5px solid var(--accent)}
+#bigParts button.now,#bigWords button.now{background:var(--accent);color:#fff}
+#bigWords{grid-column:1/3;display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+#bigWords button{font-size:30px;display:flex;align-items:center;gap:10px}
+#bigTip{grid-column:1/3;font-size:15px;color:var(--dim);text-align:center;min-height:20px}
+#bigBtns{grid-column:1/3;display:flex;gap:14px;justify-content:center;margin-top:4px}
+.btn{padding:14px 24px;border-radius:20px;background:#eef2f7;font-weight:700;font-size:21px;display:flex;align-items:center;gap:10px}
+.btn.go{background:var(--accent);color:#fff}
+.btn:active{transform:scale(.95)}
+.btn[disabled]{opacity:.35}
+/* find it */
+#find{display:none;flex-direction:column;align-items:center;justify-content:center;gap:26px;padding:10px 30px}
+#find.on{display:flex}
+#ask{font-size:28px;font-weight:700;display:flex;align-items:center;gap:18px;text-align:center}
+#play{width:104px;height:104px;border-radius:50%;background:var(--accent);color:#fff;font-size:50px;display:grid;place-items:center;box-shadow:var(--shadow);flex:none}
+#play:active{transform:scale(.94)}
+#choices{display:flex;gap:26px}
+#choices .card{width:220px;height:220px;aspect-ratio:auto}
+#choices .card .l{font-size:84px}
+#choices .card .l.long{font-size:60px}
+#choices .card .e{font-size:40px}
+.card.good{background:#dff7e3;animation:pop .35s}
+.card.nope{animation:shake .4s}
+@keyframes pop{50%{transform:scale(1.1)}}
+@keyframes shake{20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-8px)}80%{transform:translateX(8px)}}
+#msg{font-size:24px;color:var(--dim);min-height:30px;text-align:center}
+</style></head><body>
+<div id="bar"><h1>Sounds</h1>
+  <div class="tabs" id="tabs"><button data-tab="letters" class="on">Letters</button><button data-tab="digraphs">Two letters</button><button data-tab="blends">Blends</button><button data-tab="families">Word families</button></div>
+  <div class="tabs" id="modes"><button data-mode="explore" class="on">Explore</button><button data-mode="find">Find it</button></div>
+  <div id="stars"></div></div>
+<div id="grid" class="screen on"></div>
+<div id="find" class="screen">
+  <div id="ask"><button id="play">🔊</button><span id="askText">Which one makes this sound?</span></div>
+  <div id="choices"></div>
+  <div id="msg"></div>
+</div>
+<div id="big"><div id="bigCard">
+  <div id="bigL"></div><div id="bigE"></div>
+  <div id="bigParts" style="display:none"></div><div id="bigW"></div>
+  <div id="bigWords" style="display:none"></div>
+  <div id="bigTip"></div>
+  <div id="bigBtns"><button class="btn go" id="bSound">🔊 Sound</button><button class="btn" id="bWord">💬 Word</button><button class="btn" id="bClose">✕ Close</button></div>
+</div></div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let DATA=null,tab='letters',mode='explore',cur=null,stars=0,quiz=null,child='',seq=0;
+window.addEventListener('message',e=>{const d=e.data||{};if(d.kt==='hello'&&d.child&&d.child.name)child=d.child.name;});
+const kt=m=>{try{parent.postMessage(m,'*');}catch(e){}};
+const byKey={};
+
+// ---- audio: one player, sequences cancel each other
+let audio=null;
+function stopAudio(){seq++;if(audio){try{audio.pause();}catch(e){}audio=null;}}
+function play(src){return new Promise(res=>{if(!src){res(false);return;}const a=new Audio(src);audio=a;a.onended=()=>res(true);a.onerror=()=>res(false);const p=a.play();if(p&&p.catch)p.catch(()=>res(false));});}
+async function playList(list,gap,onEach){const my=++seq;for(let i=0;i<list.length;i++){if(my!==seq)return;if(onEach)onEach(i);await play(list[i]);if(my!==seq)return;if(gap&&i<list.length-1)await new Promise(r=>setTimeout(r,gap));}if(onEach&&my===seq)onEach(-1);}
+// what a card "says": its sound (or its parts in a row for a blend); null if it has no good recording
+function soundSrcs(item){
+  if(item.kind==='blend')return item.playable?item.parts.map(p=>byKey[p].clip):null;
+  return item.clip?[item.clip]:null;
+}
+
+async function init(){
+  DATA=await (await fetch('data.json')).json();
+  DATA.letters.concat(DATA.digraphs).forEach(s=>byKey[s.k]=s);
+  render();drawStars();
+}
+function items(){return DATA[tab]||[];}
+function label(it){return it.kind==='family'||it.rime!==undefined?'-'+it.rime:it.k;}
+function cardHtml(it,extra){
+  const fam=it.rime!==undefined;
+  const srcs=fam?null:soundSrcs(it);
+  const cls=fam?'family':(it.kind+(srcs?'':' nosound'));
+  const l=fam?'-'+it.rime:it.k;
+  const e=fam?it.words.slice(0,3).map(w=>w.emoji).join(''):it.emoji;
+  return '<button class="card '+E(cls)+'" data-k="'+E(fam?it.rime:it.k)+'" '+(extra||'')+'><span class="l'+(l.length>2?' long':'')+'">'+E(l)+'</span><span class="e">'+E(e)+'</span></button>';
+}
+function render(){
+  const g=$('grid');g.classList.toggle('fam',tab==='families');
+  g.innerHTML=items().map(it=>cardHtml(it)).join('');
+  g.querySelectorAll('.card').forEach(c=>c.onclick=()=>open(c.dataset.k));
+}
+function findItem(k){return items().find(it=>(it.rime!==undefined?it.rime:it.k)===k);}
+
+// ---- big card
+async function open(k){
+  const it=findItem(k);if(!it)return;cur=it;stopAudio();
+  const fam=it.rime!==undefined;
+  $('bigL').textContent=fam?'-'+it.rime:it.k;$('bigL').classList.toggle('long',(fam?it.rime.length+1:it.k.length)>2);
+  $('bigE').textContent=fam?it.words[0].emoji:it.emoji;
+  $('bigW').textContent=fam?'':it.word;
+  $('bigTip').textContent=fam?'Tap a word to hear it. Change the first sound and hear what changes.':(it.tip||'');
+  $('bigParts').style.display=it.kind==='blend'?'flex':'none';
+  $('bigWords').style.display=fam?'flex':'none';
+  $('bigSound')&&0;
+  $('bSound').disabled=fam?false:!soundSrcs(it);
+  $('bSound').textContent=fam?'🔊 Say them all':(it.kind==='blend'?'🔊 Blend':'🔊 Sound');
+  $('bWord').style.display=fam?'none':'';
+  if(it.kind==='blend'){$('bigParts').innerHTML=it.parts.map(p=>'<button data-p="'+E(p)+'">'+E(p)+'</button>').join('')+'<span style="font-size:34px;font-weight:800;padding:8px 4px">→</span><button data-p="'+E(it.k)+'" data-all="1">'+E(it.k)+'</button>';
+    $('bigParts').querySelectorAll('button').forEach(b=>b.onclick=()=>{stopAudio();if(b.dataset.all)sayBlend(it);else{b.classList.add('now');play(byKey[b.dataset.p].clip).then(()=>b.classList.remove('now'));}});}
+  if(fam){$('bigWords').innerHTML=it.words.map(w=>'<button data-w="'+E(w.w)+'"><span>'+E(w.emoji)+'</span>'+E(w.w)+'</button>').join('');
+    $('bigWords').querySelectorAll('button').forEach(b=>b.onclick=()=>{stopAudio();flash(b);const w=it.words.find(x=>x.w===b.dataset.w);play(w.clip);});}
+  $('big').classList.add('on');
+  if(fam){sayAll(it);return;}
+  if(it.kind==='blend'){await sayBlend(it);return;}
+  const s=soundSrcs(it);
+  if(s){await playList(s,0);if(cur===it)setTimeout(()=>{if(cur===it)play(it.wordClip);},350);}
+  else{await play(it.wordClip);if(cur===it)$('bigTip').textContent='No recording of this sound yet — a grown-up can add one with the recorder. Here is the word: '+it.word+'.';}
+}
+function flash(b){b.parentElement.querySelectorAll('.now').forEach(x=>x.classList.remove('now'));b.classList.add('now');setTimeout(()=>b.classList.remove('now'),700);}
+async function sayBlend(it){
+  const btns=[...$('bigParts').querySelectorAll('button[data-p]')];
+  const srcs=soundSrcs(it);if(!srcs){await play(it.wordClip);return;}
+  await playList(srcs,160,i=>{btns.forEach((b,j)=>b.classList.toggle('now',i===j));});   // s … t
+  await new Promise(r=>setTimeout(r,250));
+  btns[2]&&btns[2].classList.add('now');
+  await playList(srcs,0);                                                                   // st
+  btns.forEach(b=>b.classList.remove('now'));
+  if(cur===it&&it.wordClip)setTimeout(()=>{if(cur===it)play(it.wordClip);},300);
+}
+async function sayAll(it){
+  const btns=[...$('bigWords').querySelectorAll('button')];
+  await playList(it.words.map(w=>w.clip),380,i=>btns.forEach((b,j)=>b.classList.toggle('now',i===j)));
+}
+$('bSound').onclick=()=>{if(!cur)return;stopAudio();if(cur.rime!==undefined)sayAll(cur);else if(cur.kind==='blend')sayBlend(cur);else playList(soundSrcs(cur)||[],0);};
+$('bWord').onclick=()=>{if(!cur)return;stopAudio();play(cur.wordClip||(soundSrcs(cur)||[])[0]);};
+$('bClose').onclick=()=>{$('big').classList.remove('on');cur=null;stopAudio();};
+$('big').onclick=e=>{if(e.target===$('big'))$('bClose').onclick();};
+
+// ---- tabs + modes
+$('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;$('tabs').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));stopAudio();kt({kt:'blip',f:520});if(mode==='find')nextQuiz();else render();});
+$('modes').querySelectorAll('button').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;$('modes').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  $('grid').classList.toggle('on',mode==='explore');$('find').classList.toggle('on',mode==='find');stopAudio();if(mode==='find')nextQuiz();else render();});
+function drawStars(){$('stars').textContent=stars?('⭐'.repeat(Math.min(stars,5))+(stars>5?' '+stars:'')):'';}
+
+// ---- find it: hear one, tap it. Families: hear a word, pick it from three words of the same family.
+function nextQuiz(){
+  stopAudio();$('msg').textContent='';
+  let pool,ans,opts,playIt,html;
+  if(tab==='families'){
+    const fams=items().filter(f=>f.words.length>=3);
+    const f=fams[Math.floor(Math.random()*fams.length)];
+    opts=f.words.slice().sort(()=>Math.random()-.5).slice(0,3);ans=opts[Math.floor(Math.random()*3)];
+    playIt=()=>play(ans.clip);
+    html=opts.map(w=>'<button class="card family" data-k="'+E(w.w)+'"><span class="l">'+E(w.w)+'</span><span class="e">'+E(w.emoji)+'</span></button>').join('');
+    $('askText').textContent='Which word did you hear?';
+    quiz={key:ans.w,tries:0,playIt,word:null};
+  }else{
+    pool=items().filter(it=>soundSrcs(it));
+    if(pool.length<3){$('choices').innerHTML='';$('msg').textContent='Not enough recorded sounds here yet for a quiz.';quiz=null;return;}
+    if(tab==='letters')pool=pool.slice(0,Math.min(pool.length,14+Math.floor(stars/3)*4));
+    ans=pool[Math.floor(Math.random()*pool.length)];
+    const others=items().filter(it=>it!==ans&&soundSrcs(it)).sort(()=>Math.random()-.5).slice(0,2);
+    opts=[ans,...others].sort(()=>Math.random()-.5);
+    playIt=()=>playList(soundSrcs(ans),ans.kind==='blend'?160:0);
+    html=opts.map(it=>cardHtml(it)).join('');
+    $('askText').textContent=tab==='blends'?'Which blend makes this sound?':'Which one makes this sound?';
+    quiz={key:ans.k,tries:0,playIt,word:ans.wordClip};
+  }
+  $('choices').innerHTML=html;
+  $('choices').querySelectorAll('.card').forEach(c=>c.onclick=()=>answer(c));
+  setTimeout(()=>quiz&&quiz.playIt(),300);
+}
+$('play').onclick=()=>{if(quiz){stopAudio();quiz.playIt();}};
+async function answer(c){
+  if(!quiz)return;
+  if(c.dataset.k===quiz.key){
+    c.classList.add('good');stars++;drawStars();kt({kt:'blip',f:720});
+    $('msg').textContent=['Yes!','That is it!','Great ears!','You got it'+(child?', '+child:'')+'!'][stars%4];
+    const q=quiz;quiz=null;stopAudio();
+    if(q.word)await play(q.word);
+    setTimeout(nextQuiz,500);
+  }else{
+    quiz.tries++;c.classList.remove('nope');void c.offsetWidth;c.classList.add('nope');kt({kt:'blip',f:220});
+    $('msg').textContent=quiz.tries>=2?'It is this one':'Listen again…';
+    if(quiz.tries>=2){const r=$('choices').querySelector('[data-k="'+quiz.key+'"]');if(r)r.style.outline='5px solid var(--ok)';}
+    stopAudio();setTimeout(()=>quiz&&quiz.playIt(),350);
+  }
+}
+init();
+</script></body></html>

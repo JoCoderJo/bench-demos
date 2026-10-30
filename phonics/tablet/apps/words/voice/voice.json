@@ -1,0 +1,54 @@
+{
+ "voice": "en_US-kristin-medium",
+ "length_scale": 1.05,
+ "prompts": {
+  "build": {
+   "file": "build.mp3",
+   "text": "Build the word."
+  },
+  "listen": {
+   "file": "listen.mp3",
+   "text": "Listen."
+  },
+  "tap": {
+   "file": "tap.mp3",
+   "text": "Tap the letters to spell it."
+  },
+  "yes": {
+   "file": "yes.mp3",
+   "text": "Yes! You built"
+  },
+  "hooray": {
+   "file": "hooray.mp3",
+   "text": "Hooray! A new word!"
+  },
+  "again": {
+   "file": "again.mp3",
+   "text": "Not quite. Listen to the sounds."
+  },
+  "notword": {
+   "file": "notword.mp3",
+   "text": "That is not a word yet. Try another letter."
+  },
+  "change": {
+   "file": "change.mp3",
+   "text": "Change the first letter to make a new word."
+  },
+  "which": {
+   "file": "which.mp3",
+   "text": "Which word is this?"
+  },
+  "thisone": {
+   "file": "thisone.mp3",
+   "text": "It is this one."
+  },
+  "allfound": {
+   "file": "allfound.mp3",
+   "text": "You found every word in this family!"
+  },
+  "great": {
+   "file": "great.mp3",
+   "text": "Great job!"
+  }
+ }
+}

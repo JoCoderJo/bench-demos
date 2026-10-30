@@ -1,0 +1,21 @@
+{
+ "version": "43791de",
+ "sha": "671a5a5cd63aab5b1740a4491b4d1b9eab23d42321a42e59051439a1463a47f2",
+ "apps": [
+  "phonics-friends",
+  "camera",
+  "count",
+  "draw",
+  "example-tap",
+  "letters",
+  "maker-light",
+  "pbs-kids",
+  "show-tell",
+  "stories",
+  "words",
+  "yoto"
+ ],
+ "files": 847,
+ "bytes": 7446944,
+ "public": true
+}

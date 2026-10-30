@@ -1,0 +1,936 @@
+{
+ "families": [
+  {
+   "rime": "at",
+   "words": [
+    {
+     "w": "cat",
+     "emoji": "🐱",
+     "clip": "audio/words/cat.mp3"
+    },
+    {
+     "w": "bat",
+     "emoji": "🦇",
+     "clip": "audio/words/bat.mp3"
+    },
+    {
+     "w": "hat",
+     "emoji": "🎩",
+     "clip": "audio/words/hat.mp3"
+    },
+    {
+     "w": "mat",
+     "emoji": "🟫",
+     "clip": "audio/words/mat.mp3"
+    },
+    {
+     "w": "rat",
+     "emoji": "🐀",
+     "clip": "audio/words/rat.mp3"
+    },
+    {
+     "w": "sat",
+     "emoji": "🪑",
+     "clip": "audio/words/sat.mp3"
+    }
+   ]
+  },
+  {
+   "rime": "an",
+   "words": [
+    {
+     "w": "can",
+     "emoji": "🥫",
+     "clip": "audio/words/can.mp3"
+    },
+    {
+     "w": "man",
+     "emoji": "👨",
+     "clip": "audio/words/man.mp3"
+    },
+    {
+     "w": "pan",
+     "emoji": "🍳",
+     "clip": "audio/words/pan.mp3"
+    },
+    {
+     "w": "ran",
+     "emoji": "🏃",
+     "clip": "audio/words/ran.mp3"
+    },
+    {
+     "w": "van",
+     "emoji": "🚐",
+     "clip": "audio/words/van.mp3"
+    }
+   ]
+  },
+  {
+   "rime": "ap",
+   "words": [
+    {
+     "w": "cap",
+     "emoji": "🧢",
+     "clip": "audio/words/cap.mp3"
+    },
+    {
+     "w": "map",
+     "emoji": "🗺️",
+     "clip": "audio/words/map.mp3"
+    },
+    {
+     "w": "tap",
+     "emoji": "🚰",
+     "clip": "audio/words/tap.mp3"
+    }
+   ]
+  },
+  {
+   "rime": "ed",
+   "words": [
+    {
+     "w": "bed",
+     "emoji": "🛏️",
+     "clip": "audio/words/bed.mp3"
+    },
+    {
+     "w": "red",
+     "emoji": "🔴",
+     "clip": "audio/words/red.mp3"
+    },
+    {
+     "w": "fed",
+     "emoji": "🍽️",
+     "clip": "audio/words/fed.mp3"
+    }
+   ]
+  },
+  {
+   "rime": "en",
+   "words": [
+    {
+     "w": "hen",
+     "emoji": "🐔",
+     "clip": "audio/words/hen.mp3"
+    },
+    {
+     "w": "pen",
+     "emoji": "🖊️",
+     "clip": "audio/words/pen.mp3"
+    },
+    {
+     "w": "ten",
+     "emoji": "🔟",
+     "clip": "audio/words/ten.mp3"
+    },
+    {
+     "w": "men",
+     "emoji": "👬",
+     "clip": "audio/words/men.mp3"
+    }
+   ]
+  },
+  {
+   "rime": "et",
+   "words": [
+    {
+     "w": "net",
+     "emoji": "🥅",
+     "clip": "audio/words/net.mp3"
+    },
+    {
+     "w": "pet",
+     "emoji": "🐶",
+     "clip": "audio/words/pet.mp3"
+    },
+    {
+     "w": "wet",
+     "emoji": "💧",
+     "clip": "audio/words/wet.mp3"
+    },
+    {
+     "w": "get",
+     "emoji": "🤲",
+     "clip": "audio/words/get.mp3"
+    }
+   ]
+  },
+  {
+   "rime": "ig",
+   "words": [
+    {
+     "w": "big",
+     "emoji": "🐘",
+     "clip": "audio/words/big.mp3"
+    },
+    {
+     "w": "dig",
+     "emoji": "⛏️",
+     "clip": "audio/words/dig.mp3"
+    },
+    {
+     "w": "fig",
+     "emoji": "🍇",
+     "clip": "audio/words/fig.mp3"
+    },
+    {
+     "w": "pig",
+     "emoji": "🐷",
+     "clip": "audio/words/pig.mp3"
+    },
+    {
+     "w": "wig",
+     "emoji": "💇",
+     "clip": "audio/words/wig.mp3"
+    }
+   ]
+  },
+  {
+   "rime": "it",
+   "words": [
+    {
+     "w": "sit",
+     "emoji": "🪑",
+     "clip": "audio/words/sit.mp3"
+    },
+    {
+     "w": "hit",
+     "emoji": "👊",
+     "clip": "audio/words/hit.mp3"
+    },
+    {
+     "w": "fit",
+     "emoji": "💪",
+     "clip": "audio/words/fit.mp3"
+    },
+    {
+     "w": "bit",
+     "emoji": "🧩",
+     "clip": "audio/words/bit.mp3"
+    }
+   ]
+  },
+  {
+   "rime": "in",
+   "words": [
+    {
+     "w": "pin",
+     "emoji": "📌",
+     "clip": "audio/words/pin.mp3"
+    },
+    {
+     "w": "win",
+     "emoji": "🏆",
+     "clip": "audio/words/win.mp3"
+    },
+    {
+     "w": "tin",
+     "emoji": "🥫",
+     "clip": "audio/words/tin.mp3"
+    },
+    {
+     "w": "bin",
+     "emoji": "🗑️",
+     "clip": "audio/words/bin.mp3"
+    }
+   ]
+  },
+  {
+   "rime": "og",
+   "words": [
+    {
+     "w": "dog",
+     "emoji": "🐶",
+     "clip": "audio/words/dog.mp3"
+    },
+    {
+     "w": "log",
+     "emoji": "🪵",
+     "clip": "audio/words/log.mp3"
+    },
+    {
+     "w": "fog",
+     "emoji": "🌫️",
+     "clip": "audio/words/fog.mp3"
+    },
+    {
+     "w": "hog",
+     "emoji": "🐗",
+     "clip": "audio/words/hog.mp3"
+    }
+   ]
+  },
+  {
+   "rime": "op",
+   "words": [
+    {
+     "w": "hop",
+     "emoji": "🐰",
+     "clip": "audio/words/hop.mp3"
+    },
+    {
+     "w": "top",
+     "emoji": "🔝",
+     "clip": "audio/words/top.mp3"
+    },
+    {
+     "w": "mop",
+     "emoji": "🧹",
+     "clip": "audio/words/mop.mp3"
+    },
+    {
+     "w": "pop",
+     "emoji": "🎈",
+     "clip": "audio/words/pop.mp3"
+    }
+   ]
+  },
+  {
+   "rime": "ot",
+   "words": [
+    {
+     "w": "hot",
+     "emoji": "🔥",
+     "clip": "audio/words/hot.mp3"
+    },
+    {
+     "w": "pot",
+     "emoji": "🍲",
+     "clip": "audio/words/pot.mp3"
+    },
+    {
+     "w": "dot",
+     "emoji": "⚫",
+     "clip": "audio/words/dot.mp3"
+    },
+    {
+     "w": "cot",
+     "emoji": "🛏️",
+     "clip": "audio/words/cot.mp3"
+    }
+   ]
+  },
+  {
+   "rime": "ug",
+   "words": [
+    {
+     "w": "bug",
+     "emoji": "🐛",
+     "clip": "audio/words/bug.mp3"
+    },
+    {
+     "w": "hug",
+     "emoji": "🤗",
+     "clip": "audio/words/hug.mp3"
+    },
+    {
+     "w": "mug",
+     "emoji": "☕",
+     "clip": "audio/words/mug.mp3"
+    }
+   ]
+  },
+  {
+   "rime": "un",
+   "words": [
+    {
+     "w": "sun",
+     "emoji": "☀️",
+     "clip": "audio/words/sun.mp3"
+    },
+    {
+     "w": "run",
+     "emoji": "🏃",
+     "clip": "audio/words/run.mp3"
+    },
+    {
+     "w": "fun",
+     "emoji": "🎉",
+     "clip": "audio/words/fun.mp3"
+    }
+   ]
+  },
+  {
+   "rime": "up",
+   "words": [
+    {
+     "w": "cup",
+     "emoji": "☕",
+     "clip": "audio/words/cup.mp3"
+    },
+    {
+     "w": "pup",
+     "emoji": "🐶",
+     "clip": "audio/words/pup.mp3"
+    }
+   ]
+  }
+ ],
+ "sight": [
+  {
+   "w": "cat",
+   "emoji": "🐱",
+   "clip": "audio/words/cat.mp3",
+   "pic": true
+  },
+  {
+   "w": "bat",
+   "emoji": "🦇",
+   "clip": "audio/words/bat.mp3",
+   "pic": true
+  },
+  {
+   "w": "hat",
+   "emoji": "🎩",
+   "clip": "audio/words/hat.mp3",
+   "pic": true
+  },
+  {
+   "w": "mat",
+   "emoji": "🟫",
+   "clip": "audio/words/mat.mp3",
+   "pic": true
+  },
+  {
+   "w": "rat",
+   "emoji": "🐀",
+   "clip": "audio/words/rat.mp3",
+   "pic": true
+  },
+  {
+   "w": "sat",
+   "emoji": "🪑",
+   "clip": "audio/words/sat.mp3",
+   "pic": true
+  },
+  {
+   "w": "can",
+   "emoji": "🥫",
+   "clip": "audio/words/can.mp3",
+   "pic": true
+  },
+  {
+   "w": "man",
+   "emoji": "👨",
+   "clip": "audio/words/man.mp3",
+   "pic": true
+  },
+  {
+   "w": "pan",
+   "emoji": "🍳",
+   "clip": "audio/words/pan.mp3",
+   "pic": true
+  },
+  {
+   "w": "ran",
+   "emoji": "🏃",
+   "clip": "audio/words/ran.mp3",
+   "pic": true
+  },
+  {
+   "w": "van",
+   "emoji": "🚐",
+   "clip": "audio/words/van.mp3",
+   "pic": true
+  },
+  {
+   "w": "cap",
+   "emoji": "🧢",
+   "clip": "audio/words/cap.mp3",
+   "pic": true
+  },
+  {
+   "w": "map",
+   "emoji": "🗺️",
+   "clip": "audio/words/map.mp3",
+   "pic": true
+  },
+  {
+   "w": "tap",
+   "emoji": "🚰",
+   "clip": "audio/words/tap.mp3",
+   "pic": true
+  },
+  {
+   "w": "bed",
+   "emoji": "🛏️",
+   "clip": "audio/words/bed.mp3",
+   "pic": true
+  },
+  {
+   "w": "red",
+   "emoji": "🔴",
+   "clip": "audio/words/red.mp3",
+   "pic": true
+  },
+  {
+   "w": "fed",
+   "emoji": "🍽️",
+   "clip": "audio/words/fed.mp3",
+   "pic": true
+  },
+  {
+   "w": "hen",
+   "emoji": "🐔",
+   "clip": "audio/words/hen.mp3",
+   "pic": true
+  },
+  {
+   "w": "pen",
+   "emoji": "🖊️",
+   "clip": "audio/words/pen.mp3",
+   "pic": true
+  },
+  {
+   "w": "ten",
+   "emoji": "🔟",
+   "clip": "audio/words/ten.mp3",
+   "pic": true
+  },
+  {
+   "w": "men",
+   "emoji": "👬",
+   "clip": "audio/words/men.mp3",
+   "pic": true
+  },
+  {
+   "w": "net",
+   "emoji": "🥅",
+   "clip": "audio/words/net.mp3",
+   "pic": true
+  },
+  {
+   "w": "pet",
+   "emoji": "🐶",
+   "clip": "audio/words/pet.mp3",
+   "pic": true
+  },
+  {
+   "w": "wet",
+   "emoji": "💧",
+   "clip": "audio/words/wet.mp3",
+   "pic": true
+  },
+  {
+   "w": "get",
+   "emoji": "🤲",
+   "clip": "audio/words/get.mp3",
+   "pic": true
+  },
+  {
+   "w": "big",
+   "emoji": "🐘",
+   "clip": "audio/words/big.mp3",
+   "pic": true
+  },
+  {
+   "w": "dig",
+   "emoji": "⛏️",
+   "clip": "audio/words/dig.mp3",
+   "pic": true
+  },
+  {
+   "w": "fig",
+   "emoji": "🍇",
+   "clip": "audio/words/fig.mp3",
+   "pic": true
+  },
+  {
+   "w": "pig",
+   "emoji": "🐷",
+   "clip": "audio/words/pig.mp3",
+   "pic": true
+  },
+  {
+   "w": "wig",
+   "emoji": "💇",
+   "clip": "audio/words/wig.mp3",
+   "pic": true
+  },
+  {
+   "w": "sit",
+   "emoji": "🪑",
+   "clip": "audio/words/sit.mp3",
+   "pic": true
+  },
+  {
+   "w": "hit",
+   "emoji": "👊",
+   "clip": "audio/words/hit.mp3",
+   "pic": true
+  },
+  {
+   "w": "fit",
+   "emoji": "💪",
+   "clip": "audio/words/fit.mp3",
+   "pic": true
+  },
+  {
+   "w": "bit",
+   "emoji": "🧩",
+   "clip": "audio/words/bit.mp3",
+   "pic": true
+  },
+  {
+   "w": "pin",
+   "emoji": "📌",
+   "clip": "audio/words/pin.mp3",
+   "pic": true
+  },
+  {
+   "w": "win",
+   "emoji": "🏆",
+   "clip": "audio/words/win.mp3",
+   "pic": true
+  },
+  {
+   "w": "tin",
+   "emoji": "🥫",
+   "clip": "audio/words/tin.mp3",
+   "pic": true
+  },
+  {
+   "w": "bin",
+   "emoji": "🗑️",
+   "clip": "audio/words/bin.mp3",
+   "pic": true
+  },
+  {
+   "w": "dog",
+   "emoji": "🐶",
+   "clip": "audio/words/dog.mp3",
+   "pic": true
+  },
+  {
+   "w": "log",
+   "emoji": "🪵",
+   "clip": "audio/words/log.mp3",
+   "pic": true
+  },
+  {
+   "w": "fog",
+   "emoji": "🌫️",
+   "clip": "audio/words/fog.mp3",
+   "pic": true
+  },
+  {
+   "w": "hog",
+   "emoji": "🐗",
+   "clip": "audio/words/hog.mp3",
+   "pic": true
+  },
+  {
+   "w": "hop",
+   "emoji": "🐰",
+   "clip": "audio/words/hop.mp3",
+   "pic": true
+  },
+  {
+   "w": "top",
+   "emoji": "🔝",
+   "clip": "audio/words/top.mp3",
+   "pic": true
+  },
+  {
+   "w": "mop",
+   "emoji": "🧹",
+   "clip": "audio/words/mop.mp3",
+   "pic": true
+  },
+  {
+   "w": "pop",
+   "emoji": "🎈",
+   "clip": "audio/words/pop.mp3",
+   "pic": true
+  },
+  {
+   "w": "hot",
+   "emoji": "🔥",
+   "clip": "audio/words/hot.mp3",
+   "pic": true
+  },
+  {
+   "w": "pot",
+   "emoji": "🍲",
+   "clip": "audio/words/pot.mp3",
+   "pic": true
+  },
+  {
+   "w": "dot",
+   "emoji": "⚫",
+   "clip": "audio/words/dot.mp3",
+   "pic": true
+  },
+  {
+   "w": "cot",
+   "emoji": "🛏️",
+   "clip": "audio/words/cot.mp3",
+   "pic": true
+  },
+  {
+   "w": "bug",
+   "emoji": "🐛",
+   "clip": "audio/words/bug.mp3",
+   "pic": true
+  },
+  {
+   "w": "hug",
+   "emoji": "🤗",
+   "clip": "audio/words/hug.mp3",
+   "pic": true
+  },
+  {
+   "w": "mug",
+   "emoji": "☕",
+   "clip": "audio/words/mug.mp3",
+   "pic": true
+  },
+  {
+   "w": "sun",
+   "emoji": "☀️",
+   "clip": "audio/words/sun.mp3",
+   "pic": true
+  },
+  {
+   "w": "run",
+   "emoji": "🏃",
+   "clip": "audio/words/run.mp3",
+   "pic": true
+  },
+  {
+   "w": "fun",
+   "emoji": "🎉",
+   "clip": "audio/words/fun.mp3",
+   "pic": true
+  },
+  {
+   "w": "cup",
+   "emoji": "☕",
+   "clip": "audio/words/cup.mp3",
+   "pic": true
+  },
+  {
+   "w": "pup",
+   "emoji": "🐶",
+   "clip": "audio/words/pup.mp3",
+   "pic": true
+  },
+  {
+   "w": "frog",
+   "emoji": "🐸",
+   "clip": "audio/words/frog.mp3",
+   "pic": true
+  },
+  {
+   "w": "pond",
+   "emoji": "💧",
+   "clip": "audio/words/pond.mp3",
+   "pic": true
+  },
+  {
+   "w": "jump",
+   "emoji": "🤸",
+   "clip": "audio/words/jump.mp3",
+   "pic": true
+  },
+  {
+   "w": "green",
+   "emoji": "🟢",
+   "clip": "audio/words/green.mp3",
+   "pic": true
+  },
+  {
+   "w": "friend",
+   "emoji": "🧑‍🤝‍🧑",
+   "clip": "audio/words/friend.mp3",
+   "pic": true
+  },
+  {
+   "w": "apple",
+   "emoji": "🍎",
+   "clip": "audio/words/apple.mp3",
+   "pic": true
+  },
+  {
+   "w": "ball",
+   "emoji": "⚽",
+   "clip": "audio/words/ball.mp3",
+   "pic": true
+  },
+  {
+   "w": "chip",
+   "emoji": "🍟",
+   "clip": "audio/words/chip.mp3",
+   "pic": true
+  },
+  {
+   "w": "duck",
+   "emoji": "🦆",
+   "clip": "audio/words/duck.mp3",
+   "pic": true
+  },
+  {
+   "w": "egg",
+   "emoji": "🥚",
+   "clip": "audio/words/egg.mp3",
+   "pic": true
+  },
+  {
+   "w": "fish",
+   "emoji": "🐟",
+   "clip": "audio/words/fish.mp3",
+   "pic": true
+  },
+  {
+   "w": "fox",
+   "emoji": "🦊",
+   "clip": "audio/words/fox.mp3",
+   "pic": true
+  },
+  {
+   "w": "goat",
+   "emoji": "🐐",
+   "clip": "audio/words/goat.mp3",
+   "pic": true
+  },
+  {
+   "w": "insect",
+   "emoji": "🐞",
+   "clip": "audio/words/insect.mp3",
+   "pic": true
+  },
+  {
+   "w": "jam",
+   "emoji": "🍯",
+   "clip": "audio/words/jam.mp3",
+   "pic": true
+  },
+  {
+   "w": "kite",
+   "emoji": "🪁",
+   "clip": "audio/words/kite.mp3",
+   "pic": true
+  },
+  {
+   "w": "leaf",
+   "emoji": "🍃",
+   "clip": "audio/words/leaf.mp3",
+   "pic": true
+  },
+  {
+   "w": "moon",
+   "emoji": "🌙",
+   "clip": "audio/words/moon.mp3",
+   "pic": true
+  },
+  {
+   "w": "nest",
+   "emoji": "🪺",
+   "clip": "audio/words/nest.mp3",
+   "pic": true
+  },
+  {
+   "w": "octopus",
+   "emoji": "🐙",
+   "clip": "audio/words/octopus.mp3",
+   "pic": true
+  },
+  {
+   "w": "queen",
+   "emoji": "👸",
+   "clip": "audio/words/queen.mp3",
+   "pic": true
+  },
+  {
+   "w": "rain",
+   "emoji": "🌧️",
+   "clip": "audio/words/rain.mp3",
+   "pic": true
+  },
+  {
+   "w": "ship",
+   "emoji": "🚢",
+   "clip": "audio/words/ship.mp3",
+   "pic": true
+  },
+  {
+   "w": "thumb",
+   "emoji": "👍",
+   "clip": "audio/words/thumb.mp3",
+   "pic": true
+  },
+  {
+   "w": "tree",
+   "emoji": "🌳",
+   "clip": "audio/words/tree.mp3",
+   "pic": true
+  },
+  {
+   "w": "web",
+   "emoji": "🕸️",
+   "clip": "audio/words/web.mp3",
+   "pic": true
+  },
+  {
+   "w": "yes",
+   "emoji": "✅",
+   "clip": "audio/words/yes.mp3",
+   "pic": true
+  },
+  {
+   "w": "zip",
+   "emoji": "🤐",
+   "clip": "audio/words/zip.mp3",
+   "pic": true
+  }
+ ],
+ "sounds": {
+  "a": "audio/sounds/a.mp3",
+  "b": "audio/sounds/b.mp3",
+  "c": "audio/sounds/c.mp3",
+  "d": "audio/sounds/d.mp3",
+  "e": "audio/sounds/e.mp3",
+  "f": "audio/sounds/f.mp3",
+  "g": "audio/sounds/g.mp3",
+  "h": "audio/sounds/h.mp3",
+  "i": "audio/sounds/i.mp3",
+  "j": "audio/sounds/j.mp3",
+  "k": "audio/sounds/k.mp3",
+  "l": "audio/sounds/l.mp3",
+  "m": "audio/sounds/m.mp3",
+  "n": "audio/sounds/n.mp3",
+  "o": "audio/sounds/o.mp3",
+  "p": "audio/sounds/p.mp3",
+  "q": "audio/sounds/q.mp3",
+  "r": "audio/sounds/r.mp3",
+  "s": "audio/sounds/s.mp3",
+  "t": "audio/sounds/t.mp3",
+  "u": "audio/sounds/u.mp3",
+  "v": "audio/sounds/v.mp3",
+  "w": "audio/sounds/w.mp3",
+  "x": "audio/sounds/x.mp3",
+  "y": "audio/sounds/y.mp3",
+  "z": "audio/sounds/z.mp3",
+  "sh": null,
+  "th": null,
+  "ch": null,
+  "ck": "audio/sounds/k.mp3",
+  "ee": null,
+  "oo": null,
+  "qu": "audio/sounds/q.mp3"
+ },
+ "voice": {
+  "build": "voice/build.mp3",
+  "listen": "voice/listen.mp3",
+  "tap": "voice/tap.mp3",
+  "yes": "voice/yes.mp3",
+  "hooray": "voice/hooray.mp3",
+  "again": "voice/again.mp3",
+  "notword": "voice/notword.mp3",
+  "change": "voice/change.mp3",
+  "which": "voice/which.mp3",
+  "thisone": "voice/thisone.mp3",
+  "allfound": "voice/allfound.mp3",
+  "great": "voice/great.mp3"
+ }
+}

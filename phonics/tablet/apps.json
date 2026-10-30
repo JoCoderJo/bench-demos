@@ -1,0 +1,143 @@
+{
+ "_doc": "The home screen. One entry per tile; `path` is relative to the bundle root. Games in tablet/apps/<id>/ are added automatically by build-bundle.py (see tablet/apps/README.md); list one here only to override its tile or to pull a folder from elsewhere with `source_dir`. `needs` lists iframe permissions the app wants.",
+ "apps": [
+  {
+   "id": "phonics-friends",
+   "title": "Phonics Friends",
+   "subtitle": "spell with your friend",
+   "icon": "🐸",
+   "color": "#3fb950",
+   "path": "apps/phonics-friends/index.html",
+   "needs": [
+    "microphone",
+    "autoplay"
+   ],
+   "source": "demo/ via tools/make-offline-bundle.py"
+  },
+  {
+   "id": "camera",
+   "title": "Camera",
+   "subtitle": "see through the cameras",
+   "icon": "📷",
+   "color": "#5c6bc0",
+   "path": "apps/camera/index.html",
+   "needs": [],
+   "source": "tablet/apps/camera"
+  },
+  {
+   "id": "count",
+   "title": "Count With Me",
+   "subtitle": "count, find shapes, add",
+   "icon": "🐸",
+   "color": "#5c6bc0",
+   "path": "apps/count/index.html",
+   "needs": [
+    "autoplay"
+   ],
+   "source": "tablet/apps/count"
+  },
+  {
+   "id": "draw",
+   "title": "Draw",
+   "subtitle": "finger painting",
+   "icon": "🎨",
+   "color": "#c25048",
+   "path": "apps/draw/index.html",
+   "needs": [],
+   "source": "tablet/apps/draw"
+  },
+  {
+   "id": "example-tap",
+   "title": "Tap the Frog",
+   "subtitle": "example game",
+   "icon": "🐸",
+   "color": "#2e7d32",
+   "path": "apps/example-tap/index.html",
+   "needs": [
+    "autoplay"
+   ],
+   "source": "tablet/apps/example-tap"
+  },
+  {
+   "id": "letters",
+   "title": "Letter Sounds",
+   "subtitle": "tap a letter, hear its sound",
+   "icon": "🔤",
+   "color": "#d98e2b",
+   "path": "apps/letters/index.html",
+   "needs": [
+    "autoplay"
+   ],
+   "source": "tablet/apps/letters"
+  },
+  {
+   "id": "maker-light",
+   "title": "Light Lab",
+   "subtitle": "draw with real lights",
+   "icon": "💡",
+   "color": "#f2b632",
+   "path": "apps/maker-light/index.html",
+   "needs": [
+    "autoplay"
+   ],
+   "source": "tablet/apps/maker-light"
+  },
+  {
+   "id": "pbs-kids",
+   "title": "PBS Kids",
+   "subtitle": "shows and games",
+   "icon": "📺",
+   "color": "#2e9e44",
+   "path": "apps/pbs-kids/index.html",
+   "needs": [],
+   "source": "tablet/apps/pbs-kids",
+   "url": "https://pbskids.org"
+  },
+  {
+   "id": "show-tell",
+   "title": "Show & Tell",
+   "subtitle": "what is it?",
+   "icon": "🔍",
+   "color": "#ef8f3c",
+   "path": "apps/show-tell/index.html",
+   "needs": [],
+   "source": "tablet/apps/show-tell"
+  },
+  {
+   "id": "stories",
+   "title": "Stories",
+   "subtitle": "read along with your friend",
+   "icon": "📖",
+   "color": "#5f87ad",
+   "path": "apps/stories/index.html",
+   "needs": [
+    "autoplay"
+   ],
+   "source": "tablet/apps/stories"
+  },
+  {
+   "id": "words",
+   "title": "Word Builder",
+   "subtitle": "tap the letters, make the word",
+   "icon": "🧩",
+   "color": "#26a69a",
+   "path": "apps/words/index.html",
+   "needs": [
+    "autoplay"
+   ],
+   "source": "tablet/apps/words"
+  },
+  {
+   "id": "yoto",
+   "title": "Yoto",
+   "subtitle": "our Yoto library",
+   "icon": "🎧",
+   "color": "#f2572b",
+   "path": "apps/yoto/index.html",
+   "needs": [
+    "autoplay"
+   ],
+   "source": "tablet/apps/yoto"
+  }
+ ]
+}

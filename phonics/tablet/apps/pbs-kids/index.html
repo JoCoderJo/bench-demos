@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>PBS Kids</title>
+<!-- tablet/apps/pbs-kids — a WEBSITE app (D-014). pbskids.org refuses to run inside a frame (X-Frame-Options: DENY),
+     so the tile asks the tablet agent to open it in its own Chromium window (POST /api/open), sized to leave the
+     launcher's bottom strip — home pill and volume — showing. This page sits in the launcher's frame underneath:
+     the strip the child sees under the window, and the whole screen for the second or two before the window maps.
+     Screen time counts (not in budget.exempt_apps). The site needs internet; without it Chromium shows its own
+     "no connection" page and the home pill still works. Without any tablet helper (the public demo page, a laptop)
+     the strip offers the site as a plain link in a new tab instead. Not affiliated with PBS. -->
+<style>
+:root{--ink:#1d2a3a;--dim:#5b6b80}
+*{box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(160deg,#dff5e3,#f4fff6);color:var(--ink);font:20px system-ui,sans-serif;touch-action:manipulation}
+#mid{position:absolute;inset:0 0 84px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:20px}
+#mid .ic{width:150px;height:150px;border-radius:40px;background:#2e9e44;display:grid;place-items:center;font-size:96px;box-shadow:0 12px 30px rgba(20,60,30,.25)}
+#mid h1{font-size:34px;margin:0}
+#mid p{color:var(--dim);margin:0;font-size:22px}
+#again{font:inherit;font-weight:800;font-size:22px;color:#fff;background:#2e9e44;border:0;border-radius:30px;padding:16px 30px;box-shadow:0 8px 20px rgba(20,60,30,.25);display:none}
+#again.on{display:block}
+#strip{position:absolute;left:0;right:0;bottom:0;height:84px;display:flex;align-items:center;justify-content:center;gap:12px;color:var(--dim);font-size:19px;font-weight:600;background:rgba(255,255,255,.55)}
+#strip span{font-size:26px}
+</style></head><body>
+<div id="mid"><div class="ic">📺</div><h1>PBS Kids is opening…</h1><p id="note">Shows and games from PBS Kids open on top of this screen.</p><button id="again">Open PBS Kids again</button></div>
+<div id="strip"><span>📺</span> PBS Kids is on &nbsp;·&nbsp; tap the home button below to come back</div>
+<script>
+'use strict';
+const LIVE=location.protocol.startsWith('http');
+const $=id=>document.getElementById(id);
+async function status(){try{return await (await fetch('/api/status',{cache:'no-store'})).json();}catch(e){return null;}}
+async function open(){
+  if(!LIVE){$('note').textContent='On the tablet this opens pbskids.org in its own window.';return;}
+  try{const r=await (await fetch('/api/open',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:'pbs-kids'})})).json();
+    if(!r.ok){$('note').textContent='Could not open it: '+(r.error||'unknown');$('again').classList.add('on');}
+  }catch(e){$('note').textContent='The tablet helper did not answer.';$('again').classList.add('on');}
+}
+$('again').onclick=()=>{$('again').classList.remove('on');$('note').textContent='Opening…';open();};
+// the launcher already asked the agent to open the window when the tile was tapped; if a few seconds later nothing
+// is open (the window closed, or the open failed) offer the button
+setTimeout(async()=>{const s=await status();if(s&&!s.ext){$('note').textContent='The PBS Kids window is not open.';$('again').classList.add('on');}},6000);
+// no tablet helper at all (the public demo page, the bundle served from a laptop): there is no window to open, so
+// offer the site itself in a new tab — the one place a link may leave the frame, and only off the tablet
+// (the address comes from this tile's own entry in the bundle's apps.json — the page itself names no network address,
+// check.py's offline rule — so a one-line change in app.json still moves both the tablet window and this link)
+(async()=>{if(!LIVE||await status())return;
+  let url='';try{const a=((await (await fetch('../../apps.json',{cache:'no-store'})).json()).apps||[]).find(x=>x.id==='pbs-kids');url=a&&a.url||'';}catch(e){}
+  if(!/^https?:\/\//.test(url))return;
+  $('mid').querySelector('h1').textContent='PBS Kids';
+  const a=document.createElement('a');a.id='site';a.href=url;a.target='_blank';a.rel='noopener';a.textContent='Open PBS Kids ↗';
+  a.style.cssText='display:inline-block;margin-top:14px;font-weight:800;color:#fff;background:#2e9e44;border-radius:30px;padding:14px 26px;text-decoration:none';
+  $('note').textContent='On the tablet this opens the site in its own window. Here: ';$('note').appendChild(a);})();
+</script></body></html>

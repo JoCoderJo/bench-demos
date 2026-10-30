@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Show &amp; Tell</title>
+<!--
+  tablet/apps/show-tell — Show-and-tell (PLAN.md §9.3 #3, D-018 revised). The child holds something up to the camera and taps
+  the big button; the tablet names it in the project voice, shows the word in big letters, and keeps it in the child's collection.
+
+  Everything is local to the tablet:
+    live picture  ← livecam.py on 127.0.0.1:8095 (the Camera tile's helper)
+    naming        ← the Arduino App Lab app tablet/arduino/show-tell (built-in mobilenet image classification) on 127.0.0.1:7000:
+                    POST /classify with a JPEG → ImageNet labels; words.json turns "golden retriever" into "dog"
+    voice         ← voice/*.mp3, made on the laptop with Piper (make-voice.py; D-010: whole words only)
+    collection    ← /api/store/show-tell/<kid>/<id>.json + <id>.jpg (localStorage on a laptop)
+  Unsure (no kid word, or confidence under the bar) → "Hmm, show me again" rather than a guess.
+-->
+<style>
+  :root { --bg:#14100c; --panel:#241a12; --ink:#fbf3ea; --dim:#b39b84; --on:#ef8f3c; --ok:#43b581; --warn:#ff8a80; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--ink); font:19px/1.3 system-ui, sans-serif; overflow:hidden; touch-action:none; }
+  button { font:inherit; color:inherit; background:#3a2b1f; border:0; border-radius:18px; padding:0 20px; min-height:64px; min-width:64px; font-size:21px; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+  button.on { background:var(--on); color:#1a120a; }
+  button:disabled { opacity:.45; }
+  button:active { transform:scale(.96); }
+  .screen { position:fixed; inset:0; display:none; }
+  .screen.on { display:flex; }
+
+  /* ---- look screen */
+  #look { flex-direction:row; }
+  #stage { flex:1; min-width:0; min-height:0; display:flex; align-items:center; justify-content:center; padding:10px; position:relative; }
+  #box { position:relative; background:#000; border-radius:20px; overflow:hidden; }
+  #live { position:absolute; left:50%; top:50%; transform-origin:center; display:block; }
+  #veil { position:absolute; inset:0; display:none; align-items:center; justify-content:center; text-align:center; padding:24px; background:rgba(0,0,0,.72); font-size:22px; }
+  #box.busy #veil, #box.off #veil { display:flex; }
+  #box.off #veil { color:var(--warn); }
+  #count { position:absolute; inset:0; display:none; align-items:center; justify-content:center; font-size:180px; font-weight:800; color:#fff; text-shadow:0 6px 30px rgba(0,0,0,.6); }
+  #count.on { display:flex; }
+  #flash { position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; transition:opacity .35s; }
+  #flash.on { opacity:1; transition:none; }
+  #side { width:190px; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:12px 10px; gap:10px; background:var(--panel); }
+  #side .grp { display:flex; flex-direction:column; align-items:center; gap:10px; width:100%; }
+  #side button { width:100%; }
+  #go { width:150px; height:150px; min-height:150px; border-radius:50%; background:var(--on); color:#1a120a; font-size:24px; font-weight:800; flex-direction:column; line-height:1.1; padding:0; box-shadow:0 10px 30px rgba(239,143,60,.35); }
+  #go small { font-size:15px; font-weight:600; opacity:.8; }
+  #go .big { font-size:46px; }
+  #st { color:var(--dim); font-size:13px; text-align:center; min-height:2.6em; }
+  .badge { background:#e05a4f; color:#fff; border-radius:12px; font-size:14px; padding:2px 8px; min-width:24px; }
+
+  /* ---- answer card */
+  #card { position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:rgba(20,16,12,.92); }
+  #card.on { display:flex; }
+  .cardin { background:#fff; color:#2a1d12; border-radius:28px; padding:22px 26px; display:flex; flex-direction:column; align-items:center; gap:14px; max-width:92%; max-height:94%; box-shadow:0 20px 60px rgba(0,0,0,.5); }
+  .cardin img { max-width:min(420px, 60vw); max-height:34vh; border-radius:16px; }
+  #word { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  #word b { display:inline-flex; align-items:center; justify-content:center; width:64px; height:76px; border-radius:14px; background:#ffe6cc; font-size:46px; font-weight:800; transform:scale(.6); opacity:0; transition:transform .25s, opacity .25s; }
+  #word b.in { transform:scale(1); opacity:1; }
+  #word b.v { background:#cfe8ff; }
+  #say { font-size:22px; color:#6b5440; }
+  #hint { font-size:15px; color:#9b8673; min-height:1.2em; }
+  .cardbtns { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .cardbtns button { background:#f0e4d6; color:#2a1d12; }
+  .cardbtns button.go { background:var(--on); color:#1a120a; }
+  #unsure { font-size:30px; text-align:center; }
+
+  /* ---- collection */
+  #coll { flex-direction:column; background:#f6efe6; color:#2a1d12; }
+  #coll header { display:flex; align-items:center; gap:12px; padding:12px 18px; background:#fff; box-shadow:0 6px 20px rgba(60,30,0,.12); }
+  #coll h1 { font-size:24px; margin:0; flex:1; }
+  #coll header button { background:#efe4d8; color:#2a1d12; }
+  #coll header button.go { background:var(--on); color:#1a120a; }
+  #grid { flex:1; overflow-y:auto; padding:18px; display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:16px; align-content:start; touch-action:pan-y; }
+  .item { background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 6px 20px rgba(60,30,0,.12); display:flex; flex-direction:column; }
+  .item img { width:100%; aspect-ratio:4/3; object-fit:cover; display:block; background:#ddd; }
+  .item .w { padding:10px 12px; font-size:26px; font-weight:800; text-align:center; }
+  #empty { grid-column:1/-1; text-align:center; color:#8a7560; padding:60px 20px; font-size:22px; }
+  #confetti { position:fixed; inset:0; pointer-events:none; overflow:hidden; }
+  #confetti i { position:absolute; top:-40px; font-size:34px; animation:fall 1.8s linear forwards; }
+  @keyframes fall { to { transform:translateY(110vh) rotate(540deg); opacity:.6; } }
+
+  @media (orientation: portrait) {
+    #look { flex-direction:column; }
+    #side { width:100%; flex-direction:row; padding:10px 12px; }
+    #side .grp { flex-direction:row; width:auto; }
+    #side button { width:auto; }
+    #go { width:120px; height:120px; min-height:120px; font-size:20px; }
+    #go .big { font-size:38px; }
+    #st { display:none; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="ccm" color-interpolation-filters="sRGB"><feColorMatrix id="ccmM" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/></filter>
+</svg>
+
+<div class="screen on" id="look">
+  <div id="stage">
+    <div id="box"><img id="live" alt=""><div id="veil">starting camera…</div><div id="count"></div><div id="flash"></div></div>
+    <div id="card"><div class="cardin">
+      <img id="shot" alt="">
+      <div id="unsure" style="display:none">🤔 Hmm… show me again,<br>nice and close!</div>
+      <div id="word"></div>
+      <div id="say"></div>
+      <div id="hint"></div>
+      <div class="cardbtns"><button id="bSayAgain">🔊 Say it</button><button id="bKeep" class="go">⭐ Keep it</button><button id="bNext">Show another</button></div>
+    </div></div>
+  </div>
+  <div id="side">
+    <div class="grp"><button id="bRot">↻</button><button id="bIntro">🔊 How to play</button></div>
+    <div class="grp"><button id="go"><span class="big">🔍</span>What is it?<small>hold it up &amp; tap</small></button><div id="st">…</div></div>
+    <div class="grp"><button id="bColl">📚 My things <span class="badge" id="nColl">0</span></button><button id="bDone">Done</button></div>
+  </div>
+</div>
+
+<div class="screen" id="coll">
+  <header><h1 id="collTitle">My things</h1><button id="bCollLook" class="go">🔍 Find more</button><button id="bCollDone">Done</button></header>
+  <div id="grid"></div>
+</div>
+<div id="confetti"></div>
+
+<script>
+(() => {
+'use strict';
+const HELPER = 'http://127.0.0.1:8095';        // livecam.py — the live picture
+const BRAIN = 'http://127.0.0.1:7000';          // tablet/arduino/show-tell — the naming
+const LIVE = location.protocol.startsWith('http');
+const MIN_CONF = 22;                            // % from mobilenet top-1; below this the tablet says it is not sure
+const $ = id => document.getElementById(id);
+const box = $('box'), live = $('live'), veil = $('veil');
+
+/* ---------- words: ImageNet label → kid word ---------- */
+let RULES = [];
+fetch('words.json').then(r => r.json()).then(j => { RULES = j.rules; }).catch(() => {});
+function kidWord(label) {
+  const l = String(label || '').toLowerCase();
+  const parts = l.split(/,\s*/).map(s => s.trim());
+  for (const [word, keys] of RULES) {
+    for (const k of keys) {
+      if (parts.some(p => p === k) || l.includes(k)) return word;
+    }
+  }
+  return null;
+}
+function pickWord(labels) {                     // → {word, label, conf} or null
+  for (const x of labels) {
+    const w = kidWord(x.label);
+    if (w && x.confidence >= MIN_CONF) return { word: w, label: x.label, conf: x.confidence };
+  }
+  return null;
+}
+
+/* ---------- voice ---------- */
+let VOICES = new Set(), audio = null;
+fetch('voice/index.json').then(r => r.json()).then(j => { VOICES = new Set(j); }).catch(() => {});
+function play(key) {
+  return new Promise(res => {
+    if (!VOICES.has(key)) return res(false);
+    try { if (audio) { audio.pause(); } } catch (e) {}
+    const a = new Audio('voice/' + key + '.mp3'); audio = a;
+    a.onended = () => res(true); a.onerror = () => res(false);
+    const p = a.play(); if (p && p.catch) p.catch(() => res(false));
+  });
+}
+const blip = f => { try { parent.postMessage({ kt: 'blip', f }, '*'); } catch (e) {} };
+const toast = text => { try { parent.postMessage({ kt: 'toast', text }, '*'); } catch (e) {} };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ---------- colour (auto, same idea as the Camera tile, smaller) ---------- */
+const CCM = [[1.60, -0.45, -0.15], [-0.30, 1.55, -0.25], [0.00, -0.55, 1.55]];
+const tune = { wb: [1.08, 1.0, 1.10], gain: 1.25, off: -20, n: 0 };
+let CM = [];
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+function setColour() {
+  const L = [0.2126, 0.7152, 0.0722], sat = 1.2;
+  const S = [0, 1, 2].map(i => [0, 1, 2].map(j => (1 - sat) * L[j] + (i === j ? sat : 0)));
+  CM = [0, 1, 2].map(i => { const r = [0, 1, 2].map(j => { let v = 0; for (let k = 0; k < 3; k++) v += S[i][k] * CCM[k][j]; return v * tune.wb[j] * tune.gain; }); return [...r, tune.off]; });
+  $('ccmM').setAttribute('values', CM.map(r => `${r[0].toFixed(4)} ${r[1].toFixed(4)} ${r[2].toFixed(4)} 0 ${(r[3] / 255).toFixed(4)}`).join('  ') + '  0 0 0 1 0');
+}
+function applyColour(img) {
+  const d = img.data, [r0, r1, r2] = CM;
+  for (let i = 0; i < d.length; i += 4) { const r = d[i], g = d[i + 1], b = d[i + 2];
+    d[i] = r0[0] * r + r0[1] * g + r0[2] * b + r0[3]; d[i + 1] = r1[0] * r + r1[1] * g + r1[2] * b + r1[3]; d[i + 2] = r2[0] * r + r2[1] * g + r2[2] * b + r2[3]; }
+  return img;
+}
+const mc = document.createElement('canvas'); mc.width = 48; mc.height = 36;
+function measure(bmp) {
+  const x = mc.getContext('2d', { willReadFrequently: true }); x.drawImage(bmp, 0, 0, 48, 36);
+  const d = x.getImageData(0, 0, 48, 36).data, n = d.length / 4; let sr = 0, sg = 0, sb = 0, sl = 0; const px = [];
+  for (let i = 0; i < d.length; i += 4) { const r = d[i], g = d[i + 1], b = d[i + 2], l = 0.2126 * r + 0.7152 * g + 0.0722 * b; sr += r; sg += g; sb += b; sl += l; px.push([r, g, b, l]); }
+  px.sort((a, b) => b[3] - a[3]); const hi = px[Math.floor(n * 0.02)][3], mean = sl / n, top = px.slice(0, Math.max(8, Math.floor(n * 0.1)));
+  const tr = top.reduce((s, p) => s + p[0], 0) / top.length, tg = top.reduce((s, p) => s + p[1], 0) / top.length, tb = top.reduce((s, p) => s + p[2], 0) / top.length;
+  const dark = clamp((75 - mean) / 55, 0, 1), wG = 0.5 + 0.5 * dark, wbMax = 1.7 + dark;
+  return { wb: [clamp(wG * (sg / Math.max(1, sr)) + (1 - wG) * (tg / Math.max(1, tr)), 0.75, wbMax), 1, clamp(wG * (sg / Math.max(1, sb)) + (1 - wG) * (tg / Math.max(1, tb)), 0.75, wbMax)],
+           gain: clamp((235 - 125) / Math.max(40, hi - mean), 0.9, 1.8), off: clamp(125 - mean * ((235 - 125) / Math.max(40, hi - mean)), -80, 60) };
+}
+let tuning = false;
+async function tuneLoop() {
+  if (helperUp && !busy && !tuning) {
+    tuning = true;
+    try { const m = measure(await createImageBitmap(await (await fetch(HELPER + '/snap.jpg?t=' + Date.now(), { cache: 'no-store' })).blob()));
+      const a = tune.n === 0 ? 1 : 0.25; tune.wb = tune.wb.map((v, i) => v + (m.wb[i] - v) * a); tune.gain += (m.gain - tune.gain) * a; tune.off += (m.off - tune.off) * a; tune.n++; setColour(); } catch (e) {}
+    tuning = false;
+  }
+  setTimeout(tuneLoop, 2000);
+}
+
+/* ---------- who is playing ---------- */
+let kid = { id: 'default', name: '' };
+window.addEventListener('message', e => {
+  const d = e.data || {};
+  if (d.kt !== 'hello') return;
+  const prev = kid.id;
+  if (d.kid && d.kid.id) kid = { id: String(d.kid.id), name: d.kid.name || '' }; else if (d.child && d.child.name) kid.name = d.child.name;
+  $('collTitle').textContent = kid.name ? `${kid.name}'s things` : 'My things';
+  if (kid.id !== prev) refreshCount();
+});
+
+/* ---------- live view ---------- */
+let V; try { V = JSON.parse(localStorage.getItem('kt-camera-view') || 'null'); } catch (e) { V = null; }
+if (!V || !V.rot) V = { rot: { front: 180, rear: 180 }, mir: { front: true, rear: false } };     // shared with the Camera tile
+let active = 'front', helperUp = false, brainUp = false, busy = false, frameW = 640, frameH = 480;
+const rot = () => V.rot[active] || 0, mir = () => !!V.mir[active];
+function fit() {
+  const stage = $('stage'), W = stage.clientWidth - 20, H = stage.clientHeight - 20, turned = rot() % 180 !== 0, ar = frameW / frameH;
+  let bw, bh; if (!turned) { bw = Math.min(W, H * ar); bh = bw / ar; } else { bh = Math.min(H, W * ar); bw = bh / ar; }
+  box.style.width = bw + 'px'; box.style.height = bh + 'px';
+  const iw = turned ? bh : bw, ih = turned ? bw : bh;
+  live.style.width = iw + 'px'; live.style.height = ih + 'px';
+  live.style.transform = `translate(-50%,-50%) rotate(${rot()}deg) scaleX(${mir() ? -1 : 1})`;
+  live.style.filter = 'url(#ccm)';
+}
+function stream() { live.src = HELPER + '/stream?t=' + Date.now(); }
+$('bRot').onclick = () => { V.rot[active] = (rot() + 90) % 360; try { localStorage.setItem('kt-camera-view', JSON.stringify(V)); } catch (e) {} fit(); };
+window.addEventListener('resize', fit);
+live.onerror = () => { if (helperUp) setTimeout(stream, 1500); };
+function setStatus() {
+  const go = $('go');
+  if (!helperUp) { box.classList.add('off'); veil.textContent = 'The camera helper is not running on this tablet.'; go.disabled = true; $('st').textContent = 'camera offline'; return; }
+  box.classList.remove('off');
+  if (!brainUp) { go.disabled = true; $('st').textContent = 'the naming helper is not running (Arduino app show-tell)'; return; }
+  go.disabled = busy; $('st').textContent = busy ? 'looking…' : 'ready';
+}
+async function poll() {
+  try { const j = await (await fetch(HELPER + '/status', { cache: 'no-store' })).json();
+    const was = helperUp; helperUp = !!(j.camera && j.camera.alive);
+    if (j.active) active = j.active; if (j.camera && j.camera.size) { frameW = j.camera.size[0]; frameH = j.camera.size[1]; }
+    if (helperUp && !was) { fit(); stream(); }
+  } catch (e) { helperUp = false; }
+  try { const r = await fetch(BRAIN + '/status', { cache: 'no-store' }); brainUp = r.ok; } catch (e) { brainUp = false; }
+  setStatus();
+  setTimeout(poll, 2000);
+}
+
+/* ---------- the look: still → brain → word ---------- */
+let last_view = 'full', last = null;                                 // {word,label,conf,labels,blob,thumb,ms}
+async function look() {
+  if (busy || !helperUp || !brainUp) return;
+  busy = true; setStatus();
+  play('_looking');
+  const cnt = $('count');
+  for (const n of [2, 1]) { cnt.textContent = n; cnt.classList.add('on'); blip(n === 1 ? 900 : 600); await sleep(650); }
+  cnt.classList.remove('on');
+  try {
+    const raw = await (await fetch(HELPER + '/snap.jpg?t=' + Date.now(), { cache: 'no-store' })).blob();
+    $('flash').classList.add('on'); setTimeout(() => $('flash').classList.remove('on'), 60);
+    const bmp = await createImageBitmap(raw);
+    // the picture the child sees (turned, mirrored, coloured) — for the card and the collection
+    const r = rot(), turned = r % 180 !== 0, W = turned ? bmp.height : bmp.width, H = turned ? bmp.width : bmp.height;
+    const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+    x.save(); x.translate(W / 2, H / 2); x.rotate(r * Math.PI / 180); x.scale(mir() ? -1 : 1, 1); x.drawImage(bmp, -bmp.width / 2, -bmp.height / 2); x.restore();
+    x.putImageData(applyColour(x.getImageData(0, 0, W, H)), 0, 0);
+    const shown = await new Promise(res => c.toBlob(res, 'image/jpeg', 0.85));
+    const t = document.createElement('canvas'); t.width = 240; t.height = Math.round(240 * H / W); t.getContext('2d').drawImage(c, 0, 0, t.width, t.height);
+    const thumb = await new Promise(res => t.toBlob(res, 'image/jpeg', 0.8));
+    // the model gets the upright, COLOUR-CORRECTED picture (2026-10-27: the tablet's frames are flat and hazy — pixel values
+    // 60..140 — and the raw frame got it nothing; the stretched/balanced one the child sees did much better). Un-mirrored
+    // does not matter to it. It also gets a centre crop: a 120° lens makes a hand-held thing small in the frame, so the
+    // crop is tried too and the surer answer wins (a thing that fills the frame still wins on the full picture).
+    const u = document.createElement('canvas'); u.width = W; u.height = H; const ux = u.getContext('2d');
+    ux.save(); ux.translate(W / 2, H / 2); ux.rotate(r * Math.PI / 180); ux.drawImage(bmp, -bmp.width / 2, -bmp.height / 2); ux.restore();
+    ux.putImageData(applyColour(ux.getImageData(0, 0, W, H)), 0, 0);
+    const forBrain = await new Promise(res => u.toBlob(res, 'image/jpeg', 0.9));
+    const k = document.createElement('canvas'); k.width = Math.round(W * 0.6); k.height = Math.round(H * 0.6);
+    k.getContext('2d').drawImage(u, Math.round(W * 0.2), Math.round(H * 0.2), k.width, k.height, 0, 0, k.width, k.height);
+    const forBrainCrop = await new Promise(res => k.toBlob(res, 'image/jpeg', 0.9));
+    box.classList.add('busy'); veil.textContent = 'thinking…';
+    const t0 = Date.now();
+    const ask = b => fetch(BRAIN + '/classify', { method: 'POST', body: b }).then(r => r.json()).catch(() => null);
+    const [jf, jc] = await Promise.all([ask(forBrain), ask(forBrainCrop)]);
+    const lf = (jf && jf.labels) || [], lc = (jc && jc.labels) || [];
+    const top = l => (l[0] && l[0].confidence) || 0;
+    const labels = top(lc) > top(lf) ? lc : lf;          // the surer view wins; the other's labels follow as fallbacks
+    for (const x of (labels === lf ? lc : lf)) if (!labels.some(y => y.label === x.label)) labels.push(x);
+    last_view = labels === lc ? 'crop' : 'full';
+    last = { ...(pickWord(labels) || { word: null, label: labels[0] && labels[0].label, conf: labels[0] ? labels[0].confidence : 0 }), labels, blob: shown, thumb, ms: Date.now() - t0 };
+    showCard(last);
+  } catch (e) { console.warn('look failed', e); toast('Could not look — try again'); }
+  box.classList.remove('busy');
+  busy = false; setStatus();
+}
+function showCard(res) {
+  $('shot').src = URL.createObjectURL(res.blob);
+  $('word').innerHTML = ''; $('say').textContent = '';
+  const raw = res.labels && res.labels[0] ? `${res.labels[0].label} ${Math.round(res.labels[0].confidence)}% (${last_view})` : 'no answer';
+  $('hint').textContent = (res.word ? '' : 'the model said: ') + (res.word ? '' : raw);
+  $('card').classList.add('on');
+  if (!res.word) { $('unsure').style.display = ''; $('bKeep').style.display = 'none'; $('bSayAgain').style.display = 'none'; play('_unsure'); return; }
+  $('unsure').style.display = 'none'; $('bKeep').style.display = ''; $('bSayAgain').style.display = '';
+  const w = res.word; $('say').textContent = (/^[aeiou]/.test(w) ? 'an ' : 'a ') + w + '!';
+  for (const ch of w.toUpperCase()) { const b = document.createElement('b'); b.textContent = ch; if (/[AEIOU]/.test(ch)) b.classList.add('v'); $('word').appendChild(b); }
+  [...$('word').children].forEach((b, i) => setTimeout(() => b.classList.add('in'), 120 + i * 140));
+  setTimeout(() => play(w + '_s'), 300);
+}
+$('bSayAgain').onclick = () => { if (last && last.word) play(last.word); };
+$('bNext').onclick = () => { $('card').classList.remove('on'); play('_again'); };
+$('bKeep').onclick = async () => {
+  if (!last || !last.word) return;
+  const id = String(Date.now());
+  const ok = await store.put(id, { word: last.word, label: last.label, conf: Math.round(last.conf), t: id }, last.thumb);
+  $('card').classList.remove('on');
+  if (ok) { confetti(); const n = await refreshCount(); play(n.firstTime ? '_yay' : '_found'); toast(n.firstTime ? `New word: ${last.word}!` : 'Kept!'); } else toast('Could not keep it');
+};
+$('go').onclick = look;
+$('bIntro').onclick = () => play('_intro');
+function confetti() {
+  const c = $('confetti'); c.innerHTML = '';
+  for (let i = 0; i < 26; i++) { const s = document.createElement('i'); s.textContent = ['⭐', '🎉', '✨', '🌟'][i % 4]; s.style.left = (Math.random() * 100) + 'vw'; s.style.animationDelay = (Math.random() * 0.5) + 's'; c.appendChild(s); }
+  setTimeout(() => { c.innerHTML = ''; }, 2600);
+}
+
+/* ---------- collection store ---------- */
+const store = {
+  base() { return '/api/store/show-tell/' + encodeURIComponent(kid.id) + '/'; },
+  async list() {
+    if (LIVE) {
+      try { const r = await fetch(this.base(), { cache: 'no-store' }); if (!r.ok) return [];
+        const j = await r.json(), names = new Set((Array.isArray(j) ? j : (j.files || [])).map(e => typeof e === 'string' ? e : e.name));
+        const ids = [...names].filter(n => /^\d+\.json$/.test(n)).map(n => n.slice(0, -5)).sort((a, b) => b - a);
+        const out = [];
+        for (const id of ids) { try { const m = await (await fetch(this.base() + id + '.json', { cache: 'no-store' })).json(); out.push({ id, ...m, img: names.has(id + '.jpg') ? this.base() + id + '.jpg' : '' }); } catch (e) {} }
+        return out;
+      } catch (e) { return []; }
+    }
+    const l = this._ls(); return Object.keys(l).sort((a, b) => b - a).map(id => ({ id, ...l[id] }));
+  },
+  async put(id, meta, thumb) {
+    if (LIVE) { try { const a = await fetch(this.base() + id + '.json', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(meta) }); const b = await fetch(this.base() + id + '.jpg', { method: 'PUT', body: thumb }); return a.ok && b.ok; } catch (e) { return false; } }
+    const l = this._ls(), ids = Object.keys(l).sort(); while (ids.length >= 12) delete l[ids.shift()];
+    l[id] = { ...meta, img: await new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(thumb); }) };
+    try { localStorage.setItem('show-tell.' + kid.id, JSON.stringify(l)); return true; } catch (e) { return false; }
+  },
+  _ls() { try { return JSON.parse(localStorage.getItem('show-tell.' + kid.id) || '{}'); } catch (e) { return {}; } },
+};
+let knownWords = new Set();
+async function refreshCount() {
+  const l = await store.list(); const before = knownWords; knownWords = new Set(l.map(i => i.word));
+  $('nColl').textContent = l.length;
+  return { n: l.length, firstTime: last && last.word && !before.has(last.word) && knownWords.has(last.word) };
+}
+const show = id => { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); if (id === 'look') fit(); };
+async function openColl() {
+  show('coll'); const l = await store.list(); const g = $('grid'); g.innerHTML = '';
+  if (!l.length) { g.innerHTML = '<div id="empty">Nothing yet — hold something up to the camera and tap the big button!</div>'; return; }
+  for (const it of l) { const d = document.createElement('div'); d.className = 'item';
+    d.innerHTML = `<img alt="" src="${it.img ? it.img + (it.img.startsWith('data:') ? '' : '?' + it.id) : ''}"><div class="w">${it.word}</div>`;
+    d.onclick = () => play(it.word); g.appendChild(d); }
+}
+$('bColl').onclick = openColl; $('bCollLook').onclick = () => show('look');
+const home = () => { try { parent.postMessage({ kt: 'home' }, '*'); } catch (e) {} };
+$('bDone').onclick = home; $('bCollDone').onclick = home;
+
+/* ---------- go ---------- */
+setColour(); fit(); poll(); refreshCount(); setTimeout(tuneLoop, 800);
+window.KTST = { get state() { return { helperUp, brainUp, busy, kid: kid.id, last: last && { word: last.word, label: last.label, conf: last.conf, ms: last.ms }, rules: RULES.length, voices: VOICES.size }; }, look, kidWord, pickWord, store };
+})();
+</script>
+</body>
+</html>

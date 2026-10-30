@@ -1,0 +1,382 @@
+{
+ "voice": "en_US-kristin-medium",
+ "length_scale": 1.05,
+ "prompts": {
+  "count": {
+   "file": "count.mp3",
+   "text": "Count with me!"
+  },
+  "howmany": {
+   "file": "howmany.mp3",
+   "text": "How many do you see?"
+  },
+  "tapeach": {
+   "file": "tapeach.mp3",
+   "text": "Tap each one to count it."
+  },
+  "tapnum": {
+   "file": "tapnum.mp3",
+   "text": "Now tap the number."
+  },
+  "yes": {
+   "file": "yes.mp3",
+   "text": "Yes!"
+  },
+  "great": {
+   "file": "great.mp3",
+   "text": "Great counting!"
+  },
+  "together": {
+   "file": "together.mp3",
+   "text": "Not quite. Let's count them together."
+  },
+  "again": {
+   "file": "again.mp3",
+   "text": "Try again."
+  },
+  "shapes": {
+   "file": "shapes.mp3",
+   "text": "Let's find shapes!"
+  },
+  "add": {
+   "file": "add.mp3",
+   "text": "Let's add!"
+  },
+  "and": {
+   "file": "and.mp3",
+   "text": "and"
+  },
+  "more": {
+   "file": "more.mp3",
+   "text": "more."
+  },
+  "altogether": {
+   "file": "altogether.mp3",
+   "text": "How many altogether?"
+  },
+  "makes": {
+   "file": "makes.mp3",
+   "text": "makes"
+  },
+  "n1": {
+   "file": "n1.mp3",
+   "text": "one"
+  },
+  "n2": {
+   "file": "n2.mp3",
+   "text": "two"
+  },
+  "n3": {
+   "file": "n3.mp3",
+   "text": "three"
+  },
+  "n4": {
+   "file": "n4.mp3",
+   "text": "four"
+  },
+  "n5": {
+   "file": "n5.mp3",
+   "text": "five"
+  },
+  "n6": {
+   "file": "n6.mp3",
+   "text": "six"
+  },
+  "n7": {
+   "file": "n7.mp3",
+   "text": "seven"
+  },
+  "n8": {
+   "file": "n8.mp3",
+   "text": "eight"
+  },
+  "n9": {
+   "file": "n9.mp3",
+   "text": "nine"
+  },
+  "n10": {
+   "file": "n10.mp3",
+   "text": "ten"
+  },
+  "n11": {
+   "file": "n11.mp3",
+   "text": "eleven"
+  },
+  "n12": {
+   "file": "n12.mp3",
+   "text": "twelve"
+  },
+  "n13": {
+   "file": "n13.mp3",
+   "text": "thirteen"
+  },
+  "n14": {
+   "file": "n14.mp3",
+   "text": "fourteen"
+  },
+  "n15": {
+   "file": "n15.mp3",
+   "text": "fifteen"
+  },
+  "n16": {
+   "file": "n16.mp3",
+   "text": "sixteen"
+  },
+  "n17": {
+   "file": "n17.mp3",
+   "text": "seventeen"
+  },
+  "n18": {
+   "file": "n18.mp3",
+   "text": "eighteen"
+  },
+  "n19": {
+   "file": "n19.mp3",
+   "text": "nineteen"
+  },
+  "n20": {
+   "file": "n20.mp3",
+   "text": "twenty"
+  },
+  "shape_circle": {
+   "file": "shape_circle.mp3",
+   "text": "Find the circle."
+  },
+  "is_circle": {
+   "file": "is_circle.mp3",
+   "text": "A circle!"
+  },
+  "shape_square": {
+   "file": "shape_square.mp3",
+   "text": "Find the square."
+  },
+  "is_square": {
+   "file": "is_square.mp3",
+   "text": "A square!"
+  },
+  "shape_triangle": {
+   "file": "shape_triangle.mp3",
+   "text": "Find the triangle."
+  },
+  "is_triangle": {
+   "file": "is_triangle.mp3",
+   "text": "A triangle!"
+  },
+  "shape_star": {
+   "file": "shape_star.mp3",
+   "text": "Find the star."
+  },
+  "is_star": {
+   "file": "is_star.mp3",
+   "text": "A star!"
+  },
+  "shape_heart": {
+   "file": "shape_heart.mp3",
+   "text": "Find the heart."
+  },
+  "is_heart": {
+   "file": "is_heart.mp3",
+   "text": "A heart!"
+  },
+  "shape_rectangle": {
+   "file": "shape_rectangle.mp3",
+   "text": "Find the rectangle."
+  },
+  "is_rectangle": {
+   "file": "is_rectangle.mp3",
+   "text": "A rectangle!"
+  },
+  "color_red": {
+   "file": "color_red.mp3",
+   "text": "Find the red one."
+  },
+  "isc_red": {
+   "file": "isc_red.mp3",
+   "text": "It's red!"
+  },
+  "cs_red_circle": {
+   "file": "cs_red_circle.mp3",
+   "text": "Find the red circle."
+  },
+  "cs_red_square": {
+   "file": "cs_red_square.mp3",
+   "text": "Find the red square."
+  },
+  "cs_red_triangle": {
+   "file": "cs_red_triangle.mp3",
+   "text": "Find the red triangle."
+  },
+  "cs_red_star": {
+   "file": "cs_red_star.mp3",
+   "text": "Find the red star."
+  },
+  "cs_red_heart": {
+   "file": "cs_red_heart.mp3",
+   "text": "Find the red heart."
+  },
+  "cs_red_rectangle": {
+   "file": "cs_red_rectangle.mp3",
+   "text": "Find the red rectangle."
+  },
+  "color_blue": {
+   "file": "color_blue.mp3",
+   "text": "Find the blue one."
+  },
+  "isc_blue": {
+   "file": "isc_blue.mp3",
+   "text": "It's blue!"
+  },
+  "cs_blue_circle": {
+   "file": "cs_blue_circle.mp3",
+   "text": "Find the blue circle."
+  },
+  "cs_blue_square": {
+   "file": "cs_blue_square.mp3",
+   "text": "Find the blue square."
+  },
+  "cs_blue_triangle": {
+   "file": "cs_blue_triangle.mp3",
+   "text": "Find the blue triangle."
+  },
+  "cs_blue_star": {
+   "file": "cs_blue_star.mp3",
+   "text": "Find the blue star."
+  },
+  "cs_blue_heart": {
+   "file": "cs_blue_heart.mp3",
+   "text": "Find the blue heart."
+  },
+  "cs_blue_rectangle": {
+   "file": "cs_blue_rectangle.mp3",
+   "text": "Find the blue rectangle."
+  },
+  "color_green": {
+   "file": "color_green.mp3",
+   "text": "Find the green one."
+  },
+  "isc_green": {
+   "file": "isc_green.mp3",
+   "text": "It's green!"
+  },
+  "cs_green_circle": {
+   "file": "cs_green_circle.mp3",
+   "text": "Find the green circle."
+  },
+  "cs_green_square": {
+   "file": "cs_green_square.mp3",
+   "text": "Find the green square."
+  },
+  "cs_green_triangle": {
+   "file": "cs_green_triangle.mp3",
+   "text": "Find the green triangle."
+  },
+  "cs_green_star": {
+   "file": "cs_green_star.mp3",
+   "text": "Find the green star."
+  },
+  "cs_green_heart": {
+   "file": "cs_green_heart.mp3",
+   "text": "Find the green heart."
+  },
+  "cs_green_rectangle": {
+   "file": "cs_green_rectangle.mp3",
+   "text": "Find the green rectangle."
+  },
+  "color_yellow": {
+   "file": "color_yellow.mp3",
+   "text": "Find the yellow one."
+  },
+  "isc_yellow": {
+   "file": "isc_yellow.mp3",
+   "text": "It's yellow!"
+  },
+  "cs_yellow_circle": {
+   "file": "cs_yellow_circle.mp3",
+   "text": "Find the yellow circle."
+  },
+  "cs_yellow_square": {
+   "file": "cs_yellow_square.mp3",
+   "text": "Find the yellow square."
+  },
+  "cs_yellow_triangle": {
+   "file": "cs_yellow_triangle.mp3",
+   "text": "Find the yellow triangle."
+  },
+  "cs_yellow_star": {
+   "file": "cs_yellow_star.mp3",
+   "text": "Find the yellow star."
+  },
+  "cs_yellow_heart": {
+   "file": "cs_yellow_heart.mp3",
+   "text": "Find the yellow heart."
+  },
+  "cs_yellow_rectangle": {
+   "file": "cs_yellow_rectangle.mp3",
+   "text": "Find the yellow rectangle."
+  },
+  "color_orange": {
+   "file": "color_orange.mp3",
+   "text": "Find the orange one."
+  },
+  "isc_orange": {
+   "file": "isc_orange.mp3",
+   "text": "It's orange!"
+  },
+  "cs_orange_circle": {
+   "file": "cs_orange_circle.mp3",
+   "text": "Find the orange circle."
+  },
+  "cs_orange_square": {
+   "file": "cs_orange_square.mp3",
+   "text": "Find the orange square."
+  },
+  "cs_orange_triangle": {
+   "file": "cs_orange_triangle.mp3",
+   "text": "Find the orange triangle."
+  },
+  "cs_orange_star": {
+   "file": "cs_orange_star.mp3",
+   "text": "Find the orange star."
+  },
+  "cs_orange_heart": {
+   "file": "cs_orange_heart.mp3",
+   "text": "Find the orange heart."
+  },
+  "cs_orange_rectangle": {
+   "file": "cs_orange_rectangle.mp3",
+   "text": "Find the orange rectangle."
+  },
+  "color_purple": {
+   "file": "color_purple.mp3",
+   "text": "Find the purple one."
+  },
+  "isc_purple": {
+   "file": "isc_purple.mp3",
+   "text": "It's purple!"
+  },
+  "cs_purple_circle": {
+   "file": "cs_purple_circle.mp3",
+   "text": "Find the purple circle."
+  },
+  "cs_purple_square": {
+   "file": "cs_purple_square.mp3",
+   "text": "Find the purple square."
+  },
+  "cs_purple_triangle": {
+   "file": "cs_purple_triangle.mp3",
+   "text": "Find the purple triangle."
+  },
+  "cs_purple_star": {
+   "file": "cs_purple_star.mp3",
+   "text": "Find the purple star."
+  },
+  "cs_purple_heart": {
+   "file": "cs_purple_heart.mp3",
+   "text": "Find the purple heart."
+  },
+  "cs_purple_rectangle": {
+   "file": "cs_purple_rectangle.mp3",
+   "text": "Find the purple rectangle."
+  }
+ }
+}

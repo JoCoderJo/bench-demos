@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Yoto</title>
+<!-- tablet/apps/yoto — the family's Yoto library, played through the tablet agent (/api/yoto/*), which holds the
+     sign-in and streams the audio. Shelf of covers → player with chapters, big play/pause, next/previous, seek.
+     Works with Yoto; not an official Yoto app. -->
+<style>
+:root{--ink:#1d2a3a;--dim:#5b6b80;--card:#fff;--accent:#f2572b;--shadow:0 8px 24px rgba(20,40,80,.16)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(160deg,#fff0e8,#fff9f5);color:var(--ink);font:20px system-ui,sans-serif;touch-action:manipulation}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+#bar{display:flex;align-items:center;gap:12px;padding:10px 20px;height:72px}
+#bar h1{font-size:26px;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn{padding:12px 20px;border-radius:18px;background:#fff;box-shadow:var(--shadow);font-weight:700;font-size:19px;display:flex;align-items:center;gap:10px;white-space:nowrap}
+.btn.go{background:var(--accent);color:#fff}
+.tabs{display:flex;background:rgba(0,0,0,.08);border-radius:30px;padding:4px;gap:2px}
+.tabs button{padding:9px 16px;border-radius:26px;font-weight:700;font-size:16px;white-space:nowrap}
+.tabs button.on{background:var(--card);box-shadow:var(--shadow)}
+.btn:active{transform:scale(.95)}
+.screen{position:absolute;inset:72px 0 0 0;display:none}
+.screen.on{display:block}
+#shelf{height:100%;overflow-y:auto;padding:4px 20px 30px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;align-content:start;touch-action:pan-y;scrollbar-width:none}
+#shelf::-webkit-scrollbar{display:none}
+.cardb{background:var(--card);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;transition:transform .1s;text-align:left}
+.cardb:active{transform:scale(.96)}
+.cardb img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff3ec;display:block;padding:6px}
+.cardb .t{font-size:19px;font-weight:700;padding:10px 12px 2px;line-height:1.25;min-height:2.5em;max-height:3.9em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.cardb .s{font-size:14px;color:var(--dim);padding:0 12px 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#msg{grid-column:1/-1;text-align:center;color:var(--dim);padding:40px 20px;font-size:22px}
+/* player */
+#player{display:none;grid-template-columns:420px 1fr;gap:20px;padding:0 20px 16px}
+#player.on{display:grid}
+#left{display:flex;flex-direction:column;align-items:center;gap:14px}
+#cover{width:320px;height:320px;border-radius:28px;object-fit:contain;box-shadow:0 16px 40px rgba(0,0,0,.25);background:#fff3ec}
+#now{font-size:22px;font-weight:700;text-align:center;line-height:1.2;max-height:2.4em;overflow:hidden;padding:0 10px}
+#ctl{display:flex;align-items:center;gap:18px}
+#ctl button{border-radius:50%;background:#fff;box-shadow:var(--shadow);display:grid;place-items:center}
+#prev,#next{width:72px;height:72px;font-size:30px}
+#play{width:104px;height:104px;font-size:48px;background:var(--accent)!important;color:#fff}
+#ctl button:active{transform:scale(.94)}
+#seek{width:380px;display:flex;align-items:center;gap:10px;font-size:14px;color:var(--dim);font-variant-numeric:tabular-nums}
+#seek input{flex:1;height:40px;accent-color:var(--accent)}
+#chapters{height:100%;overflow-y:auto;background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:8px;touch-action:pan-y;scrollbar-width:none}
+#chapters::-webkit-scrollbar{display:none}
+.ch{display:flex;align-items:center;gap:14px;width:100%;padding:14px 16px;border-radius:16px;text-align:left;font-size:20px}
+.ch .n{width:40px;height:40px;border-radius:50%;background:#eef2f7;display:grid;place-items:center;font-size:16px;font-weight:700;flex:none}
+.ch .ti{flex:1;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch .d{font-size:14px;color:var(--dim);font-variant-numeric:tabular-nums}
+.ch.now{background:#fff0e8}.ch.now .n{background:var(--accent);color:#fff}
+.ch:active{background:#fde7dd}
+#toast{position:fixed;left:50%;bottom:70px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:20px;font-size:15px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;max-width:90vw;text-align:center}
+#toast.on{opacity:.95}
+</style></head><body>
+<div id="bar"><h1 id="title">Yoto</h1><div class="tabs" id="filters"><button data-f="mine" class="on">My cards</button><button data-f="shared">Shared</button><button data-f="free">Free from Yoto</button></div><button class="btn" id="back" style="display:none">◀ Library</button><button class="btn" id="refresh">↻</button></div>
+<div id="shelf" class="screen on"></div>
+<div id="player" class="screen">
+  <div id="left">
+    <img id="cover" alt="">
+    <div id="now"></div>
+    <div id="ctl"><button id="prev">⏮</button><button id="play">▶</button><button id="next">⏭</button></div>
+    <div id="seek"><span id="t0">0:00</span><input type="range" id="pos" min="0" max="1000" value="0"><span id="t1">0:00</span></div>
+  </div>
+  <div id="chapters"></div>
+</div>
+<audio id="audio" preload="auto"></audio>
+<div id="toast"></div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const kt=m=>{try{parent.postMessage(m,'*');}catch(e){}};
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2600);}
+const img=u=>u?('/api/yoto/image?u='+encodeURIComponent(u)):'';
+const fmt=s=>{s=Math.max(0,Math.floor(s||0));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0');};
+let LIB=[],card=null,idx=0,seeking=false;
+// how a card got into the library: physical-add / user-add = bought, myo-content-add = made by us, sharetoken-add = shared with us, free-content-add = Yoto's free extras (radio, podcasts, timers)
+const GROUPS={mine:['physical-add','user-add','myo-content-add'],shared:['sharetoken-add'],free:['free-content-add']};
+let filter='mine';try{filter=localStorage.getItem('yoto.filter')||'mine';}catch(e){}
+function inGroup(c){const g=GROUPS[filter];return g?g.includes(c.reason):!Object.values(GROUPS).flat().includes(c.reason)||filter==='all';}
+const audio=$('audio');
+
+async function api(p){const r=await fetch(p,{cache:'no-store'});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||('error '+r.status));return j;}
+async function loadShelf(){
+  $('shelf').innerHTML='<div id="msg">Loading your library…</div>';
+  try{
+    const st=await api('/api/yoto/status');
+    if(!st.signed_in){$('shelf').innerHTML='<div id="msg">Not signed in to Yoto yet.<br><small>A grown-up signs in once with tools/yoto-login.py on the laptop and copies the token to the tablet.</small></div>';return;}
+    LIB=(await api('/api/yoto/library')).cards;
+    renderShelf();
+  }catch(e){$('shelf').innerHTML='<div id="msg">Could not reach Yoto.<br><small>'+E(e.message)+'</small></div>';}
+}
+function renderShelf(){
+  $('filters').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.f===filter));
+  const list=LIB.filter(inGroup);
+  {
+    $('shelf').innerHTML=list.map(c=>'<button class="cardb" data-id="'+E(c.id)+'"><img src="'+E(img(c.cover))+'" alt="" loading="lazy"><span class="t">'+E(c.title)+'</span><span class="s">'+E(c.author||(c.duration?fmt(c.duration):''))+'</span></button>').join('')
+      ||'<div id="msg">Nothing in this group yet.</div>';
+    $('shelf').querySelectorAll('.cardb').forEach(b=>b.onclick=()=>openCard(b.dataset.id));
+  }
+}
+$('filters').querySelectorAll('button').forEach(b=>b.onclick=()=>{filter=b.dataset.f;try{localStorage.setItem('yoto.filter',filter);}catch(e){}renderShelf();kt({kt:'blip',f:520});});
+$('refresh').onclick=()=>{kt({kt:'blip',f:500});if(card)loadShelf().then(()=>{});else loadShelf();};
+
+// ---------------- player
+function tracks(c){const out=[];c.chapters.forEach((ch,ci)=>ch.tracks.forEach((tr,ti)=>out.push({...tr,ci,ti,chTitle:ch.title})));return out;}
+async function openCard(id){
+  kt({kt:'blip',f:560});
+  try{card=await api('/api/yoto/card/'+id);}catch(e){toast('Could not open that card: '+e.message);return;}
+  card.list=tracks(card);
+  $('title').textContent=card.title;$('cover').src=img(card.cover);
+  $('shelf').classList.remove('on');$('player').classList.add('on');$('back').style.display='';$('filters').style.display='none';
+  $('chapters').innerHTML=card.list.map((t,i)=>'<button class="ch" data-i="'+i+'"><span class="n">'+(i+1)+'</span><span class="ti">'+E(t.title)+'</span><span class="d">'+(t.duration?fmt(t.duration):(t.type==='stream'?'live':''))+'</span></button>').join('');
+  $('chapters').querySelectorAll('.ch').forEach(b=>b.onclick=()=>{playIdx(+b.dataset.i);kt({kt:'blip',f:520});});
+  let resume=0,at=0;try{const s=JSON.parse(localStorage.getItem('yoto.'+id)||'{}');resume=s.i||0;at=s.t||0;}catch(e){}
+  playIdx(Math.min(resume,card.list.length-1),at);
+}
+function playIdx(i,at){
+  if(!card||!card.list.length)return;
+  idx=i;const t=card.list[i];
+  $('chapters').querySelectorAll('.ch').forEach((b,j)=>b.classList.toggle('now',j===i));
+  const now=$('chapters').querySelector('.ch.now');if(now)now.scrollIntoView({block:'nearest'});
+  $('now').textContent=t.title;
+  audio.src=t.src;audio.currentTime=0;
+  if(at){audio.addEventListener('loadedmetadata',()=>{try{audio.currentTime=at;}catch(e){}},{once:true});}
+  audio.play().then(()=>{$('play').textContent='⏸';}).catch(()=>{$('play').textContent='▶';});
+}
+$('play').onclick=()=>{if(!card)return;if(audio.paused){audio.play();$('play').textContent='⏸';}else{audio.pause();$('play').textContent='▶';}kt({kt:'blip',f:480});};
+$('next').onclick=()=>{if(card&&idx<card.list.length-1)playIdx(idx+1);};
+$('prev').onclick=()=>{if(!card)return;if(audio.currentTime>4)audio.currentTime=0;else if(idx>0)playIdx(idx-1);};
+audio.addEventListener('ended',()=>{if(card&&card.autoadvance!=='none'&&idx<card.list.length-1)playIdx(idx+1);else $('play').textContent='▶';});
+audio.addEventListener('error',()=>{toast('That track would not play');$('play').textContent='▶';});
+audio.addEventListener('timeupdate',()=>{
+  if(!card)return;const d=audio.duration||card.list[idx].duration||0;
+  if(!seeking){$('pos').value=d?Math.round(audio.currentTime/d*1000):0;}
+  $('t0').textContent=fmt(audio.currentTime);$('t1').textContent=d&&isFinite(d)?fmt(d):'live';
+  if(Math.floor(audio.currentTime)%5===0)try{localStorage.setItem('yoto.'+card.id,JSON.stringify({i:idx,t:Math.floor(audio.currentTime)}));}catch(e){}
+});
+$('pos').addEventListener('pointerdown',()=>seeking=true);
+$('pos').addEventListener('change',()=>{seeking=false;const d=audio.duration;if(d&&isFinite(d))audio.currentTime=$('pos').value/1000*d;});
+$('pos').addEventListener('pointerup',()=>seeking=false);
+$('back').onclick=()=>{audio.pause();$('play').textContent='▶';card=null;$('player').classList.remove('on');$('shelf').classList.add('on');$('back').style.display='none';$('filters').style.display='';$('title').textContent='Yoto';};
+// the launcher's hello: nothing needed, but keep volume honest with the tablet's ceiling if told
+window.addEventListener('message',e=>{const d=e.data||{};if(d.kt==='hello'&&d.sound&&d.sound.max_volume)audio.volume=1;});
+loadShelf();
+</script></body></html>

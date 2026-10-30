@@ -1,0 +1,41 @@
+{
+  "_doc": "Tiny decodable stories. Every word in `say` must have a recording in demo/audio/free/words (build.py checks). Words in [brackets] inside a line are the ones the friend says aloud and the child can tap; the rest is read-along text.",
+  "stories": [
+    { "id": "frog", "title": "frog", "emoji": "🐸", "scene": "🌿🐸🪵💧", "pages": [
+      { "emoji": "🐸🪵", "line": "The [frog] [sat] on a [log]." },
+      { "emoji": "🐸💨", "line": "The [frog] can [hop] and [jump]." },
+      { "emoji": "💦🐸", "line": "[Jump] in the [pond], [frog]!" } ] },
+    { "id": "cat", "title": "cat", "emoji": "🐱", "scene": "🐱🎩🧶", "pages": [
+      { "emoji": "🐱🟫", "line": "The [cat] [sat] on the [mat]." },
+      { "emoji": "🐱🎩", "line": "The [cat] has a [red] [hat]." },
+      { "emoji": "🐱💨", "line": "[Run], [cat], [run]!" } ] },
+    { "id": "hen", "title": "hen", "emoji": "🐔", "scene": "🐔🪺🥚", "pages": [
+      { "emoji": "🐔🪺", "line": "The [hen] is in the [nest]." },
+      { "emoji": "🥚", "line": "The [hen] has an [egg]." },
+      { "emoji": "🥚✨", "line": "A [big] [egg]!" },
+      { "emoji": "🐣", "line": "[Pop]! A [wet] chick. [Yes]!" } ] },
+    { "id": "rain", "title": "rain", "emoji": "🌧️", "scene": "🌧️☂️🐶", "pages": [
+      { "emoji": "🌧️🌧️", "line": "[Rain], [rain], [wet] [rain]." },
+      { "emoji": "☂️", "line": "[Get] the [umbrella]!" },
+      { "emoji": "🐶💧", "line": "The [dog] is [wet]. The [pup] is [wet]." },
+      { "emoji": "🌫️🐶", "line": "[Fog] and [rain]. [Run] to the [bed]!" } ] },
+    { "id": "picnic", "title": "apple", "emoji": "🧺", "scene": "🍎🍯☕🐛", "pages": [
+      { "emoji": "🍎🍯☕", "line": "An [apple], some [jam], and a [cup]." },
+      { "emoji": "🐛🍎", "line": "A [bug] is on the [apple]!" },
+      { "emoji": "🐛💨", "line": "[Pop]! The [bug] [ran]." },
+      { "emoji": "🐜🍯", "line": "An [insect] in the [jam]. [Fun]!" } ] },
+    { "id": "sea", "title": "fish", "emoji": "🌊", "scene": "🐟🦆🚢🪁", "pages": [
+      { "emoji": "🐟🦆", "line": "A [fish] and a [duck]." },
+      { "emoji": "🚢🪁", "line": "A [big] [ship]. A [red] [kite]." },
+      { "emoji": "🐙", "line": "The [octopus] can [hug]!" } ] },
+    { "id": "night", "title": "moon", "emoji": "🌙", "scene": "☀️🌙🛏️", "pages": [
+      { "emoji": "☀️", "line": "The [sun] is [hot]." },
+      { "emoji": "🌙🛏️", "line": "The [moon] is up. [Bed]!" },
+      { "emoji": "🐶🤗", "line": "[Hug] the [pup]. [Yes]!" } ] },
+    { "id": "farm", "title": "pig", "emoji": "🐷", "scene": "🐷🐐🐔🐶", "pages": [
+      { "emoji": "🐷", "line": "A [pig] can [dig]." },
+      { "emoji": "🐐🍃", "line": "A [goat] can [get] a [leaf]." },
+      { "emoji": "🐔🐶", "line": "The [hen] and the [dog] [sit] in the [sun]." },
+      { "emoji": "🐷🐐🐔🐶", "line": "[Ten] [friend]s on the farm. [Fun]!" } ] }
+  ]
+}

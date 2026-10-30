@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Draw</title>
+<!-- tablet/apps/draw — finger painting with a library.
+     Every drawing is a PNG kept by the tablet agent (/api/store/draw/<id>.png + a thumbnail), saved automatically a
+     moment after each stroke, so a child never has to "save". The gallery offers: carry on with any drawing, a clean
+     sheet, or a template (line-art to colour in, drawn as vector shapes — no image assets). Without the agent (the page
+     opened on a laptop) the same library lives in localStorage with a handful of slots. -->
+<style>
+:root{--ink:#1d2a3a;--dim:#5b6b80;--accent:#ff8a3d;--shadow:0 8px 24px rgba(20,40,80,.16)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#f6f3ee;color:var(--ink);font:18px system-ui,sans-serif;touch-action:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+#wrap{position:fixed;inset:0;display:grid;grid-template-columns:96px 1fr;grid-template-rows:1fr 92px}
+#pots{grid-row:1/3;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 0;overflow-y:auto;z-index:2;scrollbar-width:none}
+.pot{width:64px;height:64px;border-radius:50%;border:5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.25);flex:none;transition:transform .1s}
+.pot.on{transform:scale(1.18);border-color:#1d2a3a}
+#canvas{grid-column:2;grid-row:1;width:100%;height:100%;background:#fff;touch-action:none;display:block}
+#tools{grid-column:2;grid-row:2;background:#fff;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;padding:0 16px;z-index:2;overflow-x:auto;scrollbar-width:none}
+.tool{height:66px;min-width:66px;padding:0 14px;border-radius:18px;background:#eef2f7;display:grid;place-items:center;font-size:28px;flex:none;font-weight:700}
+.tool.on{background:#1d2a3a;color:#fff}
+.tool:active{transform:scale(.94)}
+.sz i{display:block;border-radius:50%;background:currentColor}
+.sep{width:2px;height:48px;background:#e3e8ee;flex:none;margin:0 4px}
+#clear.arm{background:#e05a4f;color:#fff}
+#gal{background:var(--accent);color:#fff;font-size:22px;gap:8px;display:flex;align-items:center}
+#saved{position:fixed;right:18px;top:12px;font-size:14px;color:var(--dim);background:rgba(255,255,255,.85);padding:6px 12px;border-radius:12px;z-index:3;opacity:0;transition:opacity .3s}
+#saved.on{opacity:1}
+/* gallery */
+#gallery{position:fixed;inset:0;background:#f3f5f9;display:none;flex-direction:column;z-index:10}
+#gallery.on{display:flex}
+#gallery header{display:flex;align-items:center;gap:14px;padding:14px 22px;background:#fff;box-shadow:var(--shadow);height:78px}
+#gallery h1{font-size:26px;margin:0;flex:1}
+.hbtn{padding:12px 20px;border-radius:16px;background:#eef2f7;font-weight:700;font-size:19px}
+.hbtn.go{background:#1d2a3a;color:#fff}
+.hbtn.warn{background:#ffe3df;color:#8a2a22}
+.hbtn.warn.on{background:#e05a4f;color:#fff}
+#shelf{flex:1;overflow-y:auto;padding:20px 24px 40px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;align-content:start;touch-action:pan-y;scrollbar-width:none}
+.card{background:#fff;border-radius:22px;box-shadow:var(--shadow);overflow:hidden;aspect-ratio:16/11;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative;transition:transform .1s}
+.card:active{transform:scale(.96)}
+.card img,.card canvas{width:100%;height:100%;object-fit:cover;display:block}
+.card .big{font-size:64px;line-height:1}
+.card .t{font-size:22px;font-weight:700}
+.card .when{position:absolute;left:10px;bottom:8px;font-size:12px;color:#fff;background:rgba(0,0,0,.45);padding:3px 8px;border-radius:8px}
+.card.new{background:linear-gradient(160deg,#fff,#eef7ff)}
+.card.tpl{background:linear-gradient(160deg,#fff,#fff3e6)}
+.card.del::after{content:"🗑 tap to delete";position:absolute;inset:0;display:grid;place-items:center;background:rgba(224,90,79,.75);color:#fff;font-weight:800;font-size:22px}
+.card.cur{outline:5px solid var(--accent)}
+#tplpick .card{aspect-ratio:16/11}
+#tplpick .card .t{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.9);padding:6px;font-size:18px}
+#toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:20px;font-size:15px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30}
+#toast.on{opacity:.95}
+</style></head><body>
+<div id="wrap">
+  <div id="pots"></div>
+  <canvas id="canvas"></canvas>
+  <div id="tools">
+    <button class="tool" id="gal">📁 <span>Drawings</span></button>
+    <span class="sep"></span>
+    <button class="tool sz on" data-size="8"><i style="width:10px;height:10px"></i></button>
+    <button class="tool sz" data-size="18"><i style="width:20px;height:20px"></i></button>
+    <button class="tool sz" data-size="36"><i style="width:34px;height:34px"></i></button>
+    <button class="tool" id="fill" title="fill">🪣</button>
+    <button class="tool" id="eraser" title="eraser">🧽</button>
+    <span class="sep"></span>
+    <button class="tool stamp" data-stamp="⭐">⭐</button><button class="tool stamp" data-stamp="❤️">❤️</button><button class="tool stamp" data-stamp="🐸">🐸</button>
+    <button class="tool stamp" data-stamp="🌸">🌸</button><button class="tool stamp" data-stamp="🚗">🚗</button><button class="tool stamp" data-stamp="🦋">🦋</button>
+    <span class="sep"></span>
+    <button class="tool" id="undo">↶</button>
+    <button class="tool" id="clear">🗑</button>
+  </div>
+</div>
+<div id="saved">saved ✓</div>
+<div id="gallery">
+  <header><h1 id="gtitle">My drawings</h1><button class="hbtn warn" id="delmode">Delete…</button><button class="hbtn go" id="gclose">Back to drawing</button></header>
+  <div id="shelf"></div>
+</div>
+<div id="toast"></div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const COLORS=['#1d2a3a','#e0564f','#ff8a3d','#ffd166','#3fb950','#1e88e5','#7c4dff','#ff6fb5','#8d6e63','#ffffff'];
+const cv=$('canvas'),ctx=cv.getContext('2d',{willReadFrequently:true});
+let color=COLORS[0],size=8,tool='brush',stamp='⭐',undoStack=[],current=null,dirty=false;
+const strokes=new Map();
+const kt=m=>{try{parent.postMessage(m,'*');}catch(e){}};
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2200);}
+
+// ---------------- the library: agent store when there is one, localStorage otherwise
+const LIVE=location.protocol.startsWith('http');
+let agent=false;
+const store={
+  async detect(){if(!LIVE)return false;try{const r=await fetch('/api/status',{cache:'no-store'});agent=r.ok;}catch(e){agent=false;}return agent;},
+  async list(){
+    if(agent){const r=await fetch('/api/store/draw',{cache:'no-store'});const j=await r.json();
+      const ids={};(j.files||[]).forEach(f=>{const m=f.name.match(/^(d-\d+)(\.t)?\.png$/);if(!m)return;ids[m[1]]=ids[m[1]]||{id:m[1],mtime:0};if(!m[2])ids[m[1]].mtime=f.mtime;});
+      return Object.values(ids).sort((a,b)=>b.mtime-a.mtime);}
+    const idx=lsIndex();return idx.map(id=>({id,mtime:+id.slice(2)/1000})).reverse();
+  },
+  async put(id,blob,thumb){
+    if(agent){await fetch('/api/store/draw/'+id+'.png',{method:'PUT',body:blob});await fetch('/api/store/draw/'+id+'.t.png',{method:'PUT',body:thumb});return true;}
+    try{localStorage.setItem('draw.'+id,await blobToUrl(blob));localStorage.setItem('draw.'+id+'.t',await blobToUrl(thumb));const idx=lsIndex();if(!idx.includes(id)){idx.push(id);while(idx.length>6){const old=idx.shift();localStorage.removeItem('draw.'+old);localStorage.removeItem('draw.'+old+'.t');}localStorage.setItem('draw.index',JSON.stringify(idx));}return true;}catch(e){return false;}
+  },
+  url(id,thumb){return agent?('/api/store/draw/'+id+(thumb?'.t':'')+'.png?'+Date.now()):(localStorage.getItem('draw.'+id+(thumb?'.t':''))||'');},
+  async del(id){
+    if(agent){await fetch('/api/store/draw/'+id+'.png',{method:'DELETE'});await fetch('/api/store/draw/'+id+'.t.png',{method:'DELETE'});return;}
+    localStorage.removeItem('draw.'+id);localStorage.removeItem('draw.'+id+'.t');localStorage.setItem('draw.index',JSON.stringify(lsIndex().filter(x=>x!==id)));
+  }
+};
+function lsIndex(){try{return JSON.parse(localStorage.getItem('draw.index')||'[]');}catch(e){return [];}}
+function blobToUrl(b){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(b);});}
+const toBlob=(c,q)=>new Promise(res=>c.toBlob(res,'image/png',q));
+
+// ---------------- canvas
+function cssSize(){const r=cv.getBoundingClientRect();return {w:r.width,h:r.height};}
+function fit(){
+  const {w,h}=cssSize(),dpr=Math.min(2,window.devicePixelRatio||1);
+  const keep=cv.width?cv.toDataURL():null;
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.lineCap='round';ctx.lineJoin='round';
+  white();if(keep)drawUrl(keep);
+}
+function white(){const {w,h}=cssSize();ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);}
+function drawUrl(url){return new Promise(res=>{const im=new Image();im.onload=()=>{const {w,h}=cssSize();ctx.drawImage(im,0,0,w,h);res(true);};im.onerror=()=>res(false);im.src=url;});}
+window.addEventListener('resize',fit);
+
+// ---------------- pots + tools
+$('pots').innerHTML=COLORS.map(c=>'<button class="pot'+(c===color?' on':'')+'" style="background:'+c+'" data-c="'+c+'"></button>').join('');
+$('pots').querySelectorAll('.pot').forEach(p=>p.onclick=()=>{color=p.dataset.c;if(tool==='eraser')tool='brush';syncTools();kt({kt:'blip',f:560});});
+document.querySelectorAll('.sz').forEach(b=>b.onclick=()=>{size=+b.dataset.size;if(tool!=='eraser')tool='brush';syncTools();});
+$('eraser').onclick=()=>{tool=tool==='eraser'?'brush':'eraser';syncTools();};
+$('fill').onclick=()=>{tool=tool==='fill'?'brush':'fill';syncTools();kt({kt:'blip',f:600});};
+document.querySelectorAll('.stamp').forEach(b=>b.onclick=()=>{stamp=b.dataset.stamp;tool='stamp';syncTools();kt({kt:'blip',f:640});});
+function syncTools(){
+  $('pots').querySelectorAll('.pot').forEach(p=>p.classList.toggle('on',p.dataset.c===color&&tool!=='eraser'));
+  document.querySelectorAll('.sz').forEach(b=>b.classList.toggle('on',+b.dataset.size===size&&(tool==='brush'||tool==='eraser')));
+  $('eraser').classList.toggle('on',tool==='eraser');$('fill').classList.toggle('on',tool==='fill');
+  document.querySelectorAll('.stamp').forEach(b=>b.classList.toggle('on',tool==='stamp'&&b.dataset.stamp===stamp));
+}
+let clearT=null;
+$('clear').onclick=()=>{
+  if($('clear').classList.contains('arm')){snapshot();white();markDirty();disarm();kt({kt:'blip',f:300});}
+  else{$('clear').classList.add('arm');toast('Tap the bin again to wipe this sheet');clearT=setTimeout(disarm,2000);}
+};
+function disarm(){clearTimeout(clearT);$('clear').classList.remove('arm');}
+$('undo').onclick=async()=>{const u=undoStack.pop();if(!u)return;white();await drawUrl(u);markDirty();kt({kt:'blip',f:400});};
+function snapshot(){undoStack.push(cv.toDataURL('image/png'));if(undoStack.length>8)undoStack.shift();}
+
+// ---------------- strokes, stamps, flood fill
+function pos(e){const r=cv.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top};}
+cv.addEventListener('pointerdown',e=>{
+  e.preventDefault();cv.setPointerCapture(e.pointerId);
+  if(strokes.size===0)snapshot();
+  const p=pos(e);
+  if(tool==='stamp'){ctx.font=(size*4+40)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(stamp,p.x,p.y);markDirty();return;}
+  if(tool==='fill'){floodFill(p.x,p.y,color);markDirty();kt({kt:'blip',f:500});return;}
+  strokes.set(e.pointerId,p);dot(p);
+});
+cv.addEventListener('pointermove',e=>{
+  const last=strokes.get(e.pointerId);if(!last)return;
+  e.preventDefault();
+  const pts=e.getCoalescedEvents?e.getCoalescedEvents():[e];
+  ctx.strokeStyle=tool==='eraser'?'#fff':color;ctx.lineWidth=tool==='eraser'?size*2.5:size;
+  ctx.beginPath();ctx.moveTo(last.x,last.y);
+  let p=last;for(const ev of pts){p=pos(ev);ctx.lineTo(p.x,p.y);}
+  ctx.stroke();strokes.set(e.pointerId,p);
+});
+function end(e){if(strokes.delete(e.pointerId)&&strokes.size===0)markDirty();}
+cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+function dot(p){ctx.fillStyle=tool==='eraser'?'#fff':color;ctx.beginPath();ctx.arc(p.x,p.y,(tool==='eraser'?size*2.5:size)/2,0,Math.PI*2);ctx.fill();}
+function floodFill(cx,cy,hex){ // paint-bucket inside the template lines: scanline fill on similar colour, in device pixels
+  const dpr=cv.width/cssSize().w,W=cv.width,H=cv.height,x0=Math.floor(cx*dpr),y0=Math.floor(cy*dpr);
+  if(x0<0||y0<0||x0>=W||y0>=H)return;
+  const img=ctx.getImageData(0,0,W,H),d=img.data,i0=(y0*W+x0)*4,tr=d[i0],tg=d[i0+1],tb=d[i0+2];
+  const fr=parseInt(hex.slice(1,3),16),fg=parseInt(hex.slice(3,5),16),fb=parseInt(hex.slice(5,7),16);
+  if(Math.abs(tr-fr)+Math.abs(tg-fg)+Math.abs(tb-fb)<12)return;
+  const ok=i=>Math.abs(d[i]-tr)+Math.abs(d[i+1]-tg)+Math.abs(d[i+2]-tb)<90;
+  const stack=[[x0,y0]];
+  while(stack.length){
+    let [x,y]=stack.pop();let i=(y*W+x)*4;if(!ok(i))continue;
+    let xl=x;while(xl>0&&ok((y*W+xl-1)*4))xl--;let xr=x;while(xr<W-1&&ok((y*W+xr+1)*4))xr++;
+    let up=false,dn=false;
+    for(let xx=xl;xx<=xr;xx++){const j=(y*W+xx)*4;d[j]=fr;d[j+1]=fg;d[j+2]=fb;d[j+3]=255;
+      if(y>0){const u=((y-1)*W+xx)*4;if(ok(u)){if(!up){stack.push([xx,y-1]);up=true;}}else up=false;}
+      if(y<H-1){const v=((y+1)*W+xx)*4;if(ok(v)){if(!dn){stack.push([xx,y+1]);dn=true;}}else dn=false;}}
+  }
+  ctx.putImageData(img,0,0);
+}
+
+// ---------------- autosave: a moment after the last change, the drawing + a thumbnail go to the library
+let saveT=null;
+function markDirty(){dirty=true;clearTimeout(saveT);saveT=setTimeout(saveNow,1200);}
+async function saveNow(){
+  if(!dirty)return;dirty=false;
+  if(!current)current=newId();
+  const th=document.createElement('canvas');th.width=320;th.height=220;th.getContext('2d').drawImage(cv,0,0,320,220);
+  const ok=await store.put(current,await toBlob(cv),await toBlob(th,0.8));
+  try{localStorage.setItem('draw.current',current);}catch(e){}
+  $('saved').classList.toggle('on',ok);setTimeout(()=>$('saved').classList.remove('on'),1400);
+  if(!ok)toast('Could not save this drawing');
+}
+const newId=()=>'d-'+Date.now();
+
+// ---------------- gallery
+$('gal').onclick=()=>{saveNow();openGallery();};
+$('gclose').onclick=()=>{$('gallery').classList.remove('on');delMode=false;$('delmode').classList.remove('on');};
+let delMode=false;
+$('delmode').onclick=()=>{delMode=!delMode;$('delmode').classList.toggle('on',delMode);$('delmode').textContent=delMode?'Done deleting':'Delete…';document.querySelectorAll('#shelf .card.pic').forEach(c=>c.classList.toggle('del',delMode));};
+async function openGallery(){
+  $('gtitle').textContent='My drawings';$('delmode').style.display='';
+  $('gallery').classList.add('on');
+  const list=await store.list();
+  $('shelf').innerHTML='<button class="card new" id="cNew"><span class="big">✨</span><span class="t">Clean sheet</span></button>'
+    +'<button class="card tpl" id="cTpl"><span class="big">🖍️</span><span class="t">Colouring pages</span></button>'
+    +list.map(d=>'<button class="card pic'+(d.id===current?' cur':'')+(delMode?' del':'')+'" data-id="'+d.id+'"><img src="'+store.url(d.id,true)+'" alt=""><span class="when">'+when(d.mtime)+'</span></button>').join('');
+  $('cNew').onclick=()=>{startNew();$('gclose').onclick();kt({kt:'blip',f:620});};
+  $('cTpl').onclick=openTemplates;
+  $('shelf').querySelectorAll('.card.pic').forEach(c=>c.onclick=async()=>{
+    const id=c.dataset.id;
+    if(delMode){await store.del(id);if(id===current){current=null;}c.remove();toast('Deleted');return;}
+    await load(id);$('gclose').onclick();kt({kt:'blip',f:520});
+  });
+}
+function when(t){const d=new Date(t*1000),n=new Date();const same=d.toDateString()===n.toDateString();return (same?'today ':d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})+' ')+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});}
+function startNew(){undoStack=[];current=newId();white();dirty=true;saveNow();}
+async function load(id){undoStack=[];white();const ok=await drawUrl(store.url(id,false));if(ok){current=id;try{localStorage.setItem('draw.current',id);}catch(e){}}else toast('Could not open that one');}
+
+// ---------------- templates: line art to colour in (vector, so it looks right at any size)
+const TEMPLATES=[
+ {name:'House',draw(c,w,h){const s=Math.min(w,h);c.beginPath();c.rect(w*.3,h*.45,w*.4,h*.4);c.moveTo(w*.25,h*.45);c.lineTo(w*.5,h*.18);c.lineTo(w*.75,h*.45);c.closePath();c.stroke();
+   c.strokeRect(w*.45,h*.62,w*.1,h*.23);c.strokeRect(w*.34,h*.52,w*.08,h*.09);c.strokeRect(w*.58,h*.52,w*.08,h*.09);c.beginPath();c.arc(w*.85,h*.17,s*.07,0,7);c.stroke();
+   c.beginPath();c.moveTo(0,h*.86);c.lineTo(w,h*.86);c.stroke();}},
+ {name:'Flower',draw(c,w,h){const cx=w*.5,cy=h*.4,r=Math.min(w,h)*.09;for(let i=0;i<6;i++){const a=i*Math.PI/3;c.beginPath();c.ellipse(cx+Math.cos(a)*r*2,cy+Math.sin(a)*r*2,r*1.1,r*.7,a,0,7);c.stroke();}
+   c.beginPath();c.arc(cx,cy,r,0,7);c.stroke();c.beginPath();c.moveTo(cx,cy+r*2.5);c.lineTo(cx,h*.9);c.stroke();
+   c.beginPath();c.ellipse(cx-r*1.6,h*.72,r*1.6,r*.6,-.5,0,7);c.stroke();c.beginPath();c.ellipse(cx+r*1.6,h*.8,r*1.6,r*.6,.5,0,7);c.stroke();}},
+ {name:'Fish',draw(c,w,h){const cx=w*.48,cy=h*.5,rx=w*.25,ry=h*.2;c.beginPath();c.ellipse(cx,cy,rx,ry,0,0,7);c.stroke();
+   c.beginPath();c.moveTo(cx+rx*.95,cy);c.lineTo(cx+rx*1.4,cy-ry*.9);c.lineTo(cx+rx*1.4,cy+ry*.9);c.closePath();c.stroke();
+   c.beginPath();c.arc(cx-rx*.55,cy-ry*.25,ry*.15,0,7);c.stroke();for(let i=0;i<3;i++){c.beginPath();c.arc(cx+rx*(.1+i*.3),cy,ry*.6,Math.PI*.6,Math.PI*1.4);c.stroke();}
+   for(let i=0;i<3;i++){c.beginPath();c.arc(w*.15,h*(.25-i*.07),h*.025*(i+1),0,7);c.stroke();}}},
+ {name:'Car',draw(c,w,h){c.beginPath();c.roundRect(w*.15,h*.5,w*.7,h*.22,20);c.stroke();c.beginPath();c.moveTo(w*.3,h*.5);c.lineTo(w*.38,h*.3);c.lineTo(w*.64,h*.3);c.lineTo(w*.72,h*.5);c.stroke();
+   c.beginPath();c.moveTo(w*.51,h*.3);c.lineTo(w*.51,h*.5);c.stroke();c.beginPath();c.arc(w*.32,h*.74,h*.08,0,7);c.stroke();c.beginPath();c.arc(w*.68,h*.74,h*.08,0,7);c.stroke();
+   c.beginPath();c.moveTo(0,h*.84);c.lineTo(w,h*.84);c.stroke();}},
+ {name:'Butterfly',draw(c,w,h){const cx=w*.5,cy=h*.5;c.beginPath();c.ellipse(cx,cy,w*.03,h*.3,0,0,7);c.stroke();
+   [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sy],i)=>{const big=sy<0;c.beginPath();c.ellipse(cx+sx*w*(big?.17:.14),cy+sy*h*(big?.14:.16),w*(big?.16:.13),h*(big?.2:.15),sx*sy*.5,0,7);c.stroke();});
+   c.beginPath();c.moveTo(cx,cy-h*.3);c.quadraticCurveTo(cx-w*.06,cy-h*.45,cx-w*.09,cy-h*.42);c.moveTo(cx,cy-h*.3);c.quadraticCurveTo(cx+w*.06,cy-h*.45,cx+w*.09,cy-h*.42);c.stroke();}},
+ {name:'Rocket',draw(c,w,h){const cx=w*.5;c.beginPath();c.moveTo(cx,h*.1);c.quadraticCurveTo(cx+w*.1,h*.3,cx+w*.1,h*.7);c.lineTo(cx-w*.1,h*.7);c.quadraticCurveTo(cx-w*.1,h*.3,cx,h*.1);c.stroke();
+   c.beginPath();c.arc(cx,h*.42,w*.045,0,7);c.stroke();c.beginPath();c.moveTo(cx-w*.1,h*.55);c.lineTo(cx-w*.2,h*.78);c.lineTo(cx-w*.1,h*.7);c.moveTo(cx+w*.1,h*.55);c.lineTo(cx+w*.2,h*.78);c.lineTo(cx+w*.1,h*.7);c.stroke();
+   c.beginPath();c.moveTo(cx-w*.06,h*.72);c.lineTo(cx,h*.9);c.lineTo(cx+w*.06,h*.72);c.stroke();for(let i=0;i<5;i++){const x=w*(.1+i*.2),y=h*(.15+(i%2)*.1);c.beginPath();c.moveTo(x-8,y);c.lineTo(x+8,y);c.moveTo(x,y-8);c.lineTo(x,y+8);c.stroke();}}},
+ {name:'Frog',draw(c,w,h){const cx=w*.5,cy=h*.55,r=Math.min(w,h)*.3;c.beginPath();c.ellipse(cx,cy,r*1.15,r*.9,0,0,7);c.stroke();
+   [-1,1].forEach(s=>{c.beginPath();c.arc(cx+s*r*.6,cy-r*.75,r*.3,0,7);c.stroke();c.beginPath();c.arc(cx+s*r*.6,cy-r*.75,r*.12,0,7);c.stroke();c.beginPath();c.arc(cx+s*r*.25,cy-r*.1,r*.04,0,7);c.stroke();});
+   c.beginPath();c.arc(cx,cy,r*.6,Math.PI*.15,Math.PI*.85);c.stroke();}},
+ {name:'Rainbow',draw(c,w,h){const cx=w*.5,cy=h*.85;for(let i=0;i<5;i++){c.beginPath();c.arc(cx,cy,h*(.75-i*.1),Math.PI,0);c.stroke();}
+   [[w*.17,h*.8],[w*.83,h*.8]].forEach(([x,y])=>{c.beginPath();for(let i=0;i<4;i++)c.arc(x+(i-1.5)*w*.045,y-(i%2)*h*.03,w*.04,0,7);c.stroke();});}},
+];
+function paintTemplate(t,c,w,h,lw){c.save();c.strokeStyle='#1d2a3a';c.lineWidth=lw;c.lineCap='round';c.lineJoin='round';c.fillStyle='#fff';try{t.draw(c,w,h);}catch(e){}c.restore();}
+function openTemplates(){
+  $('gtitle').textContent='Pick a colouring page';$('delmode').style.display='none';
+  $('shelf').innerHTML='<div id="tplpick" style="display:contents"></div>';
+  const box=$('tplpick');
+  TEMPLATES.forEach((t,i)=>{const b=document.createElement('button');b.className='card tpl';const pc=document.createElement('canvas');pc.width=320;pc.height=220;const c2=pc.getContext('2d');c2.fillStyle='#fff';c2.fillRect(0,0,320,220);paintTemplate(t,c2,320,220,3);
+    b.appendChild(pc);const lab=document.createElement('span');lab.className='t';lab.textContent=t.name;b.appendChild(lab);
+    b.onclick=()=>{startNew();const {w,h}=cssSize();paintTemplate(t,ctx,w,h,8);markDirty();$('gclose').onclick();kt({kt:'blip',f:660});};box.appendChild(b);});
+  const back=document.createElement('button');back.className='card new';back.innerHTML='<span class="big">◀</span><span class="t">Back</span>';back.onclick=openGallery;box.prepend(back);
+}
+
+// ---------------- start: keep whatever was on the sheet, and rescue the pre-library drawing into the library
+(async function start(){
+  fit();
+  await store.detect();
+  const list=await store.list();
+  let last=null;try{last=localStorage.getItem('draw.current');}catch(e){}
+  let legacy=null;try{legacy=localStorage.getItem('draw.picture');}catch(e){}
+  if(legacy&&!list.some(d=>d.id==='d-1')){   // the drawing made before the library existed becomes drawing #1
+    await drawUrl(legacy);current='d-1';dirty=true;await saveNow();try{localStorage.removeItem('draw.picture');}catch(e){}
+    toast('Your drawing is in the library now');return;
+  }
+  if(last&&list.some(d=>d.id===last)){await load(last);return;}
+  if(list.length){await load(list[0].id);return;}
+  current=null; // a clean sheet; it gets an id on the first stroke
+})();
+</script></body></html>

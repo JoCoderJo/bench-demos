@@ -1,0 +1,1430 @@
+{
+"_doc": "ImageNet class_name fragment -> kid word; first match wins (rules in order). Built 2026-10-26.",
+"rules": [
+[
+"dog",
+[
+"retriever",
+"terrier",
+"spaniel",
+"poodle",
+"beagle",
+"collie",
+"shepherd",
+"husky",
+"malamute",
+"pug",
+"chihuahua",
+"dalmatian",
+"labrador",
+"bulldog",
+"hound",
+"setter",
+"pointer",
+"schnauzer",
+"corgi",
+"sheepdog",
+"mastiff",
+"rottweiler",
+"doberman",
+"great dane",
+"saint bernard",
+"newfoundland",
+"samoyed",
+"pomeranian",
+"papillon",
+"pekinese",
+"shih-tzu",
+"maltese",
+"dingo",
+"dhole",
+"mexican hairless",
+"basenji",
+"affenpinscher",
+"whippet",
+"greyhound",
+"borzoi",
+"saluki",
+"chow",
+"keeshond",
+"leonberg",
+"kuvasz",
+"komondor",
+"briard",
+"kelpie",
+"bouvier",
+"appenzeller",
+"entlebucher",
+"boxer",
+"brabancon",
+"pinscher",
+"toy dog",
+"wolfhound",
+"deerhound",
+"weimaraner",
+"vizsla",
+"redbone",
+"bloodhound",
+"bluetick",
+"coonhound",
+"otterhound",
+"foxhound",
+"staffordshire",
+"airedale",
+"cairn",
+"norfolk",
+"norwich",
+"yorkshire",
+"lakeland",
+"sealyham",
+"kerry blue",
+"silky",
+"tibetan",
+"lhasa",
+"eskimo dog",
+"malinois",
+"groenendael",
+"schipperke",
+"kuvasz"
+]
+],
+[
+"cat",
+[
+"tabby",
+"tiger cat",
+"persian cat",
+"siamese",
+"egyptian cat",
+"cougar",
+"lynx",
+"leopard",
+"jaguar",
+"lion",
+"tiger",
+"cheetah",
+"snow leopard"
+]
+],
+[
+"bird",
+[
+"cock",
+"hen",
+"ostrich",
+"brambling",
+"goldfinch",
+"finch",
+"junco",
+"bunting",
+"robin",
+"bulbul",
+"jay",
+"magpie",
+"chickadee",
+"ouzel",
+"kite",
+"eagle",
+"vulture",
+"owl",
+"peacock",
+"quail",
+"partridge",
+"grouse",
+"ptarmigan",
+"prairie chicken",
+"parrot",
+"macaw",
+"cockatoo",
+"lorikeet",
+"coucal",
+"bee eater",
+"hornbill",
+"hummingbird",
+"jacamar",
+"toucan",
+"drake",
+"merganser",
+"goose",
+"swan",
+"flamingo",
+"heron",
+"egret",
+"bittern",
+"crane",
+"limpkin",
+"gallinule",
+"coot",
+"bustard",
+"turnstone",
+"sandpiper",
+"redshank",
+"dowitcher",
+"oystercatcher",
+"pelican",
+"penguin",
+"albatross",
+"stork",
+"spoonbill",
+"ibis",
+"chicken"
+]
+],
+[
+"fish",
+[
+"goldfish",
+"shark",
+"ray",
+"tench",
+"eel",
+"coho",
+"salmon",
+"rock beauty",
+"anemone fish",
+"sturgeon",
+"gar",
+"lionfish",
+"puffer",
+"barracouta",
+"stingray",
+"fish"
+]
+],
+[
+"frog",
+[
+"frog",
+"toad",
+"tree frog"
+]
+],
+[
+"turtle",
+[
+"turtle",
+"terrapin"
+]
+],
+[
+"lizard",
+[
+"lizard",
+"iguana",
+"chameleon",
+"gecko",
+"agama",
+"komodo",
+"alligator",
+"crocodile",
+"gila"
+]
+],
+[
+"snake",
+[
+"snake",
+"boa",
+"python",
+"cobra",
+"mamba",
+"viper",
+"adder",
+"rattlesnake",
+"sidewinder"
+]
+],
+[
+"spider",
+[
+"spider",
+"tarantula",
+"harvestman",
+"scorpion",
+"tick"
+]
+],
+[
+"bug",
+[
+"beetle",
+"ladybug",
+"ant",
+"cricket",
+"grasshopper",
+"mantis",
+"cockroach",
+"cicada",
+"leafhopper",
+"lacewing",
+"fly",
+"bee",
+"dragonfly",
+"damselfly",
+"weevil",
+"centipede"
+]
+],
+[
+"butterfly",
+[
+"butterfly",
+"admiral",
+"monarch",
+"ringlet",
+"lycaenid",
+"sulphur"
+]
+],
+[
+"bear",
+[
+"brown bear",
+"black bear",
+"ice bear",
+"polar bear",
+"sloth bear"
+]
+],
+[
+"teddy",
+[
+"teddy"
+]
+],
+[
+"monkey",
+[
+"monkey",
+"macaque",
+"baboon",
+"chimpanzee",
+"gorilla",
+"orangutan",
+"gibbon",
+"siamang",
+"guenon",
+"patas",
+"langur",
+"colobus",
+"marmoset",
+"capuchin",
+"howler",
+"titi",
+"spider monkey",
+"squirrel monkey",
+"madagascar cat",
+"indri",
+"lemur"
+]
+],
+[
+"elephant",
+[
+"elephant",
+"tusker"
+]
+],
+[
+"horse",
+[
+"sorrel",
+"horse",
+"zebra"
+]
+],
+[
+"cow",
+[
+"ox",
+"cow",
+"bison",
+"water buffalo",
+"bull"
+]
+],
+[
+"sheep",
+[
+"ram",
+"sheep",
+"bighorn",
+"ibex"
+]
+],
+[
+"goat",
+[
+"goat",
+"chamois"
+]
+],
+[
+"pig",
+[
+"hog",
+"pig",
+"boar",
+"warthog"
+]
+],
+[
+"rabbit",
+[
+"hare",
+"rabbit",
+"angora"
+]
+],
+[
+"mouse",
+[
+"mouse",
+"hamster",
+"guinea pig",
+"rat",
+"gerbil"
+]
+],
+[
+"squirrel",
+[
+"squirrel",
+"marmot",
+"beaver",
+"porcupine",
+"chipmunk"
+]
+],
+[
+"fox",
+[
+"fox",
+"kit fox"
+]
+],
+[
+"wolf",
+[
+"wolf",
+"coyote",
+"hyena",
+"jackal"
+]
+],
+[
+"duck",
+[
+"duck",
+"drake"
+]
+],
+[
+"panda",
+[
+"panda"
+]
+],
+[
+"koala",
+[
+"koala",
+"wombat",
+"wallaby",
+"kangaroo"
+]
+],
+[
+"deer",
+[
+"hartebeest",
+"impala",
+"gazelle",
+"deer",
+"moose",
+"elk",
+"antelope"
+]
+],
+[
+"camel",
+[
+"camel",
+"llama",
+"alpaca"
+]
+],
+[
+"hippo",
+[
+"hippopotamus"
+]
+],
+[
+"rhino",
+[
+"rhinoceros"
+]
+],
+[
+"giraffe",
+[
+"giraffe"
+]
+],
+[
+"crab",
+[
+"crab",
+"lobster",
+"crayfish",
+"hermit crab"
+]
+],
+[
+"starfish",
+[
+"starfish",
+"sea urchin",
+"sea cucumber"
+]
+],
+[
+"shell",
+[
+"conch",
+"snail",
+"slug",
+"chambered nautilus",
+"chiton"
+]
+],
+[
+"whale",
+[
+"whale",
+"grey whale",
+"killer whale",
+"dugong",
+"sea lion",
+"seal"
+]
+],
+[
+"jellyfish",
+[
+"jellyfish",
+"anemone",
+"coral",
+"brain coral"
+]
+],
+[
+"octopus",
+[
+"octopus",
+"squid"
+]
+],
+[
+"banana",
+[
+"banana"
+]
+],
+[
+"apple",
+[
+"granny smith",
+"apple"
+]
+],
+[
+"orange",
+[
+"orange"
+]
+],
+[
+"lemon",
+[
+"lemon"
+]
+],
+[
+"strawberry",
+[
+"strawberry"
+]
+],
+[
+"pineapple",
+[
+"pineapple"
+]
+],
+[
+"pumpkin",
+[
+"pumpkin",
+"squash",
+"acorn squash",
+"butternut"
+]
+],
+[
+"corn",
+[
+"corn",
+"ear"
+]
+],
+[
+"mushroom",
+[
+"mushroom",
+"agaric",
+"bolete",
+"stinkhorn",
+"earthstar",
+"hen-of-the-woods",
+"coral fungus",
+"gyromitra"
+]
+],
+[
+"broccoli",
+[
+"broccoli",
+"cauliflower",
+"head cabbage",
+"artichoke"
+]
+],
+[
+"cucumber",
+[
+"cucumber",
+"zucchini"
+]
+],
+[
+"pepper",
+[
+"bell pepper"
+]
+],
+[
+"carrot",
+[
+"carrot"
+]
+],
+[
+"bread",
+[
+"bagel",
+"pretzel",
+"french loaf",
+"bread"
+]
+],
+[
+"pizza",
+[
+"pizza"
+]
+],
+[
+"burger",
+[
+"cheeseburger",
+"hotdog",
+"hot dog"
+]
+],
+[
+"cake",
+[
+"cake",
+"trifle",
+"ice cream",
+"icecream",
+"ice lolly",
+"chocolate sauce"
+]
+],
+[
+"egg",
+[
+"eggnog"
+]
+],
+[
+"pancake",
+[
+"pancake"
+]
+],
+[
+"cup",
+[
+"coffee mug",
+"cup",
+"teapot",
+"goblet",
+"beer glass",
+"wine glass",
+"coffeepot"
+]
+],
+[
+"bottle",
+[
+"water bottle",
+"wine bottle",
+"beer bottle",
+"pop bottle",
+"pill bottle",
+"whiskey jug",
+"water jug",
+"milk can"
+]
+],
+[
+"bowl",
+[
+"mixing bowl",
+"soup bowl",
+"bowl"
+]
+],
+[
+"plate",
+[
+"plate",
+"tray"
+]
+],
+[
+"spoon",
+[
+"wooden spoon",
+"ladle",
+"spatula"
+]
+],
+[
+"ball",
+[
+"soccer ball",
+"tennis ball",
+"basketball",
+"volleyball",
+"golf ball",
+"ping-pong ball",
+"rugby ball",
+"baseball",
+"croquet ball",
+"balloon"
+]
+],
+[
+"toy",
+[
+"toyshop",
+"jigsaw puzzle",
+"puzzle"
+]
+],
+[
+"car",
+[
+"sports car",
+"racer",
+"convertible",
+"cab",
+"limousine",
+"minivan",
+"jeep",
+"beach wagon",
+"station wagon",
+"model t",
+"ambulance",
+"police van",
+"car wheel",
+"go-kart",
+"golf cart"
+]
+],
+[
+"truck",
+[
+"pickup",
+"trailer truck",
+"tow truck",
+"garbage truck",
+"fire engine",
+"moving van",
+"tractor",
+"forklift",
+"snowplow",
+"harvester",
+"thresher"
+]
+],
+[
+"bus",
+[
+"school bus",
+"trolleybus",
+"minibus",
+"streetcar",
+"passenger car"
+]
+],
+[
+"train",
+[
+"steam locomotive",
+"electric locomotive",
+"bullet train",
+"freight car"
+]
+],
+[
+"bike",
+[
+"mountain bike",
+"bicycle",
+"tricycle",
+"unicycle",
+"tandem",
+"moped",
+"motor scooter",
+"scooter"
+]
+],
+[
+"motorbike",
+[
+"motorcycle"
+]
+],
+[
+"boat",
+[
+"canoe",
+"speedboat",
+"lifeboat",
+"yawl",
+"catamaran",
+"trimaran",
+"schooner",
+"fireboat",
+"gondola",
+"container ship",
+"liner",
+"pirate",
+"submarine",
+"paddle",
+"aircraft carrier",
+"wreck"
+]
+],
+[
+"plane",
+[
+"airliner",
+"warplane",
+"airship",
+"space shuttle",
+"wing"
+]
+],
+[
+"rocket",
+[
+"missile",
+"projectile"
+]
+],
+[
+"helicopter",
+[
+"helicopter"
+]
+],
+[
+"shoe",
+[
+"running shoe",
+"sandal",
+"loafer",
+"clog",
+"cowboy boot",
+"boot",
+"sneaker"
+]
+],
+[
+"sock",
+[
+"sock",
+"christmas stocking"
+]
+],
+[
+"hat",
+[
+"cowboy hat",
+"sombrero",
+"bonnet",
+"shower cap",
+"bathing cap",
+"football helmet",
+"crash helmet",
+"mortarboard",
+"academic gown",
+"pickelhaube",
+"bearskin",
+"hair slide"
+]
+],
+[
+"shirt",
+[
+"jersey",
+"t-shirt",
+"tee shirt",
+"sweatshirt",
+"cardigan",
+"sweater",
+"jean",
+"blue jean",
+"suit",
+"kimono",
+"abaya",
+"poncho",
+"cloak",
+"fur coat",
+"trench coat",
+"lab coat",
+"apron",
+"bib",
+"pajama",
+"diaper",
+"swimming trunks",
+"bikini",
+"maillot",
+"miniskirt",
+"overskirt",
+"sarong",
+"hoopskirt",
+"velvet",
+"wool",
+"stole",
+"vestment"
+]
+],
+[
+"glasses",
+[
+"sunglass",
+"sunglasses",
+"dark glasses",
+"loupe"
+]
+],
+[
+"watch",
+[
+"digital watch",
+"analog clock",
+"wall clock",
+"stopwatch",
+"hourglass",
+"sundial"
+]
+],
+[
+"book",
+[
+"book jacket",
+"comic book",
+"binder",
+"notebook",
+"menu"
+]
+],
+[
+"pen",
+[
+"ballpoint",
+"fountain pen",
+"quill",
+"pencil",
+"crayon",
+"rubber eraser",
+"pencil box",
+"pencil sharpener"
+]
+],
+[
+"phone",
+[
+"cellular telephone",
+"cellphone",
+"dial telephone",
+"pay-phone",
+"ipod",
+"hand-held computer"
+]
+],
+[
+"computer",
+[
+"laptop",
+"notebook computer",
+"desktop computer",
+"monitor",
+"screen",
+"computer keyboard",
+"space bar",
+"mouse, computer mouse",
+"joystick"
+]
+],
+[
+"camera",
+[
+"reflex camera",
+"polaroid camera",
+"projector",
+"binoculars",
+"tripod"
+]
+],
+[
+"tv",
+[
+"television",
+"home theater",
+"entertainment center"
+]
+],
+[
+"remote",
+[
+"remote control"
+]
+],
+[
+"light",
+[
+"table lamp",
+"lampshade",
+"candle",
+"torch",
+"spotlight",
+"jack-o'-lantern",
+"lighter"
+]
+],
+[
+"clock",
+[
+"clock"
+]
+],
+[
+"chair",
+[
+"folding chair",
+"rocking chair",
+"barber chair",
+"throne",
+"park bench"
+]
+],
+[
+"table",
+[
+"dining table",
+"desk",
+"pool table"
+]
+],
+[
+"bed",
+[
+"four-poster",
+"cradle",
+"crib",
+"bassinet",
+"quilt",
+"pillow",
+"sleeping bag",
+"hammock"
+]
+],
+[
+"sofa",
+[
+"studio couch",
+"sofa"
+]
+],
+[
+"door",
+[
+"sliding door",
+"screen door"
+]
+],
+[
+"window",
+[
+"window shade",
+"window screen",
+"shoji"
+]
+],
+[
+"brush",
+[
+"paintbrush",
+"toothbrush",
+"hair spray",
+"broom"
+]
+],
+[
+"scissors",
+[
+"scissors"
+]
+],
+[
+"key",
+[
+"padlock",
+"combination lock"
+]
+],
+[
+"bag",
+[
+"backpack",
+"purse",
+"mailbag",
+"plastic bag",
+"shopping basket",
+"hamper",
+"sleeping bag",
+"wallet"
+]
+],
+[
+"box",
+[
+"carton",
+"crate",
+"chest",
+"safe",
+"packet",
+"mailbox"
+]
+],
+[
+"umbrella",
+[
+"umbrella"
+]
+],
+[
+"flower",
+[
+"daisy",
+"yellow lady's slipper",
+"vase",
+"pot, flowerpot",
+"flowerpot"
+]
+],
+[
+"tree",
+[
+"acorn",
+"buckeye",
+"rapeseed",
+"hay",
+"corn"
+]
+],
+[
+"drum",
+[
+"drum",
+"drumstick",
+"steel drum"
+]
+],
+[
+"guitar",
+[
+"acoustic guitar",
+"electric guitar",
+"banjo",
+"violin",
+"cello",
+"harp"
+]
+],
+[
+"piano",
+[
+"grand piano",
+"upright",
+"accordion",
+"organ"
+]
+],
+[
+"trumpet",
+[
+"trumpet",
+"cornet",
+"trombone",
+"french horn",
+"sax",
+"flute",
+"oboe",
+"bassoon",
+"ocarina",
+"harmonica",
+"panpipe",
+"whistle",
+"maraca",
+"chime",
+"gong"
+]
+],
+[
+"robot",
+[
+"robot"
+]
+],
+[
+"kite",
+[
+"kite"
+]
+],
+[
+"swing",
+[
+"swing"
+]
+],
+[
+"slide",
+[
+"slide"
+]
+],
+[
+"soap",
+[
+"soap dispenser",
+"lotion",
+"sunscreen",
+"hair spray"
+]
+],
+[
+"towel",
+[
+"bath towel",
+"paper towel",
+"dishrag",
+"handkerchief"
+]
+],
+[
+"bath",
+[
+"bathtub",
+"tub",
+"washbasin"
+]
+],
+[
+"toilet",
+[
+"toilet seat",
+"toilet tissue"
+]
+],
+[
+"fridge",
+[
+"refrigerator",
+"icebox"
+]
+],
+[
+"oven",
+[
+"microwave",
+"stove",
+"rotisserie",
+"toaster",
+"waffle iron",
+"dutch oven",
+"frying pan",
+"wok",
+"caldron",
+"crock pot",
+"espresso maker"
+]
+],
+[
+"sink",
+[
+"washbasin",
+"sink"
+]
+],
+[
+"tool",
+[
+"hammer",
+"screwdriver",
+"wrench",
+"plane, carpenter's plane",
+"chain saw",
+"power drill",
+"shovel",
+"hatchet",
+"nail",
+"screw",
+"hook",
+"can opener",
+"corkscrew",
+"lawn mower",
+"plunger",
+"mop"
+]
+],
+[
+"basket",
+[
+"basket",
+"hamper",
+"bucket",
+"pail",
+"barrel",
+"rain barrel",
+"wooden spoon"
+]
+],
+[
+"coin",
+[
+"coin",
+"piggy bank"
+]
+],
+[
+"flag",
+[
+"flagpole"
+]
+],
+[
+"sign",
+[
+"street sign",
+"traffic light"
+]
+],
+[
+"fence",
+[
+"picket fence",
+"chainlink fence",
+"worm fence",
+"stone wall"
+]
+],
+[
+"house",
+[
+"barn",
+"boathouse",
+"church",
+"castle",
+"palace",
+"monastery",
+"library",
+"mosque",
+"greenhouse",
+"lighthouse",
+"dome",
+"thatch",
+"tile roof",
+"home"
+]
+],
+[
+"mask",
+[
+"mask",
+"gasmask",
+"ski mask"
+]
+],
+[
+"crown",
+[
+"crown"
+]
+],
+[
+"ring",
+[
+"ring"
+]
+],
+[
+"necklace",
+[
+"necklace",
+"bead"
+]
+],
+[
+"mirror",
+[
+"mirror"
+]
+],
+[
+"blanket",
+[
+"quilt",
+"prayer rug",
+"doormat",
+"wool"
+]
+],
+[
+"box",
+[
+"box"
+]
+]
+]
+}

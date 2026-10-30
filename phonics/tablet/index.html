@@ -1,0 +1,810 @@
+<!doctype html>
+<html lang="en" data-theme="sky"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Kids Tablet</title>
+<!-- tablet/launcher/index.html — the kids tablet's home screen (the "shell"). Offline, no fonts, no CDN.
+     Runs in Chromium kiosk on the UNO Q, served by tablet/agent/kids_tablet_agent.py at http://127.0.0.1:8090/
+     (a secure context, so the apps' microphone works with no certificate). Also opens as a plain file or on the
+     laptop for a look: without the agent it keeps settings in localStorage and only previews brightness.
+     Parent gate: hold the avatar (top-left) for kiosk.parent_hold_ms, then the PIN. -->
+<style>
+:root{--bg1:#8ed0ff;--bg2:#eef9ff;--ink:#1d2a3a;--dim:#5b6b80;--card:#ffffff;--accent:#ff8a3d;--ok:#3fb950;--bad:#e05a4f;
+  --shadow:0 10px 30px rgba(20,40,80,.18);--r:28px}
+[data-theme=forest]{--bg1:#a8e6a1;--bg2:#f0fbea;--accent:#ff7043}
+[data-theme=candy]{--bg1:#ffb3d9;--bg2:#fff2f8;--accent:#7c4dff}
+[data-theme=night]{--bg1:#1b2440;--bg2:#2a3658;--ink:#eef2ff;--dim:#aab4d0;--card:#33406a;--accent:#ffd166;--shadow:0 10px 30px rgba(0,0,0,.35)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(160deg,var(--bg1),var(--bg2));color:var(--ink);
+  font:18px/1.3 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;touch-action:manipulation;overscroll-behavior:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+.screen{position:fixed;inset:0;display:none;flex-direction:column}
+.screen.on{display:flex}
+/* ---- HOME */
+#home{padding:max(14px,env(safe-area-inset-top)) 28px 22px}
+#bar{display:flex;align-items:center;gap:14px;flex:none;min-height:74px}
+#faces{display:flex;align-items:center;gap:10px;flex:none}
+.face{height:64px;min-width:64px;padding:0 12px;border-radius:32px;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;gap:8px;font-size:34px;position:relative;overflow:hidden;opacity:.62;transform:scale(.94);transition:transform .14s,opacity .14s,box-shadow .14s}
+.face.single{width:66px;height:66px;padding:0;border-radius:50%;font-size:38px}
+.face.on{opacity:1;transform:scale(1);box-shadow:0 0 0 4px var(--accent),var(--shadow)}
+.face span{font-size:17px;font-weight:700;padding-right:4px}
+.face i{position:absolute;left:0;bottom:0;height:5px;width:0;background:var(--accent);transition:width .1s linear}
+#hello{font-size:26px;font-weight:700;line-height:1.1;min-width:0}
+#hello small{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--dim);font-weight:600;margin-top:4px}
+.bbar{display:inline-block;width:96px;height:8px;border-radius:4px;background:rgba(0,0,0,.12);overflow:hidden;vertical-align:middle}
+.bbar b{display:block;height:100%;background:var(--ok);border-radius:4px;transition:width .3s}
+.bbar.low b{background:var(--accent)}.bbar.out b{background:var(--bad)}
+#sleepKids{display:flex;gap:14px;margin-top:22px;flex-wrap:wrap;justify-content:center}
+#sleepKids button{height:64px;padding:0 18px;border-radius:32px;background:rgba(255,255,255,.14);color:#eef2ff;font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+#sleepKids button:active{transform:scale(.95)}
+#clock{margin-left:auto;font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+#dots{display:flex;gap:7px;margin-left:14px;align-items:center}
+.dot{width:12px;height:12px;border-radius:50%;background:#c3ccd8;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.dot.ok{background:var(--ok)}.dot.bad{background:var(--bad)}
+/* tile size: screen.tile_size = small | medium | large (phone-style icon grid, scrolls when it overflows) */
+:root{--tmin:200px;--ticon:104px;--tfont:22px;--tpad:18px 14px;--tgap:22px}
+[data-tiles=small]{--tmin:150px;--ticon:76px;--tfont:17px;--tpad:14px 10px;--tgap:16px}
+[data-tiles=large]{--tmin:270px;--ticon:140px;--tfont:27px;--tpad:24px 18px;--tgap:28px}
+#grid{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--tmin),1fr));gap:var(--tgap);align-content:start;padding:12px 6px 90px;
+  overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;width:100%;max-width:1180px;margin:0 auto;scrollbar-width:none}
+#grid::-webkit-scrollbar{display:none}
+.tile{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--tpad);display:flex;flex-direction:column;align-items:center;gap:8px;
+  transition:transform .12s ease;aspect-ratio:1/1.08;justify-content:center;position:relative;touch-action:pan-y}
+.tile:active{transform:scale(.94)}
+.tile .ic{width:var(--ticon);height:var(--ticon);border-radius:calc(var(--ticon)*.32);display:grid;place-items:center;font-size:calc(var(--ticon)*.58);color:#fff;
+  box-shadow:inset 0 -6px 0 rgba(0,0,0,.12);overflow:hidden;flex:none}
+.tile img.ic{object-fit:cover;box-shadow:var(--shadow)}
+.tile .t{font-size:var(--tfont);font-weight:700;text-align:center;line-height:1.1}
+.tile .s{font-size:13px;color:var(--dim);text-align:center}
+.tile.soon{opacity:.5}.tile.soon .ic{filter:grayscale(.7)}
+/* rearrange mode: long-press a tile, tiles wiggle, drag to move, Done to finish */
+@keyframes wiggle{from{transform:rotate(-1.6deg)}to{transform:rotate(1.6deg)}}
+.editing .tile{animation:wiggle .28s ease-in-out infinite alternate;touch-action:none}
+.editing .tile:active{transform:none}
+.editing .tile::after{content:"";position:absolute;inset:0;border-radius:var(--r);box-shadow:0 0 0 3px var(--accent) inset;opacity:.55;pointer-events:none}
+.tile.drag{animation:none;opacity:.9;transform:scale(1.08);z-index:4;box-shadow:0 18px 40px rgba(0,0,0,.35);transition:none}
+#editDone{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);display:none;padding:14px 30px;border-radius:30px;background:var(--accent);color:#fff;
+  font-size:20px;font-weight:700;box-shadow:var(--shadow);z-index:6}
+.editing #editDone{display:block}
+#foot{flex:none;text-align:center;font-size:12px;color:var(--dim);padding-top:6px}
+/* ---- APP */
+#app{background:#000}
+#frame{flex:1;border:0;width:100%;height:100%;background:#fff}
+#homePill{position:fixed;left:50%;bottom:8px;transform:translateX(-50%);width:68px;height:42px;border-radius:21px;background:rgba(20,30,50,.55);
+  color:#fff;display:none;place-items:center;z-index:5;backdrop-filter:blur(4px);box-shadow:0 4px 14px rgba(0,0,0,.3)}
+#homePill.on{display:grid}
+#homePill svg{width:26px;height:26px}
+/* kid volume: a speaker button on the home bar, −/+ pills beside the home pill while an app runs, one shared popover */
+#volBtn{width:56px;height:56px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;font-size:26px;margin-left:10px}
+#volBtn:active{transform:scale(.94)}
+.volPill{position:fixed;bottom:8px;width:56px;height:42px;border-radius:21px;background:rgba(20,30,50,.55);color:#fff;display:none;place-items:center;z-index:5;font-size:26px;font-weight:800;backdrop-filter:blur(4px);box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.volPill.on{display:grid}
+#volDown{left:calc(50% - 110px)}#volUp{left:calc(50% + 54px)}
+.volPill:active{transform:scale(.94)}
+#volPop{position:fixed;left:50%;bottom:70px;transform:translateX(-50%);background:var(--card);color:var(--ink);border-radius:26px;box-shadow:0 14px 40px rgba(0,0,0,.3);padding:16px 22px;display:none;align-items:center;gap:16px;z-index:40}
+#volPop.on{display:flex}
+#volPop button{width:72px;height:72px;border-radius:50%;background:#eef2f7;font-size:38px;font-weight:800}
+#volPop button:active{transform:scale(.94)}
+#volBar{display:flex;gap:5px}
+#volBar i{display:block;width:16px;height:44px;border-radius:5px;background:#e3e8ee}
+#volBar i.on{background:var(--ok)}
+#volBar i.cap{background:#f3d9d4}
+#volNum{font-size:18px;font-weight:700;min-width:48px;text-align:center;color:var(--dim)}
+#homePill i{position:absolute;left:0;bottom:0;height:4px;width:0;background:var(--accent);border-radius:2px;transition:width .1s linear}
+/* quick settings: volume, brightness, Bluetooth audio/mic — drops down from the home bar, pops up from the ⚙ pill while an app runs */
+#quickPill{left:calc(50% - 176px);z-index:9}   /* above the moon screen (7) and the gate (8): system controls from every screen */
+#quick{position:fixed;left:50%;transform:translateX(-50%);width:780px;max-width:96vw;max-height:80vh;overflow-y:auto;background:var(--card);color:var(--ink);border-radius:26px;box-shadow:0 18px 50px rgba(0,0,0,.35);padding:18px 22px;display:none;flex-direction:column;gap:12px;z-index:41;scrollbar-width:none}
+#quick.on{display:flex}
+#quick.top{top:84px}#quick.bottom{bottom:62px}
+#quickClose{position:absolute;top:12px;right:14px;width:44px;height:44px;border-radius:50%;background:#eef2f7;font-size:20px;font-weight:800}
+.qrow{display:flex;align-items:center;gap:12px;min-height:56px;flex-wrap:wrap}
+.qrow .ql{width:168px;font-weight:700;font-size:18px;white-space:nowrap;text-align:left}
+#qVolL{cursor:pointer}
+.qbar{flex:1;display:flex;gap:5px;min-width:180px}
+.qbar i{flex:1;height:36px;border-radius:5px;background:#e3e8ee;cursor:pointer;transition:transform .08s,background .12s}
+.qbar i:active{transform:scaleY(.9)}
+.qbar i.on{background:var(--ok)}
+.qbar i.cap{background:#f3d9d4;cursor:not-allowed}
+.qbtn{width:56px;height:56px;border-radius:50%;background:#eef2f7;font-size:30px;font-weight:800;display:grid;place-items:center;flex:none}
+.qbtn:active{transform:scale(.94)}
+.qbtn:disabled{opacity:.35}
+.qv{min-width:52px;text-align:right;font-weight:700;color:var(--dim);font-size:16px}
+#qBtState{flex:1;color:var(--dim);font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qact{padding:10px 16px;border-radius:14px;background:#eef2f7;font-weight:700;font-size:16px;white-space:nowrap}
+.qact.go{background:var(--accent);color:#fff}
+.qact:active{transform:scale(.96)}
+#qDevs{display:flex;flex-direction:column;gap:8px}
+.qdev{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:16px;background:#f3f6fa;font-size:18px}
+.qdev.on{background:#dff7e3}
+.qdev .n{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qdev small{color:var(--dim);font-weight:500}
+#qHint{font-size:14px;color:var(--dim);line-height:1.35}
+[data-theme=night] #quickClose,[data-theme=night] .qbtn,[data-theme=night] .qact:not(.go){background:#232f52;color:var(--ink)}
+[data-theme=night] .qbar i:not(.on):not(.cap){background:#232f52}
+[data-theme=night] .qbar i.cap{background:#4d2c36}
+[data-theme=night] .qdev{background:#232f52}
+[data-theme=night] .qdev.on{background:#1e4635}
+/* ---- GATE */
+#gate{background:rgba(15,22,38,.92);color:#fff;align-items:center;justify-content:center;z-index:8}
+.pad{display:grid;grid-template-columns:repeat(3,86px);gap:14px;margin-top:18px}
+.pad button{height:86px;border-radius:50%;background:rgba(255,255,255,.12);font-size:30px;font-weight:600}
+.pad button:active{background:rgba(255,255,255,.3)}
+#pinDots{display:flex;gap:14px;height:22px;margin-top:10px}
+#pinDots b{width:18px;height:18px;border-radius:50%;border:2px solid #fff}
+#pinDots b.f{background:#fff}
+#gateMsg{min-height:24px;margin-top:10px;color:#ffb3b3}
+.x{position:absolute;top:14px;right:18px;font-size:22px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.1);color:#fff}
+/* ---- SETTINGS */
+#settings{background:#f3f5f9;color:#1d2a3a;z-index:9}
+#settings header{flex:none;display:flex;align-items:center;gap:12px;padding:14px 18px;background:#fff;border-bottom:1px solid #dde3ec}
+#settings header h1{font-size:20px;margin:0;flex:1}
+#settings header button{padding:10px 16px;border-radius:12px;background:#1d2a3a;color:#fff;font-weight:600}
+#settings main{flex:1;overflow-y:auto;padding:14px 18px 40px;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.sec{background:#fff;border:1px solid #dde3ec;border-radius:16px;padding:6px 16px;margin-bottom:14px}
+.sec h2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#5b6b80;margin:10px 0 4px}
+.row{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #eef1f6;min-height:56px}
+.row:first-of-type{border-top:0}
+.row .l{flex:1}.row .l small{display:block;color:#5b6b80;font-size:12px;margin-top:2px}
+.row .v{font-variant-numeric:tabular-nums;min-width:48px;text-align:right;color:#5b6b80}
+input[type=range]{width:200px;height:36px;accent-color:#ff8a3d}
+.sw{width:58px;height:34px;border-radius:17px;background:#c9d1dc;position:relative;transition:background .15s;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:28px;height:28px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw.on{background:var(--ok)}.sw.on::after{left:27px}
+.swatches{display:flex;gap:10px}
+.swatch{width:44px;height:44px;border-radius:50%;border:3px solid transparent}
+.swatch.on{border-color:#1d2a3a}
+.btn{padding:10px 16px;border-radius:12px;background:#e9edf3;font-weight:600}
+.btn.warn{background:#ffe3df;color:#8a2a22}
+.btn.go{background:#1d2a3a;color:#fff}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:44px;height:44px;border-radius:12px;background:#e9edf3;font-size:22px}
+.kbd{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;margin:8px 0 4px}
+.kbd button{height:44px;border-radius:10px;background:#e9edf3;font-weight:600;font-size:17px}
+.kbd button.wide{grid-column:span 2}
+#nameOut{font-size:22px;font-weight:700;min-height:30px;letter-spacing:.04em}
+.info{font-size:12px;color:#5b6b80;line-height:1.6;font-family:ui-monospace,Menlo,monospace;word-break:break-all}
+.avs{display:flex;gap:10px}.avs button{width:54px;height:54px;border-radius:50%;background:#e9edf3;font-size:30px;border:3px solid transparent}.avs button.on{border-color:#1d2a3a}
+/* ---- SLEEP / DIM / TOAST */
+#sleep{background:radial-gradient(circle at 70% 20%,#2a3658,#0e1424 70%);color:#eef2ff;align-items:center;justify-content:center;text-align:center;z-index:7}
+#sleep .moon{font-size:120px}
+#sleep h1{font-size:34px;margin:10px 0 4px}
+#sleep p{color:#aab4d0;margin:0}
+#dim{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:20}
+#toast{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;max-width:90vw;text-align:center}
+#toast.on{opacity:.95}
+</style></head><body>
+
+<div class="screen on" id="home">
+  <div id="bar">
+    <div id="faces"></div>
+    <div id="hello">Hi!<small>pick something to play</small></div>
+    <div id="clock"></div>
+    <button id="volBtn" aria-label="volume">🔊</button>
+    <div id="dots" title="green = tablet helper running · second = Bench reachable"><span class="dot" id="dAgent"></span><span class="dot" id="dBench"></span></div>
+  </div>
+  <div id="grid"></div>
+  <div id="foot"></div>
+  <button id="editDone" onclick="endEdit()">Done</button>
+</div>
+
+<div class="screen" id="app"><iframe id="frame" title="app" allow="microphone; autoplay; fullscreen"></iframe></div>
+<button class="volPill" id="volDown" aria-label="quieter">−</button><button class="volPill" id="volUp" aria-label="louder">+</button>
+<div id="volPop"><button id="vpDown">−</button><div id="volBar"></div><button id="vpUp">+</button><span id="volNum"></span></div>
+<button class="volPill" id="quickPill" aria-label="settings">⚙</button>
+<div id="quick">
+  <button id="quickClose" aria-label="close">✕</button>
+  <div class="qrow"><button class="ql" id="qVolL" title="tap to mute or unmute">🔊 Volume</button><button class="qbtn" id="qVolDown">−</button><div class="qbar" id="qVolBar"></div><button class="qbtn" id="qVolUp">+</button><span class="qv" id="qVolNum"></span></div>
+  <div class="qrow"><div class="ql">☀️ Brightness</div><button class="qbtn" id="qBrDown">−</button><div class="qbar" id="qBrBar"></div><button class="qbtn" id="qBrUp">+</button><span class="qv" id="qBrNum"></span></div>
+  <div class="qrow"><div class="ql">🎚 Tone</div><span class="qv" style="min-width:0">Bass</span><button class="qbtn" id="qBassDown">−</button><span class="qv" id="qBassNum"></span><button class="qbtn" id="qBassUp">+</button><span class="qv" style="min-width:0;margin-left:18px">Treble</span><button class="qbtn" id="qTrebDown">−</button><span class="qv" id="qTrebNum"></span><button class="qbtn" id="qTrebUp">+</button><span id="qToneNote" style="flex:1;color:var(--dim);font-size:14px;text-align:right"></span></div>
+  <div class="qrow"><div class="ql">🎧 Bluetooth</div><button class="sw" id="qBtSw" aria-label="bluetooth on/off"></button><span id="qBtState"></span><button class="qact" id="qOut" title="switch wired output between panel speakers and headphone jack">🔊 Panel</button><button class="qact" id="qPair">Pair new…</button></div>
+  <div id="qDevs"></div>
+  <div id="qHint"></div>
+  <div class="qrow"><div class="ql">⏻ System</div><button class="qact" id="qSleep">🌙 Sleep</button><button class="qact" id="qReboot">🔄 Restart 🔒</button><button class="qact" id="qOff">⏻ Power off 🔒</button><button class="qact" id="qSettings">⚙ Settings 🔒</button><span id="qSysNote" style="flex:1;color:var(--dim);font-size:14px"></span></div>
+</div>
+<button id="homePill" aria-label="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-6h4v6"/></svg><i></i></button>
+
+<div class="screen" id="gate">
+  <button class="x" onclick="closeGate()">✕</button>
+  <div style="font-size:22px;font-weight:700">Grown-ups only</div>
+  <div id="gateMsg"></div>
+  <div id="pinDots"><b></b><b></b><b></b><b></b></div>
+  <div class="pad" id="pad"></div>
+</div>
+
+<div class="screen" id="settings">
+  <header><h1>Tablet settings</h1><span class="info" id="saveState"></span><button onclick="closeSettings()">Done</button></header>
+  <main id="smain"></main>
+</div>
+
+<div class="screen" id="sleep"><div class="moon">🌙</div><h1 id="sleepTitle">Sleepy time</h1><p id="sleepTill"></p><div id="sleepKids"></div></div>
+<div id="dim"></div>
+<div id="toast"></div>
+
+<script>window.KT_INLINE=null;window.KT_INLINE={"defaults":{"_doc":"Kids tablet settings \u2014 ONE file is the whole state. The Bench/laptop pushes this with the bundle; the launcher reads it from the tablet agent (/api/settings) and the agent applies the hardware parts (brightness, volume, rotation, screen sleep). Edits made on the tablet (parent gate) are saved as overrides in the agent's state dir and survive bundle updates. v2 (2026-10-25): kids[] profiles with per-kid tiles + daily minutes, budget rules; `child` is the fallback when kids is empty.","version":2,"child":{"name":"","avatar":"frog"},"kids":[{"id":"kid1","name":"","age":4,"avatar":"frog","apps_allowed":["phonics-friends","letters","draw","yoto"],"budget_min":45},{"id":"kid2","name":"","age":6,"avatar":"fox","apps_allowed":null,"budget_min":60}],"budget":{"enabled":true,"exempt_apps":["yoto"],"grace_min":15,"reset_hour":5,"count_home":false},"pin":"1234","screen":{"brightness":70,"rotation":"right","theme":"sky","tile_size":"medium","sleep_after_min":0},"sound":{"volume":40,"max_volume":80,"tap_sounds":true,"output":"lineout","eq":{"enabled":true,"bass_db":0,"treble_db":0,"highpass_hz":170,"preamp_db":0}},"apps":{"allowed":["phonics-friends","camera","count","draw","example-tap","letters","maker-light","pbs-kids","show-tell","stories","words","yoto"],"order":["phonics-friends","letters","stories","draw","camera","count","example-tap","maker-light","pbs-kids","show-tell","words","yoto"]},"bedtime":{"enabled":false,"start":"19:30","end":"07:00"},"kiosk":{"home_button":"tap","parent_hold_ms":1500,"show_clock":true,"clock_24h":false,"kid_volume":true},"bench":{"url":"https://bench.tail81b22c.ts.net","updates":"manual"}},"apps":{"_doc":"The home screen. One entry per tile; `path` is relative to the bundle root. Games in tablet/apps/<id>/ are added automatically by build-bundle.py (see tablet/apps/README.md); list one here only to override its tile or to pull a folder from elsewhere with `source_dir`. `needs` lists iframe permissions the app wants.","apps":[{"id":"phonics-friends","title":"Phonics Friends","subtitle":"spell with your friend","icon":"\ud83d\udc38","color":"#3fb950","path":"apps/phonics-friends/index.html","needs":["microphone","autoplay"],"source":"demo/ via tools/make-offline-bundle.py"},{"id":"camera","title":"Camera","subtitle":"see through the cameras","icon":"\ud83d\udcf7","color":"#5c6bc0","path":"apps/camera/index.html","needs":[],"source":"tablet/apps/camera"},{"id":"count","title":"Count With Me","subtitle":"count, find shapes, add","icon":"\ud83d\udc38","color":"#5c6bc0","path":"apps/count/index.html","needs":["autoplay"],"source":"tablet/apps/count"},{"id":"draw","title":"Draw","subtitle":"finger painting","icon":"\ud83c\udfa8","color":"#c25048","path":"apps/draw/index.html","needs":[],"source":"tablet/apps/draw"},{"id":"example-tap","title":"Tap the Frog","subtitle":"example game","icon":"\ud83d\udc38","color":"#2e7d32","path":"apps/example-tap/index.html","needs":["autoplay"],"source":"tablet/apps/example-tap"},{"id":"letters","title":"Letter Sounds","subtitle":"tap a letter, hear its sound","icon":"\ud83d\udd24","color":"#d98e2b","path":"apps/letters/index.html","needs":["autoplay"],"source":"tablet/apps/letters"},{"id":"maker-light","title":"Light Lab","subtitle":"draw with real lights","icon":"\ud83d\udca1","color":"#f2b632","path":"apps/maker-light/index.html","needs":["autoplay"],"source":"tablet/apps/maker-light"},{"id":"pbs-kids","title":"PBS Kids","subtitle":"shows and games","icon":"\ud83d\udcfa","color":"#2e9e44","path":"apps/pbs-kids/index.html","needs":[],"source":"tablet/apps/pbs-kids","url":"https://pbskids.org"},{"id":"show-tell","title":"Show & Tell","subtitle":"what is it?","icon":"\ud83d\udd0d","color":"#ef8f3c","path":"apps/show-tell/index.html","needs":[],"source":"tablet/apps/show-tell"},{"id":"stories","title":"Stories","subtitle":"read along with your friend","icon":"\ud83d\udcd6","color":"#5f87ad","path":"apps/stories/index.html","needs":["autoplay"],"source":"tablet/apps/stories"},{"id":"words","title":"Word Builder","subtitle":"tap the letters, make the word","icon":"\ud83e\udde9","color":"#26a69a","path":"apps/words/index.html","needs":["autoplay"],"source":"tablet/apps/words"},{"id":"yoto","title":"Yoto","subtitle":"our Yoto library","icon":"\ud83c\udfa7","color":"#f2572b","path":"apps/yoto/index.html","needs":["autoplay"],"source":"tablet/apps/yoto"}]}};</script>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LIVE=location.protocol.startsWith('http');
+let DEF={},S={},APPS=[],agent=false,STATUS={},bundleSha=null,pin='',holdT=null,current=null,sleeping=false,sleepKind='',kidId=null,BUDGET={date:'',used_s:{},grace_s:{}},editKidIdx=0;
+
+// ---------- lockdown: nothing a child can do should leave the launcher or change the page
+['contextmenu','dragstart','selectstart','gesturestart','gesturechange'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('touchmove',e=>{if(e.touches.length>1||(e.scale!==undefined&&e.scale!==1))e.preventDefault();},{passive:false});
+document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')goHome();if(e.key==='F11'||(e.ctrlKey&&['w','t','n','r','p','s','u'].includes(e.key.toLowerCase())))e.preventDefault();});
+window.addEventListener('beforeunload',()=>{});
+
+// ---------- settings: bundled default <- agent (tablet) or localStorage (laptop/file)
+function deepMerge(a,b){const o=Object.assign({},a);for(const k in (b||{})){o[k]=(b[k]&&typeof b[k]==='object'&&!Array.isArray(b[k]))?deepMerge(a[k]||{},b[k]):b[k];}return o;}
+async function jget(u){const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error(r.status);return r.json();}
+const BASE={version:2,child:{name:'',avatar:'frog'},
+  kids:[{id:'kid1',name:'',age:4,avatar:'frog',apps_allowed:['phonics-friends','letters','draw','yoto'],budget_min:45},
+        {id:'kid2',name:'',age:6,avatar:'fox',apps_allowed:null,budget_min:60}],
+  budget:{enabled:true,exempt_apps:['yoto'],grace_min:15,reset_hour:5,count_home:false},
+  pin:'1234',screen:{brightness:70,rotation:'right',theme:'sky',sleep_after_min:0,tile_size:'medium'},
+  sound:{volume:60,max_volume:80,tap_sounds:true,output:'lineout',eq:{enabled:true,bass_db:0,treble_db:0,highpass_hz:170,preamp_db:0}},apps:{allowed:[],order:[]},bedtime:{enabled:false,start:'19:30',end:'07:00'},
+  kiosk:{home_button:'tap',parent_hold_ms:1500,show_clock:true,clock_24h:false,kid_volume:true},bench:{url:'https://bench.tail81b22c.ts.net',updates:'manual'}};
+
+function kidsList(){return Array.isArray(S.kids)&&S.kids.length?S.kids:null;}
+function activeKid(){const ks=kidsList();if(!ks)return null;return ks.find(k=>k.id===kidId)||ks[0];}
+function kidLabel(k,i){if(!k)return (S.child&&S.child.name||'').trim();const n=(k.name||'').trim();if(n)return n;const ks=kidsList();return (ks&&ks.length>1)?'Kid '+((i!=null?i:ks.indexOf(k))+1):'';}
+function budgetDay(){const r=S.budget&&S.budget.reset_hour,h=r!=null?+r:5;const d=new Date(Date.now()-h*3600000);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+async function loadBudget(){
+  if(agent){try{BUDGET=await jget('/api/budget');return;}catch(e){}}
+  const day=budgetDay();
+  try{const b=JSON.parse(localStorage.getItem('kt.budget.'+day)||'{}');BUDGET={date:day,used_s:b.used_s||{},grace_s:b.grace_s||{}};}
+  catch(e){BUDGET={date:day,used_s:{},grace_s:{}};}
+}
+function saveLocalBudget(){try{localStorage.setItem('kt.budget.'+BUDGET.date,JSON.stringify({used_s:BUDGET.used_s,grace_s:BUDGET.grace_s}));}catch(e){}}
+function limitS(k){return (!k||!k.budget_min)?0:k.budget_min*60+((BUDGET.grace_s&&BUDGET.grace_s[k.id])||0);}
+function usedS(k){return (k&&BUDGET.used_s&&BUDGET.used_s[k.id])||0;}
+function remS(k){return Math.max(0,limitS(k)-usedS(k));}
+function budgetOut(k){return !!(S.budget&&S.budget.enabled&&k&&k.budget_min>0&&remS(k)<=0);}
+
+async function loadAll(){
+  // build-bundle.py inlines the defaults + apps (KT_INLINE) so the built page also works opened from disk,
+  // where Chrome refuses fetch() of a file beside a file:// page
+  const IN=window.KT_INLINE||{};
+  try{DEF=await jget('settings.default.json');}catch(e){DEF=IN.defaults||{};if(!IN.defaults)toast('settings.default.json missing — built-in defaults');}
+  try{APPS=(await jget('apps.json')).apps||[];}catch(e){APPS=(IN.apps&&IN.apps.apps)||[];}
+  DEF=deepMerge(BASE,DEF);
+  let over={};
+  try{STATUS=await jget('/api/status');agent=!!STATUS.ok;}catch(e){agent=false;}
+  if(agent&&STATUS.ext)fetch('/api/app',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:null})}).catch(()=>{});   // a fresh launcher = nothing open: close a website window left over from before (D-014)
+  if(agent){
+    try{S=await jget('/api/settings');}catch(e){S=DEF;}
+    try{kidId=(await jget('/api/kid')).id||STATUS.kid||null;}catch(e){kidId=STATUS.kid||null;}
+  }else{
+    try{over=JSON.parse(localStorage.getItem('kt.settings')||'{}');}catch(e){}
+    S=deepMerge(DEF,over);
+    try{kidId=localStorage.getItem('kt.kid')||null;}catch(e){}
+  }
+  S=deepMerge(DEF,S);
+  await loadBudget();
+  bundleSha=STATUS.sha||null;
+  applyLook();render();tick();poll();
+  if(!agent&&location.hash==='#settings')openSettings();
+}
+let saveT=null;
+function save(apply){
+  $('saveState').textContent='saving…';
+  clearTimeout(saveT);
+  saveT=setTimeout(async()=>{
+    if(agent){
+      try{const r=await fetch('/api/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(S)});
+        const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||r.status);
+        $('saveState').textContent='saved'+(j.applied?' · '+j.applied.join(', '):'');}
+      catch(e){$('saveState').textContent='not saved: '+e.message;}
+    }else{try{localStorage.setItem('kt.settings',JSON.stringify(S));$('saveState').textContent='saved on this device (no tablet helper)';}catch(e){$('saveState').textContent='could not save';}}
+    applyLook();render();tick();
+  },apply===false?600:250);
+}
+async function pickKid(id){
+  const ks=kidsList();if(!ks)return;
+  const k=ks.find(x=>x.id===id);if(!k)return;
+  kidId=k.id;blip(540);
+  if(agent){try{await fetch('/api/kid',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:k.id})});}catch(e){}}
+  else{try{localStorage.setItem('kt.kid',k.id);}catch(e){}}
+  applyLook();render();tick();
+}
+function drawFaces(){
+  const ks=kidsList(),ak=activeKid(),f=$('faces');
+  if(!ks||ks.length<=1){
+    const av=(ak?ak.avatar:S.child.avatar)||'frog';
+    f.innerHTML='<button class="face single on" data-kid="'+(ak?E(ak.id):'')+'">'+(AV[av]||'🐸')+'<i></i></button>';
+  }else{
+    f.innerHTML=ks.map((k,i)=>{
+      const on=ak&&k.id===ak.id,lbl=kidLabel(k,i);
+      return '<button class="face'+(on?' on':'')+'" data-kid="'+E(k.id)+'">'+(AV[k.avatar]||'🐸')+(lbl?'<span>'+E(lbl)+'</span>':'')+(on?'<i></i>':'')+'</button>';
+    }).join('');
+  }
+  wireFaces();
+}
+function wireFaces(){
+  $('faces').querySelectorAll('.face').forEach(btn=>{
+    const id=btn.dataset.kid,on=btn.classList.contains('on'),bar=btn.querySelector('i');
+    if(!on){btn.onclick=()=>pickKid(id);return;}
+    function start(e){e.preventDefault();if(!bar)return;const ms=S.kiosk.parent_hold_ms||1500;bar.style.transition='width '+ms+'ms linear';bar.style.width='100%';
+      holdT=setTimeout(()=>{holdT=null;bar.style.transition='none';bar.style.width='0';openGate('settings');},ms);}
+    function end(){if(holdT){clearTimeout(holdT);holdT=null;}if(bar){bar.style.transition='width .1s';bar.style.width='0';}}
+    btn.addEventListener('pointerdown',start);btn.addEventListener('pointerup',end);btn.addEventListener('pointercancel',end);btn.addEventListener('pointerleave',end);
+  });
+}
+function subLine(k){
+  const ks=kidsList(),multi=ks&&ks.length>1;
+  if(S.budget&&S.budget.enabled&&k&&k.budget_min>0){
+    const lim=limitS(k),rem=remS(k),pct=lim?Math.max(0,Math.min(100,Math.round(rem/lim*100))):100,minsLeft=Math.ceil(rem/60);
+    const cls=pct<=0?' out':(pct<=25?' low':'');
+    return '<span class="bbar'+cls+'"><b style="width:'+pct+'%"></b></span><span>'+(minsLeft>0?minsLeft+' min left today':'all done for today')+'</span>';
+  }
+  return multi?'tap your picture · pick something to play':'pick something to play';
+}
+function applyLook(){
+  document.documentElement.dataset.theme=S.screen.theme||'sky';
+  document.documentElement.dataset.tiles=S.screen.tile_size||'medium';
+  // brightness: the agent drives the backlight; without it, preview with a dim layer
+  $('dim').style.opacity=agent?0:((100-(S.screen.brightness??70))/100*0.75).toFixed(2);
+  drawFaces();
+  const ak=activeKid(),n=kidLabel(ak);
+  $('hello').innerHTML=(n?'Hi '+E(n)+'!':'Hi!')+'<small>'+subLine(ak)+'</small>';
+  $('clock').style.display=S.kiosk.show_clock?'':'none';
+  $('volBtn').style.display='';   // always: it opens the quick-settings panel (brightness, Bluetooth); kid_volume only locks the volume row
+  const v=S.sound.volume||0;$('volBtn').textContent=kidVol()?(v===0?'🔇':(v<35?'🔈':(v<70?'🔉':'🔊'))):'⚙';
+}
+const AV={frog:'🐸',fox:'🦊',cat:'🐱',owl:'🦉',bunny:'🐰',dino:'🦖',bear:'🐻',star:'⭐'};
+
+// ---------- home grid
+function render(){
+  const ak=activeKid(),order=S.apps.order||APPS.map(a=>a.id),allowed=new Set(S.apps.allowed||[]);
+  const kAllowed=(ak&&Array.isArray(ak.apps_allowed))?new Set(ak.apps_allowed):null;
+  const list=order.map(id=>APPS.find(a=>a.id===id)).filter(Boolean).concat(APPS.filter(a=>!order.includes(a.id)));
+  $('grid').innerHTML=list.filter(a=>a.soon||(allowed.has(a.id)&&(!kAllowed||kAllowed.has(a.id)))).map(a=>
+    '<button class="tile'+(a.soon?' soon':'')+'" data-id="'+E(a.id)+'">'
+    +(a.icon_url?'<img class="ic" src="'+E(a.icon_url)+'" alt="" draggable="false">':'<span class="ic" style="background:'+E(a.color||'#888')+'">'+E(a.icon||'▶')+'</span>')
+    +'<span class="t">'+E(a.title)+'</span><span class="s">'+E(a.subtitle||'')+'</span></button>').join('')
+    ||'<div style="text-align:center;color:var(--dim)">No apps allowed yet — a grown-up can turn some on.</div>';
+  wireTiles();
+  $('foot').textContent=(STATUS.version?'bundle '+STATUS.version+' · ':'')+(agent?'tablet helper running':(LIVE?'no tablet helper on this page':'opened as a file'));
+  $('dAgent').className='dot '+(agent?'ok':'bad');
+  $('dBench').className='dot '+(STATUS.bench==='ok'?'ok':(STATUS.bench==='down'?'bad':''));
+}
+// ---------- tiles: tap opens; long-press (or any press while rearranging) drags to a new place, like a phone
+let editing=false,drag=null;
+const HOLD_MS=550,SLOP=10;
+function wireTiles(){
+  document.querySelectorAll('.tile').forEach(t=>{
+    t.onclick=null;
+    t.addEventListener('pointerdown',tileDown);
+    t.addEventListener('pointermove',tileMove);
+    t.addEventListener('pointerup',tileUp);
+    t.addEventListener('pointercancel',tileCancel);
+  });
+}
+function tileDown(e){
+  if(e.button!==undefined&&e.button!==0)return;
+  const t=e.currentTarget;
+  drag={t,x0:e.clientX,y0:e.clientY,moved:false,active:false,hold:null,id:e.pointerId};
+  if(editing){startDrag(e);}
+  else drag.hold=setTimeout(()=>{if(drag&&drag.t===t&&!drag.moved){beginEdit();startDrag(e);}},HOLD_MS);
+}
+function startDrag(e){
+  const d=drag;if(!d)return;
+  d.active=true;blip(380);
+  try{d.t.setPointerCapture(d.id);}catch(x){}
+  d.t.classList.add('drag');
+}
+function tileMove(e){
+  const d=drag;if(!d||d.t!==e.currentTarget)return;
+  const dx=e.clientX-d.x0,dy=e.clientY-d.y0;
+  if(!d.active){if(Math.abs(dx)>SLOP||Math.abs(dy)>SLOP){d.moved=true;clearTimeout(d.hold);}return;}
+  e.preventDefault();
+  d.t.style.transform='translate('+dx+'px,'+dy+'px) scale(1.08)';
+  // the tile under the finger (not the one being dragged) becomes the drop target: shift it aside live
+  const under=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList&&el.classList.contains('tile')&&el!==d.t);
+  if(under){const g=$('grid'),kids=[...g.children],a=kids.indexOf(d.t),b=kids.indexOf(under);
+    if(a>-1&&b>-1&&a!==b){const r=d.t.getBoundingClientRect();
+      g.insertBefore(d.t,a<b?under.nextSibling:under);
+      // keep the dragged tile visually where the finger is after the DOM moved it
+      const r2=d.t.getBoundingClientRect();d.x0+=r2.left-r.left;d.y0+=r2.top-r.top;
+      d.t.style.transform='translate('+(e.clientX-d.x0)+'px,'+(e.clientY-d.y0)+'px) scale(1.08)';}}
+  // autoscroll near the grid's top/bottom edge
+  const gr=$('grid').getBoundingClientRect();
+  if(e.clientY<gr.top+60)$('grid').scrollTop-=12;else if(e.clientY>gr.bottom-60)$('grid').scrollTop+=12;
+}
+function tileUp(e){
+  const d=drag;if(!d||d.t!==e.currentTarget)return;
+  clearTimeout(d.hold);drag=null;
+  if(d.active){d.t.classList.remove('drag');d.t.style.transform='';try{d.t.releasePointerCapture(d.id);}catch(x){}commitOrder();return;}
+  if(!editing&&!d.moved)openApp(d.t.dataset.id);
+}
+function tileCancel(e){const d=drag;if(!d)return;clearTimeout(d.hold);if(d.active){d.t.classList.remove('drag');d.t.style.transform='';}drag=null;}
+function beginEdit(){if(editing)return;editing=true;$('home').classList.add('editing');}
+function endEdit(){editing=false;$('home').classList.remove('editing');blip(500);}
+function commitOrder(){
+  const shown=[...$('grid').querySelectorAll('.tile')].map(t=>t.dataset.id);
+  const rest=(S.apps.order||APPS.map(a=>a.id)).concat(APPS.map(a=>a.id)).filter((id,i,arr)=>!shown.includes(id)&&arr.indexOf(id)===i);
+  S.apps.order=shown.concat(rest);save(false);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&editing)endEdit();});
+
+// ---------- apps run in the frame; a tiny bridge lets a game ask for home or a blip (window.parent.postMessage({kt:'home'},'*'))
+window.addEventListener('message',e=>{
+  const f=$('frame');if(!f||e.source!==f.contentWindow)return;const d=e.data||{};
+  if(d.kt==='home')goHome();else if(d.kt==='blip')blip(+d.f||500);else if(d.kt==='toast'&&d.text)toast(String(d.text).slice(0,80));
+});
+$('frame').addEventListener('load',()=>{try{
+  const ak=activeKid(),kidObj=ak?{id:ak.id,name:ak.name||'',age:ak.age||5,avatar:ak.avatar||'frog'}:{id:'default',name:S.child.name||'',age:5,avatar:S.child.avatar||'frog'};
+  $('frame').contentWindow.postMessage({kt:'hello',child:{name:kidObj.name,avatar:kidObj.avatar},kid:kidObj,caps:STATUS.caps||{mic:false,camera:false},theme:S.screen.theme,
+  sound:{volume:S.sound.volume,max_volume:S.sound.max_volume},app:current&&current.id},'*');}catch(e){}});
+function openApp(id){
+  const a=APPS.find(x=>x.id===id);if(!a)return;
+  if(editing)return;
+  if(a.soon||!a.path){blip(300);toast(a.title+' is coming soon');return;}
+  blip(520);closeQuick();current=a;
+  if(agent)fetch('/api/app',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:a.id})}).catch(()=>{});
+  // a website app (app.json "url", D-014): the agent opens the site in its own Chromium window above us, leaving our bottom strip
+  // (home pill, volume) showing; the frame shows the app's own page underneath. goHome -> /api/app null closes the window.
+  if(a.url){if(agent)fetch('/api/open',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:a.id})}).then(r=>r.json()).then(j=>{if(j.ok)a._extSeen=true;else toast('Could not open '+a.title+(j.error?': '+j.error:''));}).catch(()=>{});else toast(a.title+' opens in its own window on the tablet');}
+  $('frame').src=a.path;
+  $('home').classList.remove('on');$('app').classList.add('on');$('homePill').classList.add('on');
+  showVolPills(true);
+}
+function goHome(){
+  if(!current)return;
+  blip(420);closeQuick();if(current.url)current._extSeen=false;current=null;$('frame').src='about:blank';
+  if(agent)fetch('/api/app',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:null})}).catch(()=>{});
+  $('app').classList.remove('on');$('homePill').classList.remove('on');$('home').classList.add('on');
+  showVolPills(false);
+  tick();
+}
+// ---------- kid volume: steps of 5, never above sound.max_volume (the grown-up ceiling); saved through the agent
+let volT=null;
+function kidVol(){return S.kiosk.kid_volume!==false;}
+function extHold(ms){if(agent&&current&&current.url)fetch('/api/ext/hold',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ms:ms||3200})}).catch(()=>{});}   // website window: stay under us while the volume popup shows (D-014)
+function setVol(v){
+  extHold();
+  const cap=S.sound.max_volume||80;v=Math.max(0,Math.min(cap,Math.round(v/5)*5));
+  if(v!==S.sound.volume){S.sound.volume=v;save(false);}
+  drawVol();blip(380+v*4);
+}
+function drawVol(){
+  const cap=S.sound.max_volume||80,v=S.sound.volume||0;
+  $('volBar').innerHTML=Array.from({length:10},(_,i)=>'<i class="'+((i+1)*10<=v?'on':((i+1)*10>cap?'cap':''))+'"></i>').join('');
+  $('volNum').textContent=v+'%';
+  $('volBtn').textContent=v===0?'🔇':(v<35?'🔈':(v<70?'🔉':'🔊'));
+  $('volPop').classList.add('on');clearTimeout(volT);volT=setTimeout(()=>$('volPop').classList.remove('on'),2800);
+}
+function showVolPills(on){const show=on&&kidVol();$('volDown').classList.toggle('on',show);$('volUp').classList.toggle('on',show);$('quickPill').classList.toggle('on',!!on);if(!on)closeQuick();}
+$('volBtn').onclick=()=>{quickOpen?closeQuick():openQuick('top');};
+$('vpDown').onclick=()=>setVol((S.sound.volume||0)-5);$('vpUp').onclick=()=>setVol((S.sound.volume||0)+5);
+$('volDown').onclick=()=>setVol((S.sound.volume||0)-5);$('volUp').onclick=()=>setVol((S.sound.volume||0)+5);
+// ---------- quick settings panel: volume + brightness for everyone (volume only if kiosk.kid_volume), Bluetooth: connecting a
+// paired speaker is open, pairing a new one / forgetting is behind the grown-up code (gate 'bt', unlocked 5 min). The agent owns
+// BlueZ (/api/bt*); sound and mic follow the connected device through PipeWire, so nothing else changes.
+let quickOpen=false,quickT=null,BT=null,btUnlock=0,prevVol=60,gateHoldT=null;
+function syncOverlayHold(){
+  clearInterval(gateHoldT);
+  const up=$('gate').classList.contains('on')||$('settings').classList.contains('on');
+  if(!up)return;
+  extHold(4000);
+  gateHoldT=setInterval(()=>{if($('gate').classList.contains('on')||$('settings').classList.contains('on'))extHold(4000);else clearInterval(gateHoldT);},2500);
+}
+function openQuick(where){quickOpen=true;$('quick').className='on '+(where||'top');$('volPop').classList.remove('on');drawQuick();pollBt();extHold(4000);
+  clearInterval(quickT);quickT=setInterval(()=>{if(!quickOpen)return;extHold(4000);pollBt();},2500);}
+function closeQuick(){if(!quickOpen)return;quickOpen=false;$('quick').className='';clearInterval(quickT);}
+function qbars(el,v,cap){el.innerHTML=Array.from({length:10},(_,i)=>{const p=(i+1)*10;return '<i data-v="'+p+'" class="'+(p<=v?'on':(p>cap?'cap':''))+'"></i>';}).join('');}
+function drawQuick(){
+  const cap=S.sound.max_volume||80,v=S.sound.volume||0,b=S.screen.brightness??70,locked=!kidVol(),out=(S.sound&&S.sound.output)||'lineout';
+  if(v>0)prevVol=v;
+  qbars($('qVolBar'),v,cap);$('qVolNum').textContent=v+'%';$('qVolL').textContent=(v===0?'🔇':v<35?'🔈':v<70?'🔉':'🔊')+' Volume'+(locked?' 🔒':'');
+  $('qVolDown').disabled=$('qVolUp').disabled=$('qVolL').disabled=locked;
+  qbars($('qBrBar'),b,100);$('qBrNum').textContent=b+'%';
+  $('qOut').textContent=out==='headphones'?'🎧 Jack':'🔊 Panel';
+  const eq=(S.sound&&S.sound.eq)||{},db=x=>(x>0?'+':'')+(+x||0)+' dB';
+  $('qBassNum').textContent=db(eq.bass_db);$('qTrebNum').textContent=db(eq.treble_db);
+  $('qToneNote').textContent=eq.enabled===false?'speaker protection off':(out!=='lineout'?'tone shapes the panel speakers only':'');
+  drawBt();
+}
+// Tone (D-016): bass and treble shelves in the panel-speaker EQ, 2 dB steps between -6 and +6; the helper retunes live
+function setTone(k,v){S.sound.eq=S.sound.eq||{};v=Math.max(-6,Math.min(6,Math.round(v/2)*2));if(v!==(+S.sound.eq[k]||0)){S.sound.eq[k]=v;save(false);}drawQuick();blip(480+v*10);}
+$('qBassDown').onclick=()=>setTone('bass_db',(+(S.sound.eq||{}).bass_db||0)-2);$('qBassUp').onclick=()=>setTone('bass_db',(+(S.sound.eq||{}).bass_db||0)+2);
+$('qTrebDown').onclick=()=>setTone('treble_db',(+(S.sound.eq||{}).treble_db||0)-2);$('qTrebUp').onclick=()=>setTone('treble_db',(+(S.sound.eq||{}).treble_db||0)+2);
+function setBright(b){b=Math.max(10,Math.min(100,Math.round(b/10)*10));if(b!==(S.screen.brightness??70)){S.screen.brightness=b;applyLook();save(false);}drawQuick();blip(500);}
+$('qVolDown').onclick=()=>{setVol((S.sound.volume||0)-5);$('volPop').classList.remove('on');drawQuick();};
+$('qVolUp').onclick=()=>{setVol((S.sound.volume||0)+5);$('volPop').classList.remove('on');drawQuick();};
+$('qVolL').onclick=()=>{if(!kidVol())return;const v=S.sound.volume||0;if(v>0)prevVol=v;setVol(v>0?0:(prevVol||40));$('volPop').classList.remove('on');drawQuick();};
+$('qVolBar').onclick=e=>{if(!kidVol())return;const seg=e.target.closest('i[data-v]');if(!seg)return;setVol(+seg.dataset.v);$('volPop').classList.remove('on');drawQuick();};
+$('qBrDown').onclick=()=>setBright((S.screen.brightness??70)-10);$('qBrUp').onclick=()=>setBright((S.screen.brightness??70)+10);
+$('qBrBar').onclick=e=>{const seg=e.target.closest('i[data-v]');if(!seg)return;setBright(+seg.dataset.v);};
+$('qOut').onclick=()=>{S.sound=S.sound||{};S.sound.output=S.sound.output==='headphones'?'lineout':'headphones';save();drawQuick();toast(S.sound.output==='headphones'?'Sound -> headphone jack':'Sound -> panel speakers');};
+$('quickClose').onclick=closeQuick;
+document.addEventListener('pointerdown',e=>{if(quickOpen&&!e.target.closest('#quick,#volBtn,#quickPill'))closeQuick();},true);
+$('quickPill').onclick=()=>{extHold(4000);quickOpen?closeQuick():openQuick('bottom');};
+function btUnlocked(){return Date.now()<btUnlock;}
+async function pollBt(){if(!agent){BT=null;drawBt();return;}try{BT=await jget('/api/bt');}catch(e){BT=null;}drawBt();}
+async function btPost(path,body){const r=await fetch('/api/bt/'+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||r.status);return j;}
+function drawBt(){
+  const el=$('qDevs'),out=(S.sound&&S.sound.output)==='headphones'?'headphone jack':'tablet speaker';
+  if(!agent||!BT||!BT.available){$('qBtState').textContent=agent?'no Bluetooth on this tablet':'needs the tablet helper';$('qBtSw').style.display='none';$('qPair').style.display='none';el.innerHTML='';$('qHint').textContent='';return;}
+  $('qBtSw').style.display='';$('qBtSw').classList.toggle('on',!!BT.powered);
+  $('qPair').style.display=BT.powered?'':'none';$('qPair').textContent=BT.scanning?'Looking…':(btUnlocked()?'Pair new…':'🔒 Pair new…');
+  const con=(BT.devices||[]).filter(d=>d.connected);
+  $('qBtState').textContent=!BT.powered?'off':(con.length?'sound on '+con.map(d=>d.name).join(', '):out);
+  const show=BT.powered?(BT.devices||[]).filter(d=>d.paired||btUnlocked()):[];
+  el.innerHTML=show.map(d=>'<div class="qdev'+(d.connected?' on':'')+'" data-mac="'+E(d.mac)+'"><span>'+(/head/.test(d.icon||'')?'🎧':(d.audio?'🔊':'📶'))+'</span><span class="n">'+E(d.name)+(d.paired?'':' <small>(new)</small>')+'</span>'
+    +(d.paired?(d.connected?'<button class="qact" data-act="disconnect">Disconnect</button>':'<button class="qact go" data-act="connect">Connect</button>'):'<button class="qact go" data-act="pair">Pair</button>')
+    +(d.paired&&btUnlocked()?'<button class="qact" data-act="forget">Forget</button>':'')+'</div>').join('')
+    ||'<div class="qdev" style="color:var(--dim)">'+(BT.powered?(BT.scanning?'Looking for speakers and headphones… (put yours in pairing mode)':'No speaker paired yet — a grown-up taps Pair new…'):'Bluetooth is off')+'</div>';
+  el.querySelectorAll('button[data-act]').forEach(b=>b.onclick=()=>btAct(b.dataset.act,b.closest('.qdev').dataset.mac,b));
+  const mic=(STATUS.caps||{}).mic;
+  $('qHint').textContent='Microphone: '+(mic?'available':'none — a Bluetooth headset adds one')+'. Sound plays on the connected device; Disconnect to use the '+out+'.';
+}
+async function btAct(act,mac,btn){
+  if((act==='forget'||act==='pair')&&!btUnlocked()){closeQuick();openGate('bt');return;}
+  if(btn){btn.disabled=true;btn.textContent='…';}
+  try{BT=await btPost(act,{mac});toast(act==='pair'?'Paired and connected':act==='connect'?'Connected':act==='disconnect'?'Back to the tablet speaker':'Forgotten');}
+  catch(e){toast('Bluetooth: '+e.message);}
+  drawBt();
+  setTimeout(()=>{if(agent)jget('/api/status').then(s=>{STATUS=s;drawBt();}).catch(()=>{});},1500);
+}
+async function btScan(){if(!btUnlocked()){closeQuick();openGate('bt');return;}try{BT=await btPost('scan',{seconds:60});}catch(e){toast('Bluetooth: '+e.message);}drawBt();}
+// System row: Sleep for everyone (screen off, a touch wakes it), Restart / Power off / Settings behind the grown-up code
+async function powerDo(action){
+  if(!agent){toast('Only on the tablet');return;}
+  $('qSysNote').textContent=action==='sleep'?'':(action==='reboot'?'Restarting…':'Turning off…');
+  try{const r=await fetch('/api/power',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action})});const j=await r.json().catch(()=>({}));
+    if(!r.ok||!j.ok)throw new Error(j.error||r.status);
+    if(action==='sleep')closeQuick();}
+  catch(e){toast('System: '+e.message);$('qSysNote').textContent='';}
+}
+$('qSleep').onclick=()=>powerDo('sleep');
+$('qReboot').onclick=()=>{closeQuick();openGate('power:reboot');};
+$('qOff').onclick=()=>{closeQuick();openGate('power:poweroff');};
+$('qSettings').onclick=()=>{closeQuick();openGate('settings');};
+$('qBtSw').onclick=async()=>{if(!BT)return;try{BT=await btPost('power',{on:!BT.powered});}catch(e){toast('Bluetooth: '+e.message);}drawBt();};
+$('qPair').onclick=btScan;
+// home pill: tap, or hold (setting) so a wandering thumb does not quit the game
+(function(){const p=$('homePill'),bar=p.querySelector('i');let t=null,t0=0;
+  function start(e){e.preventDefault();if(S.kiosk.home_button==='hold'){t0=Date.now();bar.style.transition='width .7s linear';bar.style.width='100%';t=setTimeout(()=>{t=null;goHome();bar.style.width='0'},700);}else goHome();}
+  function end(){if(t){clearTimeout(t);t=null;}bar.style.transition='width .1s';bar.style.width='0';}
+  p.addEventListener('pointerdown',start);p.addEventListener('pointerup',end);p.addEventListener('pointercancel',end);p.addEventListener('pointerleave',end);})();
+
+// ---------- parent gate: hold the active face (or moon), then the PIN
+let gateNext='settings';
+function openGate(next){gateNext=next||'settings';pin='';$('gateMsg').textContent='';drawPin();$('gate').classList.add('on');syncOverlayHold();}
+function closeGate(){$('gate').classList.remove('on');syncOverlayHold();}
+function drawPin(){[...$('pinDots').children].forEach((b,i)=>b.classList.toggle('f',i<pin.length));}
+$('pad').innerHTML=[1,2,3,4,5,6,7,8,9,'⌫',0,'✓'].map(k=>'<button data-k="'+k+'">'+k+'</button>').join('');
+$('pad').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;blip(600);
+  if(k==='⌫')pin=pin.slice(0,-1);else if(k==='✓')checkPin();else if(pin.length<4){pin+=k;if(pin.length===4)setTimeout(checkPin,120);}drawPin();};
+async function grantGrace(k){
+  if(!k)return;
+  const gMin=(S.budget&&S.budget.grace_min)||15;
+  if(agent){try{BUDGET=await (await fetch('/api/budget/grace',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kid:k.id,s:gMin*60})})).json();}catch(e){}}
+  else{BUDGET.grace_s[k.id]=(BUDGET.grace_s[k.id]||0)+gMin*60;saveLocalBudget();}
+  sleeping=false;$('sleep').classList.remove('on');applyLook();tick();toast('+'+gMin+' min for '+(kidLabel(k)||'today'));
+}
+function checkPin(){
+  if(pin===String(S.pin||'1234')){
+    closeGate();
+    if(gateNext==='settings')openSettings();
+    else if(gateNext==='wake'){sleeping=false;$('sleep').classList.remove('on');toast('awake until bedtime is next checked');wakeOverride=Date.now()+60*60*1000;}
+    else if(gateNext==='grace'){grantGrace(activeKid());}
+    else if(gateNext==='bt'){btUnlock=Date.now()+5*60*1000;openQuick(current?'bottom':'top');btScan();}
+    else if(gateNext==='power:reboot'||gateNext==='power:poweroff'){powerDo(gateNext.split(':')[1]);}
+  }else{$('gateMsg').textContent='That is not the code';pin='';drawPin();blip(180);}
+}
+
+// ---------- settings panel
+function openSettings(){drawSettings();$('settings').classList.add('on');$('saveState').textContent='';syncOverlayHold();}
+function closeSettings(){$('settings').classList.remove('on');syncOverlayHold();}
+const LETTERS='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+function row(label,sub,ctrl){return '<div class="row"><div class="l">'+label+(sub?'<small>'+sub+'</small>':'')+'</div>'+ctrl+'</div>';}
+function sw(path){return '<button class="sw '+(get(path)?'on':'')+'" data-sw="'+path+'" aria-label="'+path+'"></button>';}
+function range(path,min,max,unit){const v=get(path);return '<input type="range" min="'+min+'" max="'+max+'" value="'+v+'" data-range="'+path+'"><span class="v" id="v-'+path.replace(/\./g,'-')+'">'+v+(unit||'')+'</span>';}
+function get(path){return path.split('.').reduce((o,k)=>o==null?o:o[k],S);}
+function set(path,val){const ks=path.split('.');let o=S;ks.slice(0,-1).forEach(k=>{o[k]=o[k]||{};o=o[k];});o[ks[ks.length-1]]=val;}
+function stepper(path,fmt,step){return '<div class="stepper"><button data-step="'+path+'" data-d="-'+step+'">−</button><span class="v" style="min-width:70px;text-align:center;color:inherit" id="v-'+path.replace(/\./g,'-')+'">'+fmt(get(path))+'</span><button data-step="'+path+'" data-d="'+step+'">+</button></div>';}
+const hhmm=v=>v; const mins=v=>{const [h,m]=v.split(':').map(Number);return h*60+m;}; const unmins=n=>{n=((n%1440)+1440)%1440;return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');};
+function drawSettings(){
+  const info=STATUS||{},ks=kidsList()||[];
+  if(editKidIdx>=ks.length)editKidIdx=0;
+  const ek=ks[editKidIdx]||null;
+  const usedMin=ek?Math.floor(usedS(ek)/60):0,remMin=ek?Math.ceil(remS(ek)/60):0;
+  const caps=info.caps||{};
+  $('smain').innerHTML=
+   '<div class="sec"><h2>Kids &amp; screen time</h2>'
+   +(ks.length?
+     '<div class="row" style="flex-wrap:wrap;gap:8px"><div class="l">Who to edit<small>tap a face on the home bar to switch who is playing</small></div>'
+     +ks.map((k,i)=>'<button class="btn'+(i===editKidIdx?' go':'')+'" data-ek="'+i+'">'+(AV[k.avatar]||'🐸')+' '+E(kidLabel(k,i))+'</button>').join('')
+     +(ks.length<5?'<button class="btn" id="addKid">+ Add kid</button>':'')
+     +(ks.length>1?'<button class="btn warn" id="delKid">Remove</button>':'')
+     +'</div>'
+     +row('Name','tap the letters','<div id="nameOut">'+E(ek.name||'')+'</div>')
+     +'<div class="kbd">'+LETTERS.split('').map(l=>'<button data-l="'+l+'">'+l+'</button>').join('')+'<button data-l=" ">␣</button><button data-l="⌫" class="wide">⌫</button></div>'
+     +row('Friend','picture on the home bar','<div class="avs">'+Object.keys(AV).map(k=>'<button data-av="'+k+'" class="'+(ek.avatar===k?'on':'')+'">'+AV[k]+'</button>').join('')+'</div>')
+     +row('Age','used by games to pick difficulty','<div class="stepper"><button id="ageDn">−</button><span class="v" style="min-width:60px;text-align:center;color:inherit" id="ageVal">'+(ek.age||5)+' yr</span><button id="ageUp">+</button></div>')
+     +row('Daily time limit',usedMin+' min used today'+(ek.budget_min?' · '+remMin+' min left':''),
+          '<div class="stepper"><button id="bgDn">−</button><span class="v" style="min-width:80px;text-align:center;color:inherit" id="bgVal">'+(ek.budget_min?ek.budget_min+' min':'no limit')+'</span><button id="bgUp">+</button>'
+          +(ek.budget_min?'<button class="btn" id="bgGrace">+'+(S.budget.grace_min||15)+'m today</button>':'')+'</div>')
+     +row('Apps for '+E(kidLabel(ek,editKidIdx)),'narrows the home screen list for this child',
+          '<div style="display:flex;flex-wrap:wrap;gap:6px">'+APPS.filter(a=>!a.soon&&(S.apps.allowed||[]).includes(a.id)).map(a=>{
+            const on=!Array.isArray(ek.apps_allowed)||ek.apps_allowed.includes(a.id);
+            return '<button class="btn'+(on?' go':'')+'" data-kapp="'+E(a.id)+'">'+E(a.icon)+' '+E(a.title)+'</button>';
+          }).join('')+'</div>')
+     :row('Name','tap the letters','<div id="nameOut">'+E(S.child.name||'')+'</div>')
+      +'<div class="kbd">'+LETTERS.split('').map(l=>'<button data-l="'+l+'">'+l+'</button>').join('')+'<button data-l=" ">␣</button><button data-l="⌫" class="wide">⌫</button></div>'
+      +row('Friend','the picture in the corner','<div class="avs">'+Object.keys(AV).map(k=>'<button data-av="'+k+'" class="'+(S.child.avatar===k?'on':'')+'">'+AV[k]+'</button>').join('')+'</div>')
+   )
+   +row('Daily time limits on','shows the time bar and the moon when a child’s minutes are up (Yoto is exempt)',sw('budget.enabled'))
+   +row('Bonus time with code','added when a grown-up unlocks the moon screen',stepper('budget.grace_min',v=>v+' min',5))
+   +row('New day starts at','hour the daily timer resets',stepper('budget.reset_hour',v=>String(v).padStart(2,'0')+':00',1))
+   +row('Count time on home screen','off = only count while an app is open',sw('budget.count_home'))
+   +'</div>'
+   +'<div class="sec"><h2>Screen</h2>'
+   +row('Brightness',agent?'sets the backlight':'preview only here — the tablet helper drives the real backlight',range('screen.brightness',5,100,'%'))
+   +row('Rotation','turns the display and touch together','<div class="stepper" style="gap:8px">'+[['right','Landscape ↻'],['left','Landscape ↺'],['none','Portrait'],['inverted','Flipped']].map(o=>'<button class="btn'+((S.screen.rotation||'right')===o[0]?' go':'')+'" data-rot="'+o[0]+'">'+o[1]+'</button>').join('')+'</div>')
+   +row('Colours','',"<div class='swatches'>"+['sky','forest','candy','night'].map(t=>'<button class="swatch '+(S.screen.theme===t?'on':'')+'" data-theme="'+t+'" style="background:'+({sky:'#8ed0ff',forest:'#a8e6a1',candy:'#ffb3d9',night:'#1b2440'})[t]+'"></button>').join('')+'</div>')
+   +row('Tile size','hold a tile on the home screen to move it','<div class="stepper" style="gap:8px">'+['small','medium','large'].map(t=>'<button class="btn'+((S.screen.tile_size||'medium')===t?' go':'')+'" data-tiles="'+t+'">'+t+'</button>').join('')+'</div>')
+   +row('Show the clock','',sw('kiosk.show_clock'))
+   +row('Screen sleeps after','0 = never (a tablet on a stand should stay on); wakes on touch',stepper('screen.sleep_after_min',v=>v?v+' min':'never',5))
+   +'</div>'
+   +'<div class="sec"><h2>Sound</h2>'
+   +row('Volume','',range('sound.volume',0,100,'%'))
+   +row('Loudest allowed','the child cannot go above this',range('sound.max_volume',10,100,'%'))
+   +row('Speakers','where the sound comes out','<div class="stepper" style="gap:8px">'+[['lineout','Panel speakers'],['headphones','Headphone jack'],['earphones','Earphones']].map(o=>'<button class="btn'+((S.sound.output||'lineout')===o[0]?' go':'')+'" data-out="'+o[0]+'">'+o[1]+'</button>').join('')+'</div>')
+   +row('Children can change volume','speaker button and −/+ pills, never above the ceiling',sw('kiosk.kid_volume'))
+   +row('Protect the panel speakers','high-pass + tone EQ in front of the built-in speakers; off = flat sound (headphones and Bluetooth are always flat)',sw('sound.eq.enabled'))
+   +row('Bass','warmth below 220 Hz',range('sound.eq.bass_db',-6,6,' dB'))
+   +row('Treble','clarity above 3.5 kHz',range('sound.eq.treble_db',-6,6,' dB'))
+   +row('Codec boost','0 = unity gain (the old default was +16 dB and clipped); raise only for very quiet clips',stepper('sound.eq.preamp_db',v=>(v>0?'+':'')+(+v||0)+' dB',2))
+   +row('Tap sounds','little blips on the home screen',sw('sound.tap_sounds'))
+   +'</div>'
+   +'<div class="sec"><h2>Apps on the home screen</h2>'
+   +APPS.filter(a=>!a.soon).map(a=>row(E(a.icon)+' '+E(a.title),E(a.subtitle||''),'<button class="sw '+((S.apps.allowed||[]).includes(a.id)?'on':'')+'" data-app="'+E(a.id)+'"></button>')).join('')
+   +'</div>'
+   +'<div class="sec"><h2>Bedtime</h2>'
+   +row('Bedtime on','outside these hours the tablet shows the moon; the code wakes it for an hour',sw('bedtime.enabled'))
+   +row('Sleep from','',stepper('bedtime.start',hhmm,15))
+   +row('Wake at','',stepper('bedtime.end',hhmm,15))
+   +'</div>'
+   +'<div class="sec"><h2>Grown-up controls</h2>'
+   +row('Home button','hold = 0.7 s press so a thumb cannot quit a game by accident','<button class="btn" id="hb">'+(S.kiosk.home_button==='hold'?'hold':'tap')+'</button>')
+   +row('Grown-up hold time','how long to hold the corner picture',stepper('kiosk.parent_hold_ms',v=>(v/1000).toFixed(1)+' s',500))
+   +row('Change the code','4 digits','<button class="btn" id="chpin">change</button>')
+   +'</div>'
+   +'<div class="sec"><h2>This tablet</h2>'
+   +'<div class="row"><div class="info">'+(agent?('helper '+E(info.agent||'')+'<br>bundle '+E(info.version||'?')+' ('+E((info.sha||'').slice(0,12))+') built '+E(info.built||'?')+'<br>'+E(info.hostname||'')+' · up '+E(info.uptime||'?')+'<br>backlight '+E(info.backlight||'n/a')+' · mixer '+E(info.mixer||'n/a')+' · mic '+(caps.mic?'yes':'none')+' · camera '+(caps.camera?'yes':'none')+(info.dry_run?'<br>DRY RUN — nothing is applied to hardware':'')):'No tablet helper on this page (kids_tablet_agent.py). Settings live in this browser only.')+'</div></div>'
+   +'<div class="row" style="flex-wrap:wrap;gap:8px">'
+   +'<button class="btn go" id="reload">Reload</button>'
+   +(agent?'<button class="btn" id="update">Check the Bench for updates</button><button class="btn warn" id="devmode">Developer desktop</button><button class="btn warn" id="reboot">Restart tablet</button>':'')
+   +'</div></div>';
+  const m=$('smain');
+  m.querySelectorAll('[data-ek]').forEach(b=>b.onclick=()=>{editKidIdx=+b.dataset.ek;drawSettings();});
+  if($('addKid'))$('addKid').onclick=()=>{const n=ks.length+1,id='kid'+Date.now().toString(36).slice(-4);S.kids.push({id,name:'',age:5,avatar:Object.keys(AV)[n%Object.keys(AV).length],apps_allowed:null,budget_min:45});editKidIdx=S.kids.length-1;save();drawSettings();};
+  if($('delKid'))$('delKid').onclick=()=>{if(ks.length<=1)return;S.kids.splice(editKidIdx,1);editKidIdx=0;if(kidId&&!S.kids.find(x=>x.id===kidId))kidId=S.kids[0].id;save();drawSettings();};
+  m.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{blip(600);const t=ek||S.child;let n=t.name||'';const l=b.dataset.l;if(l==='⌫')n=n.slice(0,-1);else if(n.length<14)n+=(l===' '?' ':(n.length===0||n.endsWith(' ')?l:l.toLowerCase()));t.name=n;$('nameOut').textContent=n;save();});
+  m.querySelectorAll('[data-av]').forEach(b=>b.onclick=()=>{const t=ek||S.child;t.avatar=b.dataset.av;m.querySelectorAll('[data-av]').forEach(x=>x.classList.toggle('on',x===b));save();});
+  if(ek){
+    $('ageDn').onclick=()=>{ek.age=Math.max(1,(ek.age||5)-1);$('ageVal').textContent=ek.age+' yr';save();};
+    $('ageUp').onclick=()=>{ek.age=Math.min(16,(ek.age||5)+1);$('ageVal').textContent=ek.age+' yr';save();};
+    $('bgDn').onclick=()=>{ek.budget_min=Math.max(0,(ek.budget_min||0)-15);$('bgVal').textContent=ek.budget_min?ek.budget_min+' min':'no limit';save();};
+    $('bgUp').onclick=()=>{ek.budget_min=Math.min(240,(ek.budget_min||0)+15);$('bgVal').textContent=ek.budget_min?ek.budget_min+' min':'no limit';save();};
+    if($('bgGrace'))$('bgGrace').onclick=async()=>{await grantGrace(ek);drawSettings();};
+    m.querySelectorAll('[data-kapp]').forEach(b=>b.onclick=()=>{
+      const id=b.dataset.kapp,all=(S.apps.allowed||[]).slice();
+      const cur=new Set(Array.isArray(ek.apps_allowed)?ek.apps_allowed:all);
+      cur.has(id)?cur.delete(id):cur.add(id);
+      ek.apps_allowed=(cur.size>=all.length&&all.every(x=>cur.has(x)))?null:[...cur];
+      save();drawSettings();
+    });
+  }
+  m.querySelectorAll('[data-sw]').forEach(b=>b.onclick=()=>{set(b.dataset.sw,!get(b.dataset.sw));b.classList.toggle('on');save();});
+  m.querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>{const id=b.dataset.app,al=new Set(S.apps.allowed||[]);al.has(id)?al.delete(id):al.add(id);S.apps.allowed=[...al];b.classList.toggle('on');save();drawSettings();});
+  m.querySelectorAll('[data-range]').forEach(r=>{const p=r.dataset.range,out=$('v-'+p.replace(/\./g,'-'));
+    r.oninput=()=>{let v=+r.value;if(p==='sound.volume'&&v>S.sound.max_volume){v=S.sound.max_volume;r.value=v;}if(p==='sound.max_volume'&&S.sound.volume>v){S.sound.volume=v;const vr=m.querySelector('[data-range="sound.volume"]');if(vr){vr.value=v;$('v-sound-volume').textContent=v+'%';}}
+      set(p,v);out.textContent=p.startsWith('sound.eq.')?((v>0?'+':'')+v+' dB'):v+'%';if(p==='screen.brightness')applyLook();save(false);};});
+  m.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{const p=b.dataset.step,d=+b.dataset.d;let v=get(p);
+    if(typeof v==='string'&&v.includes(':'))v=unmins(mins(v)+d);
+    else if(p==='budget.reset_hour')v=((v!=null?+v:5)+d+24)%24;
+    else if(p==='budget.grace_min')v=Math.max(5,Math.min(120,(+v||15)+d));
+    else if(p==='sound.eq.preamp_db')v=Math.max(-12,Math.min(12,(+v||0)+d));
+    else v=Math.max(0,(+v||0)+d);
+    set(p,v);
+    $('v-'+p.replace(/\./g,'-')).textContent=p==='screen.sleep_after_min'?(v?v+' min':'never'):(p==='kiosk.parent_hold_ms'?(v/1000).toFixed(1)+' s':(p==='budget.reset_hour'?String(v).padStart(2,'0')+':00':(p==='budget.grace_min'?v+' min':v)));save();});
+  m.querySelectorAll('[data-theme]').forEach(b=>b.onclick=()=>{S.screen.theme=b.dataset.theme;m.querySelectorAll('[data-theme]').forEach(x=>x.classList.toggle('on',x===b));applyLook();save();});
+  m.querySelectorAll('[data-rot]').forEach(b=>b.onclick=()=>{S.screen.rotation=b.dataset.rot;m.querySelectorAll('[data-rot]').forEach(x=>x.classList.toggle('go',x===b));save();});
+  m.querySelectorAll('[data-out]').forEach(b=>b.onclick=()=>{S.sound.output=b.dataset.out;m.querySelectorAll('[data-out]').forEach(x=>x.classList.toggle('go',x===b));save();});
+  m.querySelectorAll('[data-tiles]').forEach(b=>b.onclick=()=>{S.screen.tile_size=b.dataset.tiles;m.querySelectorAll('[data-tiles]').forEach(x=>x.classList.toggle('go',x===b));applyLook();save();});
+  $('hb').onclick=()=>{S.kiosk.home_button=S.kiosk.home_button==='hold'?'tap':'hold';$('hb').textContent=S.kiosk.home_button;save();};
+  $('chpin').onclick=()=>{newPin='';closeSettings();openGate('newpin');$('gateMsg').textContent='Type the NEW code';};
+  $('reload').onclick=()=>location.reload();
+  if(agent){
+    $('update').onclick=async()=>{toast('asking the Bench…');try{const r=await fetch('/api/update',{method:'POST'});const j=await r.json().catch(()=>({}));toast(j.message||(r.ok?'checked':'update not wired yet ('+r.status+')'));}catch(e){toast('could not reach the helper');}};
+    $('devmode').onclick=async()=>{if(!confirm('Leave the kids screen and open the normal desktop? The tablet comes back to the kids screen on the next restart.'))return;await fetch('/api/kiosk/exit',{method:'POST'});toast('switching…');};
+    $('reboot').onclick=async()=>{if(!confirm('Restart the tablet now?'))return;const r=await fetch('/api/reboot',{method:'POST'});toast(r.ok?'restarting…':'could not restart ('+r.status+')');};
+  }
+}
+// new-PIN flow reuses the gate: first entry of 4 digits = the new code
+let newPin='';
+const _check=checkPin;
+checkPin=function(){
+  if(gateNext==='newpin'){ if(pin.length===4){S.pin=pin;save();closeGate();toast('code changed');openSettings();} return; }
+  _check();
+};
+
+// ---------- clock, bedtime, budget timer, status poll
+let wakeOverride=0;
+function isExemptApp(){
+  if(!current)return false;
+  const ex=(S.budget&&Array.isArray(S.budget.exempt_apps))?S.budget.exempt_apps:['yoto'];
+  return ex.includes(current.id);
+}
+function tick(){
+  const d=new Date();let h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0');
+  $('clock').textContent=S.kiosk.clock_24h?String(h).padStart(2,'0')+':'+m:((h%12)||12)+':'+m+(h<12?' am':' pm');
+  // bedtime window may cross midnight
+  let bedAsleep=false;
+  if(S.bedtime&&S.bedtime.enabled&&Date.now()>wakeOverride){const now=h*60+d.getMinutes(),a=mins(S.bedtime.start),b=mins(S.bedtime.end);bedAsleep=a<b?(now>=a&&now<b):(now>=a||now<b);}
+  const ak=activeKid(),bgAsleep=!bedAsleep&&!isExemptApp()&&budgetOut(ak);
+  const asleep=bedAsleep||bgAsleep;
+  sleepKind=bedAsleep?'bedtime':(bgAsleep?'budget':'');
+  if(asleep){
+    if(!sleeping)goHome();
+    sleeping=true;$('sleep').classList.add('on');$('quickPill').classList.add('on');
+    if(bedAsleep){
+      $('sleepTitle').textContent='Sleepy time';
+      $('sleepTill').textContent='back at '+fmt12(S.bedtime.end)+' · grown-ups: hold the moon';
+      $('sleepKids').innerHTML='';
+    }else{
+      const nm=kidLabel(ak)||'You',gMin=(S.budget&&S.budget.grace_min)||15;
+      $('sleepTitle').textContent='All done for today!';
+      $('sleepTill').textContent=nm+' used all '+ak.budget_min+' min today · grown-ups: hold the moon for +'+gMin+' min';
+      const others=(kidsList()||[]).filter(k=>k.id!==ak.id&&!budgetOut(k));
+      const exIds=new Set((S.budget&&Array.isArray(S.budget.exempt_apps))?S.budget.exempt_apps:['yoto']);
+      const allowed=new Set(S.apps.allowed||[]),kAllowed=(ak&&Array.isArray(ak.apps_allowed))?new Set(ak.apps_allowed):null;
+      const exApps=APPS.filter(a=>!a.soon&&exIds.has(a.id)&&allowed.has(a.id)&&(!kAllowed||kAllowed.has(a.id)));
+      $('sleepKids').innerHTML=
+        exApps.map(a=>'<button data-sapp="'+E(a.id)+'">'+E(a.icon||'▶')+' Open '+E(a.title)+'</button>').join('')
+        +others.map(k=>'<button data-skid="'+E(k.id)+'">'+(AV[k.avatar]||'🐸')+' Switch to '+E(kidLabel(k,(kidsList()||[]).indexOf(k)))+'</button>').join('');
+      $('sleepKids').querySelectorAll('[data-skid]').forEach(b=>b.onclick=e=>{e.stopPropagation();pickKid(b.dataset.skid);});
+      $('sleepKids').querySelectorAll('[data-sapp]').forEach(b=>b.onclick=e=>{e.stopPropagation();openApp(b.dataset.sapp);tick();});
+    }
+  }else if(sleeping){
+    sleeping=false;$('sleep').classList.remove('on');if(!current)$('quickPill').classList.remove('on');
+  }
+}
+async function budgetTick(){
+  const ak=activeKid();
+  if(!ak||!S.budget||!S.budget.enabled||!ak.budget_min||sleeping||$('settings').classList.contains('on')||$('gate').classList.contains('on'))return;
+  const active=(current&&!isExemptApp())||(!current&&S.budget.count_home);
+  if(!active)return;
+  if(agent){try{BUDGET=await (await fetch('/api/budget/tick',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kid:ak.id,s:30})})).json();}catch(e){}}
+  else{const day=budgetDay();if(BUDGET.date!==day)await loadBudget();BUDGET.used_s[ak.id]=(BUDGET.used_s[ak.id]||0)+30;saveLocalBudget();}
+  applyLook();tick();
+}
+function fmt12(t){const [h,m]=t.split(':').map(Number);return S.kiosk.clock_24h?t:(((h%12)||12)+':'+String(m).padStart(2,'0')+(h<12?' am':' pm'));}
+setInterval(tick,20000);
+setInterval(budgetTick,30000);
+(function(){const s=$('sleep');let t=null;s.addEventListener('pointerdown',e=>{if(e.target.closest('#sleepKids'))return;t=setTimeout(()=>openGate(sleepKind==='budget'?'grace':'wake'),S.kiosk.parent_hold_ms||1500)});['pointerup','pointercancel','pointerleave'].forEach(ev=>s.addEventListener(ev,()=>clearTimeout(t)));})();
+async function poll(){
+  // keeps going even while the agent restarts (push.sh --install re-execs it): a miss is not the end
+  if(!LIVE)return;
+  try{const st=await jget('/api/status');STATUS=st;
+    if(current&&current.url&&current._extSeen&&!st.ext)goHome();   // the website window went away (closed, crashed): back to the tiles
+    if(!agent){agent=!!st.ok;if(agent){try{S=deepMerge(DEF,await jget('/api/settings'));}catch(e){}await loadBudget();applyLook();}}
+    if(bundleSha&&st.sha&&st.sha!==bundleSha){toast('new apps arrived — reloading');setTimeout(()=>location.reload(),1200);return;}
+    bundleSha=st.sha||bundleSha;render();}
+  catch(e){if(agent){agent=false;render();}}
+  setTimeout(poll,15000);
+}
+
+// ---------- tap sounds + toast
+let AC=null;
+function blip(f){if(!S.sound||!S.sound.tap_sounds)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=f;g.gain.value=0.0001;o.connect(g);g.connect(AC.destination);const t=AC.currentTime;g.gain.exponentialRampToValueAtTime(0.12*((S.sound.volume||60)/100),t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+0.14);o.start(t);o.stop(t+0.15);}catch(e){}}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2600);}
+
+loadAll();
+</script>
+</body></html>

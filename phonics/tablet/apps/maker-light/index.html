@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Light Lab</title>
+<!-- tablet/apps/maker-light — Light Lab (PLAN.md §10 M2, the "discover" rung of the Maker Lab).
+     A live picture of the UNO Q: tap the 8×13 LED matrix to draw on the REAL matrix, flip header pins, and when a Modulino
+     node is plugged in its card pops up (knob, buttons, buzzer, pixels, distance, movement, thermo). Talks only to the
+     tablet-brain at 127.0.0.1:7000 (/maker/*, see tablet/arduino/maker/CONTRACT.md) — on the laptop that is brain_sim.py.
+     Per-kid mode from the launcher hello: age < 5 = pre-reader (icons + voice), otherwise labels too. Offline, no network. -->
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:radial-gradient(circle at 30% 0%,#2a3550,#141a2a 70%);font:22px system-ui,sans-serif;color:#f4f6fb;touch-action:none}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;margin:0;cursor:pointer}
+#bar{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;gap:16px;padding:0 22px;font-weight:800;font-size:26px;background:rgba(0,0,0,.25)}
+#hi{opacity:.85;font-weight:600;font-size:22px}
+#brain{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:18px;font-weight:700;padding:8px 16px;border-radius:999px;background:#5a2a2a}
+#brain.up{background:#1f6b3a}
+#brain i{width:14px;height:14px;border-radius:50%;background:#ff6b6b;box-shadow:0 0 12px #ff6b6b}
+#brain.up i{background:#6bff95;box-shadow:0 0 12px #6bff95}
+main{position:fixed;top:64px;left:0;right:0;bottom:104px;display:grid;grid-template-columns:1fr 380px;gap:16px;padding:14px 18px}
+/* the board */
+#board{position:relative;background:linear-gradient(160deg,#1f6f8b,#17576e);border-radius:28px;padding:18px 22px 14px;box-shadow:inset 0 0 0 4px rgba(255,255,255,.08),0 20px 50px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:12px;overflow:hidden}
+#board .corner{position:absolute;width:22px;height:22px;border-radius:50%;background:#0b2c38;box-shadow:inset 0 0 0 5px #7fb6c6}
+#board .c1{top:14px;left:14px}#board .c2{top:14px;right:14px}#board .c3{bottom:14px;left:14px}#board .c4{bottom:14px;right:14px}
+#boardName{text-align:center;font-weight:800;letter-spacing:.14em;opacity:.7;font-size:16px}
+#matrixWrap{flex:1;display:grid;place-items:center}
+#matrix{display:grid;grid-template-columns:repeat(13,1fr);gap:7px;background:#0a1116;padding:14px;border-radius:18px;box-shadow:inset 0 4px 14px rgba(0,0,0,.7)}
+#matrix button{width:46px;height:46px;border-radius:50%;background:#2a3038;box-shadow:inset 0 2px 4px rgba(0,0,0,.6);transition:background .08s,box-shadow .08s}
+#matrix button.on{background:#ffd54a;box-shadow:0 0 14px 4px rgba(255,213,74,.75),inset 0 0 6px #fff}
+#matrix button:active{transform:scale(.92)}
+#pins{display:flex;flex-direction:column;gap:8px}
+.pinrow{display:flex;align-items:center;gap:6px}
+.pinrow .lab{width:28px;font-size:14px;font-weight:800;opacity:.6;text-align:center}
+.pin{flex:1;height:44px;border-radius:10px;background:#0c2530;display:grid;place-items:center;font-size:13px;font-weight:800;opacity:.9;position:relative;overflow:hidden}
+.pin.d{box-shadow:inset 0 0 0 2px #2a6c82}
+.pin.d.on{background:#ffb347;color:#2a1a00;box-shadow:0 0 12px rgba(255,179,71,.8)}
+.pin.a{box-shadow:inset 0 0 0 2px #6a4a9a}
+.pin.a .bar{position:absolute;left:0;bottom:0;top:0;width:0;background:rgba(170,120,255,.45);transition:width .2s}
+.pin span{position:relative}
+body.pre .lab,body.pre .pin span.t{display:none}
+/* modules */
+#mods{display:flex;flex-direction:column;gap:10px;overflow-y:auto;overscroll-behavior:contain;padding-right:4px;touch-action:pan-y}
+#mods::-webkit-scrollbar{width:0}
+#empty{flex:1;display:grid;place-items:center;text-align:center;border:3px dashed rgba(255,255,255,.18);border-radius:24px;padding:20px;opacity:.8}
+#empty .plug{font-size:96px;line-height:1;animation:bob 2.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+#empty small{display:block;font-size:18px;margin-top:10px;opacity:.75}
+.card{background:rgba(255,255,255,.08);border-radius:22px;padding:10px 14px;display:flex;flex-direction:column;gap:6px;flex:none;animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+.card h3{margin:0;font-size:20px;display:flex;align-items:center;gap:10px}
+.card h3 em{font-style:normal;font-size:28px}
+body.pre .card h3 span{display:none}
+.row{display:flex;gap:10px;align-items:center;justify-content:center}
+.bigbtn{width:76px;height:76px;border-radius:50%;background:#3a4150;display:grid;place-items:center;font-size:28px;font-weight:900;box-shadow:inset 0 -6px 0 rgba(0,0,0,.4);transition:background .06s,transform .06s}
+.bigbtn.down{background:#ff6b6b;transform:translateY(4px);box-shadow:none}
+.dial{width:104px;height:104px;border-radius:50%;background:conic-gradient(#f2b632 var(--p,0%),#2a3038 0);display:grid;place-items:center;position:relative}
+.dial::after{content:"";width:72px;height:72px;border-radius:50%;background:#1b2130}
+.dial b{position:absolute;font-size:28px;font-variant-numeric:tabular-nums}
+.keys{display:flex;gap:8px}
+.key{width:58px;height:84px;border-radius:0 0 12px 12px;background:#f4f6fb;color:#222;font-weight:900;font-size:22px;display:grid;place-items:end center;padding-bottom:8px;box-shadow:inset 0 -6px 0 rgba(0,0,0,.2);transition:background .05s}
+.key.hit{background:#f2b632}
+.strip{display:flex;gap:6px}
+.strip i{flex:1;height:34px;border-radius:8px;background:#000;box-shadow:inset 0 0 0 2px rgba(255,255,255,.12)}
+.swatches{display:flex;gap:8px;justify-content:center}
+.swatches button{width:48px;height:48px;border-radius:50%;box-shadow:inset 0 0 0 3px rgba(255,255,255,.25)}
+.dist{position:relative;height:60px;background:#0c1a24;border-radius:14px;overflow:hidden}
+.dist .eye{position:absolute;left:8px;top:8px;font-size:40px}
+.dist .hand{position:absolute;top:8px;font-size:40px;transition:left .25s}
+.shake{font-size:72px;text-align:center}
+.shake.go{animation:wig .5s}
+@keyframes wig{0%,100%{transform:rotate(0)}25%{transform:rotate(-18deg)}75%{transform:rotate(18deg)}}
+.temp{font-size:40px;font-weight:900;text-align:center}
+/* tools */
+footer{position:fixed;left:0;right:0;bottom:0;height:104px;display:flex;align-items:center;gap:10px;padding:0 18px;background:rgba(0,0,0,.3)}
+footer button{height:76px;min-width:76px;border-radius:20px;background:rgba(255,255,255,.1);font-size:38px;display:grid;place-items:center;padding:0 10px}
+footer button:active{transform:scale(.94)}
+footer .sep{flex:1}
+#pics{display:flex;gap:10px}
+footer .pic{display:grid;grid-template-columns:repeat(13,5px);gap:1px;padding:0 10px;align-content:center;height:76px}
+footer .pic i{width:5px;height:5px;border-radius:50%;background:#3a4150}
+footer .pic i.on{background:#ffd54a}
+#keep.saved{background:#1f6b3a}
+/* gallery */
+#gal{position:fixed;inset:64px 0 104px 0;background:rgba(10,14,24,.96);display:none;flex-direction:column;padding:18px 24px;gap:14px}
+#gal.on{display:flex}
+#gal h2{margin:0;font-size:26px}
+#galGrid{display:flex;flex-wrap:wrap;gap:14px;overflow:auto;align-content:flex-start}
+#galGrid button{display:grid;grid-template-columns:repeat(13,9px);gap:2px;padding:10px;background:#0a1116;border-radius:14px}
+#galGrid button i{width:9px;height:9px;border-radius:50%;background:#2a3038}
+#galGrid button i.on{background:#ffd54a;box-shadow:0 0 4px #ffd54a}
+#galEmpty{opacity:.7}
+#toast{position:fixed;left:50%;top:84px;transform:translateX(-50%);background:#f2b632;color:#2a1a00;font-weight:800;padding:12px 22px;border-radius:999px;opacity:0;transition:opacity .25s;pointer-events:none}
+#toast.on{opacity:1}
+</style></head><body>
+<div id="bar">💡 <span id="title">Light Lab</span><span id="hi"></span><div id="brain"><i></i><span id="brainT">waking up…</span></div></div>
+<main>
+  <section id="board">
+    <span class="corner c1"></span><span class="corner c2"></span><span class="corner c3"></span><span class="corner c4"></span>
+    <div id="boardName">ARDUINO UNO Q</div>
+    <div id="matrixWrap"><div id="matrix"></div></div>
+    <div id="pins">
+      <div class="pinrow" id="drow"><span class="lab">D</span></div>
+      <div class="pinrow" id="arow"><span class="lab">A</span></div>
+    </div>
+  </section>
+  <aside id="mods">
+    <div id="empty"><div><div class="plug">🔌</div><div id="emptyT">Plug something in!</div><small id="emptyS">a knob, buttons, a buzzer…</small></div></div>
+  </aside>
+</main>
+<footer>
+  <span id="pics"></span>
+  <button id="clear" title="clear">🧹</button>
+  <span class="sep"></span>
+  <button id="keep" title="keep">💾</button>
+  <button id="mine" title="my pictures">🖼️</button>
+</footer>
+<div id="gal"><h2 id="galT">My pictures</h2><div id="galGrid"></div><div id="galEmpty">Nothing kept yet. Draw something and tap 💾.</div></div>
+<div id="toast"></div>
+<script>
+'use strict';
+const BRAIN='http://127.0.0.1:7000';
+const ROWS=8,COLS=13;
+const PICS={ // the same pictures spark.py knows (CONTRACT.md); drawn here for the palette
+  heart:["0000000000000","0011000110000","0111101111000","0111111111000","0011111110000","0001111100000","0000111000000","0000010000000"],
+  smile:["0000000000000","0001000001000","0001000001000","0000000000000","0100000000100","0010000001000","0001111110000","0000000000000"],
+  star:["0000001000000","0000001000000","0001111111000","0000111110000","0000011100000","0000111110000","0001100011000","0000000000000"],
+  arrow_up:["0000001000000","0000011100000","0000111110000","0001101011000","0000001000000","0000001000000","0000001000000","0000000000000"],
+  arrow_right:["0000000000000","0000000100000","0000000010000","0001111111000","0000000010000","0000000100000","0000000000000","0000000000000"],
+  check:["0000000000000","0000000000100","0000000001000","0000000010000","0100000100000","0010001000000","0001010000000","0000100000000"]};
+const MOD={ // how each Modulino shows up as a card
+  knob:{icon:'🎛️',name:'Knob'},buttons:{icon:'🔘',name:'Buttons'},buzzer:{icon:'🎵',name:'Buzzer'},pixels:{icon:'🌈',name:'Rainbow lights'},
+  distance:{icon:'👁️',name:'Distance eye'},movement:{icon:'🤸',name:'Wiggle sensor'},thermo:{icon:'🌡️',name:'Thermometer'}};
+const NOTES=[['C',262],['D',294],['E',330],['G',392],['A',440]];
+const COLORS=['#ff3b3b','#ff9f1c','#ffd54a','#3fd96b','#2fa4ff','#c75cff'];
+const $=id=>document.getElementById(id);
+const S={brainUp:false,source:'',kid:'default',name:'',mode:'reader',matrix:Array(ROWS).fill('0'.repeat(COLS)),pins:{},modules:[],lastTone:null,kept:0,errors:0,pendingUntil:0,gallery:[]};
+window.KTLL={state:S};
+
+// ---- voice (Piper clips made by make-voice.py; silent if a clip is missing)
+let voices=new Set(),cur=null;
+fetch('voice/index.json').then(r=>r.json()).then(l=>{voices=new Set(l);}).catch(()=>{});
+function say(key){if(!voices.has(key))return;try{if(cur){cur.pause();}cur=new Audio('voice/'+key+'.mp3');cur.play().catch(()=>{});}catch(e){}}
+function blip(f){parent.postMessage({kt:'blip',f:f||600},'*');}
+let toastT;function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('on'),1600);}
+
+// ---- WebAudio for the simulator's tones (on the tablet the real buzzer plays, the brain says source:'ppq')
+let AC=null;
+function beep(hz,ms){if(S.source!=='sim')return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type='square';o.frequency.value=hz;g.gain.value=.08;o.connect(g).connect(AC.destination);o.start();o.stop(AC.currentTime+Math.min(ms,1500)/1000);}catch(e){}}
+
+// ---- talking to the brain
+async function post(path,body,method){try{const r=await fetch(BRAIN+path,{method:method||'POST',headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});const j=await r.json().catch(()=>({}));if(!r.ok){S.errors++;}return j;}catch(e){S.errors++;setBrain(false);return null;}}
+function setBrain(up,src){const was=S.brainUp;S.brainUp=up;if(src)S.source=src;$('brain').classList.toggle('up',up);$('brainT').textContent=up?(S.mode==='pre'?'':'lights ready'):(S.mode==='pre'?'':'brain asleep');
+  if(up&&!was&&src){say(S.started?'awake':'intro');S.started=true;}if(!up&&was)say('asleep');}
+let es=null,esTimer=null;
+function connect(){if(es){try{es.close();}catch(e){}}
+  es=new EventSource(BRAIN+'/maker/events');
+  es.addEventListener('state',e=>{const st=JSON.parse(e.data);setBrain(true,st.source);applyState(st);});
+  es.addEventListener('input',e=>onInput(JSON.parse(e.data)));
+  es.addEventListener('tone',e=>{const t=JSON.parse(e.data);S.lastTone=t;flashKey(t.hz);beep(t.hz,t.ms);});
+  es.addEventListener('say',e=>{/* Spark programs speak through the Spark tile, not here */});
+  es.onerror=()=>{setBrain(false);};}
+function applyState(st){
+  if(Date.now()>S.pendingUntil){S.matrix=st.matrix;renderMatrix();}
+  S.pins=st.pins||{};renderPins();
+  const before=S.modules.map(m=>m.type).sort().join(),after=(st.modules||[]).map(m=>m.type).sort().join();
+  S.modules=st.modules||[];
+  if(before!==after){renderModules();const b=new Set(before.split(',').filter(Boolean)),a=new Set(after.split(',').filter(Boolean));
+    for(const t of a)if(!b.has(t)&&S.started){say('plug_'+t);blip(900);}
+    for(const t of b)if(!a.has(t)){say('unplug');}}
+  else updateModules();}
+
+// ---- the matrix
+const cells=[];
+(function buildMatrix(){const m=$('matrix');for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const b=document.createElement('button');b.dataset.r=r;b.dataset.c=c;b.setAttribute('aria-label','light '+r+' '+c);
+  b.addEventListener('pointerdown',e=>{e.preventDefault();toggle(r,c);});m.appendChild(b);cells.push(b);}})();
+function renderMatrix(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)cells[r*COLS+c].classList.toggle('on',S.matrix[r][c]==='1');}
+let sendT=null;
+function sendMatrix(){S.pendingUntil=Date.now()+400;clearTimeout(sendT);sendT=setTimeout(()=>post('/maker/matrix',{rows:S.matrix}),40);}
+function toggle(r,c){const row=S.matrix[r].split('');row[c]=row[c]==='1'?'0':'1';S.matrix=S.matrix.slice();S.matrix[r]=row.join('');renderMatrix();blip(row[c]==='1'?880:440);sendMatrix();}
+function setRows(rows){S.matrix=rows.slice();renderMatrix();sendMatrix();}
+window.KTLL.setRows=setRows;window.KTLL.toggle=toggle;
+
+// ---- header pins
+(function buildPins(){const d=$('drow'),a=$('arow');for(let i=0;i<14;i++){const p=document.createElement('button');p.className='pin d';p.dataset.pin='D'+i;p.innerHTML='<span class="t">'+i+'</span>';
+  p.addEventListener('pointerdown',e=>{e.preventDefault();const cur=(S.pins['D'+i]||{}).value?1:0;post('/maker/pin',{pin:'D'+i,mode:'out',value:cur?0:1});blip(cur?400:1000);say(cur?'pin_off':'pin_on');});d.appendChild(p);}
+  for(let i=0;i<6;i++){const p=document.createElement('div');p.className='pin a';p.dataset.pin='A'+i;p.innerHTML='<i class="bar"></i><span class="t">A'+i+'</span>';a.appendChild(p);}})();
+function renderPins(){document.querySelectorAll('.pin.d').forEach(p=>{const v=S.pins[p.dataset.pin];p.classList.toggle('on',!!(v&&v.mode!=='in'&&v.value));});
+  document.querySelectorAll('.pin.a').forEach(p=>{const v=S.pins[p.dataset.pin];p.querySelector('.bar').style.width=(v?Math.min(100,v.value/1023*100):0)+'%';});}
+
+// ---- module cards
+function renderModules(){const host=$('mods');host.querySelectorAll('.card').forEach(c=>c.remove());$('empty').style.display=S.modules.length?'none':'grid';
+  for(const m of S.modules){const info=MOD[m.type]||{icon:'🧩',name:m.type};const c=document.createElement('div');c.className='card';c.dataset.type=m.type;c.dataset.id=m.id;
+    let body='';
+    if(m.type==='knob')body='<div class="row"><div class="dial" id="dial"><b id="dialV">0</b></div></div>';
+    else if(m.type==='buttons')body='<div class="row">'+['A','B','C'].map(k=>'<div class="bigbtn" data-b="'+k+'">'+k+'</div>').join('')+'</div>';
+    else if(m.type==='buzzer')body='<div class="row keys">'+NOTES.map(n=>'<button class="key" data-hz="'+n[1]+'">'+n[0]+'</button>').join('')+'</div>';
+    else if(m.type==='pixels')body='<div class="strip" id="strip">'+'<i></i>'.repeat(8)+'</div><div class="swatches">'+COLORS.map(c=>'<button data-color="'+c+'" style="background:'+c+'"></button>').join('')+'</div>';
+    else if(m.type==='distance')body='<div class="dist"><span class="eye">👁️</span><span class="hand" id="hand" style="left:60%">✋</span></div>';
+    else if(m.type==='movement')body='<div class="shake" id="shake">🤸</div>';
+    else if(m.type==='thermo')body='<div class="temp" id="temp">--°</div>';
+    c.innerHTML='<h3><em>'+info.icon+'</em><span>'+info.name+'</span></h3>'+body;host.appendChild(c);}
+  host.querySelectorAll('.key').forEach(k=>k.addEventListener('pointerdown',e=>{e.preventDefault();const hz=+k.dataset.hz;k.classList.add('hit');setTimeout(()=>k.classList.remove('hit'),180);post('/maker/tone',{hz:hz,ms:220});}));
+  host.querySelectorAll('.swatches button').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();post('/maker/pixels',{color:b.dataset.color});blip(700);}));
+  updateModules();}
+function updateModules(){for(const m of S.modules){
+  if(m.type==='knob'&&$('dial')){const v=+m.value||0;$('dial').style.setProperty('--p',v+'%');$('dialV').textContent=v;}
+  if(m.type==='buttons'){const v=m.value||{};document.querySelectorAll('.bigbtn').forEach(b=>b.classList.toggle('down',!!v[b.dataset.b]));}
+  if(m.type==='pixels'&&$('strip')){const cols=Array.isArray(m.value)?m.value:[];$('strip').querySelectorAll('i').forEach((i,k)=>i.style.background=cols[k]||'#000');}
+  if(m.type==='distance'&&$('hand')){const mm=Math.max(0,Math.min(1200,+m.value||0));$('hand').style.left=(12+mm/1200*78)+'%';}
+  if(m.type==='thermo'&&$('temp')){const v=m.value||{};$('temp').textContent=(v.c!=null?Math.round(v.c)+'°':'--°');}}}
+function onInput(ev){S.lastInput=ev;
+  if(ev.src==='button'){const b=document.querySelector('.bigbtn[data-b="'+ev.id+'"]');if(b)b.classList.toggle('down',ev.ev==='press');if(ev.ev==='press')blip(ev.id==='A'?523:ev.id==='B'?659:784);}
+  if(ev.src==='movement'&&$('shake')){const s=$('shake');s.classList.remove('go');void s.offsetWidth;s.classList.add('go');blip(300);}}
+function flashKey(hz){const k=document.querySelector('.key[data-hz="'+hz+'"]');if(k){k.classList.add('hit');setTimeout(()=>k.classList.remove('hit'),180);}}
+
+// ---- tools: palette, clear, keep, gallery
+(function buildPalette(){const host=$('pics');for(const name in PICS){const b=document.createElement('button');b.className='pic';b.dataset.pic=name;b.title=name;
+  b.innerHTML=PICS[name].map(r=>r.split('').map(ch=>'<i class="'+(ch==='1'?'on':'')+'"></i>').join('')).join('');
+  b.addEventListener('pointerdown',e=>{e.preventDefault();setRows(PICS[name]);blip(760);});host.appendChild(b);}})();
+$('clear').addEventListener('pointerdown',e=>{e.preventDefault();setRows(Array(ROWS).fill('0'.repeat(COLS)));say('clear');blip(380);});
+function storeBase(){return location.protocol.startsWith('http')?location.origin+'/api/store/maker-light/'+encodeURIComponent(S.kid)+'/':null;}
+async function keep(){const rec={rows:S.matrix,t:Date.now(),kid:S.kid};const base=storeBase();let ok=false;
+  if(base){try{const r=await fetch(base+'pic-'+rec.t+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(rec)});ok=r.ok;}catch(e){}}
+  if(!ok){try{const k='kt-light-'+S.kid;const l=JSON.parse(localStorage.getItem(k)||'[]');l.push(rec);localStorage.setItem(k,JSON.stringify(l.slice(-60)));ok=true;}catch(e){}}
+  if(ok){S.kept++;$('keep').classList.add('saved');setTimeout(()=>$('keep').classList.remove('saved'),900);say('kept');toast(S.mode==='pre'?'💾 ✓':'Saved!');blip(1200);}}
+$('keep').addEventListener('pointerdown',e=>{e.preventDefault();keep();});
+window.KTLL.keep=keep;
+async function loadGallery(){const base=storeBase();let recs=[];
+  if(base){try{let j=await (await fetch(base)).json();if(j&&!Array.isArray(j))j=j.files||[];const names=j.map(e=>typeof e==='string'?e:e.name).filter(n=>/^pic-\d+\.json$/.test(n)).sort();
+    for(const n of names){try{recs.push(await (await fetch(base+n)).json());}catch(e){}}}catch(e){}}
+  if(!recs.length){try{recs=JSON.parse(localStorage.getItem('kt-light-'+S.kid)||'[]');}catch(e){}}
+  S.gallery=recs;const g=$('galGrid');g.innerHTML='';$('galEmpty').style.display=recs.length?'none':'block';
+  for(const r of recs.slice().reverse()){if(!Array.isArray(r.rows)||r.rows.length!==ROWS)continue;const b=document.createElement('button');b.innerHTML=r.rows.map(row=>row.split('').map(ch=>'<i class="'+(ch==='1'?'on':'')+'"></i>').join('')).join('');
+    b.addEventListener('pointerdown',e=>{e.preventDefault();setRows(r.rows);$('gal').classList.remove('on');blip(760);});g.appendChild(b);}}
+$('mine').addEventListener('pointerdown',e=>{e.preventDefault();const g=$('gal');if(g.classList.contains('on')){g.classList.remove('on');return;}loadGallery();g.classList.add('on');});
+window.KTLL.loadGallery=loadGallery;
+
+// ---- the launcher says who is playing
+function setKid(kid){S.kid=(kid&&kid.id)||'default';S.name=(kid&&kid.name)||'';const age=kid&&kid.age;S.mode=(age!=null&&age<5)?'pre':'reader';
+  document.body.classList.toggle('pre',S.mode==='pre');$('hi').textContent=S.name?('Hi '+S.name+'!'):'';$('galT').textContent=(S.name?S.name+"'s":'My')+' pictures';
+  $('emptyT').textContent=S.mode==='pre'?'':'Plug something in!';$('emptyS').textContent=S.mode==='pre'?'':'a knob, buttons, a buzzer…';$('brainT').textContent=S.mode==='pre'?'':(S.brainUp?'lights ready':'brain asleep');$('gal').classList.remove('on');}
+window.addEventListener('message',e=>{const d=e.data||{};if(d.kt==='hello')setKid(d.kid||(d.child?{id:'default',name:d.child.name}:null));});
+window.KTLL.setKid=setKid;
+
+setKid(null);renderMatrix();renderPins();connect();
+fetch(BRAIN+'/maker/state').then(r=>r.json()).then(st=>{setBrain(true,st.source);applyState(st);}).catch(()=>setBrain(false));
+</script></body></html>
