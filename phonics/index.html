@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="phonics 1.0.0+43791de" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
+<html lang="en"><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="phonics 1.0.0+79d787d" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Phonics Friends · the kids tablet</title>
@@ -35,8 +35,12 @@
  #screen{position:relative;width:1280px;height:800px;overflow:hidden;border-radius:8px;background:#8fb6d6;transform-origin:0 0}
  #screen iframe{width:1280px;height:800px;border:0;display:block;background:#8fb6d6}
  #hold{width:1280px;height:800px}  /* takes the scaled size so the page flows under the frame */
- #turn{display:none;position:absolute;inset:0;align-items:center;justify-content:center;text-align:center;color:#fff;font-size:34px;font-weight:700;background:rgba(10,12,16,.55);pointer-events:none;padding:40px}
- body.portrait #turn{display:flex}
+ /* phone upright: the tablet as big as it goes in the top half, the app notes under it; sideways (body.full): the
+    tablet takes the whole window, header gone, the notes are a scroll away. fit() sizes it; the bezel thins to 6px */
+ body.portrait #tab,body.full #tab{padding:6px;border-radius:12px}
+ body.portrait #tab:before,body.full #tab:before{display:none}
+ body.full{padding:0 0 calc(48px + env(safe-area-inset-bottom))}
+ body.full header{display:none}
  /* under the frame */
  .foot{width:100%;max-width:1100px;margin-top:14px;display:grid;gap:12px}
  .note{color:var(--dim);font-size:13.5px}
@@ -59,7 +63,7 @@
   <a class="lnk" id="full" href="tablet/index.html" target="_blank" rel="noopener">Open full window ↗</a>
 </header>
 
-<div id="hold"><div id="tab"><div id="screen"><iframe id="fr" title="the kids tablet"></iframe><div id="turn">Turn your phone sideways for a bigger tablet</div></div></div></div>
+<div id="hold"><div id="tab"><div id="screen"><iframe id="fr" title="the kids tablet"></iframe></div></div></div>
 
 <div class="foot">
   <div class="note"><b>Faces at the top</b> switch kids (each kid has their own apps and daily minutes). <b>Hold a face</b> for the parent settings.
@@ -82,15 +86,20 @@
   const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   $('full').href=B+'index.html';
 
-  // fit the 1280×800 screen to the window
-  const W=1280,H=800;
+  // fit the 1280×800 (16:10) screen to the window: upright = as big as it goes in the top half, sideways on a phone or
+  // tablet = the whole window. Touch screens may scale past 1:1; a desktop stops at 1:1 (no blur, no overflow).
+  const W=1280,H=800, touch=matchMedia('(pointer:coarse)').matches;
   function fit(){
-    const pad=32, avW=Math.max(200,document.documentElement.clientWidth-20), avH=Math.max(200,window.innerHeight-70);
-    const s=Math.min(1,(avW-pad)/W,(avH-pad)/H);
+    const vw=document.documentElement.clientWidth, vh=window.innerHeight, portrait=vw<vh, full=!portrait&&(touch||vh<=560);
+    document.body.classList.toggle('portrait',portrait); document.body.classList.toggle('full',full);
+    const pad=(portrait||full)?12:32;   // both bezels, as #tab's padding in the CSS above
+    const avW=full?vw:vw-20, avH=full?vh:portrait?vh/2:vh-$('hold').offsetTop-12;
+    let s=Math.min((avW-pad)/W,(avH-pad)/H); if(!touch)s=Math.min(1,s); s=Math.max(.1,s);
+    const tw=W*s+pad, th=H*s+pad;
     $('screen').style.transform='scale('+s+')';
-    $('tab').style.width=(W*s+pad)+'px'; $('tab').style.height=(H*s+pad)+'px';
-    $('hold').style.width=(W*s+pad)+'px'; $('hold').style.height=(H*s+pad)+'px';
-    document.body.classList.toggle('portrait',window.innerWidth<window.innerHeight&&window.innerWidth<700);
+    $('tab').style.width=tw+'px'; $('tab').style.height=th+'px';
+    $('tab').style.marginTop=full?Math.max(0,(vh-th)/2)+'px':'';   // centred in the window, the notes start below it
+    $('hold').style.width=tw+'px'; $('hold').style.height=(full?Math.max(vh,th):th)+'px';
   }
   addEventListener('resize',fit); fit();
 
@@ -126,7 +135,7 @@
   };
 })();
 </script>
-<script id="bench-release">window.BENCH_RELEASE="phonics 1.0.0+43791de";</script>
+<script id="bench-release">window.BENCH_RELEASE="phonics 1.0.0+79d787d";</script>
 <a id="bench-release-pill" href="/releases.html#phonics" title="release notes" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483000;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:#9aa4b2;background:rgba(20,23,28,.72);border:1px solid #2a3039;border-radius:999px;padding:5px 8px;text-decoration:none;opacity:.85">v1.0.0</a><!-- Public demo feedback bubble. Injected into every page of the demo site by
      publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
      touching the Bench or the tailnet). Submissions land in Netlify → Forms.
