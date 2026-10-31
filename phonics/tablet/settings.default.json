@@ -17,7 +17,8 @@
     "draw",
     "yoto"
    ],
-   "budget_min": 45
+   "budget_min": 45,
+   "look": null
   },
   {
    "id": "kid2",
@@ -25,7 +26,8 @@
    "age": 6,
    "avatar": "fox",
    "apps_allowed": null,
-   "budget_min": 60
+   "budget_min": 60,
+   "look": null
   }
  ],
  "budget": {
@@ -43,7 +45,12 @@
   "rotation": "right",
   "theme": "sky",
   "tile_size": "medium",
-  "sleep_after_min": 0
+  "sleep_after_min": 0,
+  "look": {
+   "wallpaper": "sky",
+   "dark": false,
+   "accent": "#ff8a3d"
+  }
  },
  "sound": {
   "volume": 40,
@@ -98,7 +105,9 @@
   "parent_hold_ms": 1500,
   "show_clock": true,
   "clock_24h": false,
-  "kid_volume": true
+  "kid_volume": true,
+  "lock_on_start": true,
+  "lock_after_min": 10
  },
  "bench": {
   "url": "https://bench.tail81b22c.ts.net",

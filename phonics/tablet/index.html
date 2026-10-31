@@ -172,27 +172,186 @@ input[type=range]{width:200px;height:36px;accent-color:#ff8a3d}
 #dim{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:20}
 #toast{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;max-width:90vw;text-align:center}
 #toast.on{opacity:.95}
+
+/* ===== SYSUI — Android-style system UI (2026-10-30, Joe: "home button, back button, tab button, menu bar and pull down menus").
+   Status bar on top (time, notification glyphs, Bench/helper, speaker, quick-settings gear), 3-button nav bar at the bottom
+   (back ◁, home ○, recents ▢), the quick-settings panel (#quick, D-015) is the body of a pull-down shade with a big clock
+   and notification cards, and ▢ opens an overview of recently used apps. Transparent over the home wallpaper, black in apps. */
+:root{--sb:32px;--nb:52px;--shade:#1c1b1f;--shade2:#2b2930}
+#sysbar{position:fixed;top:0;left:0;right:0;height:var(--sb);display:flex;align-items:center;padding:0 10px 0 16px;gap:12px;z-index:50;font-size:15px;font-weight:700;color:var(--ink);touch-action:none;transition:background .2s,color .2s}
+#sbLeft{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+#sbNotif{display:flex;gap:7px;align-items:center;font-size:13px;line-height:1;opacity:.9}
+#sbRight{display:flex;align-items:center;gap:2px}
+#sysbar svg{width:19px;height:19px;display:block}
+#sysbar #clock{margin:0;font-size:15px;font-weight:700;letter-spacing:0;line-height:1}
+#sysbar #dots{margin:0;gap:2px;display:flex}
+#sysbar .dot{width:30px;height:var(--sb);border-radius:8px;background:none;box-shadow:none;display:grid;place-items:center;color:currentColor;opacity:.3}
+#sysbar .dot.ok{opacity:1}#sysbar .dot.bad{opacity:1;color:var(--bad)}
+#sysbar #volBtn,#sysbar #quickPill{position:static;width:34px;height:var(--sb);border-radius:8px;background:none;box-shadow:none;margin:0;display:grid;place-items:center;font-size:16px;color:inherit;backdrop-filter:none;left:auto;bottom:auto;transform:none}
+#sysbar #volBtn:active,#sysbar #quickPill:active,#sysbar .dot:active{opacity:.55;transform:none}
+body.inapp #sysbar{background:#000;color:#fff}
+body.asleep #sysbar,body.gated #sysbar,body.shade #sysbar{background:var(--shade);color:#fff}
+#navbar{position:fixed;left:0;right:0;bottom:0;height:var(--nb);display:flex;align-items:center;justify-content:center;z-index:50;color:var(--ink);touch-action:none;transition:background .2s,color .2s}
+body.inapp #navbar,body.asleep #navbar,body.gated #navbar,body.recents #navbar{background:#000;color:#fff}
+#navbar .nav{width:112px;height:var(--nb);display:grid;place-items:center;position:relative;color:inherit;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;transform:none}
+#navbar .nav svg{width:26px;height:26px;display:block;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
+#navbar .nav:active{opacity:.5}
+#navbar #homePill{position:static;left:auto;bottom:auto;display:grid}
+#navbar #homePill i{bottom:5px;height:3px;left:32px;right:32px}
+#navbar .volPill{position:absolute;top:8px;bottom:auto;width:48px;height:36px;border-radius:18px;background:rgba(127,127,127,.18);color:inherit;backdrop-filter:none;box-shadow:none;font-size:22px;line-height:1;display:none}
+#navbar .volPill.on{display:grid}
+#navbar #volDown{left:16px}#navbar #volUp{right:16px;left:auto}
+#volPop{bottom:calc(var(--nb) + 14px)}
+#toast{bottom:calc(var(--nb) + 16px);z-index:60}
+#editDone{bottom:calc(var(--nb) + 12px)}
+#home{padding-top:calc(var(--sb) + 8px);padding-bottom:var(--nb)}
+#bar{min-height:66px}
+#app{padding:var(--sb) 0 var(--nb)}
+#settings{padding-top:var(--sb);padding-bottom:var(--nb)}
+#gate{padding:var(--sb) 0 var(--nb)}
+#sleep{padding:var(--sb) 0 var(--nb)}
+/* the shade */
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40;display:none}
+body.shade #scrim{display:block}
+#quick{top:0;bottom:auto;left:0;right:0;width:auto;max-width:none;transform:translateY(-104%);transition:transform .24s cubic-bezier(.2,.8,.2,1),visibility .24s;display:flex;visibility:hidden;max-height:calc(100vh - var(--nb) - 40px);border-radius:0 0 30px 30px;background:var(--shade);color:#fff;padding:calc(var(--sb) + 6px) 22px 14px;gap:10px;box-shadow:0 24px 70px rgba(0,0,0,.55);z-index:41}
+#quick.on{transform:translateY(0);visibility:visible}
+#quick.top{top:0}#quick.bottom{bottom:auto}
+#quickClose{top:calc(var(--sb) + 8px);background:rgba(255,255,255,.1);color:#fff}
+#qHandle{order:99;width:52px;height:5px;border-radius:3px;background:rgba(255,255,255,.35);margin:4px auto 0;flex:none}
+#qHead{display:flex;align-items:flex-end;gap:16px;padding:6px 4px 8px;flex:none}
+#qClock{font-size:50px;font-weight:600;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+#qDate{font-size:15px;color:rgba(255,255,255,.72);font-weight:600;padding-bottom:7px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#qKid{display:flex;align-items:center;gap:8px;padding:5px 14px 5px 7px;border-radius:22px;background:rgba(255,255,255,.1);font-weight:700;font-size:15px;margin-right:50px;white-space:nowrap}
+#qKid b{font-size:24px;line-height:1}
+#qNotifs{display:flex;flex-direction:column;gap:6px}
+#qNotifs:empty{display:none}
+.qn{display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:20px;background:var(--shade2);font-size:15px;line-height:1.3}
+.qn>b{font-size:21px;flex:none;line-height:1}
+.qn .n{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis}
+.qn small{display:block;color:rgba(255,255,255,.65);font-weight:500;font-size:13px}
+#quick .qrow{background:var(--shade2);border-radius:22px;padding:8px 14px}
+#quick .ql{color:#fff}
+#quick .qbar{gap:0;height:40px;border-radius:20px;overflow:hidden;background:rgba(255,255,255,.12)}
+#quick .qbar i{height:100%;border-radius:0;background:transparent}
+#quick .qbar i.on{background:var(--accent)}
+#quick .qbar i.cap{background:rgba(255,255,255,.05)}
+#quick .qbtn,#quick .qact:not(.go),#quick .qdev{background:rgba(255,255,255,.1);color:#fff}
+#quick .qact.go{background:var(--accent);color:#1c1b1f}
+#quick .qdev.on{background:#355a3f}
+#quick .qv,#quick #qBtState,#quick #qHint,#quick small,#quick #qSysNote,#quick #qToneNote{color:rgba(255,255,255,.7)}
+#quick .sw{background:rgba(255,255,255,.28)}#quick .sw.on{background:var(--ok)}
+#qFoot{display:flex;align-items:center;gap:10px;padding:0 6px;flex:none}
+#qFoot #foot{padding:0;color:rgba(255,255,255,.5);text-align:left;flex:1;font-size:12px}
+/* recents overview */
+#recents{position:fixed;inset:0;z-index:39;background:rgba(10,12,20,.8);backdrop-filter:blur(16px);display:none;flex-direction:column;padding:calc(var(--sb) + 16px) 0 calc(var(--nb) + 14px);color:#fff}
+#recents.on{display:flex}
+#rcTitle{text-align:center;font-size:13px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.1em;text-transform:uppercase;flex:none}
+#rcRow{flex:1;display:flex;align-items:center;gap:24px;overflow-x:auto;overflow-y:hidden;padding:0 max(24px,calc(50% - 250px));scroll-snap-type:x mandatory;scrollbar-width:none;touch-action:pan-x}
+#rcRow::-webkit-scrollbar{display:none}
+.rc{flex:none;width:500px;max-width:76vw;aspect-ratio:16/10;border-radius:22px;overflow:hidden;background:#fff;color:#1d2a3a;box-shadow:0 22px 50px rgba(0,0,0,.45);scroll-snap-align:center;display:flex;flex-direction:column;position:relative;touch-action:pan-x;transition:transform .18s,opacity .18s}
+.rc.gone{transform:translateY(-120%);opacity:0}
+.rc .hd{display:flex;align-items:center;gap:10px;padding:9px 12px 9px 14px;font-weight:700;font-size:16px;background:#f0f2f6;flex:none}
+.rc .hd .ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:17px;color:#fff;flex:none;overflow:hidden;object-fit:cover}
+.rc .hd span.t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc .hd .rx{width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.07);font-size:16px;font-weight:800;color:#1d2a3a;display:grid;place-items:center}
+.rc .bd{flex:1;display:grid;place-items:center;font-size:130px;color:#fff;line-height:1}
+.rc .bd img{width:38%;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+#rcEmpty{margin:auto;color:rgba(255,255,255,.7);font-size:20px;font-weight:600}
+#rcClear{align-self:center;padding:12px 26px;border-radius:24px;background:rgba(255,255,255,.14);color:#fff;font-weight:700;font-size:16px;margin-top:10px;flex:none}
+#rcClear:active{opacity:.6}
+
+/* ===== SYSUI 2 — lock screen (kid switcher) + Wallpaper & style (2026-10-30). Wallpapers are CSS only (offline); a kid's
+   photo from the Camera app can be one too. look = {wallpaper, dark, accent}: screen.look for the tablet, kids[i].look per kid. */
+body{background:var(--wall,linear-gradient(160deg,var(--bg1),var(--bg2)))!important;background-size:cover!important;background-position:center!important;background-attachment:fixed}
+[data-wall=sky]{--wall:linear-gradient(160deg,#8ed0ff,#eef9ff)}
+[data-wall=forest]{--wall:radial-gradient(circle at 85% 15%,rgba(255,255,255,.55) 0 70px,transparent 71px),linear-gradient(160deg,#a8e6a1,#f0fbea)}
+[data-wall=candy]{--wall:radial-gradient(circle at 20% 30%,rgba(255,255,255,.5) 0 90px,transparent 91px),radial-gradient(circle at 80% 75%,rgba(255,255,255,.45) 0 120px,transparent 121px),linear-gradient(160deg,#ffb3d9,#fff2f8)}
+[data-wall=ocean]{--wall:radial-gradient(ellipse 60% 40% at 20% 108%,#13c2d6 0,transparent 70%),radial-gradient(ellipse 50% 35% at 85% 104%,#1e88e5 0,transparent 70%),linear-gradient(180deg,#9be2ff 0%,#4fb3f6 55%,#1565c0 100%)}
+[data-wall=sunset]{--wall:radial-gradient(circle at 50% 78%,#ffe082 0 70px,transparent 72px),linear-gradient(180deg,#ff9a6c 0%,#ff6f91 48%,#6a4c93 100%)}
+[data-wall=bubbles]{--wall:radial-gradient(circle at 15% 25%,rgba(255,255,255,.6) 0 60px,transparent 62px),radial-gradient(circle at 70% 18%,rgba(255,255,255,.45) 0 40px,transparent 42px),radial-gradient(circle at 86% 68%,rgba(255,255,255,.55) 0 85px,transparent 87px),radial-gradient(circle at 38% 82%,rgba(255,255,255,.4) 0 50px,transparent 52px),radial-gradient(circle at 55% 50%,rgba(255,255,255,.3) 0 28px,transparent 30px),linear-gradient(160deg,#7fc8ff,#b388ff)}
+[data-wall=rainbow]{--wall:linear-gradient(180deg,#ff8a80 0%,#ffd180 20%,#fff59d 40%,#b9f6ca 60%,#80d8ff 80%,#b388ff 100%)}
+[data-wall=jungle]{--wall:radial-gradient(circle at 12% 95%,#2e7d32 0 140px,transparent 142px),radial-gradient(circle at 88% 100%,#388e3c 0 190px,transparent 192px),radial-gradient(circle at 70% 12%,#fff176 0 55px,transparent 57px),linear-gradient(180deg,#b9e8b5,#66bb6a)}
+[data-wall=stars]{--wall:radial-gradient(circle at 8% 18%,#fff 0 1.6px,transparent 2.4px),radial-gradient(circle at 23% 62%,#fff 0 1.2px,transparent 2px),radial-gradient(circle at 41% 28%,#fff 0 1.8px,transparent 2.6px),radial-gradient(circle at 58% 74%,#fff 0 1.2px,transparent 2px),radial-gradient(circle at 69% 14%,#fff 0 1.5px,transparent 2.3px),radial-gradient(circle at 84% 52%,#fff 0 1.9px,transparent 2.7px),radial-gradient(circle at 93% 22%,#fff 0 1.2px,transparent 2px),radial-gradient(circle at 33% 90%,#fff 0 1.4px,transparent 2.2px),radial-gradient(circle at 77% 88%,#ffe082 0 2.2px,transparent 3px),radial-gradient(circle at 15% 40%,#fff 0 1px,transparent 1.8px),radial-gradient(circle at 50% 50%,#fff 0 1px,transparent 1.8px),linear-gradient(180deg,#0b1026,#1b2a5a)}
+[data-wall=night]{--wall:linear-gradient(160deg,#1b2440,#2a3658)}
+[data-wall=photo]{--bg1:#000}
+#faces .face.single{width:auto;padding:0 16px 0 6px;border-radius:33px;gap:8px}
+#faces .face.single span{font-size:17px;font-weight:700;padding:0}
+#faces .face.single small{font-size:15px;opacity:.55;font-weight:700}
+/* lock screen */
+#lock{position:fixed;inset:0;z-index:38;display:none;flex-direction:column;align-items:center;padding:calc(var(--sb) + 28px) 24px 26px;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.45);background:rgba(0,0,0,.3)}
+#lock.on{display:flex}
+#lock.up{transform:translateY(-100%);transition:transform .28s cubic-bezier(.3,.7,.2,1)}
+body.locked #navbar{display:none}
+body.locked #sysbar{color:#fff}
+body.locked #gate,body.locked #settings{z-index:49}
+#lkClock{font-size:148px;font-weight:700;line-height:.95;letter-spacing:-.04em;font-variant-numeric:tabular-nums;margin-top:6px}
+#lkDate{font-size:22px;font-weight:600;opacity:.92;margin-top:8px}
+#lkChips{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;justify-content:center}
+.lkc{padding:8px 16px;border-radius:20px;background:rgba(255,255,255,.2);font-size:15px;font-weight:600;text-shadow:none}
+#lkWho{margin-top:auto;font-size:15px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+#lkKids{display:flex;gap:22px;margin:14px 0 14px;flex-wrap:wrap;justify-content:center}
+.lkk{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 24px 12px;border-radius:28px;background:rgba(255,255,255,.16);min-width:160px;text-shadow:none;color:#fff;transition:transform .12s,background .12s}
+.lkk:active{transform:scale(.95)}
+.lkk.on{background:rgba(255,255,255,.3);box-shadow:0 0 0 3px rgba(255,255,255,.8)}
+.lkk .av{width:86px;height:86px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:50px;color:#1d2a3a;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.lkk .nm{font-size:19px;font-weight:700}
+.lkk .tm{font-size:13px;opacity:.9;display:flex;align-items:center;gap:6px}
+.lkk .tm .bbar{background:rgba(255,255,255,.3);width:64px;height:6px}
+#lkHint{font-size:14px;opacity:.75}
+#lkGrown{position:absolute;right:22px;bottom:22px;padding:10px 16px;border-radius:20px;background:rgba(0,0,0,.35);color:#fff;font-size:14px;font-weight:700;text-shadow:none}
+/* shade head buttons */
+.qhb{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);font-size:20px;display:grid;place-items:center;flex:none;margin-bottom:4px}
+.qhb:active{opacity:.6}
+#qKid{margin-right:0;cursor:pointer}
+#qKid:active{opacity:.7}
+#qHead #quickClose{position:static;width:44px;height:44px;margin:0 0 4px;flex:none;top:auto;right:auto}
+body.locked #home{visibility:hidden}   /* the lock screen shows the wallpaper, not the tiles */
+#qHead{align-items:flex-end;gap:10px}
+#qDate{margin-right:auto}
+/* Wallpaper & style bottom sheet */
+#style{position:fixed;left:0;right:0;bottom:0;z-index:42;background:var(--card);color:var(--ink);border-radius:28px 28px 0 0;box-shadow:0 -20px 60px rgba(0,0,0,.4);transform:translateY(105%);transition:transform .26s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;max-height:calc(100vh - var(--sb) - 20px);padding-bottom:var(--nb)}
+#style.on{transform:none}
+#stHead{display:flex;align-items:center;gap:10px;padding:20px 22px 8px;position:relative;flex-wrap:wrap}
+#stHead::before{content:"";position:absolute;top:8px;left:50%;width:48px;height:5px;margin-left:-24px;border-radius:3px;background:rgba(127,127,127,.4)}
+#stTitle{font-size:22px;font-weight:700;flex:1}
+#stFor{display:flex;gap:6px}
+#stFor button{padding:8px 14px;border-radius:18px;background:rgba(127,127,127,.15);font-weight:700;font-size:14px}
+#stFor button.on{background:var(--accent);color:#fff}
+#stDone{padding:10px 18px;border-radius:18px;background:var(--ink);color:var(--card);font-weight:700}
+#stBody{overflow-y:auto;padding:4px 22px 16px;display:flex;flex-direction:column;gap:14px;touch-action:pan-y;scrollbar-width:none}
+.stSec{display:flex;flex-direction:column;gap:8px}
+.stSec.row{flex-direction:row;align-items:center;justify-content:space-between;min-height:52px}
+.stL{font-size:14px;font-weight:700;color:var(--dim);letter-spacing:.04em;text-transform:uppercase}
+.stRow{display:flex;gap:12px;overflow-x:auto;padding:4px 4px 8px;scrollbar-width:none;touch-action:pan-x}
+.stRow::-webkit-scrollbar{display:none}
+.wp{flex:none;width:168px;height:105px;border-radius:16px;position:relative;overflow:hidden;background:var(--wall,#888) center/cover;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.wp.on{box-shadow:0 0 0 3px var(--card),0 0 0 6px var(--accent)}
+.wp span{position:absolute;left:10px;bottom:7px;font-size:13px;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+.wp .chk{position:absolute;top:7px;right:7px;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;display:none;place-items:center;font-size:15px;font-style:normal}
+.wp.on .chk{display:grid}
+#stAccents,#stTiles{display:flex;gap:12px;flex-wrap:wrap}
+.acc{width:48px;height:48px;border-radius:50%;border:4px solid transparent;box-shadow:inset 0 0 0 2px rgba(255,255,255,.55)}
+.acc.on{border-color:var(--ink)}
+#stTiles button{padding:10px 18px;border-radius:18px;background:rgba(127,127,127,.15);font-weight:700}
+#stTiles button.on{background:var(--accent);color:#fff}
 </style></head><body>
 
 <div class="screen on" id="home">
   <div id="bar">
     <div id="faces"></div>
     <div id="hello">Hi!<small>pick something to play</small></div>
-    <div id="clock"></div>
-    <button id="volBtn" aria-label="volume">🔊</button>
-    <div id="dots" title="green = tablet helper running · second = Bench reachable"><span class="dot" id="dAgent"></span><span class="dot" id="dBench"></span></div>
   </div>
   <div id="grid"></div>
-  <div id="foot"></div>
   <button id="editDone" onclick="endEdit()">Done</button>
 </div>
 
 <div class="screen" id="app"><iframe id="frame" title="app" allow="microphone; autoplay; fullscreen"></iframe></div>
-<button class="volPill" id="volDown" aria-label="quieter">−</button><button class="volPill" id="volUp" aria-label="louder">+</button>
 <div id="volPop"><button id="vpDown">−</button><div id="volBar"></div><button id="vpUp">+</button><span id="volNum"></span></div>
-<button class="volPill" id="quickPill" aria-label="settings">⚙</button>
 <div id="quick">
   <button id="quickClose" aria-label="close">✕</button>
+  <div id="qHandle"></div>
+  <div id="qHead"><div id="qClock"></div><div id="qDate"></div><button id="qKid" title="who is playing"></button><button class="qhb" id="qStyle" aria-label="wallpaper and style">🎨</button><button class="qhb" id="qLock" aria-label="lock">🔒</button></div>
+  <div id="qNotifs"></div>
   <div class="qrow"><button class="ql" id="qVolL" title="tap to mute or unmute">🔊 Volume</button><button class="qbtn" id="qVolDown">−</button><div class="qbar" id="qVolBar"></div><button class="qbtn" id="qVolUp">+</button><span class="qv" id="qVolNum"></span></div>
   <div class="qrow"><div class="ql">☀️ Brightness</div><button class="qbtn" id="qBrDown">−</button><div class="qbar" id="qBrBar"></div><button class="qbtn" id="qBrUp">+</button><span class="qv" id="qBrNum"></span></div>
   <div class="qrow"><div class="ql">🎚 Tone</div><span class="qv" style="min-width:0">Bass</span><button class="qbtn" id="qBassDown">−</button><span class="qv" id="qBassNum"></span><button class="qbtn" id="qBassUp">+</button><span class="qv" style="min-width:0;margin-left:18px">Treble</span><button class="qbtn" id="qTrebDown">−</button><span class="qv" id="qTrebNum"></span><button class="qbtn" id="qTrebUp">+</button><span id="qToneNote" style="flex:1;color:var(--dim);font-size:14px;text-align:right"></span></div>
@@ -200,8 +359,42 @@ input[type=range]{width:200px;height:36px;accent-color:#ff8a3d}
   <div id="qDevs"></div>
   <div id="qHint"></div>
   <div class="qrow"><div class="ql">⏻ System</div><button class="qact" id="qSleep">🌙 Sleep</button><button class="qact" id="qReboot">🔄 Restart 🔒</button><button class="qact" id="qOff">⏻ Power off 🔒</button><button class="qact" id="qSettings">⚙ Settings 🔒</button><span id="qSysNote" style="flex:1;color:var(--dim);font-size:14px"></span></div>
+  <div id="qFoot"><div id="foot"></div></div>
 </div>
-<button id="homePill" aria-label="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-6h4v6"/></svg><i></i></button>
+<!-- ===== SYSUI (2026-10-30, Joe: "function like an android tablet") — status bar, 3-button nav, scrim, recents ===== -->
+<div id="sysbar">
+  <div id="sbLeft"><div id="clock"></div><div id="sbNotif"></div></div>
+  <div id="sbRight">
+    <div id="dots" title="first = Bench reachable · second = tablet helper running"><span class="dot" id="dBench"></span><span class="dot" id="dAgent"></span></div>
+    <button id="volBtn" aria-label="volume">🔊</button>
+    <button class="volPill" id="quickPill" aria-label="quick settings">⚙</button>
+  </div>
+</div>
+<div id="navbar">
+  <button class="volPill" id="volDown" aria-label="quieter">−</button>
+  <button class="nav" id="navBack" aria-label="back"><svg viewBox="0 0 24 24"><path d="M15.5 4.5 7 12l8.5 7.5z"/></svg></button>
+  <button class="nav" id="homePill" aria-label="home"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/></svg><i></i></button>
+  <button class="nav" id="navRecents" aria-label="recent apps"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2.5"/></svg></button>
+  <button class="volPill" id="volUp" aria-label="louder">+</button>
+</div>
+<div id="scrim"></div>
+<!-- SYSUI 2 (2026-10-30, Joe: "lock screen to be where you can switch kids … customizable wallpaper and theme settings") -->
+<div id="lock">
+  <div id="lkClock"></div><div id="lkDate"></div><div id="lkChips"></div>
+  <div id="lkWho"></div><div id="lkKids"></div><div id="lkHint"></div>
+  <button id="lkGrown">🔒 Grown-ups</button>
+</div>
+<div id="style">
+  <div id="stHead"><div id="stTitle">Wallpaper &amp; style</div><div id="stFor"></div><button id="stDone">Done</button></div>
+  <div id="stBody">
+    <div class="stSec"><div class="stL">Wallpaper</div><div id="stWalls" class="stRow"></div></div>
+    <div class="stSec" id="stPhotosSec" style="display:none"><div class="stL">Your photos</div><div id="stPhotos" class="stRow"></div></div>
+    <div class="stSec row"><div class="stL">Dark theme</div><button class="sw" id="stDark" aria-label="dark theme"></button></div>
+    <div class="stSec"><div class="stL">Colour</div><div id="stAccents"></div></div>
+    <div class="stSec"><div class="stL">Icon size</div><div id="stTiles"></div></div>
+  </div>
+</div>
+<div id="recents"><div id="rcTitle">Recent apps</div><div id="rcRow"></div><button id="rcClear">Clear all</button></div>
 
 <div class="screen" id="gate">
   <button class="x" onclick="closeGate()">✕</button>
@@ -220,7 +413,7 @@ input[type=range]{width:200px;height:36px;accent-color:#ff8a3d}
 <div id="dim"></div>
 <div id="toast"></div>
 
-<script>window.KT_INLINE=null;window.KT_INLINE={"defaults":{"_doc":"Kids tablet settings \u2014 ONE file is the whole state. The Bench/laptop pushes this with the bundle; the launcher reads it from the tablet agent (/api/settings) and the agent applies the hardware parts (brightness, volume, rotation, screen sleep). Edits made on the tablet (parent gate) are saved as overrides in the agent's state dir and survive bundle updates. v2 (2026-10-25): kids[] profiles with per-kid tiles + daily minutes, budget rules; `child` is the fallback when kids is empty.","version":2,"child":{"name":"","avatar":"frog"},"kids":[{"id":"kid1","name":"","age":4,"avatar":"frog","apps_allowed":["phonics-friends","letters","draw","yoto"],"budget_min":45},{"id":"kid2","name":"","age":6,"avatar":"fox","apps_allowed":null,"budget_min":60}],"budget":{"enabled":true,"exempt_apps":["yoto"],"grace_min":15,"reset_hour":5,"count_home":false},"pin":"1234","screen":{"brightness":70,"rotation":"right","theme":"sky","tile_size":"medium","sleep_after_min":0},"sound":{"volume":40,"max_volume":80,"tap_sounds":true,"output":"lineout","eq":{"enabled":true,"bass_db":0,"treble_db":0,"highpass_hz":170,"preamp_db":0}},"apps":{"allowed":["phonics-friends","camera","count","draw","example-tap","letters","maker-light","pbs-kids","show-tell","stories","words","yoto"],"order":["phonics-friends","letters","stories","draw","camera","count","example-tap","maker-light","pbs-kids","show-tell","words","yoto"]},"bedtime":{"enabled":false,"start":"19:30","end":"07:00"},"kiosk":{"home_button":"tap","parent_hold_ms":1500,"show_clock":true,"clock_24h":false,"kid_volume":true},"bench":{"url":"https://bench.tail81b22c.ts.net","updates":"manual"}},"apps":{"_doc":"The home screen. One entry per tile; `path` is relative to the bundle root. Games in tablet/apps/<id>/ are added automatically by build-bundle.py (see tablet/apps/README.md); list one here only to override its tile or to pull a folder from elsewhere with `source_dir`. `needs` lists iframe permissions the app wants.","apps":[{"id":"phonics-friends","title":"Phonics Friends","subtitle":"spell with your friend","icon":"\ud83d\udc38","color":"#3fb950","path":"apps/phonics-friends/index.html","needs":["microphone","autoplay"],"source":"demo/ via tools/make-offline-bundle.py"},{"id":"camera","title":"Camera","subtitle":"see through the cameras","icon":"\ud83d\udcf7","color":"#5c6bc0","path":"apps/camera/index.html","needs":[],"source":"tablet/apps/camera"},{"id":"count","title":"Count With Me","subtitle":"count, find shapes, add","icon":"\ud83d\udc38","color":"#5c6bc0","path":"apps/count/index.html","needs":["autoplay"],"source":"tablet/apps/count"},{"id":"draw","title":"Draw","subtitle":"finger painting","icon":"\ud83c\udfa8","color":"#c25048","path":"apps/draw/index.html","needs":[],"source":"tablet/apps/draw"},{"id":"example-tap","title":"Tap the Frog","subtitle":"example game","icon":"\ud83d\udc38","color":"#2e7d32","path":"apps/example-tap/index.html","needs":["autoplay"],"source":"tablet/apps/example-tap"},{"id":"letters","title":"Letter Sounds","subtitle":"tap a letter, hear its sound","icon":"\ud83d\udd24","color":"#d98e2b","path":"apps/letters/index.html","needs":["autoplay"],"source":"tablet/apps/letters"},{"id":"maker-light","title":"Light Lab","subtitle":"draw with real lights","icon":"\ud83d\udca1","color":"#f2b632","path":"apps/maker-light/index.html","needs":["autoplay"],"source":"tablet/apps/maker-light"},{"id":"pbs-kids","title":"PBS Kids","subtitle":"shows and games","icon":"\ud83d\udcfa","color":"#2e9e44","path":"apps/pbs-kids/index.html","needs":[],"source":"tablet/apps/pbs-kids","url":"https://pbskids.org"},{"id":"show-tell","title":"Show & Tell","subtitle":"what is it?","icon":"\ud83d\udd0d","color":"#ef8f3c","path":"apps/show-tell/index.html","needs":[],"source":"tablet/apps/show-tell"},{"id":"stories","title":"Stories","subtitle":"read along with your friend","icon":"\ud83d\udcd6","color":"#5f87ad","path":"apps/stories/index.html","needs":["autoplay"],"source":"tablet/apps/stories"},{"id":"words","title":"Word Builder","subtitle":"tap the letters, make the word","icon":"\ud83e\udde9","color":"#26a69a","path":"apps/words/index.html","needs":["autoplay"],"source":"tablet/apps/words"},{"id":"yoto","title":"Yoto","subtitle":"our Yoto library","icon":"\ud83c\udfa7","color":"#f2572b","path":"apps/yoto/index.html","needs":["autoplay"],"source":"tablet/apps/yoto"}]}};</script>
+<script>window.KT_INLINE=null;window.KT_INLINE={"defaults":{"_doc":"Kids tablet settings \u2014 ONE file is the whole state. The Bench/laptop pushes this with the bundle; the launcher reads it from the tablet agent (/api/settings) and the agent applies the hardware parts (brightness, volume, rotation, screen sleep). Edits made on the tablet (parent gate) are saved as overrides in the agent's state dir and survive bundle updates. v2 (2026-10-25): kids[] profiles with per-kid tiles + daily minutes, budget rules; `child` is the fallback when kids is empty.","version":2,"child":{"name":"","avatar":"frog"},"kids":[{"id":"kid1","name":"","age":4,"avatar":"frog","apps_allowed":["phonics-friends","letters","draw","yoto"],"budget_min":45,"look":null},{"id":"kid2","name":"","age":6,"avatar":"fox","apps_allowed":null,"budget_min":60,"look":null}],"budget":{"enabled":true,"exempt_apps":["yoto"],"grace_min":15,"reset_hour":5,"count_home":false},"pin":"1234","screen":{"brightness":70,"rotation":"right","theme":"sky","tile_size":"medium","sleep_after_min":0,"look":{"wallpaper":"sky","dark":false,"accent":"#ff8a3d"}},"sound":{"volume":40,"max_volume":80,"tap_sounds":true,"output":"lineout","eq":{"enabled":true,"bass_db":0,"treble_db":0,"highpass_hz":170,"preamp_db":0}},"apps":{"allowed":["phonics-friends","camera","count","draw","example-tap","letters","maker-light","pbs-kids","show-tell","stories","words","yoto"],"order":["phonics-friends","letters","stories","draw","camera","count","example-tap","maker-light","pbs-kids","show-tell","words","yoto"]},"bedtime":{"enabled":false,"start":"19:30","end":"07:00"},"kiosk":{"home_button":"tap","parent_hold_ms":1500,"show_clock":true,"clock_24h":false,"kid_volume":true,"lock_on_start":true,"lock_after_min":10},"bench":{"url":"https://bench.tail81b22c.ts.net","updates":"manual"}},"apps":{"_doc":"The home screen. One entry per tile; `path` is relative to the bundle root. Games in tablet/apps/<id>/ are added automatically by build-bundle.py (see tablet/apps/README.md); list one here only to override its tile or to pull a folder from elsewhere with `source_dir`. `needs` lists iframe permissions the app wants.","apps":[{"id":"phonics-friends","title":"Phonics Friends","subtitle":"spell with your friend","icon":"\ud83d\udc38","color":"#3fb950","path":"apps/phonics-friends/index.html","needs":["microphone","autoplay"],"source":"demo/ via tools/make-offline-bundle.py"},{"id":"camera","title":"Camera","subtitle":"see through the cameras","icon":"\ud83d\udcf7","color":"#5c6bc0","path":"apps/camera/index.html","needs":[],"source":"tablet/apps/camera"},{"id":"count","title":"Count With Me","subtitle":"count, find shapes, add","icon":"\ud83d\udc38","color":"#5c6bc0","path":"apps/count/index.html","needs":["autoplay"],"source":"tablet/apps/count"},{"id":"draw","title":"Draw","subtitle":"finger painting","icon":"\ud83c\udfa8","color":"#c25048","path":"apps/draw/index.html","needs":[],"source":"tablet/apps/draw"},{"id":"example-tap","title":"Tap the Frog","subtitle":"example game","icon":"\ud83d\udc38","color":"#2e7d32","path":"apps/example-tap/index.html","needs":["autoplay"],"source":"tablet/apps/example-tap"},{"id":"letters","title":"Letter Sounds","subtitle":"tap a letter, hear its sound","icon":"\ud83d\udd24","color":"#d98e2b","path":"apps/letters/index.html","needs":["autoplay"],"source":"tablet/apps/letters"},{"id":"maker-light","title":"Light Lab","subtitle":"draw with real lights","icon":"\ud83d\udca1","color":"#f2b632","path":"apps/maker-light/index.html","needs":["autoplay"],"source":"tablet/apps/maker-light"},{"id":"pbs-kids","title":"PBS Kids","subtitle":"shows and games","icon":"\ud83d\udcfa","color":"#2e9e44","path":"apps/pbs-kids/index.html","needs":[],"source":"tablet/apps/pbs-kids","url":"https://pbskids.org"},{"id":"show-tell","title":"Show & Tell","subtitle":"what is it?","icon":"\ud83d\udd0d","color":"#ef8f3c","path":"apps/show-tell/index.html","needs":[],"source":"tablet/apps/show-tell"},{"id":"stories","title":"Stories","subtitle":"read along with your friend","icon":"\ud83d\udcd6","color":"#5f87ad","path":"apps/stories/index.html","needs":["autoplay"],"source":"tablet/apps/stories"},{"id":"words","title":"Word Builder","subtitle":"tap the letters, make the word","icon":"\ud83e\udde9","color":"#26a69a","path":"apps/words/index.html","needs":["autoplay"],"source":"tablet/apps/words"},{"id":"yoto","title":"Yoto","subtitle":"our Yoto library","icon":"\ud83c\udfa7","color":"#f2572b","path":"apps/yoto/index.html","needs":["autoplay"],"source":"tablet/apps/yoto"}]}};</script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
@@ -519,7 +712,7 @@ $('qBrDown').onclick=()=>setBright((S.screen.brightness??70)-10);$('qBrUp').oncl
 $('qBrBar').onclick=e=>{const seg=e.target.closest('i[data-v]');if(!seg)return;setBright(+seg.dataset.v);};
 $('qOut').onclick=()=>{S.sound=S.sound||{};S.sound.output=S.sound.output==='headphones'?'lineout':'headphones';save();drawQuick();toast(S.sound.output==='headphones'?'Sound -> headphone jack':'Sound -> panel speakers');};
 $('quickClose').onclick=closeQuick;
-document.addEventListener('pointerdown',e=>{if(quickOpen&&!e.target.closest('#quick,#volBtn,#quickPill'))closeQuick();},true);
+document.addEventListener('pointerdown',e=>{if(quickOpen&&!e.target.closest('#quick,#volBtn,#quickPill,#sysbar,#navbar'))closeQuick();},true);
 $('quickPill').onclick=()=>{extHold(4000);quickOpen?closeQuick():openQuick('bottom');};
 function btUnlocked(){return Date.now()<btUnlock;}
 async function pollBt(){if(!agent){BT=null;drawBt();return;}try{BT=await jget('/api/bt');}catch(e){BT=null;}drawBt();}
@@ -804,6 +997,256 @@ async function poll(){
 let AC=null;
 function blip(f){if(!S.sound||!S.sound.tap_sounds)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=f;g.gain.value=0.0001;o.connect(g);g.connect(AC.destination);const t=AC.currentTime;g.gain.exponentialRampToValueAtTime(0.12*((S.sound.volume||60)/100),t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+0.14);o.start(t);o.stop(t+0.15);}catch(e){}}
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2600);}
+
+// ===== SYSUI — Android-style system UI (2026-10-30, Joe: "function like an android tablet"). Wraps the launcher's own
+// functions (openApp, goHome, applyLook, drawVol, drawQuick, tick) rather than editing them; the quick-settings panel
+// (#quick, D-015) is the shade's body. Status bar on top, back/home/recents at the bottom, on every screen.
+const SVG={
+  vol:v=>'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9.2v5.6h3.6L13 19V5L7.6 9.2z"/>'
+    +(v>0?'<path d="M16 8.6a4.8 4.8 0 0 1 0 6.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>':'')
+    +(v>=70?'<path d="M18.8 5.8a8.8 8.8 0 0 1 0 12.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>':'')
+    +(v===0?'<path d="M16.5 9.5l4.5 5M21 9.5l-4.5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>':'')+'</svg>',
+  wifi:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a15 15 0 0 1 19 0"/><path d="M5.5 12.5a10.5 10.5 0 0 1 13 0"/><path d="M8.5 16a6 6 0 0 1 7 0"/><circle cx="12" cy="19.3" r="1.3" fill="currentColor" stroke="none"/></svg>',
+  cloud:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M7 18.5h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7 11.6 3.5 3.5 0 0 0 7 18.5z"/></svg>',
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>'
+};
+$('dAgent').innerHTML=SVG.wifi;$('dBench').innerHTML=SVG.cloud;$('quickPill').innerHTML=SVG.gear;
+function volGlyph(){$('volBtn').innerHTML=SVG.vol((S.sound&&S.sound.volume)||0);}
+function sysNotif(){
+  const ak=activeKid(),g=[];
+  if(S.budget&&S.budget.enabled&&ak&&ak.budget_min>0){const lim=limitS(ak),rem=remS(ak);if(lim&&rem/lim<=0.25)g.push(rem>0?'⏳':'🌙');}
+  if(BT&&BT.powered&&(BT.devices||[]).some(d=>d.connected))g.push('🎧');
+  if(current&&current.url)g.push('🌐');
+  $('sbNotif').textContent=g.join(' ');
+}
+function sysState(){
+  const b=document.body.classList;
+  b.toggle('inapp',!!current);b.toggle('asleep',$('sleep').classList.contains('on'));
+  b.toggle('shade',$('quick').classList.contains('on'));b.toggle('recents',$('recents').classList.contains('on'));
+  b.toggle('gated',$('gate').classList.contains('on')||$('settings').classList.contains('on'));
+}
+['app','sleep','quick','gate','settings','recents'].forEach(id=>new MutationObserver(sysState).observe($(id),{attributes:true,attributeFilter:['class']}));
+const _applyLook=applyLook;applyLook=function(){_applyLook();volGlyph();sysNotif();};
+const _drawVol=drawVol;drawVol=function(){_drawVol();volGlyph();};
+// shade head: big clock, date, who is playing, and notification cards (screen time, open app, Bluetooth, bedtime, helper/Bench)
+function drawShadeHead(){
+  const d=new Date();let h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0');
+  $('qClock').textContent=(S.kiosk&&S.kiosk.clock_24h)?String(h).padStart(2,'0')+':'+m:((h%12)||12)+':'+m;
+  $('qDate').textContent=d.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});
+  const ak=activeKid(),n=kidLabel(ak)||'',av=(ak?ak.avatar:(S.child&&S.child.avatar))||'frog';
+  $('qKid').innerHTML='<b>'+(AV[av]||'🐸')+'</b>'+(n?E(n):'');
+  const N=[];
+  if(S.budget&&S.budget.enabled&&ak&&ak.budget_min>0){const r=Math.ceil(remS(ak)/60);N.push(['⏳',r>0?r+' min left today':'All done for today',(n||'Screen time')+' · '+ak.budget_min+' min a day']);}
+  if(current)N.push([current.icon||'▶',current.title+' is open',current.url?'in its own window · ○ comes back here':'◁ or ○ comes back to the tiles']);
+  if(BT&&BT.powered){const con=(BT.devices||[]).filter(x=>x.connected);if(con.length)N.push(['🎧','Sound on '+con.map(x=>x.name).join(', '),'Bluetooth']);}
+  if(S.bedtime&&S.bedtime.enabled)N.push(['🌙','Bedtime '+fmt12(S.bedtime.start)+' – '+fmt12(S.bedtime.end),'the moon screen comes on']);
+  N.push([agent?'📶':'⚠️',agent?'Tablet helper running':(LIVE?'No tablet helper on this page':'Opened as a file'),
+          (STATUS.bench==='ok'?'Bench reachable':(STATUS.bench==='down'?'Bench not reachable':'Bench: not checked'))+(STATUS.version?' · bundle '+STATUS.version:'')]);
+  $('qNotifs').innerHTML=N.map(x=>'<div class="qn"><b>'+x[0]+'</b><div class="n">'+E(x[1])+'<small>'+E(x[2])+'</small></div></div>').join('');
+}
+const _drawQuick=drawQuick;drawQuick=function(){_drawQuick();drawShadeHead();};
+const _tick=tick;tick=function(){_tick();sysNotif();if(quickOpen)drawShadeHead();};
+setInterval(()=>{sysNotif();if(quickOpen)drawShadeHead();},20000);
+// recents: the apps opened most recently (newest last, like the Android overview), per tablet, filtered to what this kid may open
+let RECENTS=[],recentsOpen=false,rcT=null;
+try{RECENTS=JSON.parse(localStorage.getItem('kt.recents')||'[]');}catch(e){}
+if(!Array.isArray(RECENTS))RECENTS=[];
+function recentsSave(){try{localStorage.setItem('kt.recents',JSON.stringify(RECENTS));}catch(e){}}
+function recentsPush(id){RECENTS=RECENTS.filter(x=>x!==id).concat([id]).slice(-8);recentsSave();}
+function recentsDrop(id){RECENTS=RECENTS.filter(x=>x!==id);recentsSave();}
+function visibleApps(){const ak=activeKid(),allowed=new Set(S.apps.allowed||[]),kA=(ak&&Array.isArray(ak.apps_allowed))?new Set(ak.apps_allowed):null;
+  return APPS.filter(a=>!a.soon&&a.path&&allowed.has(a.id)&&(!kA||kA.has(a.id)));}
+function drawRecents(){
+  const ok=new Set(visibleApps().map(a=>a.id)),list=RECENTS.map(id=>APPS.find(a=>a.id===id)).filter(a=>a&&ok.has(a.id));
+  $('rcRow').innerHTML=list.map(a=>'<div class="rc" data-id="'+E(a.id)+'"><div class="hd">'
+    +(a.icon_url?'<img class="ic" src="'+E(a.icon_url)+'" alt="" draggable="false">':'<span class="ic" style="background:'+E(a.color||'#888')+'">'+E(a.icon||'▶')+'</span>')
+    +'<span class="t">'+E(a.title)+'</span><button class="rx" aria-label="remove">✕</button></div>'
+    +'<div class="bd" style="background:linear-gradient(160deg,'+E(a.color||'#8899aa')+' 0%,#1c1b1f 140%)">'+(a.icon_url?'<img src="'+E(a.icon_url)+'" alt="" draggable="false">':E(a.icon||'▶'))+'</div></div>').join('')
+    ||'<div id="rcEmpty">No recent apps</div>';
+  $('rcClear').style.display=list.length?'':'none';
+  $('rcRow').querySelectorAll('.rc').forEach(c=>{
+    const id=c.dataset.id;let p=null;
+    c.querySelector('.rx').onclick=e=>{e.stopPropagation();dismiss(c,id);};
+    c.addEventListener('pointerdown',e=>{if(e.target.closest('.rx'))return;p={x:e.clientX,y:e.clientY,moved:false};});
+    c.addEventListener('pointermove',e=>{if(!p)return;const dy=e.clientY-p.y,dx=e.clientX-p.x;if(Math.abs(dx)>12||Math.abs(dy)>12)p.moved=true;
+      if(dy<0&&Math.abs(dx)<60)c.style.transform='translateY('+dy+'px)';});
+    function up(e){if(!p)return;const dy=e.clientY-p.y,moved=p.moved;p=null;c.style.transform='';
+      if(dy<-80)dismiss(c,id);else if(!moved){blip(520);if(current&&current.id===id)closeRecents();else openApp(id);}}
+    c.addEventListener('pointerup',up);c.addEventListener('pointercancel',()=>{p=null;c.style.transform='';});
+  });
+  function dismiss(c,id){blip(360);c.classList.add('gone');recentsDrop(id);setTimeout(drawRecents,180);}
+}
+function openRecents(){if($('sleep').classList.contains('on'))return;closeQuick();drawRecents();recentsOpen=true;$('recents').classList.add('on');
+  $('rcRow').scrollLeft=1e9;blip(460);extHold(4000);clearInterval(rcT);rcT=setInterval(()=>{if(recentsOpen)extHold(4000);else clearInterval(rcT);},2500);}
+function closeRecents(){if(!recentsOpen)return;recentsOpen=false;$('recents').classList.remove('on');clearInterval(rcT);}
+$('rcClear').onclick=()=>{RECENTS=[];recentsSave();blip(380);drawRecents();};
+$('navRecents').onclick=()=>recentsOpen?closeRecents():openRecents();
+const _openApp=openApp;openApp=function(id){_openApp(id);if(current&&current.id===id)recentsPush(id);closeRecents();};
+// home ○: the launcher's own tap/hold handler calls goHome(); on the home screen it also puts things away and scrolls to the top
+const _goHome=goHome;goHome=function(){closeRecents();if(!current){closeQuick();if(editing)endEdit();$('grid').scrollTo({top:0,behavior:'smooth'});return;}_goHome();};
+// back ◁: closes whatever is on top first; inside a game it asks the game ({kt:'back'}); a game that handled it answers
+// {kt:'back',handled:true} within 350 ms, otherwise the launcher leaves the game. A second press leaves at once.
+let backT=null;
+window.addEventListener('message',e=>{const f=$('frame');if(f&&e.source===f.contentWindow&&e.data&&e.data.kt==='back'&&e.data.handled){clearTimeout(backT);backT=null;}});
+function navBack(){
+  blip(440);
+  if(quickOpen){closeQuick();return;}
+  if(recentsOpen){closeRecents();return;}
+  if($('settings').classList.contains('on')){closeSettings();return;}
+  if($('gate').classList.contains('on')){closeGate();return;}
+  if(editing){endEdit();return;}
+  if(current){
+    if(current.url||backT){clearTimeout(backT);backT=null;goHome();return;}
+    try{$('frame').contentWindow.postMessage({kt:'back'},'*');}catch(e){}
+    backT=setTimeout(()=>{backT=null;goHome();},350);return;
+  }
+  $('grid').scrollTo({top:0,behavior:'smooth'});
+}
+$('navBack').onclick=navBack;
+document.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!e.target.closest('input,textarea'))navBack();});
+// gestures: tap or pull the status bar down for the shade; pull down on the home screen (tiles at the top) too; drag the
+// shade's head up to close it. The status and nav bars are touch-action:none so the browser never claims these.
+(function(){
+  const sb=$('sysbar');let p=null;
+  // pointer capture: the finger leaves the 32 px bar within a few px of a pull, so without it the move/up never arrive
+  sb.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;p={y:e.clientY,open:quickOpen,id:e.pointerId};try{sb.setPointerCapture(e.pointerId);}catch(x){}});
+  sb.addEventListener('pointermove',e=>{if(p&&!p.open&&e.clientY-p.y>12){p=null;openQuick('top');}});
+  sb.addEventListener('pointerup',()=>{if(p){const o=p.open;p=null;o?closeQuick():openQuick('top');}});
+  sb.addEventListener('pointercancel',()=>{p=null;});
+  const home=$('home');let g=null;
+  home.addEventListener('pointerdown',e=>{if(editing||quickOpen||e.target.closest('.face,#editDone'))return;g={y:e.clientY,x:e.clientX};},true);
+  home.addEventListener('pointermove',e=>{if(!g)return;const dy=e.clientY-g.y,dx=Math.abs(e.clientX-g.x);
+    if(dx>60||dy<-20)g=null;else if(dy>70&&$('grid').scrollTop<=0){g=null;openQuick('top');}},true);
+  ['pointerup','pointercancel'].forEach(ev=>home.addEventListener(ev,()=>{g=null;},true));
+  const q=$('quick');let d=null;
+  q.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;if(e.target.closest('#qHead,#qHandle,#qNotifs')){d={y:e.clientY};try{q.setPointerCapture(e.pointerId);}catch(x){}}});   // never capture on a button: capture retargets the click
+  q.addEventListener('pointermove',e=>{if(d&&d.y-e.clientY>30){d=null;closeQuick();}});
+  ['pointerup','pointercancel'].forEach(ev=>q.addEventListener(ev,()=>{d=null;}));
+})();
+sysState();volGlyph();
+
+// ===== SYSUI 2 — lock screen with the kid switcher + Wallpaper & style (2026-10-30, Joe: "i want the lock screen to be where you
+// can switch kids, i also need some customizable wallpaper and theme settings just like a true tablet"). look={wallpaper,dark,accent}:
+// S.screen.look is the tablet's, kids[i].look overrides it per kid (null = the tablet's). The home bar shows ONE chip (the active
+// kid: tap = lock screen / who is playing, hold = grown-ups); switching kids happens on the lock screen, like Android's user switcher.
+const WALLS=[['sky','Sky'],['forest','Forest'],['candy','Candy'],['ocean','Ocean'],['sunset','Sunset'],['bubbles','Bubbles'],['rainbow','Rainbow'],['jungle','Jungle'],['stars','Stars'],['night','Night']];
+const ACCENTS=['#ff8a3d','#1e88e5','#3fb950','#7c4dff','#ec407a','#e53935','#00897b','#ffd166'];
+const DARK_WALLS=new Set(['night','stars']);
+function tabletLook(){S.screen.look=(S.screen.look&&typeof S.screen.look==='object')?S.screen.look:{};const l=S.screen.look;
+  if(!l.wallpaper)l.wallpaper=S.screen.theme||'sky';if(l.dark==null)l.dark=S.screen.theme==='night';if(!l.accent)l.accent='#ff8a3d';return l;}
+function lookOf(k){const t=tabletLook();return (k&&k.look&&typeof k.look==='object')?Object.assign({},t,k.look):t;}
+let lastTheme=null;
+function applyWall(){
+  // the legacy "Colours" swatches in the grown-up settings still work: a theme change rewrites the tablet's look as a preset
+  if(lastTheme!==null&&S.screen.theme!==lastTheme){const t=tabletLook();t.wallpaper=S.screen.theme;t.dark=S.screen.theme==='night';}
+  lastTheme=S.screen.theme;
+  const ak=activeKid(),l=lookOf(ak),de=document.documentElement;
+  de.dataset.theme=l.dark?'night':'sky';
+  if(l.wallpaper&&l.wallpaper.startsWith('photo:')&&ak){de.dataset.wall='photo';de.style.setProperty('--wall','url("/api/store/camera/'+encodeURIComponent(ak.id)+'/'+encodeURIComponent(l.wallpaper.slice(6))+'")');}
+  else{de.dataset.wall=WALLS.some(w=>w[0]===l.wallpaper)?l.wallpaper:'sky';de.style.removeProperty('--wall');}
+  de.style.setProperty('--accent',l.accent||'#ff8a3d');
+}
+function drawChip(){
+  const ak=activeKid(),ks=kidsList(),av=(ak?ak.avatar:S.child.avatar)||'frog',lbl=ak?kidLabel(ak):(S.child.name||'').trim();
+  const f=$('faces');
+  f.innerHTML='<button class="face single on" data-kid="'+(ak?E(ak.id):'')+'" title="tap: who is playing · hold: grown-ups">'+(AV[av]||'🐸')+(lbl?'<span>'+E(lbl)+'</span>':'')+(ks&&ks.length>1?'<small>⇄</small>':'')+'<i></i></button>';
+  const btn=f.firstChild,bar=btn.querySelector('i');let fired=false;
+  function start(e){e.preventDefault();fired=false;const ms=S.kiosk.parent_hold_ms||1500;bar.style.transition='width '+ms+'ms linear';bar.style.width='100%';
+    holdT=setTimeout(()=>{holdT=null;fired=true;bar.style.transition='none';bar.style.width='0';openGate('settings');},ms);}
+  function end(e){const pending=!!holdT;if(holdT){clearTimeout(holdT);holdT=null;}bar.style.transition='width .1s';bar.style.width='0';
+    if(e.type==='pointerup'&&pending&&!fired)openLock();}
+  btn.addEventListener('pointerdown',start);btn.addEventListener('pointerup',end);btn.addEventListener('pointercancel',end);btn.addEventListener('pointerleave',end);
+}
+const _applyLook2=applyLook;applyLook=function(){_applyLook2();applyWall();drawChip();};
+// ---- lock screen
+let locked=false,lastInput=Date.now();
+function drawLock(){
+  const d=new Date();let h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0');
+  $('lkClock').textContent=(S.kiosk&&S.kiosk.clock_24h)?String(h).padStart(2,'0')+':'+m:((h%12)||12)+':'+m;
+  $('lkDate').textContent=d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+  const ks=kidsList(),ak=activeKid(),chips=[];
+  if(S.bedtime&&S.bedtime.enabled)chips.push('🌙 Bedtime at '+fmt12(S.bedtime.start));
+  if(BT&&BT.powered){const con=(BT.devices||[]).filter(x=>x.connected);if(con.length)chips.push('🎧 '+con.map(x=>x.name).join(', '));}
+  $('lkChips').innerHTML=chips.map(c=>'<span class="lkc">'+E(c)+'</span>').join('');
+  const list=ks||[{id:'',name:S.child.name,avatar:S.child.avatar,budget_min:0}];
+  $('lkWho').textContent=ks&&ks.length>1?"Who's playing?":'';
+  $('lkKids').innerHTML=list.map((k,i)=>{const on=!ks||(ak&&k.id===ak.id),bud=S.budget&&S.budget.enabled&&k.budget_min>0,lim=limitS(k),rem=remS(k),pct=lim?Math.max(0,Math.min(100,Math.round(rem/lim*100))):100,out=bud&&rem<=0;
+    return '<button class="lkk'+(on?' on':'')+'" data-kid="'+E(k.id)+'"><span class="av">'+(AV[k.avatar]||'🐸')+'</span><span class="nm">'+E(kidLabel(k,i)||'Play')+'</span>'
+      +(bud?'<span class="tm"><span class="bbar'+(out?' out':(pct<=25?' low':''))+'"><b style="width:'+pct+'%"></b></span>'+(out?'all done today':Math.ceil(rem/60)+' min left')+'</span>':'')+'</button>';}).join('');
+  $('lkKids').querySelectorAll('.lkk').forEach(b=>b.onclick=async()=>{const id=b.dataset.kid;blip(560);if(id&&(!ak||id!==ak.id))await pickKid(id);unlock();});
+  $('lkHint').textContent=ks&&ks.length>1?'tap your picture · or swipe up':'swipe up to start';
+}
+function openLock(){if($('sleep').classList.contains('on')||locked)return;locked=true;closeQuick();closeRecents();closeStyle();if(current)goHome();drawLock();
+  const l=$('lock');l.classList.remove('up');l.classList.add('on');document.body.classList.add('locked');extHold(4000);}
+function unlock(){if(!locked)return;locked=false;const l=$('lock');l.classList.add('up');setTimeout(()=>{l.classList.remove('on','up');},300);document.body.classList.remove('locked');blip(620);lastInput=Date.now();}
+window.unlock=unlock;window.openLock=openLock;
+$('qHead').appendChild($('quickClose'));   // the ✕ joins the shade's head row (after 🎨 and 🔒) instead of floating
+(function(){const l=$('lock');let p=null;   // swipe up anywhere = start as the current kid
+  l.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;p={y:e.clientY};try{l.setPointerCapture(e.pointerId);}catch(x){}});
+  l.addEventListener('pointermove',e=>{if(p&&p.y-e.clientY>90){p=null;unlock();}});
+  ['pointerup','pointercancel'].forEach(ev=>l.addEventListener(ev,()=>{p=null;}));})();
+$('lkGrown').onclick=()=>{blip(500);openGate('settings');};
+$('qLock').onclick=()=>{closeQuick();openLock();};
+$('qKid').onclick=()=>{closeQuick();openLock();};
+['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,()=>{lastInput=Date.now();},true));
+// idle on the home screen for kiosk.lock_after_min (0 = never) -> lock screen; never during a game, the moon, the gate or settings
+setInterval(()=>{const min=+((S.kiosk||{}).lock_after_min||0);if(!min||locked||current||$('sleep').classList.contains('on')||$('settings').classList.contains('on')||$('gate').classList.contains('on')||styleOpen)return;
+  if(Date.now()-lastInput>min*60000)openLock();},15000);
+const _powerDo=powerDo;powerDo=function(a){if(a==='sleep')openLock();return _powerDo(a);};   // Sleep = screen off, lock screen on wake
+const _tick3=tick;tick=function(){_tick3();if(locked){if($('sleep').classList.contains('on')){locked=false;$('lock').classList.remove('on','up');document.body.classList.remove('locked');}else drawLock();}};
+// ---- Wallpaper & style (bottom sheet): wallpapers, the kid's own photos, dark theme, colour, icon size; for this kid or everyone
+let styleOpen=false,styleFor='kid';
+function styleTarget(){const ak=activeKid();if(styleFor==='kid'&&ak){if(!ak.look||typeof ak.look!=='object')ak.look=Object.assign({},tabletLook());return ak.look;}return tabletLook();}
+function drawStyle(){
+  const ks=kidsList(),ak=activeKid();if(!ks||!ak)styleFor='all';
+  const l=styleFor==='kid'?lookOf(ak):tabletLook();
+  $('stFor').innerHTML=(ks&&ak?'<button data-for="kid" class="'+(styleFor==='kid'?'on':'')+'">'+(AV[ak.avatar]||'🐸')+' '+E(kidLabel(ak)||'me')+'</button>':'')+'<button data-for="all" class="'+(styleFor==='all'?'on':'')+'">Everyone</button>';
+  $('stFor').querySelectorAll('button').forEach(b=>b.onclick=()=>{styleFor=b.dataset.for;blip(480);drawStyle();});
+  $('stWalls').innerHTML=WALLS.map(w=>'<button class="wp'+(l.wallpaper===w[0]?' on':'')+'" data-wall="'+w[0]+'" data-pick="'+w[0]+'"><span>'+w[1]+'</span><i class="chk">✓</i></button>').join('');
+  $('stWalls').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{const id=b.dataset.pick;setLook(DARK_WALLS.has(id)?{wallpaper:id,dark:true}:{wallpaper:id});});
+  $('stDark').classList.toggle('on',!!l.dark);$('stDark').onclick=()=>setLook({dark:!l.dark});
+  $('stAccents').innerHTML=ACCENTS.map(c=>'<button class="acc'+(l.accent===c?' on':'')+'" style="background:'+c+'" data-acc="'+c+'" aria-label="colour"></button>').join('');
+  $('stAccents').querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>setLook({accent:b.dataset.acc}));
+  $('stTiles').innerHTML=['small','medium','large'].map(t=>'<button data-t="'+t+'" class="'+((S.screen.tile_size||'medium')===t?'on':'')+'">'+t+'</button>').join('');
+  $('stTiles').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{S.screen.tile_size=b.dataset.t;applyLook();save(false);blip(500);drawStyle();});
+  // the kid's own photos (Camera app, per-kid store) — only when styling this kid, the files are theirs
+  const ps=$('stPhotosSec');ps.style.display='none';
+  if(agent&&ak&&styleFor==='kid'){jget('/api/store/camera/'+encodeURIComponent(ak.id)+'/').then(j=>{
+    const th=(j.files||[]).filter(f=>/\.t\.jpg$/.test(f.name)).slice(-12).reverse();if(!th.length||styleFor!=='kid')return;
+    ps.style.display='';
+    $('stPhotos').innerHTML=th.map(f=>{const full=f.name.replace(/\.t\.jpg$/,'.jpg'),u='/api/store/camera/'+encodeURIComponent(ak.id)+'/'+encodeURIComponent(f.name);
+      return '<button class="wp'+(l.wallpaper==='photo:'+full?' on':'')+'" style="--wall:url(&quot;'+u+'&quot;)" data-photo="'+E(full)+'"><i class="chk">✓</i></button>';}).join('');
+    $('stPhotos').querySelectorAll('[data-photo]').forEach(b=>b.onclick=()=>setLook({wallpaper:'photo:'+b.dataset.photo}));
+  }).catch(()=>{});}
+}
+function setLook(patch){Object.assign(styleTarget(),patch);applyLook();save(false);blip(500);drawStyle();}
+function openStyle(){if(locked)return;styleOpen=true;closeQuick();styleFor=kidsList()?'kid':'all';drawStyle();$('style').classList.add('on');extHold(4000);}
+function closeStyle(){if(!styleOpen)return;styleOpen=false;$('style').classList.remove('on');}
+window.openStyle=openStyle;
+$('stDone').onclick=closeStyle;$('qStyle').onclick=openStyle;
+(function(){let t=null;const home=$('home');   // long-press on empty wallpaper opens Wallpaper & style, like Android
+  home.addEventListener('pointerdown',e=>{if(editing||locked||quickOpen||e.target.closest('.tile,.face,#bar,#editDone,button'))return;const x=e.clientX,y=e.clientY;
+    t=setTimeout(()=>{t=null;blip(380);openStyle();},650);
+    const mv=ev=>{if(Math.abs(ev.clientX-x)>10||Math.abs(ev.clientY-y)>10){clearTimeout(t);t=null;home.removeEventListener('pointermove',mv,true);}};home.addEventListener('pointermove',mv,true);},true);
+  ['pointerup','pointercancel'].forEach(ev=>home.addEventListener(ev,()=>{clearTimeout(t);t=null;},true));})();
+const _navBack2=navBack;navBack=function(){if(locked){blip(300);return;}if(styleOpen){blip(440);closeStyle();return;}_navBack2();};$('navBack').onclick=navBack;
+const _goHome3=goHome;goHome=function(){closeStyle();_goHome3();};
+// grown-up settings: a "Look & lock" section (Wallpaper & style…, lock at start, lock after idle)
+const _drawSettings=drawSettings;drawSettings=function(){_drawSettings();
+  const m=$('smain'),sec=document.createElement('div');sec.className='sec';
+  const la=+(get('kiosk.lock_after_min')||0);
+  sec.innerHTML='<h2>Look &amp; lock</h2>'
+   +row('Wallpaper &amp; style','wallpapers, dark theme, colour and icon size — for one child or everyone; children can open it too (hold the wallpaper, or 🎨 in the shade)','<button class="btn go" id="lsStyle">Open…</button>')
+   +row('Lock screen when the tablet starts','the "who is playing?" screen with the big clock','<button class="sw '+(get('kiosk.lock_on_start')!==false?'on':'')+'" id="lsStart"></button>')
+   +row('Back to the lock screen after','minutes with nothing touched on the home screen (never during a game)','<div class="stepper"><button id="lsDn">−</button><span class="v" style="min-width:70px;text-align:center;color:inherit" id="lsVal">'+(la?la+' min':'never')+'</span><button id="lsUp">+</button></div>');
+  m.insertBefore(sec,m.children[1]||null);
+  $('lsStyle').onclick=()=>{closeSettings();openStyle();};
+  $('lsStart').onclick=()=>{set('kiosk.lock_on_start',get('kiosk.lock_on_start')===false);$('lsStart').classList.toggle('on');save();};
+  const step=d=>{const v=Math.max(0,Math.min(120,(+(get('kiosk.lock_after_min')||0))+d));set('kiosk.lock_after_min',v);$('lsVal').textContent=v?v+' min':'never';save();};
+  $('lsDn').onclick=()=>step(-5);$('lsUp').onclick=()=>step(5);
+};
+// start on the lock screen (kiosk.lock_on_start), except when framed (the public demo page) or asleep
+const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}).lock_on_start!==false&&window.top===window&&!$('sleep').classList.contains('on'))openLock();};
 
 loadAll();
 </script>
