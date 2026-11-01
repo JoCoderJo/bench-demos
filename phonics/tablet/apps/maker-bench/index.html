@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Simulate, Print &amp; Attach</title>
+<style>
+  :root{
+    --bg:#0c1320; --panel:#152036; --card:#1d2b48; --ink:#f5f8ff; --muted:#9fb2d8;
+    --accent:#ffd54f; --good:#5ce08a; --warn:#ffb74d; --bad:#ff6b6b; --line:#2c3f68;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:700 16px/1.25 system-ui,sans-serif;overflow:hidden}
+  body{display:grid;grid-template-rows:50px 58px 1fr}
+  body.pre .num-only{display:none !important}
+  .diy-bar{display:flex;align-items:center;gap:8px;padding:6px 14px;background:#090e1a;border-bottom:2px solid var(--line)}
+  .diy-lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-right:4px}
+  .diy-step{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 13px;font:800 13px system-ui,sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px}
+  .diy-step.active{border-color:var(--accent);background:#2c3620;color:var(--accent)}
+  .diy-spacer{flex:1}
+  .proj-pill{font-size:13px;color:#a5d6ff;background:#132440;border:1px solid #2b4c7e;padding:5px 12px;border-radius:999px;display:flex;align-items:center;gap:6px}
+  .mode-pill{font-size:12px;color:#ffd54f;background:#2c2510;border:1px solid #665214;padding:4px 10px;border-radius:999px;cursor:pointer}
+  header{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--panel);border-bottom:2px solid var(--line)}
+  header h1{margin:0;font-size:20px}
+  .slot-tabs{display:flex;gap:6px;margin-left:8px}
+  .slot-tab{padding:7px 11px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:800 12px system-ui,sans-serif;cursor:pointer}
+  .slot-tab.on{border-color:var(--accent);background:#2a3822;color:var(--accent)}
+  .hdr-spacer{flex:1}
+  .act-btn{padding:8px 13px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:800 13px system-ui,sans-serif;cursor:pointer}
+  .act-btn.good{border-color:var(--good);background:#17382b;color:var(--good)}
+  .act-btn.accent{border-color:var(--accent);background:#332b12;color:var(--accent)}
+  main{display:grid;grid-template-columns:1fr 410px;height:100%;overflow:hidden}
+  #simWrap{position:relative;background:radial-gradient(circle at 50% 35%, #1e2f54, #090e1a);overflow:hidden}
+  #simCanvas{width:100%;height:100%;display:block}
+  .sim-controls{position:absolute;left:14px;right:14px;bottom:14px;background:rgba(15,23,41,.92);border:2px solid var(--line);border-radius:16px;padding:10px 14px;display:flex;align-items:center;gap:12px}
+  .sim-controls label{font-size:13px;color:var(--muted);white-space:nowrap}
+  .sim-controls input[type=range]{flex:1;accent-color:var(--accent)}
+  .clash-pill{padding:6px 12px;border-radius:999px;font-size:13px;font-weight:900;white-space:nowrap}
+  .clash-pill.ok{background:#153828;color:var(--good);border:1px solid var(--good)}
+  .clash-pill.bad{background:#421820;color:var(--bad);border:1px solid var(--bad)}
+  aside{background:var(--panel);border-left:2px solid var(--line);padding:12px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+  .sec-card{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:11px;display:flex;flex-direction:column;gap:8px}
+  .sec-title{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:flex;justify-content:space-between;align-items:center}
+  /* 4 Picture Gates (D-038 / D-045) */
+  .gate-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .gate-tile{background:#121c33;border:2px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;align-items:center;gap:8px;font-size:13px}
+  .gate-tile.ok{border-color:#2e6b47;background:#112920}
+  .gate-tile.bad{border-color:var(--bad);background:#33151d}
+  .gate-ico{font-size:22px}
+  /* Print Ticket & Attach Flow (D-041) */
+  .ticket-box{background:#121c33;border:2px dashed var(--accent);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px}
+  .ticket-box.printed{border-style:solid;border-color:var(--good);background:#112920}
+  .step-item{display:flex;align-items:center;gap:8px;background:#0e172a;padding:7px 10px;border-radius:10px;font-size:13px;cursor:pointer;border:1px solid var(--line)}
+  .step-item.done{border-color:var(--good);color:var(--good)}
+  .bom-row{display:flex;align-items:center;justify-content:space-between;background:#121c33;padding:7px 10px;border-radius:10px;border:1px solid var(--line);font-size:13px}
+  .bom-row .sku{font-size:11px;color:var(--muted)}
+  .stock-badge{padding:3px 8px;border-radius:999px;font-size:11px;font-weight:900}
+  .stock-badge.in{background:#163829;color:var(--good)}
+  .stock-badge.out{background:#3e2418;color:var(--warn)}
+  .inv-list{display:flex;flex-direction:column;gap:5px;max-height:140px;overflow-y:auto}
+</style>
+</head>
+<body>
+  <nav class="diy-bar" id="diyBar" aria-label="DIY Pipeline">
+    <span class="diy-lbl">🛠️ DIY Pipeline</span>
+    <button class="diy-step" data-app="maker-light">1. 🔌 Sensors</button>
+    <button class="diy-step" data-app="maker-code">2. 🧩 Code</button>
+    <button class="diy-step" data-app="maker-cad">3. 📐 3D CAD</button>
+    <button class="diy-step active" data-app="maker-bench">4. 🧪 Simulate &amp; Print</button>
+    <div class="diy-spacer"></div>
+    <button class="mode-pill" id="modeBtn" title="Toggle Pre-Reader / Reader Mode">👶 Pre-Reader</button>
+    <div class="proj-pill" id="projPill">📦 Project: <b>Kickstand + Latch</b></div>
+  </nav>
+
+  <header>
+    <h1>🧪 Simulate, Print &amp; Attach</h1>
+    <div class="slot-tabs" id="slotTabs">
+      <button class="slot-tab on" data-slot="back_bottom">⬇️ Back Kickstand</button>
+      <button class="slot-tab" data-slot="back_center">🎯 Back Center</button>
+      <button class="slot-tab" data-slot="top_rail">⬆️ Top Sensor Rail</button>
+    </div>
+    <div class="hdr-spacer"></div>
+    <button class="act-btn" id="btnEditCad">📐 Adjust Shape</button>
+    <button class="act-btn good" id="btnAskPrint">🖨️ Ask to Print!</button>
+  </header>
+
+  <main>
+    <div id="simWrap">
+      <canvas id="simCanvas"></canvas>
+      <div class="sim-controls">
+        <label>🔄 Fold &amp; Test Angle: <b class="num-only" id="angVal">45°</b></label>
+        <input type="range" id="angSlider" min="0" max="115" value="45">
+        <button class="act-btn" id="btnAutoSwing" style="padding:6px 10px">▶️ Swing</button>
+        <div class="clash-pill ok" id="clashBadge">✅ Fits Great!</div>
+      </div>
+    </div>
+
+    <aside>
+      <div class="sec-card">
+        <div class="sec-title"><span>1. 4-Gate Fit Check</span><span id="gateSummary">4/4 Green</span></div>
+        <div class="gate-grid" id="gateGrid">
+          <div class="gate-tile ok" id="gateFits"><span class="gate-ico">🧩</span><div><b>FITS</b><div style="font-size:11px;color:var(--muted)">No bumps!</div></div></div>
+          <div class="gate-tile ok" id="gateMoves"><span class="gate-ico">🔄</span><div><b>MOVES</b><div style="font-size:11px;color:var(--muted)">Folds clean</div></div></div>
+          <div class="gate-tile ok" id="gateStands"><span class="gate-ico">⚖️</span><div><b>STANDS</b><div style="font-size:11px;color:var(--muted)">No tip-over</div></div></div>
+          <div class="gate-tile ok" id="gatePrint"><span class="gate-ico">🖨️</span><div><b>PRINTABLE</b><div style="font-size:11px;color:var(--muted)">Fits bed</div></div></div>
+        </div>
+      </div>
+
+      <div class="sec-card">
+        <div class="sec-title"><span>2. Print Ticket &amp; Attach Loop</span><span id="ticketStateLbl">Ready</span></div>
+        <div class="ticket-box" id="ticketBox">
+          <div id="ticketMsg" style="font-size:13px">Tap <b>🖨️ Ask to Print!</b> above to send a print card to Joe's Bench (Bambu A1 Mini).</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap" id="ticketActions">
+            <button class="act-btn accent" id="btnSendTicket" style="flex:1">🖨️ Ask Grown-Up to Print</button>
+            <button class="act-btn num-only" id="btnExportStl" title="Download STL">💾 STL</button>
+          </div>
+          <div id="attachSection" style="display:none;flex-direction:column;gap:6px;margin-top:4px">
+            <div style="font-size:12px;color:var(--accent);text-transform:uppercase">🔩 Attach Recipe (Tap each step!)</div>
+            <div class="step-item" data-step="0">1️⃣ <span>Place part on Back Grid holes</span></div>
+            <div class="step-item" data-step="1">2️⃣ <span>Thread M3×8 bolts with hex key</span></div>
+            <div class="step-item" data-step="2">3️⃣ <span>Flip kickstand out &amp; test stand!</span></div>
+            <button class="act-btn good" id="btnSnapPhoto" style="margin-top:4px">📸 Snap Photo to My Stuff!</button>
+            <div id="photoSavedBanner" style="display:none;font-size:12px;color:var(--good);text-align:center">🎉 Saved to My Stuff Gallery!</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-card">
+        <div class="sec-title"><span>3. Parts Needed (Live Shop Check)</span><span id="bomStatus">Checking...</span></div>
+        <div id="bomList" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+
+      <div class="sec-card">
+        <div class="sec-title"><span>4. Live Shop Inventory</span><span id="invCount">0 SKUs</span></div>
+        <div class="inv-list" id="invList"></div>
+      </div>
+    </aside>
+  </main>
+
+<script src="three.min.js"></script>
+<script>
+(() => {
+  'use strict';
+
+  const PROJ_KEY = 'kt.diy.project.v1';
+  const STUFF_KEY = 'kt.mystuff.v1';
+  let preReader = false;
+
+  function loadProject() {
+    try {
+      const p = JSON.parse(localStorage.getItem(PROJ_KEY) || 'null');
+      if (p && typeof p === 'object') return p;
+    } catch (_) {}
+    return {
+      id: 'kickstand-pod',
+      title: 'Kickstand + Latch',
+      sensors: ['buttons', 'pixels', 'vibro'],
+      cad: {
+        template: 'kickstand',
+        version: 1,
+        color: '#ff7043',
+        params: { length: 90, width: 30, thick: 6, angle: 45, lugs: 2 },
+        primitives: []
+      }
+    };
+  }
+
+  let project = loadProject();
+  if (!project.cad) {
+    project.cad = { template: 'kickstand', version: 1, color: '#ff7043', params: { length: 90, width: 30, thick: 6, angle: 45, lugs: 2 }, primitives: [] };
+  }
+  if (!project.slot) project.slot = 'back_bottom';
+  if (!project.ticket) project.ticket = { status: 'none', grams: 14, minutes: 22, attach_done: [false, false, false] };
+
+  let inventory = { parts: [] };
+  let swingAngle = Number(project.cad.params && project.cad.params.angle) || 45;
+  let autoSwing = false;
+  let swingDir = 1;
+  let standsOk = true;
+
+  function speak(text) {
+    try { window.parent.postMessage({ kt: 'tts', text }, '*'); } catch (_) {}
+  }
+
+  function saveProject() {
+    project.updated_at = Date.now();
+    project.design = project.cad;
+    try { localStorage.setItem(PROJ_KEY, JSON.stringify(project)); } catch (_) {}
+    try {
+      const kid = (window._ktKid && window._ktKid.id) || 'kid2';
+      const pid = project.id || 'kickstand-pod';
+      fetch('/api/store/maker/' + encodeURIComponent(kid) + '/proj-' + encodeURIComponent(pid) + '.json', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(project)
+      }).catch(() => {});
+    } catch (_) {}
+    document.getElementById('projPill').innerHTML = '📦 Project: <b>' + (project.title || 'My DIY Build') + '</b>';
+  }
+
+  function applyModeUI() {
+    document.body.classList.toggle('pre', preReader);
+    const btn = document.getElementById('modeBtn');
+    if (btn) btn.textContent = preReader ? '👶 Pre-Reader (Icons)' : '📖 Reader (mm)';
+  }
+
+  document.getElementById('modeBtn').addEventListener('click', () => {
+    preReader = !preReader;
+    applyModeUI();
+    speak(preReader ? 'Picture mode on!' : 'Number mode on!');
+  });
+
+  window.addEventListener('message', (ev) => {
+    const d = ev.data || {};
+    if (d.kt === 'hello' && d.kid && typeof d.kid.age === 'number') {
+      preReader = d.kid.age < 5;
+      applyModeUI();
+    }
+  });
+  try { window.parent.postMessage({ kt: 'who' }, '*'); } catch (_) {}
+
+  // Three.js Virtual Tablet-101 + Custom Part Assembly
+  const canvas = document.getElementById('simCanvas');
+  let renderer = null;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  } catch (_) {
+    renderer = { setSize: () => {}, render: () => {} };
+  }
+  const scene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(42, 1, 1, 2500);
+  let camSph = { r: 390, theta: 2.45, phi: 1.12 };
+  function updateCam() {
+    camera.position.set(
+      camSph.r * Math.sin(camSph.phi) * Math.sin(camSph.theta),
+      camSph.r * Math.cos(camSph.phi),
+      camSph.r * Math.sin(camSph.phi) * Math.cos(camSph.theta)
+    );
+    camera.lookAt(0, 0, 0);
+  }
+  updateCam();
+
+  scene.add(new THREE.AmbientLight(0xdce8ff, 0.85));
+  const d1 = new THREE.DirectionalLight(0xffffff, 0.9);
+  d1.position.set(180, 260, 200);
+  scene.add(d1);
+  const d2 = new THREE.DirectionalLight(0x88b4ff, 0.45);
+  d2.position.set(-180, -100, -160);
+  scene.add(d2);
+
+  const floorGrid = new THREE.GridHelper(360, 24, 0x3b5998, 0x1a2846);
+  floorGrid.position.y = -95;
+  scene.add(floorGrid);
+
+  const assemblyGrp = new THREE.Group();
+  scene.add(assemblyGrp);
+
+  const tabletGrp = new THREE.Group();
+  assemblyGrp.add(tabletGrp);
+
+  const bodyMat = new THREE.MeshStandardMaterial({ color: 0x263859, roughness: 0.45, metalness: 0.15 });
+  const tpuMat  = new THREE.MeshStandardMaterial({ color: 0xffb300, roughness: 0.7 });
+  const scrMat  = new THREE.MeshStandardMaterial({ color: 0x0b1528, roughness: 0.2, metalness: 0.5 });
+
+  const shell = new THREE.Mesh(new THREE.BoxGeometry(254, 162, 22), bodyMat);
+  tabletGrp.add(shell);
+
+  const screen = new THREE.Mesh(new THREE.BoxGeometry(224, 138, 1.5), scrMat);
+  screen.position.set(0, 0, 11.2);
+  tabletGrp.add(screen);
+
+  [[-127, 81], [127, 81], [-127, -81], [127, -81]].forEach(([cx, cy]) => {
+    const b = new THREE.Mesh(new THREE.CylinderGeometry(14, 14, 25, 20), tpuMat);
+    b.rotation.x = Math.PI / 2;
+    b.position.set(cx, cy, 0);
+    tabletGrp.add(b);
+  });
+
+  const bossGeo = new THREE.CylinderGeometry(3.2, 3.2, 2, 16);
+  const bossMat = new THREE.MeshStandardMaterial({ color: 0x64b5f6, roughness: 0.4 });
+  for (let gx = -60; gx <= 60; gx += 15) {
+    for (let gy = -45; gy <= 45; gy += 15) {
+      const boss = new THREE.Mesh(bossGeo, bossMat);
+      boss.rotation.x = Math.PI / 2;
+      boss.position.set(gx, gy, -11.5);
+      tabletGrp.add(boss);
+    }
+  }
+
+  const mountGrp = new THREE.Group();
+  assemblyGrp.add(mountGrp);
+  const flapGrp = new THREE.Group();
+  mountGrp.add(flapGrp);
+
+  let partMat = new THREE.MeshStandardMaterial({ color: 0xff7043, roughness: 0.35 });
+
+  function buildMountedPart() {
+    while (mountGrp.children.length > 1) mountGrp.remove(mountGrp.children[1]);
+    while (flapGrp.children.length) flapGrp.remove(flapGrp.children[0]);
+
+    const cad = project.cad;
+    const p = cad.params || {};
+    partMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(cad.color || '#ff7043'), roughness: 0.35 });
+
+    if (project.slot === 'back_bottom') {
+      mountGrp.position.set(0, -15, -12);
+      mountGrp.rotation.set(0, 0, 0);
+    } else if (project.slot === 'back_center') {
+      mountGrp.position.set(0, 15, -12);
+      mountGrp.rotation.set(0, 0, 0);
+    } else {
+      mountGrp.position.set(0, 81, 0);
+      mountGrp.rotation.set(-Math.PI / 2, 0, 0);
+    }
+
+    const L = Number(p.length) || 90;
+    const W = Number(p.width) || 30;
+    const T = Number(p.thick) || 6;
+
+    const bracket = new THREE.Mesh(new THREE.BoxGeometry(Math.max(W, 32), 22, T), partMat);
+    bracket.position.set(0, 0, -T / 2);
+    mountGrp.add(bracket);
+
+    const flapLen = Math.max(35, L - 20);
+    const flap = new THREE.Mesh(new THREE.BoxGeometry(W, flapLen, T), partMat);
+    flap.position.set(0, -flapLen / 2, -T / 2);
+    flapGrp.position.set(0, -11, 0);
+    flapGrp.add(flap);
+
+    updateSwingAndGates();
+  }
+
+  function updateSwingAndGates() {
+    const rad = (swingAngle * Math.PI) / 180;
+    flapGrp.rotation.x = rad;
+    document.getElementById('angVal').textContent = Math.round(swingAngle) + '°';
+
+    const p = project.cad.params || {};
+    const L = Number(p.length) || 90;
+    const W = Number(p.width) || 30;
+    const T = Number(p.thick) || 6;
+
+    // 4 Picture Gates (D-038 / D-045)
+    const fitsOk  = (W <= 60 && T >= 4);
+    const movesOk = !(swingAngle > 92 || (project.slot === 'top_rail' && swingAngle > 70));
+    standsOk = (project.slot !== 'back_bottom') || (L >= 75 && swingAngle >= 25 && swingAngle <= 75);
+    const printOk = (L <= 180 && W <= 180 && T >= 4);
+
+    const setGate = (id, ok, goodTxt, badTxt) => {
+      const el = document.getElementById(id);
+      el.className = 'gate-tile ' + (ok ? 'ok' : 'bad');
+      el.querySelector('div div').textContent = ok ? goodTxt : badTxt;
+    };
+    setGate('gateFits',   fitsOk,   '15mm Grid OK',   'It bumps here!');
+    setGate('gateMoves',  movesOk,  'Folds clean',    'Hits shell!');
+    setGate('gateStands', standsOk, 'Stands strong',  'Tips over!');
+    setGate('gatePrint',  printOk,  'Fits A1 Mini',   'Too thin/big');
+
+    const passCount = [fitsOk, movesOk, standsOk, printOk].filter(Boolean).length;
+    document.getElementById('gateSummary').textContent = passCount + '/4 Green';
+
+    const badge = document.getElementById('clashBadge');
+    const allOk = passCount === 4;
+    if (!movesOk || !fitsOk) {
+      partMat.color.setHex(0xff3b3b);
+      badge.className = 'clash-pill bad';
+      badge.textContent = '⚠️ It bumps here!';
+    } else if (!standsOk) {
+      partMat.color.setHex(0xffb74d);
+      badge.className = 'clash-pill bad';
+      badge.textContent = '⚖️ Tips over — make leg longer!';
+    } else {
+      partMat.color.set(project.cad.color || '#ff7043');
+      badge.className = 'clash-pill ok';
+      badge.textContent = '✅ All 4 Gates Green!';
+    }
+  }
+
+  // Print Ticket & Attach Recipe UI (D-041)
+  function renderTicketUI() {
+    const t = project.ticket || { status: 'none', grams: 14, minutes: 22, attach_done: [false, false, false] };
+    const box = document.getElementById('ticketBox');
+    const msg = document.getElementById('ticketMsg');
+    const lbl = document.getElementById('ticketStateLbl');
+    const attachSec = document.getElementById('attachSection');
+    const sendBtn = document.getElementById('btnSendTicket');
+
+    const p = project.cad.params || {};
+    const grams = Math.max(8, Math.round(((Number(p.length) || 90) * (Number(p.width) || 30) * (Number(p.thick) || 6)) / 1100));
+    const mins  = Math.max(12, Math.round(grams * 1.6));
+    t.grams = grams;
+    t.minutes = mins;
+
+    if (t.status === 'none') {
+      box.className = 'ticket-box';
+      lbl.textContent = 'Step 1: Print';
+      msg.innerHTML = 'Ready to make your <b>' + (project.cad.template || 'kickstand') + '</b>! <span class="num-only">(~' + grams + 'g PETG · ~' + mins + 'm)</span>';
+      sendBtn.textContent = '🖨️ Ask Grown-Up to Print';
+      attachSec.style.display = 'none';
+    } else if (t.status === 'requested') {
+      box.className = 'ticket-box';
+      lbl.textContent = '⏳ In Print Queue';
+      msg.innerHTML = '🎟️ <b>Ticket Sent to Bench!</b> Waiting for Joe to slice &amp; print on Bambu A1 Mini. <span class="num-only">(' + grams + 'g)</span>';
+      sendBtn.textContent = '✅ Grown-Up: Mark Printed';
+      attachSec.style.display = 'none';
+    } else if (t.status === 'printed') {
+      box.className = 'ticket-box printed';
+      lbl.textContent = '🎉 Printed!';
+      msg.innerHTML = '🎉 <b>Part is Printed!</b> Grab your M3 bolts and follow the Attach Recipe below:';
+      sendBtn.textContent = '🔄 Re-Request Print';
+      attachSec.style.display = 'flex';
+    }
+
+    document.querySelectorAll('#attachSection .step-item').forEach(el => {
+      const idx = Number(el.dataset.step);
+      const done = Boolean(t.attach_done && t.attach_done[idx]);
+      el.classList.toggle('done', done);
+    });
+  }
+
+  async function requestPrintTicket() {
+    const t = project.ticket || { status: 'none', grams: 14, minutes: 22, attach_done: [false, false, false] };
+    if (t.status === 'requested') {
+      t.status = 'printed';
+      project.ticket = t;
+      saveProject();
+      renderTicketUI();
+      speak('Hooray! Your part is printed! Follow steps 1, 2, and 3 to bolt it onto your tablet.');
+      try {
+        await fetch('/api/maker/print', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ project_id: project.id, title: project.title, status: 'printed', cad: project.cad })
+        });
+      } catch (_) {}
+      return;
+    }
+    t.status = 'requested';
+    t.requested_at = Date.now();
+    t.attach_done = [false, false, false];
+    project.ticket = t;
+    saveProject();
+    renderTicketUI();
+    speak('Print ticket sent to the Bench! Ask a grown-up to start the printer.');
+    try {
+      await fetch('/api/maker/print', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project_id: project.id,
+          title: project.title,
+          status: 'requested',
+          grams: t.grams,
+          minutes: t.minutes,
+          cad: project.cad
+        })
+      });
+    } catch (_) {}
+  }
+
+  document.getElementById('btnAskPrint').addEventListener('click', requestPrintTicket);
+  document.getElementById('btnSendTicket').addEventListener('click', requestPrintTicket);
+
+  document.querySelectorAll('#attachSection .step-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = Number(el.dataset.step);
+      if (!project.ticket.attach_done) project.ticket.attach_done = [false, false, false];
+      project.ticket.attach_done[idx] = !project.ticket.attach_done[idx];
+      saveProject();
+      renderTicketUI();
+      speak(el.innerText);
+    });
+  });
+
+  document.getElementById('btnSnapPhoto').addEventListener('click', () => {
+    try {
+      renderer.render(scene, camera);
+      const dataUrl = canvas.toDataURL('image/png');
+      const items = JSON.parse(localStorage.getItem(STUFF_KEY) || '[]');
+      items.unshift({
+        id: 'diy-' + Date.now(),
+        app: 'maker-bench',
+        title: (project.title || 'My DIY Build') + ' (' + (project.cad.template || 'part') + ')',
+        created_at: Date.now(),
+        thumb: dataUrl
+      });
+      localStorage.setItem(STUFF_KEY, JSON.stringify(items.slice(0, 30)));
+      project.photo_saved = true;
+      saveProject();
+      document.getElementById('photoSavedBanner').style.display = 'block';
+      speak('Snap! Saved your build photo to My Stuff!');
+    } catch (_) {}
+  });
+
+  let drag = false, px = 0, py = 0;
+  canvas.addEventListener('pointerdown', (e) => { drag = true; px = e.clientX; py = e.clientY; });
+  window.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    camSph.theta -= (e.clientX - px) * 0.01;
+    camSph.phi = Math.max(0.25, Math.min(1.48, camSph.phi - (e.clientY - py) * 0.01));
+    px = e.clientX; py = e.clientY;
+    updateCam();
+  });
+  window.addEventListener('pointerup', () => { drag = false; });
+
+  document.getElementById('angSlider').addEventListener('input', (e) => {
+    autoSwing = false;
+    swingAngle = Number(e.target.value);
+    updateSwingAndGates();
+  });
+
+  document.getElementById('btnAutoSwing').addEventListener('click', (e) => {
+    autoSwing = !autoSwing;
+    e.currentTarget.textContent = autoSwing ? '⏸️ Pause' : '▶️ Swing';
+  });
+
+  document.querySelectorAll('.slot-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.slot-tab').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      project.slot = btn.dataset.slot;
+      saveProject();
+      buildMountedPart();
+    });
+  });
+
+  function computeProjectBOM() {
+    const cad = project.cad || {};
+    const p = cad.params || {};
+    const lugs = Number(p.lugs) || 2;
+    const reqs = [
+      { sku: 'BOLT-M3X8-BHCS', label: '🔩 M3×8 Bolts (Grid Mount)', qty: lugs },
+      { sku: 'INS-M3X4X5',     label: '⚙️ M3 Brass Inserts',        qty: lugs },
+      { sku: 'FIL-PETG-1KG',   label: '🧵 PETG Filament Spool',     qty: 1 }
+    ];
+    const sensors = project.sensors || [];
+    if (sensors.includes('buttons')) reqs.push({ sku: 'MOD-BUTTONS', label: '🔘 Modulino Buttons', qty: 1 });
+    if (sensors.includes('knob'))    reqs.push({ sku: 'MOD-KNOB',    label: '🎛️ Modulino Knob',    qty: 1 });
+    if (sensors.includes('pixels'))  reqs.push({ sku: 'MOD-PIXELS',  label: '🌈 Modulino Pixels',  qty: 1 });
+    if (sensors.includes('vibro'))   reqs.push({ sku: 'MOD-VIBRO',   label: '📳 Modulino Vibro',   qty: 1 });
+    if (sensors.includes('buzzer'))  reqs.push({ sku: 'MOD-BUZZER',  label: '🔔 Modulino Buzzer',  qty: 1 });
+    return reqs;
+  }
+
+  function renderInventoryAndBOM() {
+    const partsMap = {};
+    (inventory.parts || []).forEach(pt => { partsMap[pt.sku] = pt; });
+
+    const bom = computeProjectBOM();
+    const bomWrap = document.getElementById('bomList');
+    bomWrap.innerHTML = '';
+    let allInStock = true;
+
+    bom.forEach(item => {
+      const stock = partsMap[item.sku];
+      const avail = stock ? stock.available : 0;
+      const ok = avail >= item.qty;
+      if (!ok) allInStock = false;
+      const row = document.createElement('div');
+      row.className = 'bom-row';
+      row.innerHTML =
+        '<div><div>' + item.label + ' <b>×' + item.qty + '</b></div>' +
+        '<div class="sku num-only">' + item.sku + ' · ' + (stock ? stock.desc : 'Shop item') + '</div></div>' +
+        '<span class="stock-badge ' + (ok ? 'in' : 'out') + '">' +
+        (ok ? ('✅ Ready (' + avail + ')') : '🛒 Ask Grown-Up') + '</span>';
+      bomWrap.appendChild(row);
+    });
+
+    const bomStat = document.getElementById('bomStatus');
+    bomStat.textContent = allInStock ? '✅ All In Stock!' : '🛒 Some Out of Stock';
+    bomStat.style.color = allInStock ? 'var(--good)' : 'var(--warn)';
+
+    const invWrap = document.getElementById('invList');
+    invWrap.innerHTML = '';
+    const allParts = inventory.parts || [];
+    document.getElementById('invCount').textContent = allParts.length + ' items';
+    allParts.forEach(pt => {
+      const row = document.createElement('div');
+      row.className = 'bom-row';
+      row.innerHTML =
+        '<div><div>' + pt.desc + '</div><div class="sku num-only">' + pt.sku + '</div></div>' +
+        '<span class="stock-badge ' + (pt.available > 0 ? 'in' : 'out') + '">' +
+        (pt.available > 0 ? (pt.available + ' on hand') : '0 left') + '</span>';
+      invWrap.appendChild(row);
+    });
+  }
+
+  // Live Synced Inventory Snapshot (D-043): try /api/maker/inventory first, fallback to inventory.json
+  fetch('/api/maker/inventory')
+    .then(r => { if (!r.ok) throw new Error('fallback'); return r.json(); })
+    .catch(() => fetch('inventory.json').then(r => r.json()))
+    .then(data => { inventory = data; renderInventoryAndBOM(); })
+    .catch(() => { renderInventoryAndBOM(); });
+
+  const exportBtn = document.getElementById('btnExportStl');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      const stl = 'solid phonics_diy_part\nfacet normal 0 0 1\n  outer loop\n    vertex 0 0 0\n    vertex 30 0 0\n    vertex 0 90 0\n  endloop\nendfacet\nendsolid phonics_diy_part\n';
+      const blob = new Blob([stl], { type: 'application/sla' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = (project.id || 'tablet-part') + '-' + (project.cad.template || 'kickstand') + '.stl';
+      a.click();
+    });
+  }
+
+  function openMakerApp(appId) {
+    saveProject();
+    try {
+      window.parent.postMessage({ kt: 'open', id: appId, project: project.id }, '*');
+    } catch (_) {}
+  }
+
+  document.getElementById('btnEditCad').addEventListener('click', () => openMakerApp('maker-cad'));
+  document.querySelectorAll('#diyBar .diy-step').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.app;
+      if (target && target !== 'maker-bench') openMakerApp(target);
+    });
+  });
+
+  function resize() {
+    const wrap = document.getElementById('simWrap');
+    const w = wrap.clientWidth || 640;
+    const h = wrap.clientHeight || 420;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+
+  applyModeUI();
+  saveProject();
+  resize();
+  buildMountedPart();
+  renderTicketUI();
+
+  let tick = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    tick += 0.08;
+    if (autoSwing) {
+      swingAngle += swingDir * 0.8;
+      if (swingAngle >= 105) swingDir = -1;
+      if (swingAngle <= 5) swingDir = 1;
+      document.getElementById('angSlider').value = String(Math.round(swingAngle));
+      updateSwingAndGates();
+    }
+    // Gentle wobble animation when STANDS gate is red (D-045 picture cue)
+    assemblyGrp.rotation.z = standsOk ? 0 : Math.sin(tick * 2.2) * 0.06;
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
+</script>
+</body>
+</html>

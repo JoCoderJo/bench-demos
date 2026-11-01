@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Code &amp; Blocks</title>
+<!-- tablet/apps/maker-code — Code & Blocks (PLAN.md §10 M3/M4 & §13 DIY-2, Step 2 of the DIY Modular Tablet Pipeline).
+     Combines guided DIY Lessons/Recipes and the visual Spark WHEN -> DO Block Builder.
+     Talks to 127.0.0.1:7000 (/maker/program, /maker/events) when up, and runs an identical in-browser Spark engine when asleep. -->
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:radial-gradient(circle at 25% 0%,#2d2250,#141326 75%);font:20px system-ui,sans-serif;color:#f4f6fb;touch-action:none}
+button,select{font:inherit;color:inherit;border:0;background:none;padding:0;margin:0;cursor:pointer}
+#bar{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;gap:10px;padding:0 16px;font-weight:800;font-size:22px;background:rgba(0,0,0,.34);z-index:10}
+#hi{opacity:.85;font-weight:600;font-size:17px}
+#diyBar{display:flex;align-items:center;gap:6px;margin-left:6px;background:rgba(255,255,255,.07);padding:4px 8px;border-radius:999px}
+#diyProj{background:#1c2038;color:#ffd54a;font-size:14px;font-weight:800;padding:5px 10px;border-radius:999px;border:1px solid rgba(255,213,74,.35);outline:none}
+.stepPill{font-size:13px;font-weight:800;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.08);color:#cdd6f4;display:inline-flex;align-items:center;gap:4px}
+.stepPill.on{background:#f2b632;color:#1b1400;box-shadow:0 0 10px rgba(242,182,50,.5)}
+.stepPill:active{transform:scale(.94)}
+body.pre #diyBar span.lbl,body.pre #diyProj{display:none}
+#tabs{display:flex;gap:6px;margin-left:8px}
+.tabBtn{font-size:15px;font-weight:800;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.1)}
+.tabBtn.on{background:#9b6bff;color:#fff;box-shadow:0 0 14px rgba(155,107,255,.55)}
+#brain{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;padding:7px 13px;border-radius:999px;background:#3a2d60}
+#brain.up{background:#1f6b3a}
+#brain i{width:11px;height:11px;border-radius:50%;background:#ffd54a;box-shadow:0 0 10px #ffd54a}
+#brain.up i{background:#6bff95;box-shadow:0 0 10px #6bff95}
+
+main{position:fixed;top:64px;left:0;right:0;bottom:88px;display:grid;grid-template-columns:1fr 370px;gap:14px;padding:12px 16px}
+.pane{background:rgba(255,255,255,.06);border-radius:24px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;overflow:hidden;box-shadow:inset 0 0 0 2px rgba(255,255,255,.07)}
+
+/* Lessons tab */
+#secLessons{display:none}
+#secLessons.on{display:flex}
+#recipeRow{display:flex;gap:8px;flex-wrap:wrap}
+.recChip{padding:8px 14px;border-radius:16px;background:rgba(255,255,255,.09);font-size:16px;font-weight:800;display:flex;align-items:center;gap:7px}
+.recChip.on{background:#f2b632;color:#1b1400}
+.recChip .doneStar{color:#ffd54a}
+#recCard{flex:1;background:rgba(0,0,0,.25);border-radius:20px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+#recTitle{font-size:24px;font-weight:900;margin:0;display:flex;align-items:center;gap:10px}
+#recGoal{font-size:16px;opacity:.85;margin:0}
+#stepList{display:flex;flex-direction:column;gap:8px}
+.lstep{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:16px;background:rgba(255,255,255,.06);font-size:17px;font-weight:700}
+.lstep.active{background:rgba(155,107,255,.26);box-shadow:inset 0 0 0 2px #9b6bff}
+.lstep.done{background:rgba(31,107,58,.35);opacity:.9}
+.lstep .num{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;font-weight:900;flex:none}
+.lstep.done .num{background:#2ecc71;color:#0b2e13}
+#recActions{margin-top:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bigAct{padding:12px 20px;border-radius:18px;background:#2ecc71;color:#082411;font-weight:900;font-size:18px;display:inline-flex;align-items:center;gap:8px}
+.bigAct.cad{background:#f2b632;color:#1b1400}
+.bigAct:active{transform:scale(.95)}
+
+/* Blocks tab */
+#secBlocks{display:none}
+#secBlocks.on{display:flex}
+#paletteRow{display:flex;flex-direction:column;gap:8px;background:rgba(0,0,0,.24);padding:10px 12px;border-radius:18px}
+.palGroup{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.palLab{font-size:13px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:8px;margin-right:4px}
+.palLab.w{background:#ff9f1c;color:#241400}
+.palLab.d{background:#2fa4ff;color:#041a2e}
+.blkChip{padding:7px 11px;border-radius:13px;font-size:15px;font-weight:800;display:inline-flex;align-items:center;gap:5px;transition:transform .08s}
+.blkChip.w{background:rgba(255,159,28,.22);border:2px solid #ff9f1c;color:#ffe4b5}
+.blkChip.d{background:rgba(47,164,255,.22);border:2px solid #2fa4ff;color:#d6eeff}
+.blkChip:active{transform:scale(.93)}
+body.pre .blkChip span{display:none}
+
+#rulesList{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px;touch-action:pan-y}
+.ruleRow{background:rgba(255,255,255,.08);border-radius:18px;padding:10px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;box-shadow:inset 0 0 0 2px transparent}
+.ruleRow.sel{box-shadow:inset 0 0 0 2px #ffd54a;background:rgba(255,213,74,.1)}
+.ruleRow.fired{box-shadow:0 0 16px #6bff95,inset 0 0 0 2px #6bff95}
+.wBadge{background:#ff9f1c;color:#241400;padding:7px 12px;border-radius:12px;font-weight:900;font-size:16px;display:inline-flex;align-items:center;gap:6px}
+.arrow{font-weight:900;color:#ffd54a;font-size:20px}
+.dBadge{background:#2fa4ff;color:#041a2e;padding:7px 11px;border-radius:12px;font-weight:800;font-size:15px;display:inline-flex;align-items:center;gap:5px}
+.delRule{margin-left:auto;width:36px;height:36px;border-radius:50%;background:rgba(255,80,80,.25);color:#ff9b9b;font-size:16px;display:grid;place-items:center}
+
+/* Right simulator & hardware preview */
+#simPane{display:flex;flex-direction:column;gap:10px}
+#simPane h3{margin:0;font-size:17px;display:flex;align-items:center;justify-content:space-between}
+#miniMatrix{display:grid;grid-template-columns:repeat(13,1fr);gap:4px;background:#0a1116;padding:10px;border-radius:14px;box-shadow:inset 0 3px 10px rgba(0,0,0,.7)}
+#miniMatrix i{width:20px;height:20px;border-radius:50%;background:#252b34;display:block}
+#miniMatrix i.on{background:#ffd54a;box-shadow:0 0 8px #ffd54a}
+#miniStrip{display:flex;gap:5px}
+#miniStrip i{flex:1;height:22px;border-radius:6px;background:#111;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+#simTriggers{display:grid;grid-template-columns:1fr 1fr;gap:8px;overflow-y:auto}
+.trigBtn{padding:10px 10px;border-radius:14px;background:rgba(255,255,255,.1);font-size:15px;font-weight:800;display:flex;align-items:center;gap:7px;justify-content:center}
+.trigBtn:active{transform:scale(.94);background:#f2b632;color:#1b1400}
+#simStatus{margin-top:auto;background:rgba(0,0,0,.3);padding:8px 12px;border-radius:12px;font-size:14px;display:flex;justify-content:space-between;color:#cdd6f4}
+
+footer{position:fixed;left:0;right:0;bottom:0;height:88px;display:flex;align-items:center;gap:10px;padding:0 16px;background:rgba(0,0,0,.32)}
+.fBtn{height:64px;padding:0 18px;border-radius:18px;background:rgba(255,255,255,.1);font-size:20px;font-weight:800;display:inline-flex;align-items:center;gap:8px}
+.fBtn.run{background:#2ecc71;color:#06210e}
+.fBtn.run.running{background:#ff6b6b;color:#2b0505}
+.fBtn.cad{background:#f2b632;color:#1b1400}
+.fBtn:active{transform:scale(.95)}
+footer .sep{flex:1}
+#toast{position:fixed;left:50%;top:76px;transform:translateX(-50%);background:#f2b632;color:#2a1a00;font-weight:800;padding:10px 20px;border-radius:999px;opacity:0;transition:opacity .22s;pointer-events:none;z-index:20}
+#toast.on{opacity:1}
+</style></head><body>
+<div id="bar">🧩 <span id="title">Code &amp; Blocks</span><span id="hi"></span>
+  <div id="diyBar" aria-label="DIY Pipeline">
+    <select id="diyProj" title="Active DIY Project">
+      <option value="kickstand">🚲 Kickstand Alarm</option>
+      <option value="knob_stand">🌈 Rainbow Knob Stand</option>
+      <option value="dist_pod">📏 Distance Guard Pod</option>
+      <option value="custom">✨ My Custom Idea</option>
+    </select>
+    <button class="stepPill" data-step="maker-light">1. 💡<span class="lbl">Sensors</span></button>
+    <button class="stepPill on" data-step="maker-code">2. 🧩<span class="lbl">Code</span></button>
+    <button class="stepPill" data-step="maker-cad">3. 🧱<span class="lbl">3D CAD</span></button>
+    <button class="stepPill" data-step="maker-bench">4. 🔩<span class="lbl">Sim &amp; Parts</span></button>
+  </div>
+  <div id="tabs">
+    <button class="tabBtn on" id="tabBlocks">🧩 Blocks</button>
+    <button class="tabBtn" id="tabLessons">📖 Lessons (<span id="starCnt">0</span>⭐)</button>
+  </div>
+  <div id="brain"><i></i><span id="brainT">sim ready</span></div>
+</div>
+
+<main>
+  <!-- Tab 1: Spark Blocks -->
+  <section class="pane on" id="secBlocks">
+    <div id="paletteRow">
+      <div class="palGroup" id="whenPal"><span class="palLab w">WHEN</span></div>
+      <div class="palGroup" id="doPal"><span class="palLab d">DO</span></div>
+    </div>
+    <div id="rulesList"></div>
+  </section>
+
+  <!-- Tab 2: Guided DIY Lessons / Recipes -->
+  <section class="pane" id="secLessons">
+    <div id="recipeRow"></div>
+    <div id="recCard">
+      <h2 id="recTitle"></h2>
+      <p id="recGoal"></p>
+      <div id="stepList"></div>
+      <div id="recActions">
+        <button class="bigAct" id="doStepBtn">▶ Do Step 1</button>
+        <button class="bigAct cad" id="toCadBtn">🧱 Build 3D Part in CAD →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Right: Live Spark Simulator & Hardware Preview -->
+  <aside class="pane" id="simPane">
+    <h3><span>⚡ Live Tablet Brain</span><span id="cntBadge">🔢 Count: 0</span></h3>
+    <div id="miniMatrix"></div>
+    <div id="miniStrip"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div style="font-size:14px;font-weight:800;opacity:.75;margin-top:2px">Tap to test your WHEN triggers:</div>
+    <div id="simTriggers">
+      <button class="trigBtn" id="trigBtnA">🔘 Press A</button>
+      <button class="trigBtn" id="trigBtnB">🔘 Press B</button>
+      <button class="trigBtn" id="trigKnob">🎛️ Turn Knob (<span id="knobVal">40</span>)</button>
+      <button class="trigBtn" id="trigDist">👁️ Wave (<span id="distVal">120</span>mm)</button>
+      <button class="trigBtn" id="trigShake">🤸 Tilt / Shake</button>
+      <button class="trigBtn" id="trigTap">👆 Tap GO</button>
+    </div>
+    <div id="simStatus"><span id="lastEv">Waiting for trigger…</span><span id="lastAct"></span></div>
+  </aside>
+</main>
+
+<footer>
+  <button class="fBtn run" id="runBtn">▶ Run Code</button>
+  <button class="fBtn" id="addRuleBtn">➕ New Rule</button>
+  <button class="fBtn" id="clearRulesBtn">🧹 Clear</button>
+  <span class="sep"></span>
+  <button class="fBtn" id="keepBtn">💾 Save</button>
+  <button class="fBtn cad" id="nextCadBtn">🧱 Next: 3D CAD →</button>
+</footer>
+<div id="toast"></div>
+
+<script>
+'use strict';
+const BRAIN='http://127.0.0.1:7000';
+const ROWS=8,COLS=13;
+const PICS={
+  blank:Array(8).fill('0000000000000'),
+  heart:["0000000000000","0011000110000","0111101111000","0111111111000","0011111110000","0001111100000","0000111000000","0000010000000"],
+  smile:["0000000000000","0001000001000","0001000001000","0000000000000","0100000000100","0010000001000","0001111110000","0000000000000"],
+  sad:["0000000000000","0001000001000","0001000001000","0000000000000","0001111110000","0010000001000","0100000000100","0000000000000"],
+  star:["0000001000000","0000001000000","0001111111000","0000111110000","0000011100000","0000111110000","0001100011000","0000000000000"],
+  arrow_up:["0000001000000","0000011100000","0000111110000","0001101011000","0000001000000","0000001000000","0000001000000","0000000000000"],
+  check:["0000000000000","0000000000100","0000000001000","0000000010000","0100000100000","0010001000000","0001010000000","0000100000000"]
+};
+const DIGITS={
+  '0':["0000011100000","0000100010000","0000100010000","0000100010000","0000100010000","0000100010000","0000011100000","0000000000000"],
+  '1':["0000001000000","0000011000000","0000001000000","0000001000000","0000001000000","0000001000000","0000011100000","0000000000000"],
+  '2':["0000011100000","0000100010000","0000000010000","0000001100000","0000010000000","0000100000000","0000111110000","0000000000000"],
+  '3':["0000011100000","0000100010000","0000000010000","0000001100000","0000000010000","0000100010000","0000011100000","0000000000000"],
+  '4':["0000100010000","0000100010000","0000100010000","0000111110000","0000000010000","0000000010000","0000000010000","0000000000000"],
+  '5':["0000111110000","0000100000000","0000111100000","0000000010000","0000000010000","0000100010000","0000011100000","0000000000000"]
+};
+const WHENS=[
+  {key:'btnA',icon:'🔘',label:'Button A',when:{src:'button',ev:'press',id:'A'}},
+  {key:'btnB',icon:'🔘',label:'Button B',when:{src:'button',ev:'press',id:'B'}},
+  {key:'knob',icon:'🎛️',label:'Knob Turn',when:{src:'knob',ev:'turn'}},
+  {key:'dist',icon:'👁️',label:'Distance Eye',when:{src:'distance',ev:'change'}},
+  {key:'shake',icon:'🤸',label:'Tilt / Shake',when:{src:'movement',ev:'shake'}},
+  {key:'tap',icon:'👆',label:'Tap GO',when:{src:'tap',ev:'tap',id:'go'}},
+  {key:'timer',icon:'⏱️',label:'1s Timer',when:{src:'timer',every_ms:1000}}
+];
+const DOS=[
+  {key:'m_heart',icon:'❤️',label:'Heart',act:{act:'matrix',pic:'heart'}},
+  {key:'m_smile',icon:'😊',label:'Smile',act:{act:'matrix',pic:'smile'}},
+  {key:'m_sad',icon:'😟',label:'Alert Face',act:{act:'matrix',pic:'sad'}},
+  {key:'m_star',icon:'⭐',label:'Star',act:{act:'matrix',pic:'star'}},
+  {key:'p_knob',icon:'🌈',label:'Knob Rainbow',act:{act:'pixels',color:'$knob'}},
+  {key:'p_green',icon:'🟢',label:'Green Glow',act:{act:'pixels',color:'#3fd96b'}},
+  {key:'p_red',icon:'🔴',label:'Red Alert',act:{act:'pixels',color:'#ff3b3b'}},
+  {key:'t_beep',icon:'🎵',label:'Chime 660Hz',act:{act:'tone',hz:660,ms:200}},
+  {key:'t_alarm',icon:'🚨',label:'Alarm 880Hz',act:{act:'tone',hz:880,ms:260}},
+  {key:'s_cat',icon:'🐱',label:'Say "cat"',act:{act:'say',word:'cat'}},
+  {key:'c_up',icon:'🔢',label:'Count +1',act:{act:'count',by:1}},
+  {key:'m_cnt',icon:'#️⃣',label:'Show Count',act:{act:'matrix',text:'$count'}}
+];
+
+const RECIPES=[
+  {
+    id:'kickstand',icon:'🚲',title:'Kickstand Tilt Alarm',
+    goal:'Build an electronic tilt-sensor alarm for your custom 3D-printed kickstand!',
+    rules:[
+      {when:{src:'movement',ev:'shake'},do:[{act:'matrix',pic:'sad'},{act:'pixels',color:'#ff3b3b'},{act:'tone',hz:880,ms:260}]},
+      {when:{src:'button',ev:'press',id:'A'},do:[{act:'matrix',pic:'smile'},{act:'pixels',color:'#3fd96b'},{act:'tone',hz:660,ms:200}]}
+    ],
+    steps:[
+      {text:'Load the Tilt Alarm WHEN → DO blocks into your workspace',act:'load'},
+      {text:'Press ▶ Run Code to arm the Kickstand Tilt sensor',act:'run'},
+      {text:'Tap 🤸 Tilt / Shake on the right to test the alarm!',act:'shake'},
+      {text:'Tap 🔘 Press A to reset to the happy green smile!',act:'btnA'}
+    ]
+  },
+  {
+    id:'knob_stand',icon:'🌈',title:'Rainbow Knob Stand',
+    goal:'Turn the Modulino Knob on your tablet stand to sweep rainbow colors & count!',
+    rules:[
+      {when:{src:'knob',ev:'turn'},do:[{act:'pixels',color:'$knob'},{act:'matrix',pic:'star'}]},
+      {when:{src:'button',ev:'press',id:'A'},do:[{act:'count',by:1},{act:'matrix',text:'$count'}]}
+    ],
+    steps:[
+      {text:'Load the Rainbow Knob blocks into your workspace',act:'load'},
+      {text:'Press ▶ Run Code to start listening to the Knob',act:'run'},
+      {text:'Tap 🎛️ Turn Knob to sweep the 8 Rainbow Pixels!',act:'knob'}
+    ]
+  },
+  {
+    id:'dist_pod',icon:'📏',title:'Distance Guard Pod',
+    goal:'Mount a Distance Eye pod on the tablet grid that chimes when a hand waves close!',
+    rules:[
+      {when:{src:'distance',ev:'change'},do:[{act:'matrix',pic:'heart'},{act:'tone',hz:660,ms:200},{act:'pixels',color:'#3fd96b'}]}
+    ],
+    steps:[
+      {text:'Load the Distance Eye guard rule',act:'load'},
+      {text:'Press ▶ Run Code to wake the Distance Eye',act:'run'},
+      {text:'Tap 👁️ Wave on the right to trigger the heart & chime!',act:'dist'}
+    ]
+  }
+];
+
+const $=id=>document.getElementById(id);
+const S={
+  kid:'default',name:'',mode:'reader',project:'kickstand',tab:'blocks',
+  brainUp:false,source:'local',running:false,selRule:0,
+  rules:[
+    {when:{src:'button',ev:'press',id:'A'},do:[{act:'matrix',pic:'heart'},{act:'tone',hz:660,ms:200}]},
+    {when:{src:'knob',ev:'turn'},do:[{act:'pixels',color:'$knob'}]}
+  ],
+  matrix:PICS.blank.slice(),pixels:Array(8).fill('#111111'),
+  count:0,knob:40,distance:120,lastTone:null,lastSay:null,kept:0,
+  recIdx:0,stepIdx:0,doneRecipes:{}
+};
+window.KTMC={state:S};
+
+let AC=null;
+function beep(hz,ms){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=hz||660;g.gain.value=.08;o.connect(g).connect(AC.destination);o.start();o.stop(AC.currentTime+Math.min(ms||200,1000)/1000);}catch(e){}}
+function blip(f){parent.postMessage({kt:'blip',f:f||600},'*');}
+let toastT;function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('on'),1600);}
+
+// ---- DIY Pipeline bar
+function loadActiveProj(){
+  try{
+    const p=localStorage.getItem('kt.maker.active');
+    if(p&&$('diyProj').querySelector('option[value="'+p+'"]')){S.project=p;$('diyProj').value=p;}
+    const saved=JSON.parse(localStorage.getItem('kt.maker.proj.'+S.kid+'.'+S.project)||'{}');
+    if(saved.program&&Array.isArray(saved.program.rules)&&saved.program.rules.length){S.rules=saved.program.rules;S.selRule=0;}
+    const ri=RECIPES.findIndex(r=>r.id===S.project);if(ri>=0)S.recIdx=ri;
+  }catch(e){}
+}
+function saveProjState(){
+  try{
+    localStorage.setItem('kt.maker.active',S.project);
+    const k='kt.maker.proj.'+S.kid+'.'+S.project;
+    const cur=JSON.parse(localStorage.getItem(k)||'{}');
+    cur.id=S.project;cur.updated=Date.now();
+    cur.program={v:1,name:S.project,rules:S.rules};
+    localStorage.setItem(k,JSON.stringify(cur));
+  }catch(e){}
+}
+function goStep(step){
+  saveProjState();blip(720);
+  if(window.parent&&window.parent!==window){window.parent.postMessage({kt:'open',id:step,project:S.project},'*');}
+  else{location.href='../'+step+'/index.html';}
+}
+$('diyProj').addEventListener('change',()=>{
+  S.project=$('diyProj').value;
+  const ri=RECIPES.findIndex(r=>r.id===S.project);
+  if(ri>=0){S.recIdx=ri;S.stepIdx=0;S.rules=JSON.parse(JSON.stringify(RECIPES[ri].rules));S.selRule=0;renderRules();renderLessons();}
+  saveProjState();blip(640);
+});
+document.querySelectorAll('#diyBar .stepPill').forEach(btn=>{
+  btn.addEventListener('pointerdown',e=>{e.preventDefault();const s=btn.dataset.step;if(s!=='maker-code')goStep(s);});
+});
+$('nextCadBtn').addEventListener('pointerdown',e=>{e.preventDefault();goStep('maker-cad');});
+$('toCadBtn').addEventListener('pointerdown',e=>{e.preventDefault();goStep('maker-cad');});
+
+// ---- Tabs
+function setTab(t){
+  S.tab=t;
+  $('tabBlocks').classList.toggle('on',t==='blocks');
+  $('tabLessons').classList.toggle('on',t==='lessons');
+  $('secBlocks').classList.toggle('on',t==='blocks');
+  $('secLessons').classList.toggle('on',t==='lessons');
+  blip(560);
+}
+$('tabBlocks').addEventListener('pointerdown',e=>{e.preventDefault();setTab('blocks');});
+$('tabLessons').addEventListener('pointerdown',e=>{e.preventDefault();setTab('lessons');});
+
+// ---- Mini Matrix & Strip
+const mCells=[];
+(function initMini(){
+  const m=$('miniMatrix');
+  for(let i=0;i<ROWS*COLS;i++){const el=document.createElement('i');m.appendChild(el);mCells.push(el);}
+})();
+function drawSimHw(){
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)mCells[r*COLS+c].classList.toggle('on',S.matrix[r]&&S.matrix[r][c]==='1');
+  $('miniStrip').querySelectorAll('i').forEach((el,i)=>el.style.background=S.pixels[i]||'#111');
+  $('cntBadge').textContent='🔢 Count: '+S.count;
+}
+
+// ---- Palette & Rules rendering
+function whenLabel(w){
+  if(!w)return '❓';
+  if(w.src==='button')return '🔘 Button '+(w.id||'A');
+  if(w.src==='knob')return '🎛️ Knob Turn';
+  if(w.src==='distance')return '👁️ Distance Eye';
+  if(w.src==='movement')return '🤸 Tilt / Shake';
+  if(w.src==='tap')return '👆 Tap GO';
+  if(w.src==='timer')return '⏱️ Every 1s';
+  return w.src;
+}
+function doLabel(a){
+  if(!a)return '❓';
+  if(a.act==='matrix')return '💡 '+(a.pic||a.text||'Matrix');
+  if(a.act==='pixels')return '🌈 '+(a.color==='$knob'?'Knob Rainbow':a.color);
+  if(a.act==='tone')return '🎵 '+(a.hz||660)+'Hz';
+  if(a.act==='say')return '🗣️ "'+(a.word||'cat')+'"';
+  if(a.act==='count')return '🔢 Count +1';
+  if(a.act==='pin')return '⚡ '+a.pin+'='+a.value;
+  return a.act;
+}
+(function buildPalettes(){
+  const wp=$('whenPal'),dp=$('doPal');
+  WHENS.forEach(w=>{
+    const b=document.createElement('button');b.className='blkChip w';b.dataset.wkey=w.key;
+    b.innerHTML=w.icon+' <span>'+w.label+'</span>';
+    b.addEventListener('pointerdown',e=>{
+      e.preventDefault();
+      if(!S.rules.length)S.rules.push({when:JSON.parse(JSON.stringify(w.when)),do:[{act:'matrix',pic:'heart'}]});
+      else S.rules[S.selRule].when=JSON.parse(JSON.stringify(w.when));
+      renderRules();syncProgram();blip(680);
+    });
+    wp.appendChild(b);
+  });
+  DOS.forEach(d=>{
+    const b=document.createElement('button');b.className='blkChip d';b.dataset.dkey=d.key;
+    b.innerHTML=d.icon+' <span>'+d.label+'</span>';
+    b.addEventListener('pointerdown',e=>{
+      e.preventDefault();
+      if(!S.rules.length){S.rules.push({when:{src:'button',ev:'press',id:'A'},do:[JSON.parse(JSON.stringify(d.act))]});S.selRule=0;}
+      else{
+        const list=S.rules[S.selRule].do;
+        if(list.length>=6)list.shift();
+        list.push(JSON.parse(JSON.stringify(d.act)));
+      }
+      renderRules();syncProgram();blip(760);
+    });
+    dp.appendChild(b);
+  });
+})();
+
+function renderRules(){
+  const host=$('rulesList');host.innerHTML='';
+  if(S.selRule>=S.rules.length)S.selRule=Math.max(0,S.rules.length-1);
+  S.rules.forEach((r,idx)=>{
+    const row=document.createElement('div');
+    row.className='ruleRow'+(idx===S.selRule?' sel':'');
+    row.dataset.idx=idx;
+    const acts=(r.do||[]).map((a,ai)=>'<button class="dBadge" data-r="'+idx+'" data-a="'+ai+'" title="tap to remove">'+doLabel(a)+' ✕</button>').join('');
+    row.innerHTML='<span class="wBadge">WHEN '+whenLabel(r.when)+'</span><span class="arrow">➔</span>'+(acts||'<span style="opacity:.6;font-size:15px">tap a DO block above</span>')+'<button class="delRule" data-del="'+idx+'" title="delete rule">🗑️</button>';
+    row.addEventListener('pointerdown',e=>{
+      if(e.target.closest('.dBadge')||e.target.closest('.delRule'))return;
+      S.selRule=idx;renderRules();blip(520);
+    });
+    host.appendChild(row);
+  });
+  host.querySelectorAll('.dBadge').forEach(b=>b.addEventListener('pointerdown',e=>{
+    e.preventDefault();const ri=+b.dataset.r,ai=+b.dataset.a;
+    S.rules[ri].do.splice(ai,1);renderRules();syncProgram();blip(420);
+  }));
+  host.querySelectorAll('.delRule').forEach(b=>b.addEventListener('pointerdown',e=>{
+    e.preventDefault();const ri=+b.dataset.del;
+    S.rules.splice(ri,1);renderRules();syncProgram();blip(380);
+  }));
+  saveProjState();
+}
+
+// ---- Spark Interpreter (runs both locally in browser and syncs with 127.0.0.1:7000/maker/program)
+function hueHex(val){
+  const h=Math.max(0,Math.min(100,+val||0))*3.0;
+  const f=(n,k=(n+h/60)%6)=>1-Math.max(Math.min(k,4-k,1),0);
+  const toH=x=>Math.round(x*255).toString(16).padStart(2,'0');
+  return '#'+toH(f(5))+toH(f(3))+toH(f(1));
+}
+function execAct(a){
+  if(a.act==='count'){S.count=a.reset?0:(S.count+(a.by||1));}
+  else if(a.act==='matrix'){
+    if(a.pic&&PICS[a.pic])S.matrix=PICS[a.pic].slice();
+    else if(a.text){
+      const t=a.text==='$count'?String(S.count).slice(-1):String(a.text).slice(0,1);
+      S.matrix=(DIGITS[t]||PICS.star).slice();
+    }
+    if(S.brainUp)fetch(BRAIN+'/maker/matrix',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({rows:S.matrix})}).catch(()=>{});
+  }else if(a.act==='pixels'){
+    const col=a.color==='$knob'?hueHex(S.knob):(a.color||'#3fd96b');
+    S.pixels=Array(8).fill(col);
+    if(S.brainUp)fetch(BRAIN+'/maker/pixels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({color:col})}).catch(()=>{});
+  }else if(a.act==='tone'){
+    S.lastTone={hz:a.hz||660,ms:a.ms||200};
+    beep(S.lastTone.hz,S.lastTone.ms);
+    if(S.brainUp)fetch(BRAIN+'/maker/tone',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S.lastTone)}).catch(()=>{});
+  }else if(a.act==='say'){
+    S.lastSay=a.word||'cat';
+    try{if(window.speechSynthesis){const u=new SpeechSynthesisUtterance(S.lastSay);window.speechSynthesis.speak(u);}}catch(e){}
+  }
+  $('lastAct').textContent='DO: '+doLabel(a);
+}
+function fireInput(ev){
+  $('lastEv').textContent='WHEN: '+ev.src+(ev.id?' '+ev.id:'');
+  if(!S.running){S.running=true;updateRunBtn();}
+  let hit=false;
+  S.rules.forEach((r,idx)=>{
+    const w=r.when||{};
+    if(w.src!==ev.src)return;
+    if(w.id&&ev.id&&w.id!==ev.id)return;
+    hit=true;
+    (r.do||[]).forEach(execAct);
+    const el=document.querySelector('.ruleRow[data-idx="'+idx+'"]');
+    if(el){el.classList.add('fired');setTimeout(()=>el.classList.remove('fired'),450);}
+  });
+  drawSimHw();
+  checkLessonProgress(ev);
+  return hit;
+}
+window.KTMC.fireInput=fireInput;
+
+async function syncProgram(){
+  if(!S.running)return;
+  if(S.brainUp){
+    try{await fetch(BRAIN+'/maker/program',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({v:1,name:S.project,rules:S.rules})});}catch(e){}
+  }
+}
+function updateRunBtn(){
+  const b=$('runBtn');
+  b.classList.toggle('running',S.running);
+  b.textContent=S.running?'⏹ Stop Code':'▶ Run Code';
+}
+$('runBtn').addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  S.running=!S.running;
+  updateRunBtn();
+  if(S.running){syncProgram();toast('Program running! Tap a trigger to test');blip(820);checkLessonProgress({src:'_run'});}
+  else{if(S.brainUp)fetch(BRAIN+'/maker/program',{method:'DELETE'}).catch(()=>{});toast('Program stopped');blip(420);}
+});
+$('addRuleBtn').addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  S.rules.push({when:{src:'button',ev:'press',id:'A'},do:[{act:'matrix',pic:'smile'}]});
+  S.selRule=S.rules.length-1;renderRules();syncProgram();blip(660);
+});
+$('clearRulesBtn').addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  S.rules=[];S.selRule=0;S.matrix=PICS.blank.slice();S.pixels=Array(8).fill('#111111');S.count=0;
+  renderRules();drawSimHw();blip(380);
+});
+
+// ---- Triggers on the right pane
+$('trigBtnA').addEventListener('pointerdown',e=>{e.preventDefault();fireInput({src:'button',ev:'press',id:'A'});});
+$('trigBtnB').addEventListener('pointerdown',e=>{e.preventDefault();fireInput({src:'button',ev:'press',id:'B'});});
+$('trigKnob').addEventListener('pointerdown',e=>{e.preventDefault();S.knob=(S.knob+20)%100;$('knobVal').textContent=S.knob;fireInput({src:'knob',ev:'turn',value:S.knob});});
+$('trigDist').addEventListener('pointerdown',e=>{e.preventDefault();S.distance=S.distance<=80?300:60;$('distVal').textContent=S.distance;fireInput({src:'distance',ev:'change',mm:S.distance});});
+$('trigShake').addEventListener('pointerdown',e=>{e.preventDefault();fireInput({src:'movement',ev:'shake'});});
+$('trigTap').addEventListener('pointerdown',e=>{e.preventDefault();fireInput({src:'tap',ev:'tap',id:'go'});});
+
+setInterval(()=>{if(S.running&&S.rules.some(r=>r.when&&r.when.src==='timer'))fireInput({src:'timer',ev:'tick'});},1000);
+
+// ---- Interactive Lessons / Recipes
+function renderLessons(){
+  const row=$('recipeRow');
+  row.innerHTML=RECIPES.map((r,i)=>'<button class="recChip'+(i===S.recIdx?' on':'')+'" data-ri="'+i+'">'+r.icon+' '+r.title+(S.doneRecipes[r.id]?' <span class="doneStar">⭐</span>':'')+'</button>').join('');
+  row.querySelectorAll('.recChip').forEach(b=>b.addEventListener('pointerdown',e=>{
+    e.preventDefault();S.recIdx=+b.dataset.ri;S.stepIdx=0;S.project=RECIPES[S.recIdx].id;$('diyProj').value=S.project;renderLessons();blip(600);
+  }));
+  const rec=RECIPES[S.recIdx];
+  $('recTitle').textContent=rec.icon+' '+rec.title;
+  $('recGoal').textContent=rec.goal;
+  const sl=$('stepList');
+  sl.innerHTML=rec.steps.map((st,i)=>'<div class="lstep'+(i<S.stepIdx?' done':(i===S.stepIdx?' active':''))+'"><span class="num">'+(i<S.stepIdx?'✓':(i+1))+'</span><span>'+st.text+'</span></div>').join('');
+  const cur=rec.steps[S.stepIdx];
+  $('doStepBtn').textContent=cur?('▶ Do Step '+(S.stepIdx+1)):'🎉 Lesson Complete! Replay';
+  $('starCnt').textContent=Object.keys(S.doneRecipes).length;
+}
+function checkLessonProgress(ev){
+  const rec=RECIPES[S.recIdx];if(!rec)return;
+  const cur=rec.steps[S.stepIdx];if(!cur)return;
+  if((cur.act==='run'&&ev.src==='_run')||(cur.act==='shake'&&ev.src==='movement')||(cur.act==='btnA'&&ev.src==='button'&&ev.id==='A')||(cur.act==='knob'&&ev.src==='knob')||(cur.act==='dist'&&ev.src==='distance')){
+    S.stepIdx++;
+    if(S.stepIdx>=rec.steps.length){S.doneRecipes[rec.id]=true;toast('⭐ Lesson Complete! Ready for 3D CAD!');blip(1100);}
+    renderLessons();
+  }
+}
+$('doStepBtn').addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  const rec=RECIPES[S.recIdx];
+  if(S.stepIdx>=rec.steps.length){S.stepIdx=0;renderLessons();return;}
+  const cur=rec.steps[S.stepIdx];
+  if(cur.act==='load'){S.rules=JSON.parse(JSON.stringify(rec.rules));S.selRule=0;renderRules();S.stepIdx++;renderLessons();toast('Loaded blocks!');blip(740);}
+  else if(cur.act==='run'){if(!S.running){S.running=true;updateRunBtn();syncProgram();}checkLessonProgress({src:'_run'});}
+  else if(cur.act==='shake')fireInput({src:'movement',ev:'shake'});
+  else if(cur.act==='btnA')fireInput({src:'button',ev:'press',id:'A'});
+  else if(cur.act==='knob')fireInput({src:'knob',ev:'turn',value:75});
+  else if(cur.act==='dist')fireInput({src:'distance',ev:'change',mm:80});
+});
+
+// ---- Per-kid store save
+function storeBase(){return location.protocol.startsWith('http')?location.origin+'/api/store/maker/'+encodeURIComponent(S.kid)+'/':null;}
+async function keepProg(){
+  const rec={v:1,name:S.project,rules:S.rules,doneRecipes:S.doneRecipes,t:Date.now(),kid:S.kid};
+  const base=storeBase();let ok=false;
+  if(base){try{const r=await fetch(base+'proj-'+S.project+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(rec)});ok=r.ok;}catch(e){}}
+  if(!ok){try{localStorage.setItem('kt-code-'+S.kid+'-'+S.project,JSON.stringify(rec));ok=true;}catch(e){}}
+  saveProjState();
+  if(ok){S.kept++;toast('Saved Spark Code!');blip(1100);}
+}
+$('keepBtn').addEventListener('pointerdown',e=>{e.preventDefault();keepProg();});
+
+// ---- Brain connection (:7000 optional)
+fetch(BRAIN+'/maker/state').then(r=>r.json()).then(st=>{
+  S.brainUp=true;S.source=st.source||'sim';
+  $('brain').classList.add('up');$('brainT').textContent='brain ready';
+}).catch(()=>{
+  S.brainUp=false;S.source='local';
+  $('brain').classList.remove('up');$('brainT').textContent='virtual brain';
+});
+
+function setKid(kid){
+  S.kid=(kid&&kid.id)||'default';S.name=(kid&&kid.name)||'';
+  S.mode=(kid&&kid.age!=null&&kid.age<5)?'pre':'reader';
+  document.body.classList.toggle('pre',S.mode==='pre');
+  $('hi').textContent=S.name?('Hi '+S.name+'!'):'';
+  loadActiveProj();renderRules();renderLessons();drawSimHw();
+}
+window.addEventListener('message',e=>{
+  const d=e.data||{};
+  if(d.kt==='hello')setKid(d.kid||(d.child?{id:'default',name:d.child.name}:null));
+  else if(d.kt==='back'&&S.tab==='lessons'){setTab('blocks');parent.postMessage({kt:'back',handled:true},'*');}
+});
+
+setKid(null);
+</script></body></html>

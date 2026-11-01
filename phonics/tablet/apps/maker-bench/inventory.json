@@ -1,0 +1,1747 @@
+{
+  "generated_at": "2026-11-01T10:40:15Z",
+  "parts": [
+    {
+      "sku": "BOLT-M3X8-BHCS",
+      "id": "BOLT-M3X8-BHCS",
+      "category": "fasteners",
+      "desc": "M3x8 Button Head Grid Bolt",
+      "on_hand": 50,
+      "reserved": 10,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "INS-M3X4X5",
+      "id": "INS-M3X4X5",
+      "category": "inserts",
+      "desc": "M3x4x5 Brass Heat-Set Insert",
+      "on_hand": 40,
+      "reserved": 0,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "FIL-PETG-1KG",
+      "id": "FIL-PETG-1KG",
+      "category": "materials",
+      "desc": "PETG Filament Spool (Bambu A1 Mini)",
+      "on_hand": 2,
+      "reserved": 0,
+      "available": 2,
+      "free": 2
+    },
+    {
+      "sku": "MOD-BUTTONS",
+      "id": "MOD-BUTTONS",
+      "category": "modulino",
+      "desc": "Arduino Modulino Buttons (Qwiic)",
+      "on_hand": 2,
+      "reserved": 0,
+      "available": 2,
+      "free": 2
+    },
+    {
+      "sku": "MOD-KNOB",
+      "id": "MOD-KNOB",
+      "category": "modulino",
+      "desc": "Arduino Modulino Knob (Qwiic)",
+      "on_hand": 2,
+      "reserved": 0,
+      "available": 2,
+      "free": 2
+    },
+    {
+      "sku": "MOD-PIXELS",
+      "id": "MOD-PIXELS",
+      "category": "modulino",
+      "desc": "Arduino Modulino Pixels (8 RGB)",
+      "on_hand": 2,
+      "reserved": 0,
+      "available": 2,
+      "free": 2
+    },
+    {
+      "sku": "MOD-VIBRO",
+      "id": "MOD-VIBRO",
+      "category": "modulino",
+      "desc": "Arduino Modulino Vibro Haptic",
+      "on_hand": 1,
+      "reserved": 0,
+      "available": 1,
+      "free": 1
+    },
+    {
+      "sku": "MOD-BUZZER",
+      "id": "MOD-BUZZER",
+      "category": "modulino",
+      "desc": "Arduino Modulino Buzzer",
+      "on_hand": 2,
+      "reserved": 0,
+      "available": 2,
+      "free": 2
+    },
+    {
+      "sku": "B-693ZZ",
+      "id": "B-693ZZ",
+      "category": "bearings",
+      "desc": "693ZZ 3x8x4",
+      "on_hand": 12,
+      "reserved": 24,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "B-623ZZ",
+      "id": "B-623ZZ",
+      "category": "bearings",
+      "desc": "623ZZ 3x10x4",
+      "on_hand": 12,
+      "reserved": 0,
+      "available": 12,
+      "free": 12
+    },
+    {
+      "sku": "B-624ZZ",
+      "id": "B-624ZZ",
+      "category": "bearings",
+      "desc": "624ZZ 4x13x5",
+      "on_hand": 12,
+      "reserved": 0,
+      "available": 12,
+      "free": 12
+    },
+    {
+      "sku": "B-685ZZ",
+      "id": "B-685ZZ",
+      "category": "bearings",
+      "desc": "685ZZ 5x11x5",
+      "on_hand": 12,
+      "reserved": 0,
+      "available": 12,
+      "free": 12
+    },
+    {
+      "sku": "B-687ZZ",
+      "id": "B-687ZZ",
+      "category": "bearings",
+      "desc": "687ZZ 7x14x5",
+      "on_hand": 10,
+      "reserved": 0,
+      "available": 10,
+      "free": 10
+    },
+    {
+      "sku": "B-627ZZ",
+      "id": "B-627ZZ",
+      "category": "bearings",
+      "desc": "627ZZ 7x22x7",
+      "on_hand": 10,
+      "reserved": 0,
+      "available": 10,
+      "free": 10
+    },
+    {
+      "sku": "EQ-BBL-A1",
+      "id": "EQ-BBL-A1",
+      "category": "equipment",
+      "desc": "Bambu Lab A1 printer + AMS lite",
+      "on_hand": 1,
+      "reserved": 0,
+      "available": 1,
+      "free": 1
+    },
+    {
+      "sku": "EQ-ENDER3",
+      "id": "EQ-ENDER3",
+      "category": "equipment",
+      "desc": "Ender 3 (torn down): V-slot 2040/4040 stock now the rover frame; check for leftover M5 tee nuts, V wheels, brackets",
+      "on_hand": 1,
+      "reserved": 1,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "EQ-NOZ-04",
+      "id": "EQ-NOZ-04",
+      "category": "equipment",
+      "desc": "0.4mm nozzle (installed)",
+      "on_hand": 1,
+      "reserved": 0,
+      "available": 1,
+      "free": 1
+    },
+    {
+      "sku": "EQ-NOZ-06",
+      "id": "EQ-NOZ-06",
+      "category": "equipment",
+      "desc": "0.6mm nozzle (unused spare)",
+      "on_hand": 1,
+      "reserved": 0,
+      "available": 1,
+      "free": 1
+    },
+    {
+      "sku": "F-M25X4",
+      "id": "F-M25X4",
+      "category": "fasteners",
+      "desc": "M2.5x4 SHCS",
+      "on_hand": 100,
+      "reserved": 0,
+      "available": 100,
+      "free": 100
+    },
+    {
+      "sku": "F-M25X6",
+      "id": "F-M25X6",
+      "category": "fasteners",
+      "desc": "M2.5x6 SHCS",
+      "on_hand": 100,
+      "reserved": 4,
+      "available": 96,
+      "free": 96
+    },
+    {
+      "sku": "F-M25X8",
+      "id": "F-M25X8",
+      "category": "fasteners",
+      "desc": "M2.5x8 SHCS",
+      "on_hand": 100,
+      "reserved": 0,
+      "available": 100,
+      "free": 100
+    },
+    {
+      "sku": "F-M25X10",
+      "id": "F-M25X10",
+      "category": "fasteners",
+      "desc": "M2.5x10 SHCS",
+      "on_hand": 100,
+      "reserved": 0,
+      "available": 100,
+      "free": 100
+    },
+    {
+      "sku": "F-M25X12",
+      "id": "F-M25X12",
+      "category": "fasteners",
+      "desc": "M2.5x12 SHCS",
+      "on_hand": 100,
+      "reserved": 0,
+      "available": 100,
+      "free": 100
+    },
+    {
+      "sku": "F-M25X16",
+      "id": "F-M25X16",
+      "category": "fasteners",
+      "desc": "M2.5x16 SHCS",
+      "on_hand": 100,
+      "reserved": 0,
+      "available": 100,
+      "free": 100
+    },
+    {
+      "sku": "F-M25X20",
+      "id": "F-M25X20",
+      "category": "fasteners",
+      "desc": "M2.5x20 SHCS",
+      "on_hand": 100,
+      "reserved": 0,
+      "available": 100,
+      "free": 100
+    },
+    {
+      "sku": "F-M25X25",
+      "id": "F-M25X25",
+      "category": "fasteners",
+      "desc": "M2.5x25 SHCS",
+      "on_hand": 100,
+      "reserved": 0,
+      "available": 100,
+      "free": 100
+    },
+    {
+      "sku": "F-M25NUT",
+      "id": "F-M25NUT",
+      "category": "fasteners",
+      "desc": "M2.5 hex nut",
+      "on_hand": 160,
+      "reserved": 0,
+      "available": 160,
+      "free": 160
+    },
+    {
+      "sku": "F-M3X6",
+      "id": "F-M3X6",
+      "category": "fasteners",
+      "desc": "M3x6 SHCS 12.9",
+      "on_hand": 40,
+      "reserved": 16,
+      "available": 24,
+      "free": 24
+    },
+    {
+      "sku": "F-M3X8",
+      "id": "F-M3X8",
+      "category": "fasteners",
+      "desc": "M3x8 SHCS 12.9",
+      "on_hand": 40,
+      "reserved": 0,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "F-M3X10",
+      "id": "F-M3X10",
+      "category": "fasteners",
+      "desc": "M3x10 SHCS 12.9",
+      "on_hand": 35,
+      "reserved": 0,
+      "available": 35,
+      "free": 35
+    },
+    {
+      "sku": "F-M3X12",
+      "id": "F-M3X12",
+      "category": "fasteners",
+      "desc": "M3x12 SHCS 12.9",
+      "on_hand": 35,
+      "reserved": 0,
+      "available": 35,
+      "free": 35
+    },
+    {
+      "sku": "F-M3X16",
+      "id": "F-M3X16",
+      "category": "fasteners",
+      "desc": "M3x16 SHCS 12.9",
+      "on_hand": 30,
+      "reserved": 0,
+      "available": 30,
+      "free": 30
+    },
+    {
+      "sku": "F-M3X20",
+      "id": "F-M3X20",
+      "category": "fasteners",
+      "desc": "M3x20 SHCS 12.9",
+      "on_hand": 30,
+      "reserved": 24,
+      "available": 6,
+      "free": 6
+    },
+    {
+      "sku": "F-M3X25",
+      "id": "F-M3X25",
+      "category": "fasteners",
+      "desc": "M3x25 SHCS 12.9",
+      "on_hand": 20,
+      "reserved": 0,
+      "available": 20,
+      "free": 20
+    },
+    {
+      "sku": "F-M3X30",
+      "id": "F-M3X30",
+      "category": "fasteners",
+      "desc": "M3x30 SHCS 12.9",
+      "on_hand": 20,
+      "reserved": 24,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M3X40",
+      "id": "F-M3X40",
+      "category": "fasteners",
+      "desc": "M3x40 SHCS 12.9",
+      "on_hand": 0,
+      "reserved": 0,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M3X50",
+      "id": "F-M3X50",
+      "category": "fasteners",
+      "desc": "M3x50 SHCS 12.9",
+      "on_hand": 0,
+      "reserved": 24,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M3NUT",
+      "id": "F-M3NUT",
+      "category": "fasteners",
+      "desc": "M3 hex nut",
+      "on_hand": 125,
+      "reserved": 48,
+      "available": 77,
+      "free": 77
+    },
+    {
+      "sku": "F-M3NUTL",
+      "id": "F-M3NUTL",
+      "category": "fasteners",
+      "desc": "M3 lock nut",
+      "on_hand": 125,
+      "reserved": 24,
+      "available": 101,
+      "free": 101
+    },
+    {
+      "sku": "F-M3WASH",
+      "id": "F-M3WASH",
+      "category": "fasteners",
+      "desc": "M3 flat washer",
+      "on_hand": 250,
+      "reserved": 0,
+      "available": 250,
+      "free": 250
+    },
+    {
+      "sku": "F-M3SHIM",
+      "id": "F-M3SHIM",
+      "category": "fasteners",
+      "desc": "M3 shim washer 3.2x5.0x0.5 (DIN 988)",
+      "on_hand": 0,
+      "reserved": 12,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M4X6",
+      "id": "F-M4X6",
+      "category": "fasteners",
+      "desc": "M4x6 SHCS 12.9",
+      "on_hand": 25,
+      "reserved": 0,
+      "available": 25,
+      "free": 25
+    },
+    {
+      "sku": "F-M4X8",
+      "id": "F-M4X8",
+      "category": "fasteners",
+      "desc": "M4x8 SHCS 12.9",
+      "on_hand": 25,
+      "reserved": 0,
+      "available": 25,
+      "free": 25
+    },
+    {
+      "sku": "F-M4X12",
+      "id": "F-M4X12",
+      "category": "fasteners",
+      "desc": "M4x12 SHCS 12.9",
+      "on_hand": 18,
+      "reserved": 0,
+      "available": 18,
+      "free": 18
+    },
+    {
+      "sku": "F-M4X16",
+      "id": "F-M4X16",
+      "category": "fasteners",
+      "desc": "M4x16 SHCS 12.9",
+      "on_hand": 18,
+      "reserved": 0,
+      "available": 18,
+      "free": 18
+    },
+    {
+      "sku": "F-M4X20",
+      "id": "F-M4X20",
+      "category": "fasteners",
+      "desc": "M4x20 SHCS 12.9",
+      "on_hand": 12,
+      "reserved": 4,
+      "available": 8,
+      "free": 8
+    },
+    {
+      "sku": "F-M4X25",
+      "id": "F-M4X25",
+      "category": "fasteners",
+      "desc": "M4x25 SHCS 12.9",
+      "on_hand": 12,
+      "reserved": 8,
+      "available": 4,
+      "free": 4
+    },
+    {
+      "sku": "F-M4X30",
+      "id": "F-M4X30",
+      "category": "fasteners",
+      "desc": "M4x30 SHCS 12.9",
+      "on_hand": 10,
+      "reserved": 8,
+      "available": 2,
+      "free": 2
+    },
+    {
+      "sku": "F-M4X35",
+      "id": "F-M4X35",
+      "category": "fasteners",
+      "desc": "M4x35 SHCS 12.9",
+      "on_hand": 0,
+      "reserved": 32,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M4X40",
+      "id": "F-M4X40",
+      "category": "fasteners",
+      "desc": "M4x40 SHCS 12.9",
+      "on_hand": 0,
+      "reserved": 0,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M4X50",
+      "id": "F-M4X50",
+      "category": "fasteners",
+      "desc": "M4x50 SHCS 12.9",
+      "on_hand": 0,
+      "reserved": 0,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M4X65",
+      "id": "F-M4X65",
+      "category": "fasteners",
+      "desc": "M4x65 SHCS 12.9",
+      "on_hand": 0,
+      "reserved": 0,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M4X80",
+      "id": "F-M4X80",
+      "category": "fasteners",
+      "desc": "M4x80 SHCS 12.9",
+      "on_hand": 0,
+      "reserved": 0,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M4NUT",
+      "id": "F-M4NUT",
+      "category": "fasteners",
+      "desc": "M4 hex nut",
+      "on_hand": 60,
+      "reserved": 4,
+      "available": 56,
+      "free": 56
+    },
+    {
+      "sku": "F-M4NUTL",
+      "id": "F-M4NUTL",
+      "category": "fasteners",
+      "desc": "M4 lock nut",
+      "on_hand": 60,
+      "reserved": 0,
+      "available": 60,
+      "free": 60
+    },
+    {
+      "sku": "F-M4WASH",
+      "id": "F-M4WASH",
+      "category": "fasteners",
+      "desc": "M4 flat washer",
+      "on_hand": 120,
+      "reserved": 0,
+      "available": 120,
+      "free": 120
+    },
+    {
+      "sku": "F-M4SPRG",
+      "id": "F-M4SPRG",
+      "category": "fasteners",
+      "desc": "M4 spring washer",
+      "on_hand": 120,
+      "reserved": 0,
+      "available": 120,
+      "free": 120
+    },
+    {
+      "sku": "P-M4X14",
+      "id": "P-M4X14",
+      "category": "fasteners",
+      "desc": "M4x14 pan PH 4.8",
+      "on_hand": 22,
+      "reserved": 0,
+      "available": 22,
+      "free": 22
+    },
+    {
+      "sku": "P-M4X22",
+      "id": "P-M4X22",
+      "category": "fasteners",
+      "desc": "M4x22 pan PH 4.8",
+      "on_hand": 20,
+      "reserved": 0,
+      "available": 20,
+      "free": 20
+    },
+    {
+      "sku": "P-M5X28",
+      "id": "P-M5X28",
+      "category": "fasteners",
+      "desc": "M5x28 pan PH 4.8",
+      "on_hand": 12,
+      "reserved": 0,
+      "available": 12,
+      "free": 12
+    },
+    {
+      "sku": "P-M6X28",
+      "id": "P-M6X28",
+      "category": "fasteners",
+      "desc": "M6x28 pan PH 4.8",
+      "on_hand": 10,
+      "reserved": 0,
+      "available": 10,
+      "free": 10
+    },
+    {
+      "sku": "P-M6X38",
+      "id": "P-M6X38",
+      "category": "fasteners",
+      "desc": "M6x38 pan PH 4.8",
+      "on_hand": 6,
+      "reserved": 0,
+      "available": 6,
+      "free": 6
+    },
+    {
+      "sku": "P-M6X53",
+      "id": "P-M6X53",
+      "category": "fasteners",
+      "desc": "M6x53 pan PH 4.8",
+      "on_hand": 5,
+      "reserved": 0,
+      "available": 5,
+      "free": 5
+    },
+    {
+      "sku": "P-M4WASH",
+      "id": "P-M4WASH",
+      "category": "fasteners",
+      "desc": "M4 flat washer (pan kit)",
+      "on_hand": 42,
+      "reserved": 0,
+      "available": 42,
+      "free": 42
+    },
+    {
+      "sku": "P-M4NUT",
+      "id": "P-M4NUT",
+      "category": "fasteners",
+      "desc": "M4 hex nut (pan kit)",
+      "on_hand": 42,
+      "reserved": 0,
+      "available": 42,
+      "free": 42
+    },
+    {
+      "sku": "P-M5WASH",
+      "id": "P-M5WASH",
+      "category": "fasteners",
+      "desc": "M5 flat washer",
+      "on_hand": 12,
+      "reserved": 0,
+      "available": 12,
+      "free": 12
+    },
+    {
+      "sku": "P-M5NUT",
+      "id": "P-M5NUT",
+      "category": "fasteners",
+      "desc": "M5 hex nut",
+      "on_hand": 12,
+      "reserved": 0,
+      "available": 12,
+      "free": 12
+    },
+    {
+      "sku": "P-M6WASH",
+      "id": "P-M6WASH",
+      "category": "fasteners",
+      "desc": "M6 flat washer",
+      "on_hand": 21,
+      "reserved": 0,
+      "available": 21,
+      "free": 21
+    },
+    {
+      "sku": "P-M6NUT",
+      "id": "P-M6NUT",
+      "category": "fasteners",
+      "desc": "M6 hex nut",
+      "on_hand": 21,
+      "reserved": 0,
+      "available": 21,
+      "free": 21
+    },
+    {
+      "sku": "I-M2X2",
+      "id": "I-M2X2",
+      "category": "inserts",
+      "desc": "M2  L2   OD3.2",
+      "on_hand": 50,
+      "reserved": 0,
+      "available": 50,
+      "free": 50
+    },
+    {
+      "sku": "I-M2X4",
+      "id": "I-M2X4",
+      "category": "inserts",
+      "desc": "M2  L4   OD3.2",
+      "on_hand": 50,
+      "reserved": 0,
+      "available": 50,
+      "free": 50
+    },
+    {
+      "sku": "I-M25X25",
+      "id": "I-M25X25",
+      "category": "inserts",
+      "desc": "M2.5 L2.5 OD3.5",
+      "on_hand": 40,
+      "reserved": 0,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "I-M25X4",
+      "id": "I-M25X4",
+      "category": "inserts",
+      "desc": "M2.5 L4  OD3.5",
+      "on_hand": 40,
+      "reserved": 0,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "I-M3X4",
+      "id": "I-M3X4",
+      "category": "inserts",
+      "desc": "M3  L4   OD5",
+      "on_hand": 40,
+      "reserved": 0,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "I-M3X6",
+      "id": "I-M3X6",
+      "category": "inserts",
+      "desc": "M3  L6   OD5",
+      "on_hand": 40,
+      "reserved": 0,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "I-M3X8",
+      "id": "I-M3X8",
+      "category": "inserts",
+      "desc": "M3  L8   OD5",
+      "on_hand": 40,
+      "reserved": 0,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "I-M4X4",
+      "id": "I-M4X4",
+      "category": "inserts",
+      "desc": "M4  L4   OD6",
+      "on_hand": 20,
+      "reserved": 16,
+      "available": 4,
+      "free": 4
+    },
+    {
+      "sku": "I-M4X6",
+      "id": "I-M4X6",
+      "category": "inserts",
+      "desc": "M4  L6   OD6",
+      "on_hand": 20,
+      "reserved": 16,
+      "available": 4,
+      "free": 4
+    },
+    {
+      "sku": "I-M4X8",
+      "id": "I-M4X8",
+      "category": "inserts",
+      "desc": "M4  L8   OD6",
+      "on_hand": 20,
+      "reserved": 0,
+      "available": 20,
+      "free": 20
+    },
+    {
+      "sku": "I-M5X6",
+      "id": "I-M5X6",
+      "category": "inserts",
+      "desc": "M5  L6   OD7",
+      "on_hand": 10,
+      "reserved": 0,
+      "available": 10,
+      "free": 10
+    },
+    {
+      "sku": "I-M5X8",
+      "id": "I-M5X8",
+      "category": "inserts",
+      "desc": "M5  L8   OD7",
+      "on_hand": 10,
+      "reserved": 0,
+      "available": 10,
+      "free": 10
+    },
+    {
+      "sku": "I-M5X10",
+      "id": "I-M5X10",
+      "category": "inserts",
+      "desc": "M5  L10  OD7",
+      "on_hand": 10,
+      "reserved": 0,
+      "available": 10,
+      "free": 10
+    },
+    {
+      "sku": "I-M6X8",
+      "id": "I-M6X8",
+      "category": "inserts",
+      "desc": "M6  L8   OD8",
+      "on_hand": 5,
+      "reserved": 0,
+      "available": 5,
+      "free": 5
+    },
+    {
+      "sku": "I-M6X10",
+      "id": "I-M6X10",
+      "category": "inserts",
+      "desc": "M6  L10  OD8",
+      "on_hand": 5,
+      "reserved": 0,
+      "available": 5,
+      "free": 5
+    },
+    {
+      "sku": "MAT-PETG",
+      "id": "MAT-PETG",
+      "category": "materials",
+      "desc": "PETG filament, colors/spools TBD",
+      "on_hand": 1,
+      "reserved": 0,
+      "available": 1,
+      "free": 1
+    },
+    {
+      "sku": "MAT-PLA",
+      "id": "MAT-PLA",
+      "category": "materials",
+      "desc": "PLA filament, colors/spools TBD",
+      "on_hand": 1,
+      "reserved": 0,
+      "available": 1,
+      "free": 1
+    },
+    {
+      "sku": "MAT-TPU",
+      "id": "MAT-TPU",
+      "category": "materials",
+      "desc": "TPU filament, spools TBD",
+      "on_hand": 1,
+      "reserved": 0,
+      "available": 1,
+      "free": 1
+    }
+  ],
+  "items": [
+    {
+      "sku": "BOLT-M3X8-BHCS",
+      "id": "BOLT-M3X8-BHCS",
+      "category": "fasteners",
+      "desc": "M3x8 Button Head Grid Bolt",
+      "on_hand": 50,
+      "reserved": 10,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "INS-M3X4X5",
+      "id": "INS-M3X4X5",
+      "category": "inserts",
+      "desc": "M3x4x5 Brass Heat-Set Insert",
+      "on_hand": 40,
+      "reserved": 0,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "FIL-PETG-1KG",
+      "id": "FIL-PETG-1KG",
+      "category": "materials",
+      "desc": "PETG Filament Spool (Bambu A1 Mini)",
+      "on_hand": 2,
+      "reserved": 0,
+      "available": 2,
+      "free": 2
+    },
+    {
+      "sku": "MOD-BUTTONS",
+      "id": "MOD-BUTTONS",
+      "category": "modulino",
+      "desc": "Arduino Modulino Buttons (Qwiic)",
+      "on_hand": 2,
+      "reserved": 0,
+      "available": 2,
+      "free": 2
+    },
+    {
+      "sku": "MOD-KNOB",
+      "id": "MOD-KNOB",
+      "category": "modulino",
+      "desc": "Arduino Modulino Knob (Qwiic)",
+      "on_hand": 2,
+      "reserved": 0,
+      "available": 2,
+      "free": 2
+    },
+    {
+      "sku": "MOD-PIXELS",
+      "id": "MOD-PIXELS",
+      "category": "modulino",
+      "desc": "Arduino Modulino Pixels (8 RGB)",
+      "on_hand": 2,
+      "reserved": 0,
+      "available": 2,
+      "free": 2
+    },
+    {
+      "sku": "MOD-VIBRO",
+      "id": "MOD-VIBRO",
+      "category": "modulino",
+      "desc": "Arduino Modulino Vibro Haptic",
+      "on_hand": 1,
+      "reserved": 0,
+      "available": 1,
+      "free": 1
+    },
+    {
+      "sku": "MOD-BUZZER",
+      "id": "MOD-BUZZER",
+      "category": "modulino",
+      "desc": "Arduino Modulino Buzzer",
+      "on_hand": 2,
+      "reserved": 0,
+      "available": 2,
+      "free": 2
+    },
+    {
+      "sku": "B-693ZZ",
+      "id": "B-693ZZ",
+      "category": "bearings",
+      "desc": "693ZZ 3x8x4",
+      "on_hand": 12,
+      "reserved": 24,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "B-623ZZ",
+      "id": "B-623ZZ",
+      "category": "bearings",
+      "desc": "623ZZ 3x10x4",
+      "on_hand": 12,
+      "reserved": 0,
+      "available": 12,
+      "free": 12
+    },
+    {
+      "sku": "B-624ZZ",
+      "id": "B-624ZZ",
+      "category": "bearings",
+      "desc": "624ZZ 4x13x5",
+      "on_hand": 12,
+      "reserved": 0,
+      "available": 12,
+      "free": 12
+    },
+    {
+      "sku": "B-685ZZ",
+      "id": "B-685ZZ",
+      "category": "bearings",
+      "desc": "685ZZ 5x11x5",
+      "on_hand": 12,
+      "reserved": 0,
+      "available": 12,
+      "free": 12
+    },
+    {
+      "sku": "B-687ZZ",
+      "id": "B-687ZZ",
+      "category": "bearings",
+      "desc": "687ZZ 7x14x5",
+      "on_hand": 10,
+      "reserved": 0,
+      "available": 10,
+      "free": 10
+    },
+    {
+      "sku": "B-627ZZ",
+      "id": "B-627ZZ",
+      "category": "bearings",
+      "desc": "627ZZ 7x22x7",
+      "on_hand": 10,
+      "reserved": 0,
+      "available": 10,
+      "free": 10
+    },
+    {
+      "sku": "EQ-BBL-A1",
+      "id": "EQ-BBL-A1",
+      "category": "equipment",
+      "desc": "Bambu Lab A1 printer + AMS lite",
+      "on_hand": 1,
+      "reserved": 0,
+      "available": 1,
+      "free": 1
+    },
+    {
+      "sku": "EQ-ENDER3",
+      "id": "EQ-ENDER3",
+      "category": "equipment",
+      "desc": "Ender 3 (torn down): V-slot 2040/4040 stock now the rover frame; check for leftover M5 tee nuts, V wheels, brackets",
+      "on_hand": 1,
+      "reserved": 1,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "EQ-NOZ-04",
+      "id": "EQ-NOZ-04",
+      "category": "equipment",
+      "desc": "0.4mm nozzle (installed)",
+      "on_hand": 1,
+      "reserved": 0,
+      "available": 1,
+      "free": 1
+    },
+    {
+      "sku": "EQ-NOZ-06",
+      "id": "EQ-NOZ-06",
+      "category": "equipment",
+      "desc": "0.6mm nozzle (unused spare)",
+      "on_hand": 1,
+      "reserved": 0,
+      "available": 1,
+      "free": 1
+    },
+    {
+      "sku": "F-M25X4",
+      "id": "F-M25X4",
+      "category": "fasteners",
+      "desc": "M2.5x4 SHCS",
+      "on_hand": 100,
+      "reserved": 0,
+      "available": 100,
+      "free": 100
+    },
+    {
+      "sku": "F-M25X6",
+      "id": "F-M25X6",
+      "category": "fasteners",
+      "desc": "M2.5x6 SHCS",
+      "on_hand": 100,
+      "reserved": 4,
+      "available": 96,
+      "free": 96
+    },
+    {
+      "sku": "F-M25X8",
+      "id": "F-M25X8",
+      "category": "fasteners",
+      "desc": "M2.5x8 SHCS",
+      "on_hand": 100,
+      "reserved": 0,
+      "available": 100,
+      "free": 100
+    },
+    {
+      "sku": "F-M25X10",
+      "id": "F-M25X10",
+      "category": "fasteners",
+      "desc": "M2.5x10 SHCS",
+      "on_hand": 100,
+      "reserved": 0,
+      "available": 100,
+      "free": 100
+    },
+    {
+      "sku": "F-M25X12",
+      "id": "F-M25X12",
+      "category": "fasteners",
+      "desc": "M2.5x12 SHCS",
+      "on_hand": 100,
+      "reserved": 0,
+      "available": 100,
+      "free": 100
+    },
+    {
+      "sku": "F-M25X16",
+      "id": "F-M25X16",
+      "category": "fasteners",
+      "desc": "M2.5x16 SHCS",
+      "on_hand": 100,
+      "reserved": 0,
+      "available": 100,
+      "free": 100
+    },
+    {
+      "sku": "F-M25X20",
+      "id": "F-M25X20",
+      "category": "fasteners",
+      "desc": "M2.5x20 SHCS",
+      "on_hand": 100,
+      "reserved": 0,
+      "available": 100,
+      "free": 100
+    },
+    {
+      "sku": "F-M25X25",
+      "id": "F-M25X25",
+      "category": "fasteners",
+      "desc": "M2.5x25 SHCS",
+      "on_hand": 100,
+      "reserved": 0,
+      "available": 100,
+      "free": 100
+    },
+    {
+      "sku": "F-M25NUT",
+      "id": "F-M25NUT",
+      "category": "fasteners",
+      "desc": "M2.5 hex nut",
+      "on_hand": 160,
+      "reserved": 0,
+      "available": 160,
+      "free": 160
+    },
+    {
+      "sku": "F-M3X6",
+      "id": "F-M3X6",
+      "category": "fasteners",
+      "desc": "M3x6 SHCS 12.9",
+      "on_hand": 40,
+      "reserved": 16,
+      "available": 24,
+      "free": 24
+    },
+    {
+      "sku": "F-M3X8",
+      "id": "F-M3X8",
+      "category": "fasteners",
+      "desc": "M3x8 SHCS 12.9",
+      "on_hand": 40,
+      "reserved": 0,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "F-M3X10",
+      "id": "F-M3X10",
+      "category": "fasteners",
+      "desc": "M3x10 SHCS 12.9",
+      "on_hand": 35,
+      "reserved": 0,
+      "available": 35,
+      "free": 35
+    },
+    {
+      "sku": "F-M3X12",
+      "id": "F-M3X12",
+      "category": "fasteners",
+      "desc": "M3x12 SHCS 12.9",
+      "on_hand": 35,
+      "reserved": 0,
+      "available": 35,
+      "free": 35
+    },
+    {
+      "sku": "F-M3X16",
+      "id": "F-M3X16",
+      "category": "fasteners",
+      "desc": "M3x16 SHCS 12.9",
+      "on_hand": 30,
+      "reserved": 0,
+      "available": 30,
+      "free": 30
+    },
+    {
+      "sku": "F-M3X20",
+      "id": "F-M3X20",
+      "category": "fasteners",
+      "desc": "M3x20 SHCS 12.9",
+      "on_hand": 30,
+      "reserved": 24,
+      "available": 6,
+      "free": 6
+    },
+    {
+      "sku": "F-M3X25",
+      "id": "F-M3X25",
+      "category": "fasteners",
+      "desc": "M3x25 SHCS 12.9",
+      "on_hand": 20,
+      "reserved": 0,
+      "available": 20,
+      "free": 20
+    },
+    {
+      "sku": "F-M3X30",
+      "id": "F-M3X30",
+      "category": "fasteners",
+      "desc": "M3x30 SHCS 12.9",
+      "on_hand": 20,
+      "reserved": 24,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M3X40",
+      "id": "F-M3X40",
+      "category": "fasteners",
+      "desc": "M3x40 SHCS 12.9",
+      "on_hand": 0,
+      "reserved": 0,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M3X50",
+      "id": "F-M3X50",
+      "category": "fasteners",
+      "desc": "M3x50 SHCS 12.9",
+      "on_hand": 0,
+      "reserved": 24,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M3NUT",
+      "id": "F-M3NUT",
+      "category": "fasteners",
+      "desc": "M3 hex nut",
+      "on_hand": 125,
+      "reserved": 48,
+      "available": 77,
+      "free": 77
+    },
+    {
+      "sku": "F-M3NUTL",
+      "id": "F-M3NUTL",
+      "category": "fasteners",
+      "desc": "M3 lock nut",
+      "on_hand": 125,
+      "reserved": 24,
+      "available": 101,
+      "free": 101
+    },
+    {
+      "sku": "F-M3WASH",
+      "id": "F-M3WASH",
+      "category": "fasteners",
+      "desc": "M3 flat washer",
+      "on_hand": 250,
+      "reserved": 0,
+      "available": 250,
+      "free": 250
+    },
+    {
+      "sku": "F-M3SHIM",
+      "id": "F-M3SHIM",
+      "category": "fasteners",
+      "desc": "M3 shim washer 3.2x5.0x0.5 (DIN 988)",
+      "on_hand": 0,
+      "reserved": 12,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M4X6",
+      "id": "F-M4X6",
+      "category": "fasteners",
+      "desc": "M4x6 SHCS 12.9",
+      "on_hand": 25,
+      "reserved": 0,
+      "available": 25,
+      "free": 25
+    },
+    {
+      "sku": "F-M4X8",
+      "id": "F-M4X8",
+      "category": "fasteners",
+      "desc": "M4x8 SHCS 12.9",
+      "on_hand": 25,
+      "reserved": 0,
+      "available": 25,
+      "free": 25
+    },
+    {
+      "sku": "F-M4X12",
+      "id": "F-M4X12",
+      "category": "fasteners",
+      "desc": "M4x12 SHCS 12.9",
+      "on_hand": 18,
+      "reserved": 0,
+      "available": 18,
+      "free": 18
+    },
+    {
+      "sku": "F-M4X16",
+      "id": "F-M4X16",
+      "category": "fasteners",
+      "desc": "M4x16 SHCS 12.9",
+      "on_hand": 18,
+      "reserved": 0,
+      "available": 18,
+      "free": 18
+    },
+    {
+      "sku": "F-M4X20",
+      "id": "F-M4X20",
+      "category": "fasteners",
+      "desc": "M4x20 SHCS 12.9",
+      "on_hand": 12,
+      "reserved": 4,
+      "available": 8,
+      "free": 8
+    },
+    {
+      "sku": "F-M4X25",
+      "id": "F-M4X25",
+      "category": "fasteners",
+      "desc": "M4x25 SHCS 12.9",
+      "on_hand": 12,
+      "reserved": 8,
+      "available": 4,
+      "free": 4
+    },
+    {
+      "sku": "F-M4X30",
+      "id": "F-M4X30",
+      "category": "fasteners",
+      "desc": "M4x30 SHCS 12.9",
+      "on_hand": 10,
+      "reserved": 8,
+      "available": 2,
+      "free": 2
+    },
+    {
+      "sku": "F-M4X35",
+      "id": "F-M4X35",
+      "category": "fasteners",
+      "desc": "M4x35 SHCS 12.9",
+      "on_hand": 0,
+      "reserved": 32,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M4X40",
+      "id": "F-M4X40",
+      "category": "fasteners",
+      "desc": "M4x40 SHCS 12.9",
+      "on_hand": 0,
+      "reserved": 0,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M4X50",
+      "id": "F-M4X50",
+      "category": "fasteners",
+      "desc": "M4x50 SHCS 12.9",
+      "on_hand": 0,
+      "reserved": 0,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M4X65",
+      "id": "F-M4X65",
+      "category": "fasteners",
+      "desc": "M4x65 SHCS 12.9",
+      "on_hand": 0,
+      "reserved": 0,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M4X80",
+      "id": "F-M4X80",
+      "category": "fasteners",
+      "desc": "M4x80 SHCS 12.9",
+      "on_hand": 0,
+      "reserved": 0,
+      "available": 0,
+      "free": 0
+    },
+    {
+      "sku": "F-M4NUT",
+      "id": "F-M4NUT",
+      "category": "fasteners",
+      "desc": "M4 hex nut",
+      "on_hand": 60,
+      "reserved": 4,
+      "available": 56,
+      "free": 56
+    },
+    {
+      "sku": "F-M4NUTL",
+      "id": "F-M4NUTL",
+      "category": "fasteners",
+      "desc": "M4 lock nut",
+      "on_hand": 60,
+      "reserved": 0,
+      "available": 60,
+      "free": 60
+    },
+    {
+      "sku": "F-M4WASH",
+      "id": "F-M4WASH",
+      "category": "fasteners",
+      "desc": "M4 flat washer",
+      "on_hand": 120,
+      "reserved": 0,
+      "available": 120,
+      "free": 120
+    },
+    {
+      "sku": "F-M4SPRG",
+      "id": "F-M4SPRG",
+      "category": "fasteners",
+      "desc": "M4 spring washer",
+      "on_hand": 120,
+      "reserved": 0,
+      "available": 120,
+      "free": 120
+    },
+    {
+      "sku": "P-M4X14",
+      "id": "P-M4X14",
+      "category": "fasteners",
+      "desc": "M4x14 pan PH 4.8",
+      "on_hand": 22,
+      "reserved": 0,
+      "available": 22,
+      "free": 22
+    },
+    {
+      "sku": "P-M4X22",
+      "id": "P-M4X22",
+      "category": "fasteners",
+      "desc": "M4x22 pan PH 4.8",
+      "on_hand": 20,
+      "reserved": 0,
+      "available": 20,
+      "free": 20
+    },
+    {
+      "sku": "P-M5X28",
+      "id": "P-M5X28",
+      "category": "fasteners",
+      "desc": "M5x28 pan PH 4.8",
+      "on_hand": 12,
+      "reserved": 0,
+      "available": 12,
+      "free": 12
+    },
+    {
+      "sku": "P-M6X28",
+      "id": "P-M6X28",
+      "category": "fasteners",
+      "desc": "M6x28 pan PH 4.8",
+      "on_hand": 10,
+      "reserved": 0,
+      "available": 10,
+      "free": 10
+    },
+    {
+      "sku": "P-M6X38",
+      "id": "P-M6X38",
+      "category": "fasteners",
+      "desc": "M6x38 pan PH 4.8",
+      "on_hand": 6,
+      "reserved": 0,
+      "available": 6,
+      "free": 6
+    },
+    {
+      "sku": "P-M6X53",
+      "id": "P-M6X53",
+      "category": "fasteners",
+      "desc": "M6x53 pan PH 4.8",
+      "on_hand": 5,
+      "reserved": 0,
+      "available": 5,
+      "free": 5
+    },
+    {
+      "sku": "P-M4WASH",
+      "id": "P-M4WASH",
+      "category": "fasteners",
+      "desc": "M4 flat washer (pan kit)",
+      "on_hand": 42,
+      "reserved": 0,
+      "available": 42,
+      "free": 42
+    },
+    {
+      "sku": "P-M4NUT",
+      "id": "P-M4NUT",
+      "category": "fasteners",
+      "desc": "M4 hex nut (pan kit)",
+      "on_hand": 42,
+      "reserved": 0,
+      "available": 42,
+      "free": 42
+    },
+    {
+      "sku": "P-M5WASH",
+      "id": "P-M5WASH",
+      "category": "fasteners",
+      "desc": "M5 flat washer",
+      "on_hand": 12,
+      "reserved": 0,
+      "available": 12,
+      "free": 12
+    },
+    {
+      "sku": "P-M5NUT",
+      "id": "P-M5NUT",
+      "category": "fasteners",
+      "desc": "M5 hex nut",
+      "on_hand": 12,
+      "reserved": 0,
+      "available": 12,
+      "free": 12
+    },
+    {
+      "sku": "P-M6WASH",
+      "id": "P-M6WASH",
+      "category": "fasteners",
+      "desc": "M6 flat washer",
+      "on_hand": 21,
+      "reserved": 0,
+      "available": 21,
+      "free": 21
+    },
+    {
+      "sku": "P-M6NUT",
+      "id": "P-M6NUT",
+      "category": "fasteners",
+      "desc": "M6 hex nut",
+      "on_hand": 21,
+      "reserved": 0,
+      "available": 21,
+      "free": 21
+    },
+    {
+      "sku": "I-M2X2",
+      "id": "I-M2X2",
+      "category": "inserts",
+      "desc": "M2  L2   OD3.2",
+      "on_hand": 50,
+      "reserved": 0,
+      "available": 50,
+      "free": 50
+    },
+    {
+      "sku": "I-M2X4",
+      "id": "I-M2X4",
+      "category": "inserts",
+      "desc": "M2  L4   OD3.2",
+      "on_hand": 50,
+      "reserved": 0,
+      "available": 50,
+      "free": 50
+    },
+    {
+      "sku": "I-M25X25",
+      "id": "I-M25X25",
+      "category": "inserts",
+      "desc": "M2.5 L2.5 OD3.5",
+      "on_hand": 40,
+      "reserved": 0,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "I-M25X4",
+      "id": "I-M25X4",
+      "category": "inserts",
+      "desc": "M2.5 L4  OD3.5",
+      "on_hand": 40,
+      "reserved": 0,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "I-M3X4",
+      "id": "I-M3X4",
+      "category": "inserts",
+      "desc": "M3  L4   OD5",
+      "on_hand": 40,
+      "reserved": 0,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "I-M3X6",
+      "id": "I-M3X6",
+      "category": "inserts",
+      "desc": "M3  L6   OD5",
+      "on_hand": 40,
+      "reserved": 0,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "I-M3X8",
+      "id": "I-M3X8",
+      "category": "inserts",
+      "desc": "M3  L8   OD5",
+      "on_hand": 40,
+      "reserved": 0,
+      "available": 40,
+      "free": 40
+    },
+    {
+      "sku": "I-M4X4",
+      "id": "I-M4X4",
+      "category": "inserts",
+      "desc": "M4  L4   OD6",
+      "on_hand": 20,
+      "reserved": 16,
+      "available": 4,
+      "free": 4
+    },
+    {
+      "sku": "I-M4X6",
+      "id": "I-M4X6",
+      "category": "inserts",
+      "desc": "M4  L6   OD6",
+      "on_hand": 20,
+      "reserved": 16,
+      "available": 4,
+      "free": 4
+    },
+    {
+      "sku": "I-M4X8",
+      "id": "I-M4X8",
+      "category": "inserts",
+      "desc": "M4  L8   OD6",
+      "on_hand": 20,
+      "reserved": 0,
+      "available": 20,
+      "free": 20
+    },
+    {
+      "sku": "I-M5X6",
+      "id": "I-M5X6",
+      "category": "inserts",
+      "desc": "M5  L6   OD7",
+      "on_hand": 10,
+      "reserved": 0,
+      "available": 10,
+      "free": 10
+    },
+    {
+      "sku": "I-M5X8",
+      "id": "I-M5X8",
+      "category": "inserts",
+      "desc": "M5  L8   OD7",
+      "on_hand": 10,
+      "reserved": 0,
+      "available": 10,
+      "free": 10
+    },
+    {
+      "sku": "I-M5X10",
+      "id": "I-M5X10",
+      "category": "inserts",
+      "desc": "M5  L10  OD7",
+      "on_hand": 10,
+      "reserved": 0,
+      "available": 10,
+      "free": 10
+    },
+    {
+      "sku": "I-M6X8",
+      "id": "I-M6X8",
+      "category": "inserts",
+      "desc": "M6  L8   OD8",
+      "on_hand": 5,
+      "reserved": 0,
+      "available": 5,
+      "free": 5
+    },
+    {
+      "sku": "I-M6X10",
+      "id": "I-M6X10",
+      "category": "inserts",
+      "desc": "M6  L10  OD8",
+      "on_hand": 5,
+      "reserved": 0,
+      "available": 5,
+      "free": 5
+    },
+    {
+      "sku": "MAT-PETG",
+      "id": "MAT-PETG",
+      "category": "materials",
+      "desc": "PETG filament, colors/spools TBD",
+      "on_hand": 1,
+      "reserved": 0,
+      "available": 1,
+      "free": 1
+    },
+    {
+      "sku": "MAT-PLA",
+      "id": "MAT-PLA",
+      "category": "materials",
+      "desc": "PLA filament, colors/spools TBD",
+      "on_hand": 1,
+      "reserved": 0,
+      "available": 1,
+      "free": 1
+    },
+    {
+      "sku": "MAT-TPU",
+      "id": "MAT-TPU",
+      "category": "materials",
+      "desc": "TPU filament, spools TBD",
+      "on_hand": 1,
+      "reserved": 0,
+      "available": 1,
+      "free": 1
+    }
+  ]
+}

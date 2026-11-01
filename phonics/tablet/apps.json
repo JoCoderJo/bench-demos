@@ -71,6 +71,38 @@
    "source": "tablet/apps/letters"
   },
   {
+   "id": "maker-bench",
+   "title": "Sim & Inventory",
+   "subtitle": "3D fit check & shop parts",
+   "icon": "🔩",
+   "color": "#27ae60",
+   "path": "apps/maker-bench/index.html",
+   "needs": [],
+   "source": "tablet/apps/maker-bench"
+  },
+  {
+   "id": "maker-cad",
+   "title": "3D CAD Studio",
+   "subtitle": "design parts for the tablet",
+   "icon": "🧱",
+   "color": "#e67e22",
+   "path": "apps/maker-cad/index.html",
+   "needs": [],
+   "source": "tablet/apps/maker-cad"
+  },
+  {
+   "id": "maker-code",
+   "title": "Code & Blocks",
+   "subtitle": "lessons & Spark blocks",
+   "icon": "🧩",
+   "color": "#7c4dff",
+   "path": "apps/maker-code/index.html",
+   "needs": [
+    "autoplay"
+   ],
+   "source": "tablet/apps/maker-code"
+  },
+  {
    "id": "maker-light",
    "title": "Light Lab",
    "subtitle": "draw with real lights",

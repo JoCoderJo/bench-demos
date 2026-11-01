@@ -1,6 +1,6 @@
 {
- "version": "a7bce22",
- "sha": "90dbf70f18ed5d1709e0239f4fb213895f7ab118004272d4053de0cea1414d23",
+ "version": "2bd629f",
+ "sha": "658fbf3022c526a050fe18248b7c8d707eb059c6ca7d4259717d37bd4300c567",
  "apps": [
   "phonics-friends",
   "camera",
@@ -8,6 +8,9 @@
   "draw",
   "example-tap",
   "letters",
+  "maker-bench",
+  "maker-cad",
+  "maker-code",
   "maker-light",
   "music",
   "pbs-kids",
@@ -17,7 +20,7 @@
   "words",
   "yoto"
  ],
- "files": 1044,
- "bytes": 9065351,
+ "files": 1056,
+ "bytes": 12249665,
  "public": true
 }

@@ -1,0 +1,350 @@
+{
+  "v": 1,
+  "templates": [
+    {
+      "id": "kickstand",
+      "tver": 1,
+      "name": "kickstand",
+      "say": "kickstand",
+      "icon": "kickstand",
+      "foot": "hinge_ear",
+      "blurb": "The leg that holds the tablet up. Yours clicks into the same ears as the one we have.",
+      "params": [
+        {
+          "id": "arm_len",
+          "scad": "diy_arm_len",
+          "type": "num",
+          "name": "how long",
+          "icon": "ruler",
+          "min": 80,
+          "max": 160,
+          "step": 5,
+          "default": 110,
+          "unit": "mm",
+          "prereader": [
+            "short",
+            "medium",
+            "long"
+          ]
+        },
+        {
+          "id": "bar_w",
+          "scad": "diy_bar_w",
+          "type": "num",
+          "name": "foot bar",
+          "icon": "bar",
+          "min": 12,
+          "max": 40,
+          "step": 2,
+          "default": 20,
+          "unit": "mm",
+          "prereader": [
+            "thin",
+            "medium",
+            "wide"
+          ]
+        },
+        {
+          "id": "panel",
+          "scad": "diy_panel",
+          "type": "pick",
+          "name": "picture panel",
+          "icon": "shield",
+          "pick": [
+            "none",
+            "shield"
+          ],
+          "default": "none"
+        },
+        {
+          "id": "panel_h",
+          "scad": "diy_panel_h",
+          "type": "num",
+          "name": "panel height",
+          "icon": "ruler",
+          "min": 20,
+          "max": 80,
+          "step": 5,
+          "default": 40,
+          "unit": "mm",
+          "when": {
+            "panel": "shield"
+          },
+          "prereader": [
+            "small",
+            "medium",
+            "big"
+          ]
+        },
+        {
+          "id": "cutout",
+          "scad": "diy_cutout",
+          "type": "pick",
+          "name": "picture",
+          "icon": "star",
+          "pick": [
+            "none",
+            "heart",
+            "star",
+            "smile",
+            "ring"
+          ],
+          "default": "none"
+        },
+        {
+          "id": "cut_mm",
+          "scad": "diy_cut_mm",
+          "type": "num",
+          "name": "picture size",
+          "icon": "ruler",
+          "min": 8,
+          "max": 30,
+          "step": 2,
+          "default": 14,
+          "unit": "mm",
+          "when": {
+            "cutout": "!none"
+          },
+          "prereader": [
+            "small",
+            "medium",
+            "big"
+          ]
+        },
+        {
+          "id": "feet",
+          "scad": "diy_feet",
+          "type": "bool",
+          "name": "round feet",
+          "icon": "feet",
+          "default": true
+        }
+      ],
+      "materials": [
+        "PETG",
+        "PLA"
+      ],
+      "sim": {
+        "hinge": "ks",
+        "angles": [
+          0,
+          30,
+          60,
+          90,
+          120
+        ],
+        "note": "angles are the printed ears' holes (not a kid parameter for tver 1); the kid picks which ones to try"
+      },
+      "needs": [
+        {
+          "id": "F-M3X30",
+          "qty": 1,
+          "note": "the stud, from the old frame"
+        },
+        {
+          "id": "I-M3X4",
+          "qty": 1
+        }
+      ],
+      "scad": {
+        "file": "projects/tablet-101/diy/kickstand.scad",
+        "echo": "DIY"
+      },
+      "print": {
+        "material_default": "PETG",
+        "bed_face": "the flat side down, knuckles up",
+        "supports": false
+      }
+    },
+    {
+      "id": "modulino_cradle",
+      "tver": 1,
+      "name": "sensor pod",
+      "say": "sensor pod",
+      "icon": "\ud83e\uddf1",
+      "foot": "lug",
+      "params": [
+        {
+          "id": "pocket_w",
+          "name": "pod width",
+          "icon": "\ud83d\udce6",
+          "min": 30,
+          "max": 60,
+          "step": 5,
+          "default": 42,
+          "unit": "mm",
+          "prereader": "small|medium|big"
+        },
+        {
+          "id": "pocket_d",
+          "name": "pod depth",
+          "icon": "\ud83d\udce6",
+          "min": 25,
+          "max": 50,
+          "step": 5,
+          "default": 32,
+          "unit": "mm",
+          "prereader": "short|medium|deep"
+        }
+      ],
+      "cutouts": [
+        "none",
+        "star",
+        "heart"
+      ],
+      "materials": [
+        "PETG",
+        "PLA"
+      ],
+      "sim": {
+        "hinge": null,
+        "mass_g_per_mm": 0.16
+      },
+      "needs": [
+        {
+          "id": "F-M3X6",
+          "qty": 2
+        },
+        {
+          "id": "MOD-KNOB",
+          "qty": 1
+        }
+      ],
+      "scad": {
+        "module": "diy_modulino_cradle",
+        "file": "lib/diy/modulino_cradle.scad"
+      }
+    },
+    {
+      "id": "hook",
+      "tver": 1,
+      "name": "carry hook",
+      "say": "carry hook",
+      "icon": "\ud83e\ude9d",
+      "foot": "lug",
+      "params": [
+        {
+          "id": "reach",
+          "name": "hook reach",
+          "icon": "\ud83d\udccf",
+          "min": 20,
+          "max": 50,
+          "step": 5,
+          "default": 30,
+          "unit": "mm",
+          "prereader": "short|medium|long"
+        }
+      ],
+      "cutouts": [
+        "none",
+        "star"
+      ],
+      "materials": [
+        "PETG"
+      ],
+      "sim": {
+        "hinge": null,
+        "mass_g_per_mm": 0.15
+      },
+      "needs": [
+        {
+          "id": "F-M3X6",
+          "qty": 2
+        }
+      ],
+      "scad": {
+        "module": "diy_hook",
+        "file": "lib/diy/hook.scad"
+      }
+    },
+    {
+      "id": "name_plate",
+      "tver": 1,
+      "name": "name badge",
+      "say": "name badge",
+      "icon": "\ud83c\udff7\ufe0f",
+      "foot": "lug",
+      "params": [
+        {
+          "id": "width",
+          "name": "badge width",
+          "icon": "\ud83d\udccf",
+          "min": 45,
+          "max": 90,
+          "step": 15,
+          "default": 60,
+          "unit": "mm",
+          "prereader": "small|medium|wide"
+        }
+      ],
+      "cutouts": [
+        "none",
+        "heart",
+        "star",
+        "smile"
+      ],
+      "materials": [
+        "PLA",
+        "PETG"
+      ],
+      "sim": {
+        "hinge": null,
+        "mass_g_per_mm": 0.12
+      },
+      "needs": [
+        {
+          "id": "F-M3X6",
+          "qty": 2
+        }
+      ],
+      "scad": {
+        "module": "diy_name_plate",
+        "file": "lib/diy/name_plate.scad"
+      }
+    },
+    {
+      "id": "light_shade",
+      "tver": 1,
+      "name": "light dome",
+      "say": "light dome",
+      "icon": "\ud83c\udfee",
+      "foot": "wall_clip",
+      "params": [
+        {
+          "id": "dome_h",
+          "name": "dome height",
+          "icon": "\ud83d\udccf",
+          "min": 10,
+          "max": 30,
+          "step": 5,
+          "default": 15,
+          "unit": "mm",
+          "prereader": "flat|medium|tall"
+        }
+      ],
+      "cutouts": [
+        "none",
+        "star",
+        "heart"
+      ],
+      "materials": [
+        "PLA"
+      ],
+      "sim": {
+        "hinge": null,
+        "mass_g_per_mm": 0.1
+      },
+      "needs": [
+        {
+          "id": "F-M3X6",
+          "qty": 2
+        }
+      ],
+      "scad": {
+        "module": "diy_light_shade",
+        "file": "lib/diy/light_shade.scad"
+      }
+    }
+  ],
+  "_doc": "DIY part templates (DESIGN_CONTRACT \u00a75). The Bench renders `scad.file` from the hw project root with -D <scad var>=<value> per param; tiles show `name`/`say`/`icon`, pre-reader mode shows `prereader` pictures instead of numbers. Every template's foot is from the Interface Spec; kids never design the foot."
+}

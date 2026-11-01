@@ -1,0 +1,9 @@
+{
+  "title": "Code & Blocks",
+  "subtitle": "lessons & Spark blocks",
+  "icon": "\ud83e\udde9",
+  "color": "#7c4dff",
+  "needs": [
+    "autoplay"
+  ]
+}
