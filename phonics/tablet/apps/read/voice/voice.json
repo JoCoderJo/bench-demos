@@ -1,0 +1,358 @@
+{
+ "voice": "en_US-kristin-medium",
+ "length_scale": 1.08,
+ "prompts": {
+  "p_tap": {
+   "file": "p_tap.mp3",
+   "text": "Tap each word to read the line."
+  },
+  "p_readit": {
+   "file": "p_readit.mp3",
+   "text": "Now I will read it."
+  },
+  "p_which": {
+   "file": "p_which.mp3",
+   "text": "Which picture goes with it?"
+  },
+  "p_yes": {
+   "file": "p_yes.mp3",
+   "text": "Yes!"
+  },
+  "p_great": {
+   "file": "p_great.mp3",
+   "text": "Great reading!"
+  },
+  "p_again": {
+   "file": "p_again.mp3",
+   "text": "Not that one. Listen again."
+  },
+  "p_find": {
+   "file": "p_find.mp3",
+   "text": "Find the word"
+  },
+  "p_fix": {
+   "file": "p_fix.mp3",
+   "text": "Put the words in order. Listen."
+  },
+  "p_nice": {
+   "file": "p_nice.mp3",
+   "text": "You read the whole line!"
+  },
+  "p_sound": {
+   "file": "p_sound.mp3",
+   "text": "Sound it out."
+  },
+  "p_hooray": {
+   "file": "p_hooray.mp3",
+   "text": "Hooray! A new line!"
+  },
+  "w_the": {
+   "file": "w_the.mp3",
+   "text": "the"
+  },
+  "w_a": {
+   "file": "w_a.mp3",
+   "text": "a"
+  },
+  "w_i": {
+   "file": "w_i.mp3",
+   "text": "I"
+  },
+  "w_is": {
+   "file": "w_is.mp3",
+   "text": "is"
+  },
+  "w_on": {
+   "file": "w_on.mp3",
+   "text": "on"
+  },
+  "w_in": {
+   "file": "w_in.mp3",
+   "text": "in"
+  },
+  "w_and": {
+   "file": "w_and.mp3",
+   "text": "and"
+  },
+  "w_my": {
+   "file": "w_my.mp3",
+   "text": "my"
+  },
+  "w_see": {
+   "file": "w_see.mp3",
+   "text": "see"
+  },
+  "w_has": {
+   "file": "w_has.mp3",
+   "text": "has"
+  },
+  "w_it": {
+   "file": "w_it.mp3",
+   "text": "it"
+  },
+  "w_at": {
+   "file": "w_at.mp3",
+   "text": "at"
+  },
+  "w_up": {
+   "file": "w_up.mp3",
+   "text": "up"
+  },
+  "w_to": {
+   "file": "w_to.mp3",
+   "text": "to"
+  },
+  "w_we": {
+   "file": "w_we.mp3",
+   "text": "we"
+  },
+  "w_he": {
+   "file": "w_he.mp3",
+   "text": "he"
+  },
+  "w_she": {
+   "file": "w_she.mp3",
+   "text": "she"
+  },
+  "w_not": {
+   "file": "w_not.mp3",
+   "text": "not"
+  },
+  "w_go": {
+   "file": "w_go.mp3",
+   "text": "go"
+  },
+  "w_am": {
+   "file": "w_am.mp3",
+   "text": "am"
+  },
+  "w_like": {
+   "file": "w_like.mp3",
+   "text": "like"
+  },
+  "s_0": {
+   "file": "s_0.mp3",
+   "text": "I see a cat."
+  },
+  "s_1": {
+   "file": "s_1.mp3",
+   "text": "The dog ran."
+  },
+  "s_2": {
+   "file": "s_2.mp3",
+   "text": "A big pig."
+  },
+  "s_3": {
+   "file": "s_3.mp3",
+   "text": "The hen sat."
+  },
+  "s_4": {
+   "file": "s_4.mp3",
+   "text": "I can hop."
+  },
+  "s_5": {
+   "file": "s_5.mp3",
+   "text": "The sun is hot."
+  },
+  "s_6": {
+   "file": "s_6.mp3",
+   "text": "I see a frog."
+  },
+  "s_7": {
+   "file": "s_7.mp3",
+   "text": "My red hat."
+  },
+  "s_8": {
+   "file": "s_8.mp3",
+   "text": "The fox sat."
+  },
+  "s_9": {
+   "file": "s_9.mp3",
+   "text": "I like jam."
+  },
+  "s_10": {
+   "file": "s_10.mp3",
+   "text": "The bug is big."
+  },
+  "s_11": {
+   "file": "s_11.mp3",
+   "text": "I am ten."
+  },
+  "s_12": {
+   "file": "s_12.mp3",
+   "text": "Get the pen."
+  },
+  "s_13": {
+   "file": "s_13.mp3",
+   "text": "Tap the top."
+  },
+  "s_14": {
+   "file": "s_14.mp3",
+   "text": "Hug the pup."
+  },
+  "s_15": {
+   "file": "s_15.mp3",
+   "text": "Sit on the mat."
+  },
+  "s_16": {
+   "file": "s_16.mp3",
+   "text": "The leaf is green."
+  },
+  "s_17": {
+   "file": "s_17.mp3",
+   "text": "I see the moon."
+  },
+  "s_18": {
+   "file": "s_18.mp3",
+   "text": "The duck can run."
+  },
+  "s_19": {
+   "file": "s_19.mp3",
+   "text": "I see a red bug."
+  },
+  "s_20": {
+   "file": "s_20.mp3",
+   "text": "The cat sat on the mat."
+  },
+  "s_21": {
+   "file": "s_21.mp3",
+   "text": "The dog is in the pond."
+  },
+  "s_22": {
+   "file": "s_22.mp3",
+   "text": "The pig can dig and dig."
+  },
+  "s_23": {
+   "file": "s_23.mp3",
+   "text": "The frog can hop and jump."
+  },
+  "s_24": {
+   "file": "s_24.mp3",
+   "text": "The man has a big map."
+  },
+  "s_25": {
+   "file": "s_25.mp3",
+   "text": "The hen is in the nest."
+  },
+  "s_26": {
+   "file": "s_26.mp3",
+   "text": "My pet dog can run."
+  },
+  "s_27": {
+   "file": "s_27.mp3",
+   "text": "The fish is in the net."
+  },
+  "s_28": {
+   "file": "s_28.mp3",
+   "text": "The rat ran up the log."
+  },
+  "s_29": {
+   "file": "s_29.mp3",
+   "text": "I can see a big ship."
+  },
+  "s_30": {
+   "file": "s_30.mp3",
+   "text": "The hog sat in the fog."
+  },
+  "s_31": {
+   "file": "s_31.mp3",
+   "text": "The fox has a red hat."
+  },
+  "s_32": {
+   "file": "s_32.mp3",
+   "text": "The duck is in the rain."
+  },
+  "s_33": {
+   "file": "s_33.mp3",
+   "text": "A bug is on the leaf."
+  },
+  "s_34": {
+   "file": "s_34.mp3",
+   "text": "The men sit on the log."
+  },
+  "s_35": {
+   "file": "s_35.mp3",
+   "text": "My friend has a pet frog."
+  },
+  "s_36": {
+   "file": "s_36.mp3",
+   "text": "The queen has a big hat."
+  },
+  "s_37": {
+   "file": "s_37.mp3",
+   "text": "I can hop on the log."
+  },
+  "s_38": {
+   "file": "s_38.mp3",
+   "text": "The bat is in the tree."
+  },
+  "s_39": {
+   "file": "s_39.mp3",
+   "text": "Get the mop and the pan."
+  },
+  "s_40": {
+   "file": "s_40.mp3",
+   "text": "The jam is in the pot."
+  },
+  "s_41": {
+   "file": "s_41.mp3",
+   "text": "The egg is in the pan."
+  },
+  "s_42": {
+   "file": "s_42.mp3",
+   "text": "The pup can dig in the sun."
+  },
+  "s_43": {
+   "file": "s_43.mp3",
+   "text": "We see the moon and the sun."
+  },
+  "s_44": {
+   "file": "s_44.mp3",
+   "text": "The fox and the hog sit in the fog."
+  },
+  "s_45": {
+   "file": "s_45.mp3",
+   "text": "My friend and i can run and jump."
+  },
+  "s_46": {
+   "file": "s_46.mp3",
+   "text": "The pig can dig and the dog can run."
+  },
+  "s_47": {
+   "file": "s_47.mp3",
+   "text": "The hen sat on the egg in the nest."
+  },
+  "s_48": {
+   "file": "s_48.mp3",
+   "text": "I see a big green frog in the pond."
+  },
+  "s_49": {
+   "file": "s_49.mp3",
+   "text": "The man has a map and a red pen."
+  },
+  "s_50": {
+   "file": "s_50.mp3",
+   "text": "The rat ran up the log to the top."
+  },
+  "s_51": {
+   "file": "s_51.mp3",
+   "text": "The bug is on the leaf in the tree."
+  },
+  "s_52": {
+   "file": "s_52.mp3",
+   "text": "We can hop and run in the sun."
+  },
+  "s_53": {
+   "file": "s_53.mp3",
+   "text": "The pup has a ball and a big bat."
+  },
+  "s_54": {
+   "file": "s_54.mp3",
+   "text": "She has a red cup and a mug."
+  },
+  "s_55": {
+   "file": "s_55.mp3",
+   "text": "He can see the ship and the moon."
+  }
+ }
+}

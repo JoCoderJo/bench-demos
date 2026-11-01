@@ -1,0 +1,62 @@
+{
+ "voice": "en_US-kristin-medium",
+ "length_scale": 1.05,
+ "prompts": {
+  "play": {
+   "file": "play.mp3",
+   "text": "Tap the bars to play!"
+  },
+  "listen": {
+   "file": "listen.mp3",
+   "text": "Listen, and watch the lights."
+  },
+  "yourturn": {
+   "file": "yourturn.mp3",
+   "text": "Your turn!"
+  },
+  "yes": {
+   "file": "yes.mp3",
+   "text": "Yes!"
+  },
+  "lovely": {
+   "file": "lovely.mp3",
+   "text": "Lovely playing!"
+  },
+  "again": {
+   "file": "again.mp3",
+   "text": "Not that one. Watch the lights again."
+  },
+  "song_done": {
+   "file": "song_done.mp3",
+   "text": "You played the whole song!"
+  },
+  "beat": {
+   "file": "beat.mp3",
+   "text": "Listen to the beat."
+  },
+  "beat_done": {
+   "file": "beat_done.mp3",
+   "text": "You've got the beat!"
+  },
+  "song_twinkle": {
+   "file": "song_twinkle.mp3",
+   "text": "Twinkle, Twinkle, Little Star."
+  },
+  "song_mary": {
+   "file": "song_mary.mp3",
+   "text": "Mary Had a Little Lamb."
+  },
+  "song_hotcross": {
+   "file": "song_hotcross.mp3",
+   "text": "Hot Cross Buns."
+  },
+  "song_row": {
+   "file": "song_row.mp3",
+   "text": "Row, Row, Row Your Boat."
+  },
+  "song_rain": {
+   "file": "song_rain.mp3",
+   "text": "Rain, Rain, Go Away."
+  }
+ }
+}

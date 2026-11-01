@@ -1,0 +1,18 @@
+{
+ "voice": {
+  "play": "voice/play.mp3",
+  "listen": "voice/listen.mp3",
+  "yourturn": "voice/yourturn.mp3",
+  "yes": "voice/yes.mp3",
+  "lovely": "voice/lovely.mp3",
+  "again": "voice/again.mp3",
+  "song_done": "voice/song_done.mp3",
+  "beat": "voice/beat.mp3",
+  "beat_done": "voice/beat_done.mp3",
+  "song_twinkle": "voice/song_twinkle.mp3",
+  "song_mary": "voice/song_mary.mp3",
+  "song_hotcross": "voice/song_hotcross.mp3",
+  "song_row": "voice/song_row.mp3",
+  "song_rain": "voice/song_rain.mp3"
+ }
+}

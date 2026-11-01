@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="phonics 1.0.0+6dc98d2" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
+<html lang="en"><script id="bench-gate-loader" src="/bench-gate.js"></script><meta name="bench-release" content="phonics 1.0.0+a7bce22" id="bench-release-meta"><script id="bench-beacon-loader" src="/bench-beacon.js" defer></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Phonics Friends · the kids tablet</title>
@@ -12,8 +12,15 @@
      the apps already run without the tablet helper (settings, kids, screen time and saved things live in this
      browser's localStorage; cameras, lights and the Arduino brain are hardware on the tablet and those tiles say so).
 
+     3D (C9, D-034, 2026-10-31 — Joe: "merge the tablet 3D model and on the screen run the demo"): by default the page
+     shows the PRINTED tablet — the kit's release model of projects/tablet-101 (tools/make-tablet3d.py → tablet3d/
+     tablet.json + tablet.bin, every part placed as the assembly places it, three.js from tablet3d/three.min.js) — with
+     this same iframe sitting on the glass as a CSS 3D plane (the iframe never moves in the DOM, so it never reloads):
+     drag the body to turn it, pinch or wheel to zoom, tap a part for its name and rev, tap the screen to use the apps.
+     "Flat" is the old 2D frame (and the fallback without WebGL); ?view=flat / ?view=3d force one, the choice is kept.
+
      Published by ~/bench-app/publish-demos-site.sh as /phonics/ (public site, passcode) and /static/phonics/ (the
-     Bench, tailnet). To look at it on the laptop:
+     Bench, tailnet), tablet3d/ copied beside it. To look at it on the laptop:
          python3 tablet/build-bundle.py build/tablet-bundle
          python3 -m http.server 8777     →  http://127.0.0.1:8777/demo/tablet.html?bundle=../build/tablet-bundle/
      (file:// will not do — the launcher and the apps fetch their data.) -->
@@ -32,9 +39,28 @@
  /* the tablet: a bezel around a 1280×800 screen, scaled to fit */
  #tab{position:relative;background:var(--bezel);border-radius:22px;padding:16px;box-shadow:0 18px 50px rgba(0,0,0,.45),inset 0 0 0 1px #2a2f38;flex:none}
  #tab:before{content:"";position:absolute;left:50%;top:5px;width:7px;height:7px;margin-left:-3px;border-radius:50%;background:#1d2330;box-shadow:inset 0 0 0 1px #343b48}
+ #stage{position:relative;width:1280px;height:800px}
+ #gl{display:none;position:absolute;inset:0;width:100%;height:100%}
  #screen{position:relative;width:1280px;height:800px;overflow:hidden;border-radius:8px;background:#8fb6d6;transform-origin:0 0}
  #screen iframe{width:1280px;height:800px;border:0;display:block;background:#8fb6d6}
  #hold{width:1280px;height:800px}  /* takes the scaled size so the page flows under the frame */
+ /* 3D: the WebGL canvas under a CSS-3D layer that carries #screen (the iframe stays where it is in the DOM) */
+ body.v3d #tab{background:none;padding:0;box-shadow:none;border-radius:0}
+ body.v3d #tab:before{display:none}
+ body.v3d #stage{background:radial-gradient(ellipse at 50% 40%,rgba(120,140,170,.25),transparent 70%);border-radius:18px;overflow:hidden}
+ body.v3d #gl{display:block}
+ body.v3d #css3d{position:absolute;inset:0;overflow:hidden;touch-action:none;cursor:grab}
+ body.v3d #css3d.drag{cursor:grabbing}
+ body.v3d #camEl{position:absolute;left:0;top:0;width:100%;height:100%;transform-style:preserve-3d;pointer-events:none}
+ body.v3d #screen{position:absolute;left:0;top:0;transform-origin:50% 50%;border-radius:0;background:#000;pointer-events:auto;backface-visibility:hidden}
+ body.v3d #screen.away{visibility:hidden}
+ #lbl{position:absolute;left:12px;bottom:12px;max-width:min(420px,calc(100% - 24px));background:rgba(20,23,28,.88);color:#e6e8ea;border:1px solid #2a3039;border-radius:12px;padding:8px 12px;font-size:13px;line-height:1.35;display:none;pointer-events:none}
+ #lbl b{color:#fff}
+ #lbl .m{color:#9aa4b2}
+ body.v3d #lbl.on{display:block}
+ #hint3d{position:absolute;right:12px;top:10px;color:#9aa4b2;font-size:12px;background:rgba(20,23,28,.55);padding:4px 9px;border-radius:999px;display:none;pointer-events:none}
+ body.v3d #hint3d{display:block}
+ .tools button.on{border-color:var(--brass);color:var(--brass)}
  /* phone upright: the tablet as big as it goes in the top half, the app notes under it; sideways (body.full): the
     tablet takes the whole window, header gone, the notes are a scroll away. fit() sizes it; the bezel thins to 6px */
  body.portrait #tab,body.full #tab{padding:6px;border-radius:12px}
@@ -58,12 +84,16 @@
 <body>
 <header>
   <h1>The kids tablet</h1>
-  <span class="sub">every app, as it runs on the 10.1-inch tablet — tap a tile</span>
+  <span class="sub" id="sub">the printed tablet with every app running on its screen — tap a tile</span>
   <span class="sp"></span>
   <a class="lnk" id="full" href="tablet/index.html" target="_blank" rel="noopener">Open full window ↗</a>
 </header>
 
-<div id="hold"><div id="tab"><div id="screen"><iframe id="fr" title="the kids tablet"></iframe></div></div></div>
+<div id="hold"><div id="tab"><div id="stage">
+  <canvas id="gl"></canvas>
+  <div id="css3d"><div id="camEl"><div id="screen"><iframe id="fr" title="the kids tablet"></iframe></div></div>
+    <div id="lbl"></div><div id="hint3d">drag to turn · pinch to zoom · tap a part</div></div>
+</div></div></div>
 
 <div class="foot">
   <div class="note"><b>Faces at the top</b> switch kids (each kid has their own apps and daily minutes). <b>Hold a face</b> for the parent settings.
@@ -72,8 +102,10 @@
   <div class="chips" id="chips"></div>
   <div class="tools">
     <span>Testing one app? The chips open it on its own, full window, with no launcher around it.</span>
+    <button id="view" type="button">Flat view</button>
     <button id="reset" type="button">Reset this demo</button>
     <span class="ver" id="ver"></span>
+    <span class="ver" id="ver3d"></span>
   </div>
 </div>
 
@@ -89,9 +121,17 @@
   // fit the 1280×800 (16:10) screen to the window: upright = as big as it goes in the top half, sideways on a phone or
   // tablet = the whole window. Touch screens may scale past 1:1; a desktop stops at 1:1 (no blur, no overflow).
   const W=1280,H=800, touch=matchMedia('(pointer:coarse)').matches;
+  const T3={on:false,ready:false,loading:false,parts:0,head:'',sel:null};window.T3=T3;   // 3D state (block below); fit() reads it
   function fit(){
     const vw=document.documentElement.clientWidth, vh=window.innerHeight, portrait=vw<vh, full=!portrait&&(touch||vh<=560);
     document.body.classList.toggle('portrait',portrait); document.body.classList.toggle('full',full);
+    if(T3.on){   // 3D: the stage takes the room the frame had; the screen's size comes from the camera
+      const w=full?vw:vw-20, h=full?vh:portrait?Math.round(vh*.6):Math.max(360,vh-$('hold').offsetTop-12);
+      for(const id of ['stage','tab','hold']){$(id).style.width=w+'px';$(id).style.height=h+'px';}
+      $('tab').style.marginTop='';$('screen').style.transform='';
+      resize3d(w,h);return;
+    }
+    for(const id of ['stage']){$(id).style.width='';$(id).style.height='';}
     const pad=(portrait||full)?12:32;   // both bezels, as #tab's padding in the CSS above
     const avW=full?vw:vw-20, avH=full?vh:portrait?vh/2:vh-$('hold').offsetTop-12;
     let s=Math.min((avW-pad)/W,(avH-pad)/H); if(!touch)s=Math.min(1,s); s=Math.max(.1,s);
@@ -127,15 +167,112 @@
     try{const i=await jget(B+'BUNDLE.json');$('ver').textContent='bundle '+(i.version||'')+(i.sha?' · '+i.sha.slice(0,12):'')+(i.apps?' · '+i.apps.length+' apps':'');}catch(e){}
   })();
 
+  // ===== 3D (C9, D-034): the printed tablet with this iframe on its glass ==========================================
+  const stage=$('stage'),css3d=$('css3d'),camEl=$('camEl'),scr=$('screen'),glc=$('gl'),lbl=$('lbl');
+  let R,scene,cam,grp,screenObj,meshes=[],need=true,raf=0;
+  const C={az:0,pol:1.42,dist:640,vaz:0,vpol:0,vd:0,tx:0,ty:-4,tz:8};     // orbit: az 0 = in front, pol π/2 = level
+  const HOME={az:0,pol:1.42,dist:640};
+  function webgl(){try{const c=document.createElement('canvas');return !!(window.WebGLRenderingContext&&(c.getContext('webgl')||c.getContext('experimental-webgl')));}catch(e){return false;}}
+  function script(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('script '+src));document.head.appendChild(s);});}
+  const eps=v=>Math.abs(v)<1e-10?0:v;
+  function camCSS(m){const e=m.elements;return 'matrix3d('+[eps(e[0]),eps(-e[1]),eps(e[2]),eps(e[3]),eps(e[4]),eps(-e[5]),eps(e[6]),eps(e[7]),eps(e[8]),eps(-e[9]),eps(e[10]),eps(e[11]),eps(e[12]),eps(-e[13]),eps(e[14]),eps(e[15])].join(',')+')';}
+  function objCSS(m){const e=m.elements;return 'translate(-50%,-50%) matrix3d('+[eps(e[0]),eps(e[1]),eps(e[2]),eps(e[3]),eps(-e[4]),eps(-e[5]),eps(-e[6]),eps(-e[7]),eps(e[8]),eps(e[9]),eps(e[10]),eps(e[11]),eps(e[12]),eps(e[13]),eps(e[14]),eps(e[15])].join(',')+')';}
+  async function load3d(){
+    if(T3.ready||T3.loading)return;T3.loading=true;lbl.className='on';lbl.innerHTML='loading the tablet model…';
+    try{
+      if(!window.THREE)await script('tablet3d/three.min.js');
+      const man=await jget('tablet3d/tablet.json');
+      const bin=await (await fetch('tablet3d/tablet.bin')).arrayBuffer();
+      R=new THREE.WebGLRenderer({canvas:glc,antialias:true,alpha:true});R.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+      scene=new THREE.Scene();cam=new THREE.PerspectiveCamera(30,1,10,6000);
+      scene.add(new THREE.HemisphereLight(0xffffff,0x3a4556,.85));
+      const d1=new THREE.DirectionalLight(0xffffff,.75);d1.position.set(-250,350,-600);scene.add(d1);
+      const d2=new THREE.DirectionalLight(0xffffff,.3);d2.position.set(300,120,600);scene.add(d2);
+      grp=new THREE.Group();scene.add(grp);
+      for(const p of man.parts){
+        const g=new THREE.BufferGeometry();
+        g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(bin,p.v.off,p.v.n*3),3));
+        g.setIndex(new THREE.BufferAttribute(new Uint32Array(bin,p.i.off,p.i.n*3),1));
+        const ref=p.kind!=='print', glass=p.name==='panel_ref';
+        const mat=new THREE.MeshStandardMaterial({color:new THREE.Color(p.color),flatShading:true,roughness:glass?.3:.62,metalness:ref?.12:.02});
+        for(const inst of p.instances){const m=new THREE.Mesh(g,mat);m.matrixAutoUpdate=false;m.matrix.fromArray(inst);m.userData=p;grp.add(m);meshes.push(m);}
+      }
+      // the live screen: this page's 1280×800 frame scaled to the panel's active area, on the glass front (z=0), facing -z
+      screenObj=new THREE.Object3D();const sc=man.glass.va_w/W;screenObj.scale.set(sc,sc,sc);screenObj.position.set(0,0,-0.4);screenObj.rotation.y=Math.PI;grp.add(screenObj);
+      // a soft shadow blob on the table under it
+      const cv=document.createElement('canvas');cv.width=cv.height=256;const cx=cv.getContext('2d');const gr=cx.createRadialGradient(128,128,10,128,128,128);gr.addColorStop(0,'rgba(0,0,0,.55)');gr.addColorStop(1,'rgba(0,0,0,0)');cx.fillStyle=gr;cx.fillRect(0,0,256,256);
+      const sh=new THREE.Mesh(new THREE.PlaneGeometry(420,260),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.set(0,man.bbox[0][1]-6,30);scene.add(sh);
+      grp.rotation.x=0.2;   // leans back as it does on its kickstand
+      T3.ready=true;T3.parts=man.parts.length;T3.head=man.head;
+      $('ver3d').textContent='model '+(man.model_rev||'')+(man.head?' · '+man.head:'')+' · '+man.parts.length+' parts · '+Math.round(man.faces/1000)+'k faces';
+      lbl.className='';fit();need=true;loop();
+    }catch(e){lbl.innerHTML='3D view unavailable here ('+E(e.message||e)+') — showing the flat view';setTimeout(()=>setView('flat',false),1500);T3.loading=false;}
+  }
+  function resize3d(w,h){if(!R)return;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();need=true;loop();}
+  function placeCam(){const r=C.dist,p=C.pol;cam.position.set(C.tx+r*Math.sin(p)*Math.sin(C.az),C.ty+r*Math.cos(p),C.tz-r*Math.sin(p)*Math.cos(C.az));cam.lookAt(C.tx,C.ty,C.tz);cam.updateMatrixWorld();}
+  function render3d(){
+    placeCam();R.render(scene,cam);
+    const w=stage.clientWidth,h=stage.clientHeight,fov=cam.projectionMatrix.elements[5]*h/2;
+    css3d.style.perspective=fov+'px';
+    camEl.style.transform='translateZ('+fov+'px)'+camCSS(cam.matrixWorldInverse)+' translate('+(w/2)+'px,'+(h/2)+'px)';
+    screenObj.updateWorldMatrix(true,false);scr.style.transform=objCSS(screenObj.matrixWorld);
+    const n=new THREE.Vector3(0,0,-1).applyQuaternion(grp.quaternion), to=cam.position.clone().sub(screenObj.getWorldPosition(new THREE.Vector3()));
+    scr.classList.toggle('away',n.dot(to)<0.06*to.length());   // seen from behind or edge-on: the DOM layer would float over the shell
+  }
+  function loop(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;if(!T3.on||!T3.ready)return;
+    const moving=Math.abs(C.vaz)>1e-4||Math.abs(C.vpol)>1e-4||Math.abs(C.vd)>1e-3;
+    if(moving){C.az+=C.vaz;C.pol=Math.min(2.9,Math.max(.25,C.pol+C.vpol));C.dist=Math.min(1600,Math.max(260,C.dist*(1+C.vd)));C.vaz*=.86;C.vpol*=.86;C.vd*=.8;need=true;}
+    if(need){render3d();need=false;}
+    if(moving)loop();});}
+  // orbit by pointer on the stage (the iframe keeps its own touches); pinch = zoom; a still tap names a part
+  // a drag turns the model by the finger's travel (ROT rad per px); the last move's speed carries on as a short glide after release
+  const ptr=new Map();let down=null,pinch0=0,fling={az:0,pol:0,t:0};const ROT=0.0045;
+  css3d.addEventListener('pointerdown',e=>{if(!T3.on)return;css3d.setPointerCapture(e.pointerId);ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    C.vaz=C.vpol=0;fling={az:0,pol:0,t:0};
+    if(ptr.size===1)down={x:e.clientX,y:e.clientY,t:Date.now(),moved:false};else{down=null;const [a,b]=[...ptr.values()];pinch0=Math.hypot(a.x-b.x,a.y-b.y);}
+    css3d.classList.add('drag');});
+  css3d.addEventListener('pointermove',e=>{if(!ptr.has(e.pointerId))return;const q=ptr.get(e.pointerId);const dx=e.clientX-q.x,dy=e.clientY-q.y;ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(ptr.size===1){if(down&&Math.hypot(e.clientX-down.x,e.clientY-down.y)>6)down.moved=true;
+      C.az-=dx*ROT;C.pol=Math.min(2.9,Math.max(.25,C.pol-dy*ROT));fling={az:-dx*ROT,pol:-dy*ROT,t:Date.now()};need=true;loop();}
+    else if(ptr.size===2){const [a,b]=[...ptr.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);if(pinch0>0)C.vd=-(d-pinch0)/pinch0*.9;pinch0=d;loop();}});
+  const up=e=>{if(!ptr.has(e.pointerId))return;ptr.delete(e.pointerId);if(!ptr.size)css3d.classList.remove('drag');
+    if(down&&!down.moved&&Date.now()-down.t<500&&T3.ready)pickPart(e);
+    else if(!ptr.size&&Date.now()-fling.t<80){C.vaz=fling.az*.5;C.vpol=fling.pol*.5;loop();}
+    down=null;};
+  css3d.addEventListener('pointerup',up);css3d.addEventListener('pointercancel',up);
+  css3d.addEventListener('wheel',e=>{if(!T3.on)return;e.preventDefault();C.vd=Math.sign(e.deltaY)*.08;loop();},{passive:false});
+  css3d.addEventListener('dblclick',()=>{Object.assign(C,HOME);C.vaz=C.vpol=C.vd=0;need=true;loop();});
+  function pickPart(e){const r=stage.getBoundingClientRect();const v=new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
+    const rc=new THREE.Raycaster();rc.setFromCamera(v,cam);const hit=rc.intersectObjects(meshes,false)[0];
+    if(T3.sel){T3.sel.material.emissive.setHex(0);T3.sel=null;}
+    if(!hit){lbl.className='';need=true;loop();return;}
+    const p=hit.object.userData;T3.sel=hit.object;hit.object.material.emissive.setHex(0x3a2a00);
+    const name=p.name.replace(/_ref$/,'').replace(/_/g,' ');
+    lbl.innerHTML='<b>'+E(name)+'</b>'+(p.kind==='print'?' <span class="m">· printed, '+E(p.material||'')+(p.stamp!=null?', rev '+p.stamp:'')+(p.qty>1?', ×'+p.qty:'')+'</span>':' <span class="m">· bought part, drawn at its size</span>')
+      +(p.size?'<br><span class="m">'+p.size.map(x=>Math.round(x)).join(' × ')+' mm</span>':'')+(p.note?'<br>'+E(p.note):'');
+    lbl.className='on';need=true;loop();}
+  function setView(mode,remember){
+    T3.on=mode==='3d'&&webgl();
+    document.body.classList.toggle('v3d',T3.on);
+    $('view').textContent=T3.on?'Flat view':'3D view';$('view').classList.toggle('on',T3.on);
+    $('sub').textContent=T3.on?'the printed tablet with every app running on its screen — drag to turn it, tap a tile':'every app, as it runs on the 10.1-inch tablet — tap a tile';
+    if(remember!==false){try{localStorage.setItem('kt.demo.view',T3.on?'3d':'flat');}catch(e){}}
+    if(T3.on){if(T3.ready){fit();need=true;loop();}else{fit();load3d();}}else{scr.classList.remove('away');lbl.className='';fit();}
+  }
+  $('view').onclick=()=>setView(T3.on?'flat':'3d');
+  T3.setView=setView;T3.az=()=>C.az;
+  { let want=q.get('view');if(!want){try{want=localStorage.getItem('kt.demo.view');}catch(e){}}
+    setView(want||'3d',false); }
+
   // wipe what the launcher and the apps keep in this browser (kt.*, draw.*, camera.*, per-kid progress …)
   $('reset').onclick=()=>{
     if(!confirm('Forget this browser\'s kids, settings, screen time and saved pictures for the demo?'))return;
-    try{localStorage.clear();sessionStorage.removeItem('kt.session');}catch(e){}
+    try{const v=localStorage.getItem('kt.demo.view');localStorage.clear();sessionStorage.removeItem('kt.session');if(v)localStorage.setItem('kt.demo.view',v);}catch(e){}
     location.reload();
   };
 })();
 </script>
-<script id="bench-release">window.BENCH_RELEASE="phonics 1.0.0+6dc98d2";</script>
+<script id="bench-release">window.BENCH_RELEASE="phonics 1.0.0+a7bce22";</script>
 <a id="bench-release-pill" href="/releases.html#phonics" title="release notes" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483000;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:#9aa4b2;background:rgba(20,23,28,.72);border:1px solid #2a3039;border-radius:999px;padding:5px 8px;text-decoration:none;opacity:.85">v1.0.0</a><!-- Public demo feedback bubble. Injected into every page of the demo site by
      publish-demos-site.sh. Posts to Netlify Forms (static host, no backend, nothing
      touching the Bench or the tailnet). Submissions land in Netlify → Forms.

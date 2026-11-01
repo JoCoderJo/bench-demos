@@ -1,0 +1,2470 @@
+{
+ "lines": [
+  {
+   "id": "s0",
+   "text": "i see a cat.",
+   "words": [
+    {
+     "w": "i",
+     "clip": "voice/w_i.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "see",
+     "clip": "voice/w_see.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "cat",
+     "clip": "audio/words/cat.mp3",
+     "tier": "human",
+     "pic": "🐱"
+    }
+   ],
+   "clip": "voice/s_0.mp3",
+   "pics": "🐱",
+   "level": 1
+  },
+  {
+   "id": "s1",
+   "text": "the dog ran.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "dog",
+     "clip": "audio/words/dog.mp3",
+     "tier": "human",
+     "pic": "🐶"
+    },
+    {
+     "w": "ran",
+     "clip": "audio/words/ran.mp3",
+     "tier": "human",
+     "pic": "🏃"
+    }
+   ],
+   "clip": "voice/s_1.mp3",
+   "pics": "🐶🏃",
+   "level": 1
+  },
+  {
+   "id": "s2",
+   "text": "a big pig.",
+   "words": [
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "big",
+     "clip": "audio/words/big.mp3",
+     "tier": "human",
+     "pic": "🐘"
+    },
+    {
+     "w": "pig",
+     "clip": "audio/words/pig.mp3",
+     "tier": "human",
+     "pic": "🐷"
+    }
+   ],
+   "clip": "voice/s_2.mp3",
+   "pics": "🐘🐷",
+   "level": 1
+  },
+  {
+   "id": "s3",
+   "text": "the hen sat.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "hen",
+     "clip": "audio/words/hen.mp3",
+     "tier": "human",
+     "pic": "🐔"
+    },
+    {
+     "w": "sat",
+     "clip": "audio/words/sat.mp3",
+     "tier": "human",
+     "pic": "🪑"
+    }
+   ],
+   "clip": "voice/s_3.mp3",
+   "pics": "🐔🪑",
+   "level": 1
+  },
+  {
+   "id": "s4",
+   "text": "i can hop.",
+   "words": [
+    {
+     "w": "i",
+     "clip": "voice/w_i.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "can",
+     "clip": "audio/words/can.mp3",
+     "tier": "human",
+     "pic": "🥫"
+    },
+    {
+     "w": "hop",
+     "clip": "audio/words/hop.mp3",
+     "tier": "human",
+     "pic": "🐰"
+    }
+   ],
+   "clip": "voice/s_4.mp3",
+   "pics": "🥫🐰",
+   "level": 1
+  },
+  {
+   "id": "s5",
+   "text": "the sun is hot.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "sun",
+     "clip": "audio/words/sun.mp3",
+     "tier": "human",
+     "pic": "☀️"
+    },
+    {
+     "w": "is",
+     "clip": "voice/w_is.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "hot",
+     "clip": "audio/words/hot.mp3",
+     "tier": "human",
+     "pic": "🔥"
+    }
+   ],
+   "clip": "voice/s_5.mp3",
+   "pics": "☀️🔥",
+   "level": 1
+  },
+  {
+   "id": "s6",
+   "text": "i see a frog.",
+   "words": [
+    {
+     "w": "i",
+     "clip": "voice/w_i.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "see",
+     "clip": "voice/w_see.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "frog",
+     "clip": "audio/words/frog.mp3",
+     "tier": "human",
+     "pic": "🐸"
+    }
+   ],
+   "clip": "voice/s_6.mp3",
+   "pics": "🐸",
+   "level": 1
+  },
+  {
+   "id": "s7",
+   "text": "my red hat.",
+   "words": [
+    {
+     "w": "my",
+     "clip": "voice/w_my.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "red",
+     "clip": "audio/words/red.mp3",
+     "tier": "human",
+     "pic": "🔴"
+    },
+    {
+     "w": "hat",
+     "clip": "audio/words/hat.mp3",
+     "tier": "human",
+     "pic": "🎩"
+    }
+   ],
+   "clip": "voice/s_7.mp3",
+   "pics": "🔴🎩",
+   "level": 1
+  },
+  {
+   "id": "s8",
+   "text": "the fox sat.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "fox",
+     "clip": "audio/words/fox.mp3",
+     "tier": "human",
+     "pic": "🦊"
+    },
+    {
+     "w": "sat",
+     "clip": "audio/words/sat.mp3",
+     "tier": "human",
+     "pic": "🪑"
+    }
+   ],
+   "clip": "voice/s_8.mp3",
+   "pics": "🦊🪑",
+   "level": 1
+  },
+  {
+   "id": "s9",
+   "text": "i like jam.",
+   "words": [
+    {
+     "w": "i",
+     "clip": "voice/w_i.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "like",
+     "clip": "voice/w_like.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "jam",
+     "clip": "audio/words/jam.mp3",
+     "tier": "human",
+     "pic": "🍯"
+    }
+   ],
+   "clip": "voice/s_9.mp3",
+   "pics": "🍯",
+   "level": 1
+  },
+  {
+   "id": "s10",
+   "text": "the bug is big.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "bug",
+     "clip": "audio/words/bug.mp3",
+     "tier": "human",
+     "pic": "🐛"
+    },
+    {
+     "w": "is",
+     "clip": "voice/w_is.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "big",
+     "clip": "audio/words/big.mp3",
+     "tier": "human",
+     "pic": "🐘"
+    }
+   ],
+   "clip": "voice/s_10.mp3",
+   "pics": "🐛🐘",
+   "level": 1
+  },
+  {
+   "id": "s11",
+   "text": "i am ten.",
+   "words": [
+    {
+     "w": "i",
+     "clip": "voice/w_i.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "am",
+     "clip": "voice/w_am.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "ten",
+     "clip": "audio/words/ten.mp3",
+     "tier": "human",
+     "pic": "🔟"
+    }
+   ],
+   "clip": "voice/s_11.mp3",
+   "pics": "🔟",
+   "level": 1
+  },
+  {
+   "id": "s12",
+   "text": "get the pen.",
+   "words": [
+    {
+     "w": "get",
+     "clip": "audio/words/get.mp3",
+     "tier": "human",
+     "pic": "🤲"
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "pen",
+     "clip": "audio/words/pen.mp3",
+     "tier": "human",
+     "pic": "🖊️"
+    }
+   ],
+   "clip": "voice/s_12.mp3",
+   "pics": "🤲🖊️",
+   "level": 1
+  },
+  {
+   "id": "s13",
+   "text": "tap the top.",
+   "words": [
+    {
+     "w": "tap",
+     "clip": "audio/words/tap.mp3",
+     "tier": "human",
+     "pic": "🚰"
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "top",
+     "clip": "audio/words/top.mp3",
+     "tier": "human",
+     "pic": "🔝"
+    }
+   ],
+   "clip": "voice/s_13.mp3",
+   "pics": "🚰🔝",
+   "level": 1
+  },
+  {
+   "id": "s14",
+   "text": "hug the pup.",
+   "words": [
+    {
+     "w": "hug",
+     "clip": "audio/words/hug.mp3",
+     "tier": "human",
+     "pic": "🤗"
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "pup",
+     "clip": "audio/words/pup.mp3",
+     "tier": "human",
+     "pic": "🐶"
+    }
+   ],
+   "clip": "voice/s_14.mp3",
+   "pics": "🤗🐶",
+   "level": 1
+  },
+  {
+   "id": "s15",
+   "text": "sit on the mat.",
+   "words": [
+    {
+     "w": "sit",
+     "clip": "audio/words/sit.mp3",
+     "tier": "human",
+     "pic": "🪑"
+    },
+    {
+     "w": "on",
+     "clip": "voice/w_on.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "mat",
+     "clip": "audio/words/mat.mp3",
+     "tier": "human",
+     "pic": "🟫"
+    }
+   ],
+   "clip": "voice/s_15.mp3",
+   "pics": "🪑🟫",
+   "level": 1
+  },
+  {
+   "id": "s16",
+   "text": "the leaf is green.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "leaf",
+     "clip": "audio/words/leaf.mp3",
+     "tier": "human",
+     "pic": "🍃"
+    },
+    {
+     "w": "is",
+     "clip": "voice/w_is.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "green",
+     "clip": "audio/words/green.mp3",
+     "tier": "human",
+     "pic": "🟢"
+    }
+   ],
+   "clip": "voice/s_16.mp3",
+   "pics": "🍃🟢",
+   "level": 1
+  },
+  {
+   "id": "s17",
+   "text": "i see the moon.",
+   "words": [
+    {
+     "w": "i",
+     "clip": "voice/w_i.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "see",
+     "clip": "voice/w_see.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "moon",
+     "clip": "audio/words/moon.mp3",
+     "tier": "human",
+     "pic": "🌙"
+    }
+   ],
+   "clip": "voice/s_17.mp3",
+   "pics": "🌙",
+   "level": 1
+  },
+  {
+   "id": "s18",
+   "text": "the duck can run.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "duck",
+     "clip": "audio/words/duck.mp3",
+     "tier": "human",
+     "pic": "🦆"
+    },
+    {
+     "w": "can",
+     "clip": "audio/words/can.mp3",
+     "tier": "human",
+     "pic": "🥫"
+    },
+    {
+     "w": "run",
+     "clip": "audio/words/run.mp3",
+     "tier": "human",
+     "pic": "🏃"
+    }
+   ],
+   "clip": "voice/s_18.mp3",
+   "pics": "🦆🥫🏃",
+   "level": 1
+  },
+  {
+   "id": "s19",
+   "text": "i see a red bug.",
+   "words": [
+    {
+     "w": "i",
+     "clip": "voice/w_i.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "see",
+     "clip": "voice/w_see.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "red",
+     "clip": "audio/words/red.mp3",
+     "tier": "human",
+     "pic": "🔴"
+    },
+    {
+     "w": "bug",
+     "clip": "audio/words/bug.mp3",
+     "tier": "human",
+     "pic": "🐛"
+    }
+   ],
+   "clip": "voice/s_19.mp3",
+   "pics": "🔴🐛",
+   "level": 2
+  },
+  {
+   "id": "s20",
+   "text": "the cat sat on the mat.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "cat",
+     "clip": "audio/words/cat.mp3",
+     "tier": "human",
+     "pic": "🐱"
+    },
+    {
+     "w": "sat",
+     "clip": "audio/words/sat.mp3",
+     "tier": "human",
+     "pic": "🪑"
+    },
+    {
+     "w": "on",
+     "clip": "voice/w_on.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "mat",
+     "clip": "audio/words/mat.mp3",
+     "tier": "human",
+     "pic": "🟫"
+    }
+   ],
+   "clip": "voice/s_20.mp3",
+   "pics": "🐱🪑🟫",
+   "level": 2
+  },
+  {
+   "id": "s21",
+   "text": "the dog is in the pond.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "dog",
+     "clip": "audio/words/dog.mp3",
+     "tier": "human",
+     "pic": "🐶"
+    },
+    {
+     "w": "is",
+     "clip": "voice/w_is.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "in",
+     "clip": "voice/w_in.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "pond",
+     "clip": "audio/words/pond.mp3",
+     "tier": "human",
+     "pic": "💧"
+    }
+   ],
+   "clip": "voice/s_21.mp3",
+   "pics": "🐶💧",
+   "level": 2
+  },
+  {
+   "id": "s22",
+   "text": "the pig can dig and dig.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "pig",
+     "clip": "audio/words/pig.mp3",
+     "tier": "human",
+     "pic": "🐷"
+    },
+    {
+     "w": "can",
+     "clip": "audio/words/can.mp3",
+     "tier": "human",
+     "pic": "🥫"
+    },
+    {
+     "w": "dig",
+     "clip": "audio/words/dig.mp3",
+     "tier": "human",
+     "pic": "⛏️"
+    },
+    {
+     "w": "and",
+     "clip": "voice/w_and.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "dig",
+     "clip": "audio/words/dig.mp3",
+     "tier": "human",
+     "pic": "⛏️"
+    }
+   ],
+   "clip": "voice/s_22.mp3",
+   "pics": "🐷🥫⛏️",
+   "level": 2
+  },
+  {
+   "id": "s23",
+   "text": "the frog can hop and jump.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "frog",
+     "clip": "audio/words/frog.mp3",
+     "tier": "human",
+     "pic": "🐸"
+    },
+    {
+     "w": "can",
+     "clip": "audio/words/can.mp3",
+     "tier": "human",
+     "pic": "🥫"
+    },
+    {
+     "w": "hop",
+     "clip": "audio/words/hop.mp3",
+     "tier": "human",
+     "pic": "🐰"
+    },
+    {
+     "w": "and",
+     "clip": "voice/w_and.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "jump",
+     "clip": "audio/words/jump.mp3",
+     "tier": "human",
+     "pic": "🤸"
+    }
+   ],
+   "clip": "voice/s_23.mp3",
+   "pics": "🐸🥫🐰🤸",
+   "level": 2
+  },
+  {
+   "id": "s24",
+   "text": "the man has a big map.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "man",
+     "clip": "audio/words/man.mp3",
+     "tier": "human",
+     "pic": "👨"
+    },
+    {
+     "w": "has",
+     "clip": "voice/w_has.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "big",
+     "clip": "audio/words/big.mp3",
+     "tier": "human",
+     "pic": "🐘"
+    },
+    {
+     "w": "map",
+     "clip": "audio/words/map.mp3",
+     "tier": "human",
+     "pic": "🗺️"
+    }
+   ],
+   "clip": "voice/s_24.mp3",
+   "pics": "👨🐘🗺️",
+   "level": 2
+  },
+  {
+   "id": "s25",
+   "text": "the hen is in the nest.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "hen",
+     "clip": "audio/words/hen.mp3",
+     "tier": "human",
+     "pic": "🐔"
+    },
+    {
+     "w": "is",
+     "clip": "voice/w_is.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "in",
+     "clip": "voice/w_in.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "nest",
+     "clip": "audio/words/nest.mp3",
+     "tier": "human",
+     "pic": "🪺"
+    }
+   ],
+   "clip": "voice/s_25.mp3",
+   "pics": "🐔🪺",
+   "level": 2
+  },
+  {
+   "id": "s26",
+   "text": "my pet dog can run.",
+   "words": [
+    {
+     "w": "my",
+     "clip": "voice/w_my.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "pet",
+     "clip": "audio/words/pet.mp3",
+     "tier": "human",
+     "pic": "🐶"
+    },
+    {
+     "w": "dog",
+     "clip": "audio/words/dog.mp3",
+     "tier": "human",
+     "pic": "🐶"
+    },
+    {
+     "w": "can",
+     "clip": "audio/words/can.mp3",
+     "tier": "human",
+     "pic": "🥫"
+    },
+    {
+     "w": "run",
+     "clip": "audio/words/run.mp3",
+     "tier": "human",
+     "pic": "🏃"
+    }
+   ],
+   "clip": "voice/s_26.mp3",
+   "pics": "🐶🥫🏃",
+   "level": 2
+  },
+  {
+   "id": "s27",
+   "text": "the fish is in the net.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "fish",
+     "clip": "audio/words/fish.mp3",
+     "tier": "human",
+     "pic": "🐟"
+    },
+    {
+     "w": "is",
+     "clip": "voice/w_is.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "in",
+     "clip": "voice/w_in.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "net",
+     "clip": "audio/words/net.mp3",
+     "tier": "human",
+     "pic": "🥅"
+    }
+   ],
+   "clip": "voice/s_27.mp3",
+   "pics": "🐟🥅",
+   "level": 2
+  },
+  {
+   "id": "s28",
+   "text": "the rat ran up the log.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "rat",
+     "clip": "audio/words/rat.mp3",
+     "tier": "human",
+     "pic": "🐀"
+    },
+    {
+     "w": "ran",
+     "clip": "audio/words/ran.mp3",
+     "tier": "human",
+     "pic": "🏃"
+    },
+    {
+     "w": "up",
+     "clip": "voice/w_up.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "log",
+     "clip": "audio/words/log.mp3",
+     "tier": "human",
+     "pic": "🪵"
+    }
+   ],
+   "clip": "voice/s_28.mp3",
+   "pics": "🐀🏃🪵",
+   "level": 2
+  },
+  {
+   "id": "s29",
+   "text": "i can see a big ship.",
+   "words": [
+    {
+     "w": "i",
+     "clip": "voice/w_i.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "can",
+     "clip": "audio/words/can.mp3",
+     "tier": "human",
+     "pic": "🥫"
+    },
+    {
+     "w": "see",
+     "clip": "voice/w_see.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "big",
+     "clip": "audio/words/big.mp3",
+     "tier": "human",
+     "pic": "🐘"
+    },
+    {
+     "w": "ship",
+     "clip": "audio/words/ship.mp3",
+     "tier": "human",
+     "pic": "🚢"
+    }
+   ],
+   "clip": "voice/s_29.mp3",
+   "pics": "🥫🐘🚢",
+   "level": 2
+  },
+  {
+   "id": "s30",
+   "text": "the hog sat in the fog.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "hog",
+     "clip": "audio/words/hog.mp3",
+     "tier": "human",
+     "pic": "🐗"
+    },
+    {
+     "w": "sat",
+     "clip": "audio/words/sat.mp3",
+     "tier": "human",
+     "pic": "🪑"
+    },
+    {
+     "w": "in",
+     "clip": "voice/w_in.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "fog",
+     "clip": "audio/words/fog.mp3",
+     "tier": "human",
+     "pic": "🌫️"
+    }
+   ],
+   "clip": "voice/s_30.mp3",
+   "pics": "🐗🪑🌫️",
+   "level": 2
+  },
+  {
+   "id": "s31",
+   "text": "the fox has a red hat.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "fox",
+     "clip": "audio/words/fox.mp3",
+     "tier": "human",
+     "pic": "🦊"
+    },
+    {
+     "w": "has",
+     "clip": "voice/w_has.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "red",
+     "clip": "audio/words/red.mp3",
+     "tier": "human",
+     "pic": "🔴"
+    },
+    {
+     "w": "hat",
+     "clip": "audio/words/hat.mp3",
+     "tier": "human",
+     "pic": "🎩"
+    }
+   ],
+   "clip": "voice/s_31.mp3",
+   "pics": "🦊🔴🎩",
+   "level": 2
+  },
+  {
+   "id": "s32",
+   "text": "the duck is in the rain.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "duck",
+     "clip": "audio/words/duck.mp3",
+     "tier": "human",
+     "pic": "🦆"
+    },
+    {
+     "w": "is",
+     "clip": "voice/w_is.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "in",
+     "clip": "voice/w_in.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "rain",
+     "clip": "audio/words/rain.mp3",
+     "tier": "human",
+     "pic": "🌧️"
+    }
+   ],
+   "clip": "voice/s_32.mp3",
+   "pics": "🦆🌧️",
+   "level": 2
+  },
+  {
+   "id": "s33",
+   "text": "a bug is on the leaf.",
+   "words": [
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "bug",
+     "clip": "audio/words/bug.mp3",
+     "tier": "human",
+     "pic": "🐛"
+    },
+    {
+     "w": "is",
+     "clip": "voice/w_is.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "on",
+     "clip": "voice/w_on.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "leaf",
+     "clip": "audio/words/leaf.mp3",
+     "tier": "human",
+     "pic": "🍃"
+    }
+   ],
+   "clip": "voice/s_33.mp3",
+   "pics": "🐛🍃",
+   "level": 2
+  },
+  {
+   "id": "s34",
+   "text": "the men sit on the log.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "men",
+     "clip": "audio/words/men.mp3",
+     "tier": "human",
+     "pic": "👬"
+    },
+    {
+     "w": "sit",
+     "clip": "audio/words/sit.mp3",
+     "tier": "human",
+     "pic": "🪑"
+    },
+    {
+     "w": "on",
+     "clip": "voice/w_on.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "log",
+     "clip": "audio/words/log.mp3",
+     "tier": "human",
+     "pic": "🪵"
+    }
+   ],
+   "clip": "voice/s_34.mp3",
+   "pics": "👬🪑🪵",
+   "level": 2
+  },
+  {
+   "id": "s35",
+   "text": "my friend has a pet frog.",
+   "words": [
+    {
+     "w": "my",
+     "clip": "voice/w_my.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "friend",
+     "clip": "audio/words/friend.mp3",
+     "tier": "human",
+     "pic": "🧑‍🤝‍🧑"
+    },
+    {
+     "w": "has",
+     "clip": "voice/w_has.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "pet",
+     "clip": "audio/words/pet.mp3",
+     "tier": "human",
+     "pic": "🐶"
+    },
+    {
+     "w": "frog",
+     "clip": "audio/words/frog.mp3",
+     "tier": "human",
+     "pic": "🐸"
+    }
+   ],
+   "clip": "voice/s_35.mp3",
+   "pics": "🧑‍🤝‍🧑🐶🐸",
+   "level": 2
+  },
+  {
+   "id": "s36",
+   "text": "the queen has a big hat.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "queen",
+     "clip": "audio/words/queen.mp3",
+     "tier": "human",
+     "pic": "👸"
+    },
+    {
+     "w": "has",
+     "clip": "voice/w_has.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "big",
+     "clip": "audio/words/big.mp3",
+     "tier": "human",
+     "pic": "🐘"
+    },
+    {
+     "w": "hat",
+     "clip": "audio/words/hat.mp3",
+     "tier": "human",
+     "pic": "🎩"
+    }
+   ],
+   "clip": "voice/s_36.mp3",
+   "pics": "👸🐘🎩",
+   "level": 2
+  },
+  {
+   "id": "s37",
+   "text": "i can hop on the log.",
+   "words": [
+    {
+     "w": "i",
+     "clip": "voice/w_i.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "can",
+     "clip": "audio/words/can.mp3",
+     "tier": "human",
+     "pic": "🥫"
+    },
+    {
+     "w": "hop",
+     "clip": "audio/words/hop.mp3",
+     "tier": "human",
+     "pic": "🐰"
+    },
+    {
+     "w": "on",
+     "clip": "voice/w_on.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "log",
+     "clip": "audio/words/log.mp3",
+     "tier": "human",
+     "pic": "🪵"
+    }
+   ],
+   "clip": "voice/s_37.mp3",
+   "pics": "🥫🐰🪵",
+   "level": 2
+  },
+  {
+   "id": "s38",
+   "text": "the bat is in the tree.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "bat",
+     "clip": "audio/words/bat.mp3",
+     "tier": "human",
+     "pic": "🦇"
+    },
+    {
+     "w": "is",
+     "clip": "voice/w_is.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "in",
+     "clip": "voice/w_in.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "tree",
+     "clip": "audio/words/tree.mp3",
+     "tier": "human",
+     "pic": "🌳"
+    }
+   ],
+   "clip": "voice/s_38.mp3",
+   "pics": "🦇🌳",
+   "level": 2
+  },
+  {
+   "id": "s39",
+   "text": "get the mop and the pan.",
+   "words": [
+    {
+     "w": "get",
+     "clip": "audio/words/get.mp3",
+     "tier": "human",
+     "pic": "🤲"
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "mop",
+     "clip": "audio/words/mop.mp3",
+     "tier": "human",
+     "pic": "🧹"
+    },
+    {
+     "w": "and",
+     "clip": "voice/w_and.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "pan",
+     "clip": "audio/words/pan.mp3",
+     "tier": "human",
+     "pic": "🍳"
+    }
+   ],
+   "clip": "voice/s_39.mp3",
+   "pics": "🤲🧹🍳",
+   "level": 2
+  },
+  {
+   "id": "s40",
+   "text": "the jam is in the pot.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "jam",
+     "clip": "audio/words/jam.mp3",
+     "tier": "human",
+     "pic": "🍯"
+    },
+    {
+     "w": "is",
+     "clip": "voice/w_is.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "in",
+     "clip": "voice/w_in.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "pot",
+     "clip": "audio/words/pot.mp3",
+     "tier": "human",
+     "pic": "🍲"
+    }
+   ],
+   "clip": "voice/s_40.mp3",
+   "pics": "🍯🍲",
+   "level": 2
+  },
+  {
+   "id": "s41",
+   "text": "the egg is in the pan.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "egg",
+     "clip": "audio/words/egg.mp3",
+     "tier": "human",
+     "pic": "🥚"
+    },
+    {
+     "w": "is",
+     "clip": "voice/w_is.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "in",
+     "clip": "voice/w_in.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "pan",
+     "clip": "audio/words/pan.mp3",
+     "tier": "human",
+     "pic": "🍳"
+    }
+   ],
+   "clip": "voice/s_41.mp3",
+   "pics": "🥚🍳",
+   "level": 2
+  },
+  {
+   "id": "s42",
+   "text": "the pup can dig in the sun.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "pup",
+     "clip": "audio/words/pup.mp3",
+     "tier": "human",
+     "pic": "🐶"
+    },
+    {
+     "w": "can",
+     "clip": "audio/words/can.mp3",
+     "tier": "human",
+     "pic": "🥫"
+    },
+    {
+     "w": "dig",
+     "clip": "audio/words/dig.mp3",
+     "tier": "human",
+     "pic": "⛏️"
+    },
+    {
+     "w": "in",
+     "clip": "voice/w_in.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "sun",
+     "clip": "audio/words/sun.mp3",
+     "tier": "human",
+     "pic": "☀️"
+    }
+   ],
+   "clip": "voice/s_42.mp3",
+   "pics": "🐶🥫⛏️☀️",
+   "level": 3
+  },
+  {
+   "id": "s43",
+   "text": "we see the moon and the sun.",
+   "words": [
+    {
+     "w": "we",
+     "clip": "voice/w_we.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "see",
+     "clip": "voice/w_see.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "moon",
+     "clip": "audio/words/moon.mp3",
+     "tier": "human",
+     "pic": "🌙"
+    },
+    {
+     "w": "and",
+     "clip": "voice/w_and.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "sun",
+     "clip": "audio/words/sun.mp3",
+     "tier": "human",
+     "pic": "☀️"
+    }
+   ],
+   "clip": "voice/s_43.mp3",
+   "pics": "🌙☀️",
+   "level": 3
+  },
+  {
+   "id": "s44",
+   "text": "the fox and the hog sit in the fog.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "fox",
+     "clip": "audio/words/fox.mp3",
+     "tier": "human",
+     "pic": "🦊"
+    },
+    {
+     "w": "and",
+     "clip": "voice/w_and.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "hog",
+     "clip": "audio/words/hog.mp3",
+     "tier": "human",
+     "pic": "🐗"
+    },
+    {
+     "w": "sit",
+     "clip": "audio/words/sit.mp3",
+     "tier": "human",
+     "pic": "🪑"
+    },
+    {
+     "w": "in",
+     "clip": "voice/w_in.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "fog",
+     "clip": "audio/words/fog.mp3",
+     "tier": "human",
+     "pic": "🌫️"
+    }
+   ],
+   "clip": "voice/s_44.mp3",
+   "pics": "🦊🐗🪑🌫️",
+   "level": 3
+  },
+  {
+   "id": "s45",
+   "text": "my friend and i can run and jump.",
+   "words": [
+    {
+     "w": "my",
+     "clip": "voice/w_my.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "friend",
+     "clip": "audio/words/friend.mp3",
+     "tier": "human",
+     "pic": "🧑‍🤝‍🧑"
+    },
+    {
+     "w": "and",
+     "clip": "voice/w_and.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "i",
+     "clip": "voice/w_i.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "can",
+     "clip": "audio/words/can.mp3",
+     "tier": "human",
+     "pic": "🥫"
+    },
+    {
+     "w": "run",
+     "clip": "audio/words/run.mp3",
+     "tier": "human",
+     "pic": "🏃"
+    },
+    {
+     "w": "and",
+     "clip": "voice/w_and.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "jump",
+     "clip": "audio/words/jump.mp3",
+     "tier": "human",
+     "pic": "🤸"
+    }
+   ],
+   "clip": "voice/s_45.mp3",
+   "pics": "🧑‍🤝‍🧑🥫🏃🤸",
+   "level": 3
+  },
+  {
+   "id": "s46",
+   "text": "the pig can dig and the dog can run.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "pig",
+     "clip": "audio/words/pig.mp3",
+     "tier": "human",
+     "pic": "🐷"
+    },
+    {
+     "w": "can",
+     "clip": "audio/words/can.mp3",
+     "tier": "human",
+     "pic": "🥫"
+    },
+    {
+     "w": "dig",
+     "clip": "audio/words/dig.mp3",
+     "tier": "human",
+     "pic": "⛏️"
+    },
+    {
+     "w": "and",
+     "clip": "voice/w_and.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "dog",
+     "clip": "audio/words/dog.mp3",
+     "tier": "human",
+     "pic": "🐶"
+    },
+    {
+     "w": "can",
+     "clip": "audio/words/can.mp3",
+     "tier": "human",
+     "pic": "🥫"
+    },
+    {
+     "w": "run",
+     "clip": "audio/words/run.mp3",
+     "tier": "human",
+     "pic": "🏃"
+    }
+   ],
+   "clip": "voice/s_46.mp3",
+   "pics": "🐷🥫⛏️🐶🏃",
+   "level": 3
+  },
+  {
+   "id": "s47",
+   "text": "the hen sat on the egg in the nest.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "hen",
+     "clip": "audio/words/hen.mp3",
+     "tier": "human",
+     "pic": "🐔"
+    },
+    {
+     "w": "sat",
+     "clip": "audio/words/sat.mp3",
+     "tier": "human",
+     "pic": "🪑"
+    },
+    {
+     "w": "on",
+     "clip": "voice/w_on.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "egg",
+     "clip": "audio/words/egg.mp3",
+     "tier": "human",
+     "pic": "🥚"
+    },
+    {
+     "w": "in",
+     "clip": "voice/w_in.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "nest",
+     "clip": "audio/words/nest.mp3",
+     "tier": "human",
+     "pic": "🪺"
+    }
+   ],
+   "clip": "voice/s_47.mp3",
+   "pics": "🐔🪑🥚🪺",
+   "level": 3
+  },
+  {
+   "id": "s48",
+   "text": "i see a big green frog in the pond.",
+   "words": [
+    {
+     "w": "i",
+     "clip": "voice/w_i.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "see",
+     "clip": "voice/w_see.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "big",
+     "clip": "audio/words/big.mp3",
+     "tier": "human",
+     "pic": "🐘"
+    },
+    {
+     "w": "green",
+     "clip": "audio/words/green.mp3",
+     "tier": "human",
+     "pic": "🟢"
+    },
+    {
+     "w": "frog",
+     "clip": "audio/words/frog.mp3",
+     "tier": "human",
+     "pic": "🐸"
+    },
+    {
+     "w": "in",
+     "clip": "voice/w_in.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "pond",
+     "clip": "audio/words/pond.mp3",
+     "tier": "human",
+     "pic": "💧"
+    }
+   ],
+   "clip": "voice/s_48.mp3",
+   "pics": "🐘🟢🐸💧",
+   "level": 3
+  },
+  {
+   "id": "s49",
+   "text": "the man has a map and a red pen.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "man",
+     "clip": "audio/words/man.mp3",
+     "tier": "human",
+     "pic": "👨"
+    },
+    {
+     "w": "has",
+     "clip": "voice/w_has.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "map",
+     "clip": "audio/words/map.mp3",
+     "tier": "human",
+     "pic": "🗺️"
+    },
+    {
+     "w": "and",
+     "clip": "voice/w_and.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "red",
+     "clip": "audio/words/red.mp3",
+     "tier": "human",
+     "pic": "🔴"
+    },
+    {
+     "w": "pen",
+     "clip": "audio/words/pen.mp3",
+     "tier": "human",
+     "pic": "🖊️"
+    }
+   ],
+   "clip": "voice/s_49.mp3",
+   "pics": "👨🗺️🔴🖊️",
+   "level": 3
+  },
+  {
+   "id": "s50",
+   "text": "the rat ran up the log to the top.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "rat",
+     "clip": "audio/words/rat.mp3",
+     "tier": "human",
+     "pic": "🐀"
+    },
+    {
+     "w": "ran",
+     "clip": "audio/words/ran.mp3",
+     "tier": "human",
+     "pic": "🏃"
+    },
+    {
+     "w": "up",
+     "clip": "voice/w_up.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "log",
+     "clip": "audio/words/log.mp3",
+     "tier": "human",
+     "pic": "🪵"
+    },
+    {
+     "w": "to",
+     "clip": "voice/w_to.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "top",
+     "clip": "audio/words/top.mp3",
+     "tier": "human",
+     "pic": "🔝"
+    }
+   ],
+   "clip": "voice/s_50.mp3",
+   "pics": "🐀🏃🪵🔝",
+   "level": 3
+  },
+  {
+   "id": "s51",
+   "text": "the bug is on the leaf in the tree.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "bug",
+     "clip": "audio/words/bug.mp3",
+     "tier": "human",
+     "pic": "🐛"
+    },
+    {
+     "w": "is",
+     "clip": "voice/w_is.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "on",
+     "clip": "voice/w_on.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "leaf",
+     "clip": "audio/words/leaf.mp3",
+     "tier": "human",
+     "pic": "🍃"
+    },
+    {
+     "w": "in",
+     "clip": "voice/w_in.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "tree",
+     "clip": "audio/words/tree.mp3",
+     "tier": "human",
+     "pic": "🌳"
+    }
+   ],
+   "clip": "voice/s_51.mp3",
+   "pics": "🐛🍃🌳",
+   "level": 3
+  },
+  {
+   "id": "s52",
+   "text": "we can hop and run in the sun.",
+   "words": [
+    {
+     "w": "we",
+     "clip": "voice/w_we.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "can",
+     "clip": "audio/words/can.mp3",
+     "tier": "human",
+     "pic": "🥫"
+    },
+    {
+     "w": "hop",
+     "clip": "audio/words/hop.mp3",
+     "tier": "human",
+     "pic": "🐰"
+    },
+    {
+     "w": "and",
+     "clip": "voice/w_and.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "run",
+     "clip": "audio/words/run.mp3",
+     "tier": "human",
+     "pic": "🏃"
+    },
+    {
+     "w": "in",
+     "clip": "voice/w_in.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "sun",
+     "clip": "audio/words/sun.mp3",
+     "tier": "human",
+     "pic": "☀️"
+    }
+   ],
+   "clip": "voice/s_52.mp3",
+   "pics": "🥫🐰🏃☀️",
+   "level": 3
+  },
+  {
+   "id": "s53",
+   "text": "the pup has a ball and a big bat.",
+   "words": [
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "pup",
+     "clip": "audio/words/pup.mp3",
+     "tier": "human",
+     "pic": "🐶"
+    },
+    {
+     "w": "has",
+     "clip": "voice/w_has.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "ball",
+     "clip": "audio/words/ball.mp3",
+     "tier": "human",
+     "pic": "⚽"
+    },
+    {
+     "w": "and",
+     "clip": "voice/w_and.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "big",
+     "clip": "audio/words/big.mp3",
+     "tier": "human",
+     "pic": "🐘"
+    },
+    {
+     "w": "bat",
+     "clip": "audio/words/bat.mp3",
+     "tier": "human",
+     "pic": "🦇"
+    }
+   ],
+   "clip": "voice/s_53.mp3",
+   "pics": "🐶⚽🐘🦇",
+   "level": 3
+  },
+  {
+   "id": "s54",
+   "text": "she has a red cup and a mug.",
+   "words": [
+    {
+     "w": "she",
+     "clip": "voice/w_she.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "has",
+     "clip": "voice/w_has.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "red",
+     "clip": "audio/words/red.mp3",
+     "tier": "human",
+     "pic": "🔴"
+    },
+    {
+     "w": "cup",
+     "clip": "audio/words/cup.mp3",
+     "tier": "human",
+     "pic": "☕"
+    },
+    {
+     "w": "and",
+     "clip": "voice/w_and.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "a",
+     "clip": "voice/w_a.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "mug",
+     "clip": "audio/words/mug.mp3",
+     "tier": "human",
+     "pic": "☕"
+    }
+   ],
+   "clip": "voice/s_54.mp3",
+   "pics": "🔴☕",
+   "level": 3
+  },
+  {
+   "id": "s55",
+   "text": "he can see the ship and the moon.",
+   "words": [
+    {
+     "w": "he",
+     "clip": "voice/w_he.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "can",
+     "clip": "audio/words/can.mp3",
+     "tier": "human",
+     "pic": "🥫"
+    },
+    {
+     "w": "see",
+     "clip": "voice/w_see.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "ship",
+     "clip": "audio/words/ship.mp3",
+     "tier": "human",
+     "pic": "🚢"
+    },
+    {
+     "w": "and",
+     "clip": "voice/w_and.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "the",
+     "clip": "voice/w_the.mp3",
+     "tier": "piper",
+     "pic": null
+    },
+    {
+     "w": "moon",
+     "clip": "audio/words/moon.mp3",
+     "tier": "human",
+     "pic": "🌙"
+    }
+   ],
+   "clip": "voice/s_55.mp3",
+   "pics": "🥫🚢🌙",
+   "level": 3
+  }
+ ],
+ "sounds": {
+  "a": "audio/sounds/a.mp3",
+  "b": "audio/sounds/b.mp3",
+  "c": "audio/sounds/c.mp3",
+  "d": "audio/sounds/d.mp3",
+  "e": "audio/sounds/e.mp3",
+  "f": "audio/sounds/f.mp3",
+  "g": "audio/sounds/g.mp3",
+  "h": "audio/sounds/h.mp3",
+  "i": "audio/sounds/i.mp3",
+  "j": "audio/sounds/j.mp3",
+  "k": "audio/sounds/k.mp3",
+  "l": "audio/sounds/l.mp3",
+  "m": "audio/sounds/m.mp3",
+  "n": "audio/sounds/n.mp3",
+  "o": "audio/sounds/o.mp3",
+  "p": "audio/sounds/p.mp3",
+  "q": "audio/sounds/q.mp3",
+  "r": "audio/sounds/r.mp3",
+  "s": "audio/sounds/s.mp3",
+  "t": "audio/sounds/t.mp3",
+  "u": "audio/sounds/u.mp3",
+  "v": "audio/sounds/v.mp3",
+  "w": "audio/sounds/w.mp3",
+  "x": "audio/sounds/x.mp3",
+  "y": "audio/sounds/y.mp3",
+  "z": "audio/sounds/z.mp3",
+  "sh": null,
+  "th": null,
+  "ch": null,
+  "ck": "audio/sounds/k.mp3",
+  "ee": null,
+  "oo": null,
+  "qu": "audio/sounds/q.mp3"
+ },
+ "voice": {
+  "tap": "voice/p_tap.mp3",
+  "readit": "voice/p_readit.mp3",
+  "which": "voice/p_which.mp3",
+  "yes": "voice/p_yes.mp3",
+  "great": "voice/p_great.mp3",
+  "again": "voice/p_again.mp3",
+  "find": "voice/p_find.mp3",
+  "fix": "voice/p_fix.mp3",
+  "nice": "voice/p_nice.mp3",
+  "sound": "voice/p_sound.mp3",
+  "hooray": "voice/p_hooray.mp3"
+ }
+}

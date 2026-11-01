@@ -83,6 +83,18 @@
    "source": "tablet/apps/maker-light"
   },
   {
+   "id": "music",
+   "title": "Music Pads",
+   "subtitle": "xylophone, drums, follow the lights",
+   "icon": "🎵",
+   "color": "#ab47bc",
+   "path": "apps/music/index.html",
+   "needs": [
+    "autoplay"
+   ],
+   "source": "tablet/apps/music"
+  },
+  {
    "id": "pbs-kids",
    "title": "PBS Kids",
    "subtitle": "shows and games",
@@ -92,6 +104,18 @@
    "needs": [],
    "source": "tablet/apps/pbs-kids",
    "url": "https://pbskids.org"
+  },
+  {
+   "id": "read",
+   "title": "Read It",
+   "subtitle": "tap the words, read the line",
+   "icon": "📖",
+   "color": "#7e57c2",
+   "path": "apps/read/index.html",
+   "needs": [
+    "autoplay"
+   ],
+   "source": "tablet/apps/read"
   },
   {
    "id": "show-tell",
