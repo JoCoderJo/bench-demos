@@ -169,7 +169,7 @@ footer .sep{flex:1}
 
 <script>
 'use strict';
-const BRAIN='http://127.0.0.1:7000';
+let BRAIN='http://127.0.0.1:7000';
 const ROWS=8,COLS=13;
 const PICS={
   blank:Array(8).fill('0000000000000'),
@@ -276,7 +276,8 @@ let toastT;function toast(t){const e=$('toast');e.textContent=t;e.classList.add(
 // ---- DIY Pipeline bar
 function loadActiveProj(){
   try{
-    const p=localStorage.getItem('kt.maker.active');
+    const qp=new URLSearchParams(location.search).get('project');
+    const p=qp||localStorage.getItem('kt.maker.active');
     if(p&&$('diyProj').querySelector('option[value="'+p+'"]')){S.project=p;$('diyProj').value=p;}
     const saved=JSON.parse(localStorage.getItem('kt.maker.proj.'+S.kid+'.'+S.project)||'{}');
     if(saved.program&&Array.isArray(saved.program.rules)&&saved.program.rules.length){S.rules=saved.program.rules;S.selRule=0;}
@@ -291,6 +292,12 @@ function saveProjState(){
     cur.id=S.project;cur.updated=Date.now();
     cur.program={v:1,name:S.project,rules:S.rules};
     localStorage.setItem(k,JSON.stringify(cur));
+    const diy=JSON.parse(localStorage.getItem('kt.diy.project.v1')||'{}');
+    diy.id=diy.id||'kickstand-pod';
+    diy.project_key=S.project;
+    diy.program=cur.program;
+    diy.updated_at=Date.now();
+    localStorage.setItem('kt.diy.project.v1',JSON.stringify(diy));
   }catch(e){}
 }
 function goStep(step){
@@ -437,7 +444,7 @@ function execAct(a){
     if(S.brainUp)fetch(BRAIN+'/maker/tone',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S.lastTone)}).catch(()=>{});
   }else if(a.act==='say'){
     S.lastSay=a.word||'cat';
-    try{if(window.speechSynthesis){const u=new SpeechSynthesisUtterance(S.lastSay);window.speechSynthesis.speak(u);}}catch(e){}
+    try{parent.postMessage({kt:'tts',text:S.lastSay},'*');}catch(e){}
   }
   $('lastAct').textContent='DO: '+doLabel(a);
 }
@@ -540,23 +547,37 @@ $('doStepBtn').addEventListener('pointerdown',e=>{
 // ---- Per-kid store save
 function storeBase(){return location.protocol.startsWith('http')?location.origin+'/api/store/maker/'+encodeURIComponent(S.kid)+'/':null;}
 async function keepProg(){
-  const rec={v:1,name:S.project,rules:S.rules,doneRecipes:S.doneRecipes,t:Date.now(),kid:S.kid};
-  const base=storeBase();let ok=false;
-  if(base){try{const r=await fetch(base+'proj-'+S.project+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(rec)});ok=r.ok;}catch(e){}}
-  if(!ok){try{localStorage.setItem('kt-code-'+S.kid+'-'+S.project,JSON.stringify(rec));ok=true;}catch(e){}}
   saveProjState();
+  const diy=JSON.parse(localStorage.getItem('kt.diy.project.v1')||'{}');
+  const rec=Object.assign({},diy,{v:1,name:S.project,program:{v:1,name:S.project,rules:S.rules},rules:S.rules,doneRecipes:S.doneRecipes,t:Date.now(),kid:S.kid});
+  const base=storeBase();let ok=false;
+  if(base){try{const r=await fetch(base+'proj-'+(diy.id||S.project)+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(rec)});ok=r.ok;}catch(e){}}
+  if(!ok){try{localStorage.setItem('kt-code-'+S.kid+'-'+S.project,JSON.stringify(rec));ok=true;}catch(e){}}
   if(ok){S.kept++;toast('Saved Spark Code!');blip(1100);}
 }
 $('keepBtn').addEventListener('pointerdown',e=>{e.preventDefault();keepProg();});
 
-// ---- Brain connection (:7000 optional)
-fetch(BRAIN+'/maker/state').then(r=>r.json()).then(st=>{
+// ---- Brain connection (:7000 or built-in :8090 agent brain)
+fetch(BRAIN+'/maker/state').then(r=>{if(!r.ok)throw new Error('no');return r.json();}).then(st=>{
+  if(!st||!Array.isArray(st.matrix))throw new Error('no');
   S.brainUp=true;S.source=st.source||'sim';
   $('brain').classList.add('up');$('brainT').textContent='brain ready';
 }).catch(()=>{
-  S.brainUp=false;S.source='local';
-  $('brain').classList.remove('up');$('brainT').textContent='virtual brain';
+  if(location.protocol.startsWith('http')){
+    BRAIN=location.origin;
+    fetch(BRAIN+'/maker/state').then(r=>{if(!r.ok)throw new Error('no');return r.json();}).then(st=>{
+      S.brainUp=true;S.source=st.source||'sim';
+      $('brain').classList.add('up');$('brainT').textContent='brain ready';
+    }).catch(()=>{
+      S.brainUp=false;S.source='local';
+      $('brain').classList.remove('up');$('brainT').textContent='virtual brain';
+    });
+  }else{
+    S.brainUp=false;S.source='local';
+    $('brain').classList.remove('up');$('brainT').textContent='virtual brain';
+  }
 });
+try{parent.postMessage({kt:'who'},'*');}catch(e){}
 
 function setKid(kid){
   S.kid=(kid&&kid.id)||'default';S.name=(kid&&kid.name)||'';

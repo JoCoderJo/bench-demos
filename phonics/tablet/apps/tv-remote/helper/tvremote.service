@@ -1,0 +1,14 @@
+[Unit]
+Description=Kids Tablet TV Remote Helper (127.0.0.1:8097, Android TV Remote v2)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# the helper ships inside the bundle (tablet/apps/tv-remote/helper), so push.sh updates it; a restart picks the new code up
+ExecStart=/usr/bin/python3 %h/kids-tablet/bundle/apps/tv-remote/helper/tvremote.py --port 8097 --state %h/kids-tablet/state/tv-remote
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target

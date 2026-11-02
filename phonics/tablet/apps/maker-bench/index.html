@@ -142,6 +142,26 @@
 (() => {
   'use strict';
 
+  /* ---- forgiving touch-tap helper (X11 touchscreen finger roll cancels click if > ~8px) ---- */
+  (() => {
+    let dEl = null, dx = 0, dy = 0, dt = 0, clicked = false;
+  document.addEventListener('click', () => { clicked = true; }, true);
+  document.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse' || (e.button && e.button !== 0)) return;
+    clicked = false;
+    dEl = e.target.closest('button, .prim-item, .step-item');
+    dx = e.clientX; dy = e.clientY; dt = Date.now();
+  }, true);
+  document.addEventListener('pointerup', e => {
+    const el = dEl; dEl = null;
+    if (!el || el.disabled || e.pointerType === 'mouse') return;
+    const dist = Math.hypot(e.clientX - dx, e.clientY - dy);
+    if (Date.now() - dt > 700 || dist < 5 || dist > 36) return;
+    setTimeout(() => { if (!clicked && !el.disabled) el.click(); }, 30);
+  }, true);
+  })();
+
+
   const PROJ_KEY = 'kt.diy.project.v1';
   const STUFF_KEY = 'kt.mystuff.v1';
   let preReader = false;
@@ -211,9 +231,12 @@
 
   window.addEventListener('message', (ev) => {
     const d = ev.data || {};
-    if (d.kt === 'hello' && d.kid && typeof d.kid.age === 'number') {
-      preReader = d.kid.age < 5;
-      applyModeUI();
+    if (d.kt === 'hello' && d.kid) {
+      window._ktKid = d.kid;
+      if (typeof d.kid.age === 'number') {
+        preReader = d.kid.age < 5;
+        applyModeUI();
+      }
     }
   });
   try { window.parent.postMessage({ kt: 'who' }, '*'); } catch (_) {}
@@ -238,6 +261,13 @@
       camSph.r * Math.sin(camSph.phi) * Math.cos(camSph.theta)
     );
     camera.lookAt(0, 0, 0);
+    requestRender();
+  }
+  let _renderQueued = false, tick = 0;
+  function requestRender() {
+    if (_renderQueued) return;
+    _renderQueued = true;
+    requestAnimationFrame(stepFrame);
   }
   updateCam();
 
@@ -375,6 +405,7 @@
       badge.className = 'clash-pill ok';
       badge.textContent = '✅ All 4 Gates Green!';
     }
+    requestRender();
   }
 
   // Print Ticket & Attach Recipe UI (D-041)
@@ -398,7 +429,7 @@
       msg.innerHTML = 'Ready to make your <b>' + (project.cad.template || 'kickstand') + '</b>! <span class="num-only">(~' + grams + 'g PETG · ~' + mins + 'm)</span>';
       sendBtn.textContent = '🖨️ Ask Grown-Up to Print';
       attachSec.style.display = 'none';
-    } else if (t.status === 'requested') {
+    } else if (t.status === 'requested' || t.status === 'asked' || t.status === 'queued' || t.status === 'printing') {
       box.className = 'ticket-box';
       lbl.textContent = '⏳ In Print Queue';
       msg.innerHTML = '🎟️ <b>Ticket Sent to Bench!</b> Waiting for Joe to slice &amp; print on Bambu A1 Mini. <span class="num-only">(' + grams + 'g)</span>';
@@ -421,7 +452,7 @@
 
   async function requestPrintTicket() {
     const t = project.ticket || { status: 'none', grams: 14, minutes: 22, attach_done: [false, false, false] };
-    if (t.status === 'requested') {
+    if (t.status === 'requested' || t.status === 'asked' || t.status === 'queued' || t.status === 'printing') {
       t.status = 'printed';
       project.ticket = t;
       saveProject();
@@ -513,6 +544,7 @@
   document.getElementById('btnAutoSwing').addEventListener('click', (e) => {
     autoSwing = !autoSwing;
     e.currentTarget.textContent = autoSwing ? '⏸️ Pause' : '▶️ Swing';
+    requestRender();
   });
 
   document.querySelectorAll('.slot-tab').forEach(btn => {
@@ -544,8 +576,14 @@
   }
 
   function renderInventoryAndBOM() {
+    const rawParts = inventory.parts || (inventory.items || []).map(it => ({
+      sku: it.sku,
+      desc: it.name || it.desc || it.sku,
+      available: it.qty !== undefined ? it.qty : (it.available || 0)
+    }));
+    inventory.parts = rawParts;
     const partsMap = {};
-    (inventory.parts || []).forEach(pt => { partsMap[pt.sku] = pt; });
+    rawParts.forEach(pt => { partsMap[pt.sku] = pt; });
 
     const bom = computeProjectBOM();
     const bomWrap = document.getElementById('bomList');
@@ -627,6 +665,7 @@
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    requestRender();
   }
   window.addEventListener('resize', resize);
 
@@ -636,9 +675,8 @@
   buildMountedPart();
   renderTicketUI();
 
-  let tick = 0;
-  function animate() {
-    requestAnimationFrame(animate);
+  function stepFrame() {
+    _renderQueued = false;
     tick += 0.08;
     if (autoSwing) {
       swingAngle += swingDir * 0.8;
@@ -650,8 +688,27 @@
     // Gentle wobble animation when STANDS gate is red (D-045 picture cue)
     assemblyGrp.rotation.z = standsOk ? 0 : Math.sin(tick * 2.2) * 0.06;
     renderer.render(scene, camera);
+    if (autoSwing || !standsOk) {
+      requestRender();
+    }
   }
-  animate();
+  requestRender();
+
+  // Live SSE updates from agent / Bench for print ticket status
+  try {
+    const es = new EventSource('/api/maker/events');
+    es.addEventListener('print', (ev) => {
+      try {
+        const tk = JSON.parse(ev.data || '{}');
+        if (tk && tk.status && (!tk.project_id || tk.project_id === project.id)) {
+          project.ticket = project.ticket || { attach_done: [false, false, false] };
+          project.ticket.status = tk.status === 'asked' ? 'requested' : tk.status;
+          saveProject();
+          renderTicketUI();
+        }
+      } catch (_) {}
+    });
+  } catch (_) {}
 })();
 </script>
 </body>

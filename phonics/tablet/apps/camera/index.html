@@ -166,6 +166,25 @@
 <script>
 (() => {
 'use strict';
+/* ---- forgiving touch-tap helper (X11 touchscreen finger roll cancels click if > ~8px) ---- */
+(() => {
+  let dEl = null, dx = 0, dy = 0, dt = 0, clicked = false;
+  document.addEventListener('click', () => { clicked = true; }, true);
+  document.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse' || (e.button && e.button !== 0)) return;
+    clicked = false;
+    dEl = e.target.closest('button, .pick, .card');
+    dx = e.clientX; dy = e.clientY; dt = Date.now();
+  }, true);
+  document.addEventListener('pointerup', e => {
+    const el = dEl; dEl = null;
+    if (!el || el.disabled || e.pointerType === 'mouse') return;
+    const dist = Math.hypot(e.clientX - dx, e.clientY - dy);
+    if (Date.now() - dt > 700 || dist < 5 || dist > 36) return;
+    setTimeout(() => { if (!clicked && !el.disabled) el.click(); }, 30);
+  }, true);
+})();
+
 const HELPER = 'http://127.0.0.1:8095';
 const LIVE = location.protocol.startsWith('http');          // served by the launcher: the store exists
 const $ = id => document.getElementById(id);
@@ -245,7 +264,7 @@ async function tuneLoop() {
     } catch (e) {}
     tuning = false;
   }
-  setTimeout(tuneLoop, 1500);
+  setTimeout(tuneLoop, tune.n >= 3 ? 4000 : 1500);
 }
 /* the Colour panel: Auto, then five sliders; touching a slider takes over from auto (starting from auto's numbers) */
 const SLIDERS = { wbR: ['Red', 0.6, 1.8, 0.01], wbB: ['Blue', 0.6, 1.8, 0.01], off: ['Brightness', -90, 90, 1], gain: ['Contrast', 0.7, 2.2, 0.01], sat: ['Colour', 0.4, 2.2, 0.01] };
@@ -282,6 +301,17 @@ const saveV = () => { try { localStorage.setItem('kt-camera-view', JSON.stringif
 let kid = { id: 'default', name: '' }, caps = { camera: true };
 window.addEventListener('message', e => {
   const d = e.data || {};
+  if (d.kt === 'back') {
+    if ($('big').classList.contains('on')) { openGallery(); try { parent.postMessage({ kt: 'back', handled: true }, '*'); } catch (_) {} return; }
+    if ($('gal').classList.contains('on')) { show('cam'); try { parent.postMessage({ kt: 'back', handled: true }, '*'); } catch (_) {} return; }
+    if ($('drawer').classList.contains('on') || $('colpanel').classList.contains('on')) {
+      $('drawer').classList.remove('on'); $('bStick').classList.remove('on');
+      $('colpanel').classList.remove('on'); $('bCol').classList.remove('on');
+      try { parent.postMessage({ kt: 'back', handled: true }, '*'); } catch (_) {}
+      return;
+    }
+    return;
+  }
   if (d.kt !== 'hello') return;
   const prev = kid.id;
   if (d.kid && d.kid.id) kid = { id: String(d.kid.id), name: d.kid.name || '' }; else if (d.child && d.child.name) kid.name = d.child.name;
@@ -289,6 +319,7 @@ window.addEventListener('message', e => {
   if (kid.id !== prev) refreshCount();
   $('galTitle').textContent = kid.name ? `${kid.name}'s pictures` : 'My pictures';
 });
+try { parent.postMessage({ kt: 'who' }, '*'); } catch (e) {}
 const blip = f => { try { parent.postMessage({ kt: 'blip', f }, '*'); } catch (e) {} };
 const toast = text => { try { parent.postMessage({ kt: 'toast', text }, '*'); } catch (e) {} };
 
@@ -509,7 +540,7 @@ async function faceLoop() {
     } catch (e) { face.err = String(e).slice(0, 80); }
     facing = false;
   }
-  setTimeout(faceLoop, Math.max(40, 160 - (Date.now() - due)));          // ~6 passes a second on the UNO Q, less if it is slow
+  setTimeout(faceLoop, stickers.length ? Math.max(40, 160 - (Date.now() - due)) : 550);          // ~6 passes a second on the UNO Q, less if it is slow
 }
 
 /* ---------- pictures: capture ---------- */
@@ -531,7 +562,7 @@ async function takePicture() {
   if (!active || !helperUp || taking) return;
   taking = true; $('shutter').disabled = true;
   const cnt = $('count');
-  for (const n of [3, 2, 1]) { cnt.textContent = n; cnt.classList.add('on'); blip(n === 1 ? 900 : 600); await sleep(800); }
+  for (const n of [3, 2, 1]) { cnt.textContent = n; cnt.classList.add('on'); blip(n === 1 ? 900 : 600); await sleep(450); }
   cnt.textContent = '😀'; await sleep(250); cnt.classList.remove('on');
   let ok = false;
   try {

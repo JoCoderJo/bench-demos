@@ -151,7 +151,7 @@ body.pre #vbenchBtn span{display:none}
 <div id="toast"></div>
 <script>
 'use strict';
-const BRAIN='http://127.0.0.1:7000';
+let BRAIN='http://127.0.0.1:7000';
 const ROWS=8,COLS=13;
 const PICS={ // the same pictures spark.py knows (CONTRACT.md); drawn here for the palette
   heart:["0000000000000","0011000110000","0111101111000","0111111111000","0011111110000","0001111100000","0000111000000","0000010000000"],
@@ -171,8 +171,18 @@ const S={brainUp:false,source:'',kid:'default',name:'',mode:'reader',project:'ki
 window.KTLL={state:S};
 
 // ---- DIY Pipeline bar & shared project state
+const PROJ_META={
+  kickstand:{title:'Kickstand + Latch',tpl:'kickstand'},
+  knob_stand:{title:'Rainbow Knob Stand',tpl:'cradle'},
+  dist_pod:{title:'Distance Guard Pod',tpl:'cradle'},
+  custom:{title:'My Custom Idea',tpl:'clip'}
+};
 function loadActiveProj(){
-  try{const p=localStorage.getItem('kt.maker.active');if(p&&$('diyProj').querySelector('option[value="'+p+'"]')){S.project=p;$('diyProj').value=p;}}catch(e){}
+  try{
+    const qp=new URLSearchParams(location.search).get('project');
+    const p=qp||localStorage.getItem('kt.maker.active');
+    if(p&&$('diyProj').querySelector('option[value="'+p+'"]')){S.project=p;$('diyProj').value=p;}
+  }catch(e){}
 }
 function saveProjState(){
   try{
@@ -182,6 +192,15 @@ function saveProjState(){
     cur.id=S.project;cur.updated=Date.now();
     cur.electronics={matrix:S.matrix,modules:S.modules.map(m=>m.type),pins:S.pins};
     localStorage.setItem(k,JSON.stringify(cur));
+    const diy=JSON.parse(localStorage.getItem('kt.diy.project.v1')||'{}');
+    const meta=PROJ_META[S.project]||PROJ_META.kickstand;
+    diy.id=diy.id||'kickstand-pod';
+    diy.project_key=S.project;
+    diy.title=meta.title;
+    diy.electronics=cur.electronics;
+    diy.sensors=S.modules.map(m=>m.type);
+    diy.updated_at=Date.now();
+    localStorage.setItem('kt.diy.project.v1',JSON.stringify(diy));
   }catch(e){}
 }
 $('diyProj').addEventListener('change',()=>{S.project=$('diyProj').value;saveProjState();blip(640);toast('Project: '+$('diyProj').options[$('diyProj').selectedIndex].text);});
@@ -246,13 +265,12 @@ function renderVbChips(){
   host.querySelectorAll('.vbChip').forEach(b=>b.addEventListener('pointerdown',e=>{
     e.preventDefault();
     const t=b.dataset.vmod,has=S.modules.some(m=>m.type===t);
+    S.virtualOn=true;
+    if(has){S.modules=S.modules.filter(m=>m.type!==t);say('unplug');}
+    else{S.modules.push({type:t,id:t,addr:100,value:JSON.parse(JSON.stringify(MOD[t].def))});say('plug_'+t);blip(900);}
+    renderModules();renderVbChips();saveProjState();
     if(S.brainUp&&S.source==='sim'){
       fetch(BRAIN+(has?'/sim/unplug':'/sim/plug'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(has?{id:t}:{type:t})}).catch(()=>{});
-    }else{
-      S.virtualOn=true;
-      if(has){S.modules=S.modules.filter(m=>m.type!==t);say('unplug');}
-      else{S.modules.push({type:t,id:t,addr:100,value:JSON.parse(JSON.stringify(MOD[t].def))});say('plug_'+t);blip(900);}
-      renderModules();renderVbChips();saveProjState();
     }
   }));
 }
@@ -347,6 +365,17 @@ function setKid(kid){S.kid=(kid&&kid.id)||'default';S.name=(kid&&kid.name)||'';c
 window.addEventListener('message',e=>{const d=e.data||{};if(d.kt==='hello')setKid(d.kid||(d.child?{id:'default',name:d.child.name}:null));});
 window.KTLL.setKid=setKid;
 
-loadActiveProj();setKid(null);renderMatrix();renderPins();renderVbChips();connect();
-fetch(BRAIN+'/maker/state').then(r=>r.json()).then(st=>{setBrain(true,st.source);applyState(st);}).catch(()=>setBrain(false));
+loadActiveProj();setKid(null);renderMatrix();renderPins();renderVbChips();
+try{parent.postMessage({kt:'who'},'*');}catch(e){}
+fetch(BRAIN+'/maker/state').then(r=>{if(!r.ok)throw new Error('no');return r.json();}).then(st=>{
+  if(!st||!Array.isArray(st.matrix))throw new Error('no');
+  setBrain(true,st.source);applyState(st);connect();
+}).catch(()=>{
+  if(location.protocol.startsWith('http')){
+    BRAIN=location.origin;
+    fetch(BRAIN+'/maker/state').then(r=>{if(!r.ok)throw new Error('no');return r.json();}).then(st=>{
+      setBrain(true,st.source);applyState(st);connect();
+    }).catch(()=>{setBrain(false);connect();});
+  }else{setBrain(false);}
+});
 </script></body></html>

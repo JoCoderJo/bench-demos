@@ -127,6 +127,16 @@
    "source": "tablet/apps/music"
   },
   {
+   "id": "mystuff",
+   "title": "My Stuff",
+   "subtitle": "your pictures, words and makes",
+   "icon": "🎒",
+   "color": "#2e8b7a",
+   "path": "apps/mystuff/index.html",
+   "needs": [],
+   "source": "tablet/apps/mystuff"
+  },
+  {
    "id": "pbs-kids",
    "title": "PBS Kids",
    "subtitle": "shows and games",
@@ -170,6 +180,16 @@
     "autoplay"
    ],
    "source": "tablet/apps/stories"
+  },
+  {
+   "id": "tv-remote",
+   "title": "TV Remote",
+   "subtitle": "steer the family TV",
+   "icon": "📺",
+   "color": "#2b7a78",
+   "path": "apps/tv-remote/index.html",
+   "needs": [],
+   "source": "tablet/apps/tv-remote"
   },
   {
    "id": "words",

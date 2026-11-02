@@ -99,6 +99,24 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 
 <script>
 'use strict';
+// Forgiving touch-tap helper for X11 touchscreen: synthesize click if pointerdown+pointerup stays within 36px
+(function(){
+  let pt=null,lastClick=0;
+  document.addEventListener("click",()=>{lastClick=Date.now();},true);
+  document.addEventListener("pointerdown",e=>{
+    if(e.pointerType==="mouse")return;
+    const b=e.target.closest("button,[role=button],.card,.item,.wd,.tile,.thing,.num,.shape,.opt,.fw");
+    if(!b)return;
+    pt={b,x:e.clientX,y:e.clientY,t:Date.now(),id:e.pointerId};
+  },true);
+  document.addEventListener("pointerup",e=>{
+    if(!pt||e.pointerId!==pt.id)return;
+    const p=pt;pt=null;
+    if(Date.now()-p.t>750||Math.hypot(e.clientX-p.x,e.clientY-p.y)>36)return;
+    setTimeout(()=>{if(Date.now()-lastClick>80&&!p.b.disabled)p.b.click();},35);
+  },true);
+  document.addEventListener("pointercancel",()=>{pt=null;},true);
+})();
 const $=id=>document.getElementById(id);
 const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const LIVE=location.protocol.startsWith('http');
@@ -225,13 +243,15 @@ let drag=null;
 function wireTile(t){
   t.addEventListener('pointerdown',e=>{if(t.classList.contains('used'))return;drag={t,x0:e.clientX,y0:e.clientY,moved:false,ghost:null,id:e.pointerId};try{t.setPointerCapture(e.pointerId);}catch(x){}});
   t.addEventListener('pointermove',e=>{const d=drag;if(!d||d.t!==t)return;const dx=e.clientX-d.x0,dy=e.clientY-d.y0;
-    if(!d.moved&&Math.hypot(dx,dy)<10)return;
+    if(!d.moved&&Math.hypot(dx,dy)<26)return;
     if(!d.moved){d.moved=true;d.ghost=t.cloneNode(true);d.ghost.classList.add('drag');document.body.appendChild(d.ghost);const r=t.getBoundingClientRect();d.ox=e.clientX-r.left;d.oy=e.clientY-r.top;t.style.opacity='.3';}
     d.ghost.style.left=(e.clientX-d.ox)+'px';d.ghost.style.top=(e.clientY-d.oy)+'px';});
   const up=e=>{const d=drag;if(!d||d.t!==t)return;drag=null;try{t.releasePointerCapture(d.id);}catch(x){}
     if(d.ghost){d.ghost.remove();t.style.opacity='';
       const under=document.elementsFromPoint(e.clientX,e.clientY).find(el=>el.classList&&el.classList.contains('slot')&&el.closest('#slots'));
-      if(under)place(t,+under.dataset.i);return;}
+      if(under){place(t,+under.dataset.i);return;}
+      if(Math.hypot(e.clientX-d.x0,e.clientY-d.y0)<52){place(t,null);return;}
+      return;}
     place(t,null);};
   t.addEventListener('pointerup',up);
   t.addEventListener('pointercancel',()=>{const d=drag;if(!d)return;drag=null;if(d.ghost)d.ghost.remove();t.style.opacity='';});

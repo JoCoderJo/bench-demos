@@ -88,10 +88,28 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 </div></div>
 <script>
 'use strict';
+// Forgiving touch-tap helper for X11 touchscreen: synthesize click if pointerdown+pointerup stays within 36px
+(function(){
+  let pt=null,lastClick=0;
+  document.addEventListener("click",()=>{lastClick=Date.now();},true);
+  document.addEventListener("pointerdown",e=>{
+    if(e.pointerType==="mouse")return;
+    const b=e.target.closest("button,[role=button],.card,.item,.wd,.tile,.thing,.num,.shape,.opt,.fw");
+    if(!b)return;
+    pt={b,x:e.clientX,y:e.clientY,t:Date.now(),id:e.pointerId};
+  },true);
+  document.addEventListener("pointerup",e=>{
+    if(!pt||e.pointerId!==pt.id)return;
+    const p=pt;pt=null;
+    if(Date.now()-p.t>750||Math.hypot(e.clientX-p.x,e.clientY-p.y)>36)return;
+    setTimeout(()=>{if(Date.now()-lastClick>80&&!p.b.disabled)p.b.click();},35);
+  },true);
+  document.addEventListener("pointercancel",()=>{pt=null;},true);
+})();
 const $=id=>document.getElementById(id);
 const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let DATA=null,tab='letters',mode='explore',cur=null,stars=0,quiz=null,child='',seq=0;
-window.addEventListener('message',e=>{const d=e.data||{};if(d.kt==='hello'&&d.child&&d.child.name)child=d.child.name;});
+window.addEventListener('message',e=>{const d=e.data||{};if(d.kt==='hello'&&d.child&&d.child.name)child=d.child.name;else if(d.kt==='back'&&$('big').classList.contains('on')){$('bClose').onclick();kt({kt:'back',handled:true});}});
 const kt=m=>{try{parent.postMessage(m,'*');}catch(e){}};
 const byKey={};
 

@@ -123,6 +123,25 @@
 <script>
 (() => {
 'use strict';
+/* ---- forgiving touch-tap helper (X11 touchscreen finger roll cancels click if > ~8px) ---- */
+(() => {
+  let dEl = null, dx = 0, dy = 0, dt = 0, clicked = false;
+  document.addEventListener('click', () => { clicked = true; }, true);
+  document.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse' || (e.button && e.button !== 0)) return;
+    clicked = false;
+    dEl = e.target.closest('button, .item');
+    dx = e.clientX; dy = e.clientY; dt = Date.now();
+  }, true);
+  document.addEventListener('pointerup', e => {
+    const el = dEl; dEl = null;
+    if (!el || el.disabled || e.pointerType === 'mouse') return;
+    const dist = Math.hypot(e.clientX - dx, e.clientY - dy);
+    if (Date.now() - dt > 700 || dist < 5 || dist > 36) return;
+    setTimeout(() => { if (!clicked && !el.disabled) el.click(); }, 30);
+  }, true);
+})();
+
 const HELPER = 'http://127.0.0.1:8095';        // livecam.py — the live picture
 const BRAIN = 'http://127.0.0.1:7000';          // tablet/arduino/show-tell — the naming
 const LIVE = location.protocol.startsWith('http');
@@ -203,19 +222,25 @@ async function tuneLoop() {
       const a = tune.n === 0 ? 1 : 0.25; tune.wb = tune.wb.map((v, i) => v + (m.wb[i] - v) * a); tune.gain += (m.gain - tune.gain) * a; tune.off += (m.off - tune.off) * a; tune.n++; setColour(); } catch (e) {}
     tuning = false;
   }
-  setTimeout(tuneLoop, 2000);
+  setTimeout(tuneLoop, tune.n >= 3 ? 4000 : 2000);
 }
 
 /* ---------- who is playing ---------- */
 let kid = { id: 'default', name: '' };
 window.addEventListener('message', e => {
   const d = e.data || {};
+  if (d.kt === 'back') {
+    if ($('card').classList.contains('on')) { $('card').classList.remove('on'); try { parent.postMessage({ kt: 'back', handled: true }, '*'); } catch (_) {} return; }
+    if ($('coll').classList.contains('on')) { show('look'); try { parent.postMessage({ kt: 'back', handled: true }, '*'); } catch (_) {} return; }
+    return;
+  }
   if (d.kt !== 'hello') return;
   const prev = kid.id;
   if (d.kid && d.kid.id) kid = { id: String(d.kid.id), name: d.kid.name || '' }; else if (d.child && d.child.name) kid.name = d.child.name;
   $('collTitle').textContent = kid.name ? `${kid.name}'s things` : 'My things';
   if (kid.id !== prev) refreshCount();
 });
+try { parent.postMessage({ kt: 'who' }, '*'); } catch (e) {}
 
 /* ---------- live view ---------- */
 let V; try { V = JSON.parse(localStorage.getItem('kt-camera-view') || 'null'); } catch (e) { V = null; }
@@ -260,7 +285,7 @@ async function look() {
   busy = true; setStatus();
   play('_looking');
   const cnt = $('count');
-  for (const n of [2, 1]) { cnt.textContent = n; cnt.classList.add('on'); blip(n === 1 ? 900 : 600); await sleep(650); }
+  for (const n of [2, 1]) { cnt.textContent = n; cnt.classList.add('on'); blip(n === 1 ? 900 : 600); await sleep(280); }
   cnt.classList.remove('on');
   try {
     const raw = await (await fetch(HELPER + '/snap.jpg?t=' + Date.now(), { cache: 'no-store' })).blob();

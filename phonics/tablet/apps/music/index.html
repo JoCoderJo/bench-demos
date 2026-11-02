@@ -82,6 +82,24 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 
 <script>
 'use strict';
+// Forgiving touch-tap helper for X11 touchscreen: synthesize click if pointerdown+pointerup stays within 36px
+(function(){
+  let pt=null,lastClick=0;
+  document.addEventListener("click",()=>{lastClick=Date.now();},true);
+  document.addEventListener("pointerdown",e=>{
+    if(e.pointerType==="mouse")return;
+    const b=e.target.closest("button,[role=button],.card,.item,.wd,.tile,.thing,.num,.shape,.opt,.fw");
+    if(!b)return;
+    pt={b,x:e.clientX,y:e.clientY,t:Date.now(),id:e.pointerId};
+  },true);
+  document.addEventListener("pointerup",e=>{
+    if(!pt||e.pointerId!==pt.id)return;
+    const p=pt;pt=null;
+    if(Date.now()-p.t>750||Math.hypot(e.clientX-p.x,e.clientY-p.y)>36)return;
+    setTimeout(()=>{if(Date.now()-lastClick>80&&!p.b.disabled)p.b.click();},35);
+  },true);
+  document.addEventListener("pointercancel",()=>{pt=null;},true);
+})();
 const $=id=>document.getElementById(id);
 const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const LIVE=location.protocol.startsWith('http');
@@ -145,10 +163,11 @@ function drum(k){try{const c=ac(),t=c.currentTime;
   else if(k==='clap'){burst(.05,'bandpass',1200,.6,t);burst(.05,'bandpass',1200,.5,t+.03);burst(.16,'bandpass',1200,.45,t+.06);}}catch(e){}}
 
 // ---------- shared pieces: a xylophone and a drum row rendered into a container, with a tap handler
+function wireInst(b,fn){let lastP=0;b.addEventListener('pointerdown',e=>{if(e.button!==undefined&&e.button!==0)return;e.preventDefault();lastP=Date.now();fn();});b.onclick=()=>{if(Date.now()-lastP>250)fn();};}
 function xylo(el,onTap){el.innerHTML=NOTES.map((n,i)=>'<button class="key" data-i="'+i+'" style="background:'+n.c+';height:'+(100-i*8)+'%">'+n.n+'</button>').join('');
-  el.querySelectorAll('.key').forEach(b=>b.onclick=()=>onTap(+b.dataset.i,b));}
+  el.querySelectorAll('.key').forEach(b=>wireInst(b,()=>onTap(+b.dataset.i,b)));}
 function drumRow(el,onTap){el.innerHTML=DRUMS.map(d=>'<button class="pad" data-k="'+d.k+'"><span>'+d.e+'</span>'+d.n+'</button>').join('');
-  el.querySelectorAll('.pad').forEach(b=>b.onclick=()=>onTap(b.dataset.k,b));}
+  el.querySelectorAll('.pad').forEach(b=>wireInst(b,()=>onTap(b.dataset.k,b)));}
 function light(b,ms){if(!b)return;b.classList.add('lit');setTimeout(()=>b.classList.remove('lit'),ms||260);}
 function shakeIt(b){if(!b)return;b.classList.remove('nope');void b.offsetWidth;b.classList.add('nope');}
 function buzz(){try{const c=ac(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.value=110;g.gain.setValueAtTime(.25,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.26);}catch(e){}}
@@ -164,7 +183,7 @@ function drawChips(){$('songChips').innerHTML=SONGS.map(s=>'<button class="chip'
   $('songChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>openSong(c.dataset.k));}
 function drawDots(){const s=song.s;if(!s){$('sDots').innerHTML='';return;}$('sDots').innerHTML=s.lines.map((_,i)=>'<i class="'+(i<song.li?'done':(i===song.li?'now':''))+'"></i>').join('');}
 async function openSong(key){
-  stopVoice();song.s=SONGS.find(s=>s.key===key);song.li=0;song.ci=0;song.misses=0;song.busy=false;drawChips();drawDots();
+  stopVoice();song.s=SONGS.find(s=>s.key===key);song.li=0;song.ci=0;song.misses=0;song.busy=true;drawChips();drawDots();
   $('sMsg').textContent=song.s.name;
   await say('song_'+key);
   if(song.s&&song.s.key===key)teach();
@@ -178,9 +197,10 @@ async function teach(replay,keep){
   if(!replay)await play(DATA.voice.listen);
   for(const i of song.chunk.slice(keep?song.expect:0)){if(my!==seq||song.s!==s){if(song.s===s)song.busy=false;return;}const b=$('sXylo').querySelector('.key[data-i="'+i+'"]');tone(i,.7);light(b,320);await wait(520);}
   if(my!==seq||song.s!==s){if(song.s===s)song.busy=false;return;}
-  await wait(150);await play(DATA.voice.yourturn);
-  if(my!==seq||song.s!==s||tab!=='songs')return;   // audit fix 2: a cancelled lesson must not free the board under a newer one
+  await wait(120);
+  if(my!==seq||song.s!==s||tab!=='songs')return;
   $('sMsg').textContent='Your turn!';song.busy=false;
+  await play(DATA.voice.yourturn);
 }
 xylo($('sXylo'),async(i,b)=>{
   if(!song.s){tone(i);light(b);return;}
@@ -228,9 +248,10 @@ async function showBeat(){
   await play(DATA.voice.beat);
   for(const k of beat.pattern){if(my!==seq)return;const b=$('bDrums').querySelector('.pad[data-k="'+k+'"]');drum(k);light(b,300);await wait(560);}
   if(my!==seq)return;
-  await wait(120);await play(DATA.voice.yourturn);
-  if(my!==seq||tab!=='beat')return;   // audit fix 2
+  await wait(100);
+  if(my!==seq||tab!=='beat')return;
   $('bMsg').textContent='Your turn!';beat.expect=0;beat.busy=false;
+  await play(DATA.voice.yourturn);
 }
 drumRow($('bDrums'),async(k,b)=>{
   if(beat.busy){return;}

@@ -151,6 +151,26 @@
 (() => {
   'use strict';
 
+  /* ---- forgiving touch-tap helper (X11 touchscreen finger roll cancels click if > ~8px) ---- */
+  (() => {
+    let dEl = null, dx = 0, dy = 0, dt = 0, clicked = false;
+  document.addEventListener('click', () => { clicked = true; }, true);
+  document.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse' || (e.button && e.button !== 0)) return;
+    clicked = false;
+    dEl = e.target.closest('button, .prim-item, .step-item');
+    dx = e.clientX; dy = e.clientY; dt = Date.now();
+  }, true);
+  document.addEventListener('pointerup', e => {
+    const el = dEl; dEl = null;
+    if (!el || el.disabled || e.pointerType === 'mouse') return;
+    const dist = Math.hypot(e.clientX - dx, e.clientY - dy);
+    if (Date.now() - dt > 700 || dist < 5 || dist > 36) return;
+    setTimeout(() => { if (!clicked && !el.disabled) el.click(); }, 30);
+  }, true);
+  })();
+
+
   const PROJ_KEY = 'kt.diy.project.v1';
   let preReader = false;
 
@@ -246,6 +266,7 @@
   window.addEventListener('message', (ev) => {
     const d = ev.data || {};
     if (d.kt === 'hello' && d.kid) {
+      window._ktKid = d.kid;
       if (typeof d.kid.age === 'number') {
         preReader = d.kid.age < 5;
         applyModeUI();
@@ -293,10 +314,10 @@
     } catch (_) {}
   }
 
-  function saveProject() {
-    project.updated_at = Date.now();
-    project.design = project.cad;
-    try { localStorage.setItem(PROJ_KEY, JSON.stringify(project)); } catch (_) {}
+  let _syncTimer = null;
+  function flushNetworkSync() {
+    clearTimeout(_syncTimer);
+    _syncTimer = null;
     try {
       const kid = (window._ktKid && window._ktKid.id) || 'kid2';
       const pid = project.id || 'kickstand-pod';
@@ -309,8 +330,25 @@
         body: JSON.stringify(project)
       }).catch(() => {});
     } catch (_) {}
-    document.getElementById('projPill').innerHTML = '📦 Project: <b>' + (project.title || 'My DIY Build') + '</b>';
     syncDesignToBench();
+  }
+  function saveProject(immediate) {
+    project.updated_at = Date.now();
+    project.design = project.cad;
+    try {
+      const prev = JSON.parse(localStorage.getItem(PROJ_KEY) || '{}');
+      if (prev.electronics && !project.electronics) project.electronics = prev.electronics;
+      if (prev.program && !project.program) project.program = prev.program;
+      if (prev.sensors && !project.sensors) project.sensors = prev.sensors;
+      localStorage.setItem(PROJ_KEY, JSON.stringify(project));
+    } catch (_) {}
+    document.getElementById('projPill').innerHTML = '📦 Project: <b>' + (project.title || 'My DIY Build') + '</b>';
+    if (immediate) {
+      flushNetworkSync();
+    } else {
+      clearTimeout(_syncTimer);
+      _syncTimer = setTimeout(flushNetworkSync, 320);
+    }
   }
 
   // Three.js scene setup (60fps preview + offline fallback per D-042)
@@ -333,6 +371,16 @@
       camSpherical.r * Math.sin(camSpherical.phi) * Math.cos(camSpherical.theta)
     );
     camera.lookAt(0, 12, 0);
+    requestRender();
+  }
+  let _renderQueued = false;
+  function requestRender() {
+    if (_renderQueued) return;
+    _renderQueued = true;
+    requestAnimationFrame(() => {
+      _renderQueued = false;
+      renderer.render(scene, camera);
+    });
   }
   updateCam();
 
@@ -390,7 +438,6 @@
     let bbox = [90, 30, 6];
     if (cad.template === 'kickstand') {
       syncKitParams();
-      lines.push('// Kit render: openscad --backend Manifold -D diy_arm_len=' + p.diy_arm_len + ' -D diy_bar_w=' + p.diy_bar_w + ' -D diy_panel="' + p.diy_panel + '" -D diy_cutout="' + p.diy_cutout + '" projects/tablet-101/diy/kickstand.scad');
       const L = Number(p.length) || 90;
       const W = Number(p.width) || 30;
       const T = Number(p.thick) || 6;
@@ -490,6 +537,7 @@
     document.getElementById('hudFit').innerHTML = fitsBed
       ? '✅ <b>Fits Printer &amp; Tablet Grid!</b>'
       : '⚠️ <b>Too big — make it smaller!</b>';
+    requestRender();
   }
 
   let dragging = false, prevX = 0, prevY = 0;
@@ -519,6 +567,7 @@
     showGhost = !showGhost;
     gridGrp.visible = showGhost;
     e.currentTarget.textContent = '👻 Tablet Grid: ' + (showGhost ? 'ON' : 'OFF');
+    requestRender();
   });
 
   function renderSliders() {
@@ -655,7 +704,9 @@
       ''
     ];
     if (cad.template === 'kickstand') {
+      syncKitParams();
       lines.push(
+        '// Kit render: openscad --backend Manifold -D diy_arm_len=' + p.diy_arm_len + ' -D diy_bar_w=' + p.diy_bar_w + ' -D diy_panel="' + p.diy_panel + '" -D diy_cutout="' + p.diy_cutout + '" projects/tablet-101/diy/kickstand.scad',
         'length = ' + p.length + '; width = ' + p.width + '; thick = ' + p.thick + '; angle = ' + p.angle + '; lugs = ' + p.lugs + ';',
         'difference() {',
         '  union() {',
@@ -680,7 +731,7 @@
   });
 
   function openMakerApp(appId) {
-    saveProject();
+    saveProject(true);
     try {
       window.parent.postMessage({ kt: 'open', id: appId, project: project.id }, '*');
     } catch (_) {}
@@ -701,6 +752,7 @@
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    requestRender();
   }
   window.addEventListener('resize', resize);
 
@@ -714,11 +766,8 @@
   resize();
   rebuildMesh();
 
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-  }
-  animate();
+  saveProject(true);
+  requestRender();
 })();
 </script>
 </body>

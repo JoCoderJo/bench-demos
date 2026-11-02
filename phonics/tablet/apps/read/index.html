@@ -90,6 +90,24 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 
 <script>
 'use strict';
+// Forgiving touch-tap helper for X11 touchscreen: synthesize click if pointerdown+pointerup stays within 36px
+(function(){
+  let pt=null,lastClick=0;
+  document.addEventListener("click",()=>{lastClick=Date.now();},true);
+  document.addEventListener("pointerdown",e=>{
+    if(e.pointerType==="mouse")return;
+    const b=e.target.closest("button,[role=button],.card,.item,.wd,.tile,.thing,.num,.shape,.opt,.fw");
+    if(!b)return;
+    pt={b,x:e.clientX,y:e.clientY,t:Date.now(),id:e.pointerId};
+  },true);
+  document.addEventListener("pointerup",e=>{
+    if(!pt||e.pointerId!==pt.id)return;
+    const p=pt;pt=null;
+    if(Date.now()-p.t>750||Math.hypot(e.clientX-p.x,e.clientY-p.y)>36)return;
+    setTimeout(()=>{if(Date.now()-lastClick>80&&!p.b.disabled)p.b.click();},35);
+  },true);
+  document.addEventListener("pointercancel",()=>{pt=null;},true);
+})();
 const $=id=>document.getElementById(id);
 const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const LIVE=location.protocol.startsWith('http');
@@ -193,9 +211,9 @@ $('rNext').onclick=()=>{if(rd.busy)return;newRead();};
 // ---------- Find it: three words a round
 function newFind(){stopAudio();fd.s=pickLine({},fd.s&&fd.s.id);fd.used=[];fd.got=0;fd.t=-1;fd.busy=false;drawLine($('fLine'),fd.s);drawTicks();nextTarget();}
 function drawTicks(){$('fTicks').textContent=[0,1,2].map(i=>i<fd.got?'●':'○').join(' ');}
-async function nextTarget(){const free=fd.s.words.map((w,i)=>i).filter(i=>!fd.used.includes(i));fd.t=pick(free);fd.used.push(fd.t);fd.tries=0;fd.busy=true;
+async function nextTarget(){const free=fd.s.words.map((w,i)=>i).filter(i=>!fd.used.includes(i));fd.t=pick(free);fd.used.push(fd.t);fd.tries=0;fd.busy=false;
   $('fLine').querySelectorAll('.wd').forEach(b=>b.classList.remove('good','hint'));$('fMsg').textContent='Find the word…';
-  const my=++seq;await play(V('find'));if(my!==seq)return;await play(fd.s.words[fd.t].clip);if(my===seq)fd.busy=false;}
+  const my=++seq;await play(V('find'));if(my!==seq)return;await play(fd.s.words[fd.t].clip);}
 $('fLine').onclick=async e=>{const b=e.target.closest('.wd');if(!b||fd.busy||fd.t<0)return;const i=+b.dataset.i;const w=fd.s.words[i];lastWord=w;stopAudio();
   if(w.w===fd.s.words[fd.t].w){fd.busy=true;b.classList.add('good');b.classList.remove('hint');fd.got++;drawTicks();kt({kt:'blip',f:720});const my=seq;await play(w.clip);if(my!==seq)return;
     if(fd.got>=3){star(1);$('fMsg').textContent=['Yes!','You found them all!','Great reading!','Super!'][prog.stars%4];await play(V('great'));if(my!==seq)return;await wait(700);if(my===seq)newFind();}
@@ -210,8 +228,8 @@ async function newFix(){stopAudio();fx.s=pickLine(prog.fixed,fx.s&&fx.s.id);fx.n
   $('xPics').textContent=fx.s.pics;
   $('xSlots').innerHTML=fx.s.words.map((w,i)=>`<div class="slot${i===0?' next':''}" data-i="${i}"></div>`).join('')+'<span class="dot">.</span>';
   $('xBank').innerHTML=order.map(i=>`<button class="wd" data-i="${i}">${E(fx.s.words[i].w==='i'?'I':fx.s.words[i].w)}</button>`).join('');
-  $('xMsg').textContent='Listen, then put the words in order';
-  const my=++seq;await play(V('fix'));if(my!==seq)return;await play(fx.s.clip);if(my===seq)fx.busy=false;}
+  $('xMsg').textContent='Listen, then put the words in order';fx.busy=false;
+  const my=++seq;await play(V('fix'));if(my!==seq)return;await play(fx.s.clip);}
 $('xBank').onclick=async e=>{const b=e.target.closest('.wd');if(!b||fx.busy||b.classList.contains('used'))return;const w=fx.s.words[+b.dataset.i];lastWord=w;stopAudio();
   if(w.w===fx.s.words[fx.next].w){b.classList.add('used');$('xBank').querySelectorAll('.wd').forEach(x=>x.classList.remove('hint'));
     const i=fx.next,w=fx.s.words[i];const slot=$('xSlots').querySelector(`.slot[data-i="${i}"]`);slot.textContent=show(w.w,i);slot.classList.add('full');slot.classList.remove('next');

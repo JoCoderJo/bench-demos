@@ -1,6 +1,6 @@
 {
- "version": "2bd629f",
- "sha": "658fbf3022c526a050fe18248b7c8d707eb059c6ca7d4259717d37bd4300c567",
+ "version": "24fa7c8",
+ "sha": "7cd57c16ab51f43055dd9fb8db596c4df96dec2f8aa4cbfd013ab1fa599997da",
  "apps": [
   "phonics-friends",
   "camera",
@@ -13,14 +13,16 @@
   "maker-code",
   "maker-light",
   "music",
+  "mystuff",
   "pbs-kids",
   "read",
   "show-tell",
   "stories",
+  "tv-remote",
   "words",
   "yoto"
  ],
- "files": 1056,
- "bytes": 12249665,
+ "files": 1078,
+ "bytes": 12452946,
  "public": true
 }

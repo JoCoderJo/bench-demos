@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>TV Remote</title>
+<!--
+  tablet/apps/tv-remote — a kid-sized remote for the family's Google TV (PLAN.md §14, D-046).
+
+  The page talks ONLY to the helper on the tablet itself, helper/tvremote.py on 127.0.0.1:8097, which speaks the Android TV
+  Remote protocol v2 to the one TV a grown-up paired. The kid side is big buttons: arrows + OK, back/home, play-pause, volume,
+  three kid app shortcuts, and a power button that needs a 1.2 s hold. Everything that could lose the picture (inputs,
+  settings, channels) is not on the remote and the helper refuses it anyway (ALLOWED_KEYS).
+
+  Grown-ups: hold the ⚙ corner 1.5 s → pick the TV from the list (mDNS) or type its address with the keypad → type the 6-digit
+  code the TV shows. Pairing survives restarts (cert + tv.json in ~/kids-tablet/state/tv-remote). ◁ closes the grown-up
+  panel / the code dialog (handled) and otherwise leaves the tile. On a laptop with no helper the page shows "helper offline".
+  Test: tablet/tests/tvremote_dom.py (fake TV: python3 helper/tvremote.py --fake --port 8097).
+-->
+<style>
+  :root { --bg:#0f1a1c; --panel:#17272a; --ink:#eef5f5; --dim:#8fa7a9; --on:#2b7a78; --hot:#3aafa9; --warn:#ff8a80; --ok:#5fd38d; --key:#213538; --key2:#2a4347; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--ink); font:18px/1.3 system-ui, sans-serif; overflow:hidden; touch-action:none; }
+  button { font:inherit; color:inherit; background:var(--key); border:0; border-radius:18px; min-height:64px; min-width:64px; padding:0 14px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; position:relative; }
+  button:active, button.down { background:var(--key2); transform:scale(.96); }
+  button.on { background:var(--on); }
+  button:disabled { opacity:.4; }
+  .cap { font-size:14px; color:var(--dim); }
+  body.pre .cap { display:none; }
+  .big { font-size:34px; line-height:1; }
+
+  #remote { position:fixed; inset:0; display:grid; grid-template-columns:290px 1fr 250px; gap:12px; padding:12px; }
+  .col { display:flex; flex-direction:column; gap:10px; min-height:0; }
+  #status { background:var(--panel); border-radius:20px; padding:14px 16px; display:flex; flex-direction:column; gap:6px; }
+  #tvname { font-size:22px; font-weight:700; display:flex; align-items:center; gap:10px; }
+  #dot { width:14px; height:14px; border-radius:50%; background:#555; flex:none; }
+  #dot.on { background:var(--ok); } #dot.off { background:#777; } #dot.lost { background:var(--warn); }
+  #volbar { height:12px; background:#0b1416; border-radius:6px; overflow:hidden; }
+  #volfill { height:100%; width:0; background:var(--hot); transition:width .2s; }
+  #volfill.muted { background:var(--warn); }
+  #now { color:var(--dim); font-size:15px; min-height:1.3em; }
+  #apps { display:grid; grid-template-columns:1fr; gap:10px; flex:1; }
+  #apps button { min-height:84px; flex-direction:row; justify-content:flex-start; gap:14px; font-size:20px; padding:0 18px; }
+  #apps .ic { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:30px; flex:none; color:#fff; }
+  #gear { min-height:48px; min-width:48px; background:transparent; color:var(--dim); font-size:26px; align-self:flex-end; }
+  #gear.down::after { content:''; position:absolute; inset:4px; border-radius:50%; border:3px solid var(--hot); border-right-color:transparent; animation:spin 1.5s linear; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  #mid { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
+  #pad { display:grid; grid-template-columns:repeat(3, 130px); grid-template-rows:repeat(3, 130px); gap:8px; }
+  #pad button { font-size:48px; border-radius:26px; }
+  #pad .ok { background:var(--on); font-size:30px; font-weight:800; border-radius:50%; }
+  #nav { display:flex; gap:12px; }
+  #nav button { min-width:150px; min-height:74px; font-size:22px; flex-direction:row; gap:10px; }
+
+  #right button { width:100%; }
+  #vol { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  #vol button { min-height:96px; font-size:40px; }
+  #vol button.wide { grid-column:1 / span 2; min-height:72px; font-size:28px; }
+  #media button { min-height:84px; font-size:30px; }
+  #mediarow { display:grid; grid-template-columns:1fr 1.4fr 1fr; gap:10px; }
+  #power { margin-top:auto; min-height:80px; background:#3a2226; font-size:28px; overflow:hidden; }
+  #power .ring { position:absolute; left:0; bottom:0; height:6px; width:0; background:var(--warn); }
+  #power.down .ring { width:100%; transition:width 1.2s linear; }
+
+  /* overlays */
+  .veil { position:fixed; inset:0; display:none; align-items:center; justify-content:center; text-align:center; padding:30px; background:rgba(8,14,16,.94); z-index:5; flex-direction:column; gap:18px; }
+  .veil.on { display:flex; }
+  .veil h1 { font-size:36px; margin:0; } .veil p { color:var(--dim); font-size:20px; max-width:720px; margin:0; }
+  .veil .em { font-size:90px; line-height:1; }
+  .veil button { min-height:72px; font-size:22px; padding:0 26px; }
+
+  #grown, #pair { z-index:10; justify-content:flex-start; padding:20px 28px; text-align:left; align-items:stretch; gap:12px; background:#0c1517; }
+  .hdr { display:flex; align-items:center; justify-content:space-between; }
+  .hdr h2 { margin:0; font-size:26px; }
+  .hdr button { min-height:56px; }
+  #grown .body { display:grid; grid-template-columns:1fr 360px; gap:20px; flex:1; min-height:0; }
+  .card { background:var(--panel); border-radius:18px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; min-height:0; }
+  .card h3 { margin:0; font-size:18px; color:var(--dim); font-weight:600; }
+  #tvlist { display:flex; flex-direction:column; gap:8px; overflow:auto; }
+  #tvlist button { flex-direction:row; justify-content:space-between; min-height:66px; font-size:20px; }
+  #tvlist .none { color:var(--dim); padding:10px 4px; }
+  .field { background:#0b1416; border-radius:12px; min-height:56px; display:flex; align-items:center; padding:0 14px; font:26px/1 ui-monospace, monospace; letter-spacing:2px; }
+  .kp { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
+  .kp button { min-height:60px; font-size:26px; }
+  .msg { color:var(--warn); min-height:1.3em; font-size:17px; }
+  #pair .code { display:flex; gap:10px; justify-content:center; margin:6px 0; }
+  #pair .code span { width:64px; height:80px; border-radius:14px; background:#0b1416; display:flex; align-items:center; justify-content:center; font:44px/1 ui-monospace, monospace; }
+  #pair .code span.cur { outline:3px solid var(--hot); }
+  #pair .kp { max-width:420px; margin:0 auto; width:100%; }
+  #pair .kp button { min-height:68px; }
+  #pair.shake .code { animation:shake .4s; }
+  @keyframes shake { 25% { transform:translateX(-12px);} 75% { transform:translateX(12px);} }
+  #pair .mid { display:grid; grid-template-columns:1fr 1fr; gap:20px; flex:1; align-items:center; }
+  #pair .tvside { text-align:center; } #pair .tvside .em { font-size:120px; }
+</style>
+</head>
+<body>
+
+<div id="remote">
+  <div class="col" id="left">
+    <div id="status">
+      <div id="tvname"><span id="dot"></span><span id="tvlabel">TV</span></div>
+      <div id="volbar"><div id="volfill"></div></div>
+      <div id="now"></div>
+    </div>
+    <div id="apps"></div>
+    <button id="gear" title="grown-ups: hold">⚙</button>
+  </div>
+
+  <div class="col" id="mid">
+    <div id="pad">
+      <span></span><button data-key="DPAD_UP" aria-label="up">▲</button><span></span>
+      <button data-key="DPAD_LEFT" aria-label="left">◀</button><button class="ok" data-key="DPAD_CENTER" aria-label="OK">OK</button><button data-key="DPAD_RIGHT" aria-label="right">▶</button>
+      <span></span><button data-key="DPAD_DOWN" aria-label="down">▼</button><span></span>
+    </div>
+    <div id="nav">
+      <button data-key="BACK"><span class="big">↩</span><span class="cap">Back</span></button>
+      <button data-key="HOME"><span class="big">⌂</span><span class="cap">TV home</span></button>
+    </div>
+  </div>
+
+  <div class="col" id="right">
+    <div id="vol">
+      <button data-key="VOLUME_DOWN" aria-label="quieter">🔉<span class="cap">quieter</span></button>
+      <button data-key="VOLUME_UP" aria-label="louder">🔊<span class="cap">louder</span></button>
+      <button class="wide" data-key="MUTE" id="bMute">🔇<span class="cap">mute</span></button>
+    </div>
+    <div id="media">
+      <div id="mediarow">
+        <button data-key="MEDIA_REWIND" aria-label="rewind">⏪</button>
+        <button data-key="MEDIA_PLAY_PAUSE" aria-label="play or pause">⏯</button>
+        <button data-key="MEDIA_FAST_FORWARD" aria-label="forward">⏩</button>
+      </div>
+    </div>
+    <button id="power">⏻<span class="cap">hold to turn the TV on or off</span><i class="ring"></i></button>
+  </div>
+</div>
+
+<!-- states that cover the remote -->
+<div class="veil" id="veilOff"><div class="em">📺</div><h1 id="veilTitle">The TV is not connected</h1><p id="veilText"></p><button id="veilBtn">Try again</button></div>
+
+<!-- grown-ups: pick / forget the TV -->
+<div class="veil" id="grown">
+  <div class="hdr"><h2>Grown-ups · the TV this remote steers</h2><button id="grownX">Done</button></div>
+  <div class="body">
+    <div class="card">
+      <h3>Your TV</h3>
+      <div id="yourtv" style="font-size:20px">—</div>
+      <div style="display:flex;gap:10px"><button id="bForget">Forget this TV</button><button id="bReconnect">Connect again</button></div>
+      <h3 style="margin-top:8px">TVs on the home network <button id="bScan" style="min-height:44px;min-width:44px;margin-left:8px">↻</button></h3>
+      <div id="tvlist"><div class="none">looking…</div></div>
+      <div class="msg" id="grownMsg"></div>
+    </div>
+    <div class="card">
+      <h3>Or type the TV's address</h3>
+      <div class="field" id="hostField">&nbsp;</div>
+      <div class="kp" id="hostKp"></div>
+      <button id="bHostGo" class="on">Connect to this address</button>
+      <div class="cap" style="font-size:14px">On the TV: Settings → Network → the IP address (looks like 10.0.0.42 or 192.168.1.42).</div>
+    </div>
+  </div>
+</div>
+
+<!-- the 6-digit code the TV shows -->
+<div class="veil" id="pair">
+  <div class="hdr"><h2>Type the number the TV is showing</h2><button id="pairX">Cancel</button></div>
+  <div class="mid">
+    <div class="tvside"><div class="em">📺</div><div id="pairTv" class="cap" style="font-size:18px"></div><div class="msg" id="pairMsg" style="text-align:center;margin-top:8px"></div></div>
+    <div>
+      <div class="code" id="code"></div>
+      <div class="kp" id="codeKp"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const HELPER = 'http://127.0.0.1:8097';
+const SHORTCUTS = [
+  { id: 'com.google.android.apps.youtube.kids', title: 'YouTube Kids', icon: '▶', color: '#e53935' },
+  { id: 'org.pbskids.video', title: 'PBS Kids', icon: '🐸', color: '#2e7d32' },
+  { id: 'com.disney.disneyplus', title: 'Disney+', icon: '✨', color: '#1e3a8a' },
+];
+const APP_NAMES = Object.assign({ 'com.google.android.tvlauncher': 'Home screen', 'com.google.android.youtube.tv': 'YouTube', 'com.netflix.ninja': 'Netflix' },
+  Object.fromEntries(SHORTCUTS.map(s => [s.id, s.title])));
+const HOLD_POWER = 1200, HOLD_GEAR = 1500, REPEAT_AFTER = 450, REPEAT_EVERY = 220;
+const REPEATS = new Set(['DPAD_UP', 'DPAD_DOWN', 'DPAD_LEFT', 'DPAD_RIGHT', 'VOLUME_UP', 'VOLUME_DOWN', 'MEDIA_REWIND', 'MEDIA_FAST_FORWARD']);
+
+const KTTV = window.KTTV = { state: { helperUp: false, phase: '', status: null, sent: [], grown: false, pairing: false }, send, launch, openGrown, closeGrown, pairStart, pairFinish, poll };
+let kid = { id: 'default', name: '', age: null };
+
+/* ---------- bridge: who is playing, back ---------- */
+window.addEventListener('message', e => {
+  const d = e.data || {};
+  if (d.kt === 'back' && !('handled' in d)) {
+    if ($('pair').classList.contains('on')) { pairCancel(); reply(); return; }
+    if ($('grown').classList.contains('on')) { closeGrown(); reply(); return; }
+    return;
+  }
+  if (d.kt !== 'hello') return;
+  if (d.kid && d.kid.id) kid = { id: String(d.kid.id), name: d.kid.name || '', age: d.kid.age == null ? null : +d.kid.age };
+  else if (d.child && d.child.name) kid.name = d.child.name;
+  document.body.classList.toggle('pre', kid.age != null && kid.age < 5);
+});
+function reply() { try { parent.postMessage({ kt: 'back', handled: true }, '*'); } catch (_) {} }
+try { parent.postMessage({ kt: 'who' }, '*'); } catch (e) {}
+const blip = f => { try { parent.postMessage({ kt: 'blip', f }, '*'); } catch (e) {} };
+const toast = text => { try { parent.postMessage({ kt: 'toast', text }, '*'); } catch (e) {} };
+
+/* ---------- helper calls ---------- */
+async function post(path, body, timeout = 8000) {
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), timeout);
+  try {
+    const r = await fetch(HELPER + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}), signal: ctl.signal });
+    let j = {}; try { j = await r.json(); } catch (_) {}
+    if (!r.ok && j.ok === undefined) j.ok = false;
+    return j;
+  } catch (e) { return { ok: false, error: 'helper offline' }; }
+  finally { clearTimeout(t); }
+}
+async function send(key, direction) {
+  const j = await post('/key', { key, direction: direction || 'SHORT' }, 4000);
+  KTTV.state.sent.push(key);
+  if (j.ok) blip(key.startsWith('VOLUME') ? 700 : 520); else if (j.error) toast(j.error);
+  schedulePoll(250);
+  return j;
+}
+async function launch(id) {
+  const j = await post('/app', { id }, 4000);
+  if (j.ok) { blip(600); toast('Opening ' + (APP_NAMES[id] || 'the app') + ' on the TV'); } else if (j.error) toast(j.error);
+  schedulePoll(400);
+  return j;
+}
+
+/* ---------- status poll ---------- */
+let pollT = null;
+function schedulePoll(ms) { clearTimeout(pollT); pollT = setTimeout(poll, ms); }
+async function poll() {
+  clearTimeout(pollT);
+  let st = null;
+  try {
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 2500);
+    st = await (await fetch(HELPER + '/status', { cache: 'no-store', signal: ctl.signal })).json();
+    clearTimeout(t);
+  } catch (e) { st = null; }
+  KTTV.state.helperUp = !!st;
+  KTTV.state.status = st;
+  KTTV.state.phase = st ? st.phase : 'offline';
+  render();
+  pollT = setTimeout(poll, st && st.phase === 'ready' ? 2000 : 1500);
+}
+
+function render() {
+  const st = KTTV.state.status, phase = KTTV.state.phase;
+  const veil = $('veilOff'), title = $('veilTitle'), text = $('veilText'), btn = $('veilBtn');
+  const dot = $('dot');
+  dot.className = '';
+  $('tvlabel').textContent = (st && st.name) || 'TV';
+  if (phase === 'ready') {
+    veil.classList.remove('on');
+    dot.classList.add(st.is_on === false ? 'off' : 'on');
+    const v = st.volume;
+    if (v && v.max) { $('volfill').style.width = Math.round(100 * v.level / v.max) + '%'; $('volfill').classList.toggle('muted', !!v.muted); }
+    else { $('volfill').style.width = '0%'; }
+    $('bMute').classList.toggle('on', !!(v && v.muted));
+    $('now').textContent = st.is_on === false ? 'TV is off' : (st.current_app ? 'On the TV: ' + (APP_NAMES[st.current_app] || st.current_app.replace(/^.*\./, '')) : '');
+    return;
+  }
+  // something covers the remote (the grown-up panel sits above it when open)
+  veil.classList.add('on');
+  btn.style.display = '';
+  if (phase === 'offline') { title.textContent = 'The TV helper is not running'; text.textContent = 'This tablet needs its TV helper (tvremote.py on port 8097). A grown-up can start it: see helper/install.sh.'; btn.textContent = 'Try again'; btn.onclick = () => poll(); }
+  else if (phase === 'nolib') { title.textContent = 'Almost ready'; text.textContent = 'A grown-up needs to finish setting up the TV helper once (helper/install.sh installs three packages). ' + (st.error || ''); btn.textContent = 'Try again'; btn.onclick = () => poll(); }
+  else if (phase === 'unpaired') { title.textContent = st.paired ? 'The TV forgot this tablet' : 'No TV connected yet'; text.textContent = st.error || 'Ask a grown-up to connect the TV: hold the ⚙ corner.'; btn.textContent = 'Grown-ups: connect the TV'; btn.onclick = () => openGrown(); }
+  else if (phase === 'connecting') { title.textContent = 'Finding the TV…'; text.textContent = st.name ? 'Connecting to ' + st.name : ''; btn.style.display = 'none'; }
+  else if (phase === 'lost') { title.textContent = 'The TV is asleep or away'; text.textContent = 'Turn the TV on with its own remote, or check it is on the same Wi-Fi. ' + (st.error || ''); dot.classList.add('lost'); btn.textContent = 'Grown-ups: connect a TV'; btn.onclick = () => openGrown(); }
+  else if (phase === 'pairing' || phase === 'pair_failed') { title.textContent = 'A grown-up is connecting the TV'; text.textContent = st.error || ''; btn.textContent = 'Open the code screen'; btn.onclick = () => openGrown(); }
+  else { title.textContent = 'The TV is not connected'; text.textContent = st.error || phase; btn.textContent = 'Try again'; btn.onclick = () => poll(); }
+}
+
+/* ---------- buttons: tap = one key, hold = repeat; power = hold ---------- */
+function wireKeys() {
+  for (const b of document.querySelectorAll('[data-key]')) {
+    const key = b.dataset.key;
+    let repT = null, repI = null, fired = false;
+    const stop = () => { clearTimeout(repT); clearInterval(repI); repT = repI = null; b.classList.remove('down'); };
+    b.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      try { b.setPointerCapture(e.pointerId); } catch (_) {}
+      b.classList.add('down'); fired = false;
+      if (REPEATS.has(key)) repT = setTimeout(() => { fired = true; send(key); repI = setInterval(() => send(key), REPEAT_EVERY); }, REPEAT_AFTER);
+    });
+    b.addEventListener('pointerup', () => { const f = fired; stop(); if (!f) send(key); });
+    b.addEventListener('pointercancel', stop);
+    b.addEventListener('lostpointercapture', stop);
+  }
+  const p = $('power'); let pT = null;
+  p.addEventListener('pointerdown', e => {
+    try { p.setPointerCapture(e.pointerId); } catch (_) {}
+    p.classList.add('down');
+    pT = setTimeout(() => { pT = null; p.classList.remove('down'); send('POWER'); toast('TV power'); }, HOLD_POWER);
+  });
+  const pStop = () => { if (pT) { clearTimeout(pT); pT = null; toast('Hold the ⏻ button to turn the TV on or off'); } p.classList.remove('down'); };
+  p.addEventListener('pointerup', pStop); p.addEventListener('pointercancel', pStop);
+  const g = $('gear'); let gT = null;
+  g.addEventListener('pointerdown', e => { try { g.setPointerCapture(e.pointerId); } catch (_) {} g.classList.add('down'); gT = setTimeout(() => { gT = null; g.classList.remove('down'); openGrown(); }, HOLD_GEAR); });
+  const gStop = () => { if (gT) { clearTimeout(gT); gT = null; toast('Grown-ups: hold ⚙ to connect the TV'); } g.classList.remove('down'); };
+  g.addEventListener('pointerup', gStop); g.addEventListener('pointercancel', gStop);
+}
+$('apps').innerHTML = SHORTCUTS.map(s => `<button data-app="${s.id}"><span class="ic" style="background:${s.color}">${s.icon}</span><span>${s.title}</span></button>`).join('');
+for (const b of document.querySelectorAll('[data-app]')) b.addEventListener('click', () => launch(b.dataset.app));
+
+/* ---------- grown-ups: find / type / forget the TV ---------- */
+let host = '';
+function keypad(el, keys, onKey) {
+  el.innerHTML = keys.map(k => `<button data-k="${k}">${k === 'del' ? '⌫' : k}</button>`).join('');
+  for (const b of el.querySelectorAll('button')) b.addEventListener('click', () => onKey(b.dataset.k));
+}
+keypad($('hostKp'), ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'del'], k => {
+  if (k === 'del') host = host.slice(0, -1); else if (host.length < 15) host += k;
+  $('hostField').innerHTML = host || '&nbsp;';
+});
+function openGrown() {
+  KTTV.state.grown = true;
+  $('grown').classList.add('on'); $('grownMsg').textContent = '';
+  renderYourTv(); scan();
+}
+function closeGrown() { KTTV.state.grown = false; $('grown').classList.remove('on'); poll(); }
+$('grownX').onclick = closeGrown;
+function renderYourTv() {
+  const st = KTTV.state.status || {};
+  $('yourtv').textContent = st.host ? `${st.name || st.host} (${st.host}) — ${{ ready: 'connected', lost: 'not reachable right now', connecting: 'connecting…', unpaired: 'needs pairing again' }[st.phase] || st.phase}` : 'none yet';
+  $('bForget').disabled = !st.host; $('bReconnect').disabled = !st.host || st.phase === 'ready';
+}
+async function scan() {
+  $('tvlist').innerHTML = '<div class="none">looking…</div>';
+  let list = [];
+  try { list = await (await fetch(HELPER + '/discover', { cache: 'no-store' })).json(); } catch (e) { list = []; }
+  if (!Array.isArray(list)) list = [];
+  KTTV.state.discovered = list;
+  $('tvlist').innerHTML = list.length ? list.map(t => `<button data-host="${t.host}" data-name="${(t.name || '').replace(/"/g, '')}"><span>📺 ${t.name || t.host}</span><span class="cap" style="display:inline">${t.host}</span></button>`).join('')
+    : '<div class="none">No Google TV answered. Is the TV on? Then type its address on the right.</div>';
+  for (const b of $('tvlist').querySelectorAll('button')) b.addEventListener('click', () => pairStart(b.dataset.host, b.dataset.name));
+}
+$('bScan').onclick = scan;
+$('bHostGo').onclick = () => { if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) { $('grownMsg').textContent = 'An address looks like 10.0.0.42 — four numbers with dots.'; return; } pairStart(host, ''); };
+$('bForget').onclick = async () => { const j = await post('/forget'); KTTV.state.status = j; KTTV.state.phase = j.phase; renderYourTv(); toast('TV forgotten'); };
+$('bReconnect').onclick = async () => { const st = KTTV.state.status || {}; if (st.host) pairStart(st.host, st.name || ''); };
+
+/* ---------- pairing: the 6-digit code ---------- */
+let code = '', pairHost = '', pairName = '';
+function drawCode() {
+  $('code').innerHTML = [0, 1, 2, 3, 4, 5].map(i => `<span class="${i === code.length ? 'cur' : ''}">${code[i] || ''}</span>`).join('');
+}
+keypad($('codeKp'), ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'del', '0', 'ok'], k => {
+  if (k === 'del') code = code.slice(0, -1);
+  else if (k === 'ok') { if (code.length === 6) pairFinish(code); return; }
+  else if (code.length < 6) code += k;
+  drawCode();
+  if (code.length === 6) pairFinish(code);
+});
+async function pairStart(h, name) {
+  $('grownMsg').textContent = 'Asking the TV…';
+  const j = await post('/pair/start', { host: h, name: name || '' }, 15000);
+  KTTV.state.status = j; KTTV.state.phase = j.phase || KTTV.state.phase; render();
+  if (j.phase === 'pairing') {
+    pairHost = h; pairName = name || h; code = ''; drawCode();
+    $('pairTv').textContent = `${pairName} · ${h}`; $('pairMsg').textContent = '';
+    $('pair').classList.add('on'); KTTV.state.pairing = true; $('grownMsg').textContent = '';
+  } else {
+    $('grownMsg').textContent = j.error || 'The TV did not answer.';
+  }
+  renderYourTv();
+  return j;
+}
+async function pairFinish(c) {
+  $('pairMsg').textContent = 'Checking…';
+  const j = await post('/pair/finish', { code: c }, 30000);
+  KTTV.state.status = j; KTTV.state.phase = j.phase || KTTV.state.phase; render();
+  if (j.phase === 'ready' || j.phase === 'connecting') {
+    $('pair').classList.remove('on'); KTTV.state.pairing = false; closeGrown(); toast('The TV is connected 🎉'); blip(880);
+  } else {
+    $('pair').classList.add('shake'); setTimeout(() => $('pair').classList.remove('shake'), 500);
+    $('pairMsg').textContent = j.error || 'That did not work.';
+    code = ''; drawCode();
+    // the TV closes the pairing session after a wrong number: open a new one so the grown-up can just type again
+    const again = await post('/pair/start', { host: pairHost, name: pairName === pairHost ? '' : pairName }, 15000);
+    KTTV.state.status = again; KTTV.state.phase = again.phase || KTTV.state.phase;
+    if (again.phase !== 'pairing') { $('pairMsg').textContent = again.error || 'The TV stopped. Try again from the list.'; $('pair').classList.remove('on'); KTTV.state.pairing = false; $('grownMsg').textContent = $('pairMsg').textContent; }
+  }
+  renderYourTv();
+  return j;
+}
+async function pairCancel() { $('pair').classList.remove('on'); KTTV.state.pairing = false; const j = await post('/pair/cancel'); KTTV.state.status = j; renderYourTv(); }
+$('pairX').onclick = pairCancel;
+
+wireKeys();
+drawCode();
+poll();
+</script>
+</body>
+</html>
