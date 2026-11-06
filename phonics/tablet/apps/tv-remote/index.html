@@ -8,12 +8,12 @@
   tablet/apps/tv-remote — a kid-sized remote for the family's Google TV (PLAN.md §14, D-046).
 
   The page talks ONLY to the helper on the tablet itself, helper/tvremote.py on 127.0.0.1:8097, which speaks the Android TV
-  Remote protocol v2 to the one TV a grown-up paired. The kid side is big buttons: arrows + OK, back/home, play-pause, volume,
-  three kid app shortcuts, and a power button that needs a 1.2 s hold. Everything that could lose the picture (inputs,
+  Remote protocol v2 to the TVs a grown-up paired (one steered at a time; two or more → a picker on the remote). The kid side is big buttons: arrows + OK, back/home, play-pause, volume,
+  two kid app shortcuts (PBS Kids, Disney+), and a power button that needs a 1.2 s hold. Everything that could lose the picture (inputs,
   settings, channels) is not on the remote and the helper refuses it anyway (ALLOWED_KEYS).
 
-  Grown-ups: hold the ⚙ corner 1.5 s → pick the TV from the list (mDNS) or type its address with the keypad → type the 6-digit
-  code the TV shows. Pairing survives restarts (cert + tv.json in ~/kids-tablet/state/tv-remote). ◁ closes the grown-up
+  Grown-ups: hold the ⚙ corner 1.5 s → pick the TV from the list (mDNS) or type its address with the keypad → type the 6-character
+  code the TV shows (hex: digits and A–F). Pairing survives restarts (cert + tv.json in ~/kids-tablet/state/tv-remote). ◁ closes the grown-up
   panel / the code dialog (handled) and otherwise leaves the tile. On a laptop with no helper the page shows "helper offline".
   Test: tablet/tests/tvremote_dom.py (fake TV: python3 helper/tvremote.py --fake --port 8097).
 -->
@@ -39,6 +39,12 @@
   #volfill { height:100%; width:0; background:var(--hot); transition:width .2s; }
   #volfill.muted { background:var(--warn); }
   #now { color:var(--dim); font-size:15px; min-height:1.3em; }
+  /* two or more paired TVs: a picker in the status card and on the veil (2026-11-03, Joe's two TVs) */
+  #tvpick { display:none; gap:8px; } #tvpick.on { display:flex; }
+  #tvpick button, #veilPick button { min-height:58px; font-size:17px; padding:0 10px; flex:1; }
+  #veilPick { display:none; gap:10px; justify-content:center; flex-wrap:wrap; } #veilPick.on { display:flex; }
+  #tvs .row { display:flex; align-items:center; gap:8px; margin:6px 0; } #tvs .row > span:first-child { flex:1; font-size:18px; text-align:left; }
+  #tvs .row button { min-height:48px; min-width:48px; font-size:16px; }
   #apps { display:grid; grid-template-columns:1fr; gap:10px; flex:1; }
   #apps button { min-height:84px; flex-direction:row; justify-content:flex-start; gap:14px; font-size:20px; padding:0 18px; }
   #apps .ic { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:30px; flex:none; color:#fff; }
@@ -87,7 +93,7 @@
   #pair .code { display:flex; gap:10px; justify-content:center; margin:6px 0; }
   #pair .code span { width:64px; height:80px; border-radius:14px; background:#0b1416; display:flex; align-items:center; justify-content:center; font:44px/1 ui-monospace, monospace; }
   #pair .code span.cur { outline:3px solid var(--hot); }
-  #pair .kp { max-width:420px; margin:0 auto; width:100%; }
+  #pair .kp { max-width:600px; margin:0 auto; width:100%; grid-template-columns:repeat(6, 1fr); }  /* hex code: 0-9 + A-F */
   #pair .kp button { min-height:68px; }
   #pair.shake .code { animation:shake .4s; }
   @keyframes shake { 25% { transform:translateX(-12px);} 75% { transform:translateX(12px);} }
@@ -101,6 +107,7 @@
   <div class="col" id="left">
     <div id="status">
       <div id="tvname"><span id="dot"></span><span id="tvlabel">TV</span></div>
+      <div id="tvpick"></div>
       <div id="volbar"><div id="volfill"></div></div>
       <div id="now"></div>
     </div>
@@ -138,16 +145,17 @@
 </div>
 
 <!-- states that cover the remote -->
-<div class="veil" id="veilOff"><div class="em">📺</div><h1 id="veilTitle">The TV is not connected</h1><p id="veilText"></p><button id="veilBtn">Try again</button></div>
+<div class="veil" id="veilOff"><div class="em">📺</div><h1 id="veilTitle">The TV is not connected</h1><p id="veilText"></p><div id="veilPick"></div><button id="veilBtn">Try again</button></div>
 
 <!-- grown-ups: pick / forget the TV -->
 <div class="veil" id="grown">
-  <div class="hdr"><h2>Grown-ups · the TV this remote steers</h2><button id="grownX">Done</button></div>
+  <div class="hdr"><h2>Grown-ups · the TVs this remote steers</h2><button id="grownX">Done</button></div>
   <div class="body">
     <div class="card">
-      <h3>Your TV</h3>
+      <h3>Your TVs</h3>
       <div id="yourtv" style="font-size:20px">—</div>
       <div style="display:flex;gap:10px"><button id="bForget">Forget this TV</button><button id="bReconnect">Connect again</button></div>
+      <div id="tvs"></div>
       <h3 style="margin-top:8px">TVs on the home network <button id="bScan" style="min-height:44px;min-width:44px;margin-left:8px">↻</button></h3>
       <div id="tvlist"><div class="none">looking…</div></div>
       <div class="msg" id="grownMsg"></div>
@@ -162,9 +170,9 @@
   </div>
 </div>
 
-<!-- the 6-digit code the TV shows -->
+<!-- the 6-character code the TV shows (hex: 0-9 and A-F, e.g. 3C9F02) -->
 <div class="veil" id="pair">
-  <div class="hdr"><h2>Type the number the TV is showing</h2><button id="pairX">Cancel</button></div>
+  <div class="hdr"><h2>Type the code the TV is showing</h2><button id="pairX">Cancel</button></div>
   <div class="mid">
     <div class="tvside"><div class="em">📺</div><div id="pairTv" class="cap" style="font-size:18px"></div><div class="msg" id="pairMsg" style="text-align:center;margin-top:8px"></div></div>
     <div>
@@ -178,17 +186,21 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const HELPER = 'http://127.0.0.1:8097';
+/* Kid app shortcuts (Joe's pick, 2026-11-03: no YouTube Kids). `id` = Android package (what the TV reports as
+   current_app); `link` = the app's https deep link when it has one. Joe's Google TV answers an error to the Play-Store
+   form market://launch?id=... and a LEANBACK_LAUNCHER intent too (helper log, 2026-11-03) but opens https://www.disneyplus.com
+   and https://pbskids.org/video; with no link the helper still sends the launcher intent (works on some TVs). */
 const SHORTCUTS = [
-  { id: 'com.google.android.apps.youtube.kids', title: 'YouTube Kids', icon: '▶', color: '#e53935' },
-  { id: 'org.pbskids.video', title: 'PBS Kids', icon: '🐸', color: '#2e7d32' },
-  { id: 'com.disney.disneyplus', title: 'Disney+', icon: '✨', color: '#1e3a8a' },
+  { id: 'org.pbskids.video', title: 'PBS Kids', icon: '🐸', color: '#2e7d32', link: 'https://pbskids.org/video' },  // exact: with a trailing slash the TV shows a chooser
+  { id: 'com.disney.disneyplus', title: 'Disney+', icon: '✨', color: '#1e3a8a', link: 'https://www.disneyplus.com' },
 ];
-const APP_NAMES = Object.assign({ 'com.google.android.tvlauncher': 'Home screen', 'com.google.android.youtube.tv': 'YouTube', 'com.netflix.ninja': 'Netflix' },
+const APP_NAMES = Object.assign({ 'com.google.android.tvlauncher': 'Home screen', 'com.google.android.apps.tv.launcherx': 'Home screen',
+  'com.google.android.apps.tv.dreamx': 'Screensaver', 'com.google.android.youtube.tv': 'YouTube', 'com.netflix.ninja': 'Netflix' },
   Object.fromEntries(SHORTCUTS.map(s => [s.id, s.title])));
 const HOLD_POWER = 1200, HOLD_GEAR = 1500, REPEAT_AFTER = 450, REPEAT_EVERY = 220;
 const REPEATS = new Set(['DPAD_UP', 'DPAD_DOWN', 'DPAD_LEFT', 'DPAD_RIGHT', 'VOLUME_UP', 'VOLUME_DOWN', 'MEDIA_REWIND', 'MEDIA_FAST_FORWARD']);
 
-const KTTV = window.KTTV = { state: { helperUp: false, phase: '', status: null, sent: [], grown: false, pairing: false }, send, launch, openGrown, closeGrown, pairStart, pairFinish, poll };
+const KTTV = window.KTTV = { state: { helperUp: false, phase: '', status: null, sent: [], grown: false, pairing: false }, send, launch, select, openGrown, closeGrown, pairStart, pairFinish, poll };
 let kid = { id: 'default', name: '', age: null };
 
 /* ---------- bridge: who is playing, back ---------- */
@@ -228,7 +240,8 @@ async function send(key, direction) {
   return j;
 }
 async function launch(id) {
-  const j = await post('/app', { id }, 4000);
+  const s = SHORTCUTS.find(x => x.id === id);
+  const j = await post('/app', { id: (s && s.link) || id }, 4000);
   if (j.ok) { blip(600); toast('Opening ' + (APP_NAMES[id] || 'the app') + ' on the TV'); } else if (j.error) toast(j.error);
   schedulePoll(400);
   return j;
@@ -252,9 +265,42 @@ async function poll() {
   pollT = setTimeout(poll, st && st.phase === 'ready' ? 2000 : 1500);
 }
 
+/* ---------- several TVs: the picker (kid side) ---------- */
+let pickSig = '';
+function escTv(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function renderPick(st) {
+  const tvs = (st && Array.isArray(st.tvs)) ? st.tvs : [];
+  const sig = tvs.map(t => `${t.host}|${t.name}|${t.active ? 1 : 0}`).join(',');
+  if (sig === pickSig) return;              // rebuilt only on change: a tap must not land on a re-created button
+  pickSig = sig;
+  const html = tvs.length > 1 ? tvs.map(t => `<button data-tv="${t.host}" class="${t.active ? 'on' : ''}">📺 ${escTv(t.name || t.host)}</button>`).join('') : '';
+  for (const id of ['tvpick', 'veilPick']) {
+    const el = $(id); el.innerHTML = html; el.classList.toggle('on', tvs.length > 1);
+    for (const b of el.querySelectorAll('button')) b.addEventListener('click', () => select(b.dataset.tv));
+  }
+}
+async function select(h) {
+  const st = KTTV.state.status || {};
+  if (h === st.host && KTTV.state.phase === 'ready') return st;
+  const t = (st.tvs || []).find(x => x.host === h);
+  toast('Switching to ' + ((t && t.name) || h));
+  const j = await post('/tv/select', { host: h }, 10000);
+  if (j && j.phase) { KTTV.state.status = j; KTTV.state.phase = j.phase; render(); }
+  else if (j && j.error) toast(j.error);
+  schedulePoll(400);
+  return j;
+}
+async function forget(h) {
+  const j = await post('/forget', h ? { host: h } : {});
+  if (j && j.phase) { KTTV.state.status = j; KTTV.state.phase = j.phase; render(); }
+  renderYourTv(); toast('TV forgotten');
+  return j;
+}
+
 function render() {
   const st = KTTV.state.status, phase = KTTV.state.phase;
   const veil = $('veilOff'), title = $('veilTitle'), text = $('veilText'), btn = $('veilBtn');
+  renderPick(st);
   const dot = $('dot');
   dot.className = '';
   $('tvlabel').textContent = (st && st.name) || 'TV';
@@ -333,6 +379,10 @@ function renderYourTv() {
   const st = KTTV.state.status || {};
   $('yourtv').textContent = st.host ? `${st.name || st.host} (${st.host}) — ${{ ready: 'connected', lost: 'not reachable right now', connecting: 'connecting…', unpaired: 'needs pairing again' }[st.phase] || st.phase}` : 'none yet';
   $('bForget').disabled = !st.host; $('bReconnect').disabled = !st.host || st.phase === 'ready';
+  const tvs = Array.isArray(st.tvs) ? st.tvs : [];
+  $('tvs').innerHTML = tvs.length > 1 ? tvs.map(t => `<div class="row"><span>📺 ${escTv(t.name || t.host)} <span class="cap" style="display:inline">${t.host}</span>${t.active ? ' — in use' : ''}</span><button data-use="${t.host}" ${t.active ? 'disabled' : ''}>Use</button><button data-forget="${t.host}">Forget</button></div>`).join('') : '';
+  for (const b of $('tvs').querySelectorAll('[data-use]')) b.addEventListener('click', () => select(b.dataset.use).then(renderYourTv));
+  for (const b of $('tvs').querySelectorAll('[data-forget]')) b.addEventListener('click', () => forget(b.dataset.forget));
 }
 async function scan() {
   $('tvlist').innerHTML = '<div class="none">looking…</div>';
@@ -340,21 +390,24 @@ async function scan() {
   try { list = await (await fetch(HELPER + '/discover', { cache: 'no-store' })).json(); } catch (e) { list = []; }
   if (!Array.isArray(list)) list = [];
   KTTV.state.discovered = list;
-  $('tvlist').innerHTML = list.length ? list.map(t => `<button data-host="${t.host}" data-name="${(t.name || '').replace(/"/g, '')}"><span>📺 ${t.name || t.host}</span><span class="cap" style="display:inline">${t.host}</span></button>`).join('')
+  const known = new Set((((KTTV.state.status || {}).tvs) || []).map(t => t.host));   // already paired: a tap switches, no code
+  $('tvlist').innerHTML = list.length ? list.map(t => `<button data-host="${t.host}" data-name="${(t.name || '').replace(/"/g, '')}"><span>📺 ${escTv(t.name || t.host)}${known.has(t.host) ? ' ✓ paired' : ''}</span><span class="cap" style="display:inline">${t.host}</span></button>`).join('')
     : '<div class="none">No Google TV answered. Is the TV on? Then type its address on the right.</div>';
-  for (const b of $('tvlist').querySelectorAll('button')) b.addEventListener('click', () => pairStart(b.dataset.host, b.dataset.name));
+  for (const b of $('tvlist').querySelectorAll('button')) b.addEventListener('click', () => known.has(b.dataset.host)
+    ? select(b.dataset.host).then(() => { $('grownMsg').textContent = 'Switched to ' + (b.dataset.name || b.dataset.host) + '.'; renderYourTv(); })
+    : pairStart(b.dataset.host, b.dataset.name));
 }
 $('bScan').onclick = scan;
 $('bHostGo').onclick = () => { if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) { $('grownMsg').textContent = 'An address looks like 10.0.0.42 — four numbers with dots.'; return; } pairStart(host, ''); };
-$('bForget').onclick = async () => { const j = await post('/forget'); KTTV.state.status = j; KTTV.state.phase = j.phase; renderYourTv(); toast('TV forgotten'); };
+$('bForget').onclick = () => forget('');
 $('bReconnect').onclick = async () => { const st = KTTV.state.status || {}; if (st.host) pairStart(st.host, st.name || ''); };
 
-/* ---------- pairing: the 6-digit code ---------- */
+/* ---------- pairing: the 6-character hex code (0-9, A-F) ---------- */
 let code = '', pairHost = '', pairName = '';
 function drawCode() {
   $('code').innerHTML = [0, 1, 2, 3, 4, 5].map(i => `<span class="${i === code.length ? 'cur' : ''}">${code[i] || ''}</span>`).join('');
 }
-keypad($('codeKp'), ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'del', '0', 'ok'], k => {
+keypad($('codeKp'), ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'A', 'B', 'C', 'D', 'E', 'F', 'del', 'ok'], k => {
   if (k === 'del') code = code.slice(0, -1);
   else if (k === 'ok') { if (code.length === 6) pairFinish(code); return; }
   else if (code.length < 6) code += k;

@@ -11,7 +11,7 @@ that opens a connection to another device on the home LAN; it connects to exactl
 and refuses anything that is not a private (RFC 1918) address.
 
 Protocol (vendored library `vendor/androidtvremote2`, Apache-2.0): TLS to the TV with a self-signed client cert kept in
-the state dir. First time: POST /pair/start {host} → the TV shows a 6-digit code → POST /pair/finish {code} → the TV
+the state dir. First time: POST /pair/start {host} → the TV shows a 6-character hex code → POST /pair/finish {code} → the TV
 remembers our cert → from then on the helper connects at start and keeps reconnecting by itself.
 
 Routes (all JSON, CORS *, 127.0.0.1 only):
@@ -21,9 +21,10 @@ Routes (all JSON, CORS *, 127.0.0.1 only):
   POST /pair/start        {host, name?} → the TV shows a code; phase → pairing
   POST /pair/finish       {code} → paired + connected, or pair_failed (wrong code) / unpaired (cancelled on the TV)
   POST /pair/cancel
-  POST /forget            drop the pairing (cert + tv.json)
+  POST /forget            {host?} drop one TV's pairing (the active one by default; the cert goes with the last TV)
+  POST /tv/select         {host} steer another paired TV — tvs.json remembers every paired TV and the active one
   POST /key               {key: "DPAD_UP", direction?: "SHORT"|"START_LONG"|"END_LONG"} — kid-safe allowlist below
-  POST /app               {id: "com.google.android.apps.youtube.kids" | "https://…"} → launch on the TV
+  POST /app               {id: "org.pbskids.video" | "https://…"} → launch on the TV (package → launcher intent, https as-is)
   GET  /fake/log          (--fake only) what the pretend TV received, for tests
 
 No ping, no telemetry, nothing leaves the tablet except the TV connection above.
@@ -34,6 +35,7 @@ import argparse
 import asyncio
 import ipaddress
 import json
+import re
 import logging
 import os
 import random
@@ -217,7 +219,7 @@ class FakeRemote:
     async def async_connect(self):
         if self.host == "10.0.0.98":
             raise CannotConnect("pretend TV is off")
-        if not self.store.get("paired"):
+        if not self.store["paired"].get(self.host):
             raise InvalidAuth("not paired")
         self._connected = True
 
@@ -240,7 +242,7 @@ class FakeRemote:
         self._pairing = False
         if code != self.PIN:
             raise InvalidAuth("wrong code")
-        self.store["paired"] = True
+        self.store["paired"][self.host] = True
 
     def send_key_command(self, key, direction="SHORT"):
         if not self._connected:
@@ -261,7 +263,8 @@ class FakeRemote:
         if not self._connected:
             raise ConnectionClosed("not connected")
         self.store["log"].append(f"app:{link}")
-        self.current_app = link
+        m = re.search(r"package=([\w.]+);", link)
+        self.current_app = m.group(1) if m else link
 
 
 class TV:
@@ -273,13 +276,14 @@ class TV:
         self.state_dir.mkdir(parents=True, exist_ok=True)
         self.certfile = str(self.state_dir / "cert.pem")
         self.keyfile = str(self.state_dir / "key.pem")
-        self.cfg_path = self.state_dir / "tv.json"
-        self.cfg = self._load_cfg()
+        self.cfg_path = self.state_dir / "tvs.json"      # {"active": host, "tvs": {host: {"name", "fake_paired"}}}
+        self.tvs = {}
+        self.cfg = self._load_cfg()                       # the ACTIVE TV as {"host", "name"} ({} = none)
         self.phase = "unpaired"
         self.error = ""
         self.remote = None
         self.lib_ok = True
-        self.fake_store = {"paired": bool(self.cfg.get("fake_paired")), "log": []}
+        self.fake_store = {"paired": {h: True for h, t in self.tvs.items() if t.get("fake_paired")}, "log": []}
         self.loop = asyncio.new_event_loop()
         self._task = None
         if not fake and LIB_ERR:
@@ -296,13 +300,56 @@ class TV:
         return asyncio.run_coroutine_threadsafe(coro, self.loop).result(timeout)
 
     def _load_cfg(self):
+        """tvs.json -> self.tvs; returns the active TV as {"host","name"} ({} = none). Migrates the one-TV tv.json (2026-11-02)."""
+        d = {}
         try:
-            return json.loads(self.cfg_path.read_text())
+            d = json.loads(self.cfg_path.read_text())
         except Exception:  # noqa: BLE001
-            return {}
+            old = self.state_dir / "tv.json"
+            try:
+                o = json.loads(old.read_text())
+                if o.get("host"):
+                    d = {"active": o["host"], "tvs": {o["host"]: {"name": o.get("name") or o["host"], "fake_paired": bool(o.get("fake_paired"))}}}
+                    self.cfg_path.write_text(json.dumps(d, indent=1))
+                    old.unlink()
+                    LOG.info("migrated tv.json -> tvs.json (%s)", o["host"])
+            except Exception:  # noqa: BLE001
+                pass
+        self.tvs = {h: t for h, t in (d.get("tvs") or {}).items() if isinstance(t, dict) and t.get("name")}
+        active = d.get("active") if d.get("active") in self.tvs else (next(iter(self.tvs)) if self.tvs else None)
+        return {"host": active, "name": self.tvs[active]["name"]} if active else {}
 
     def _save_cfg(self):
-        self.cfg_path.write_text(json.dumps(self.cfg, indent=1))
+        self.cfg_path.write_text(json.dumps({"active": self.cfg.get("host"), "tvs": self.tvs}, indent=1))
+
+    async def _learn_name(self, host):
+        """Names: the one the TV announces on the network (mDNS, what the grown-up sees in the list) is best and final;
+        a TV paired by typed address starts as its address and gets the device label (manufacturer + model) until mDNS
+        answers for it — two Chromecasts must not both read "Google Chromecast" on the picker."""
+        t = self.tvs.get(host)
+        if not t or t.get("name_src") == "mdns":
+            return
+        found = {}
+        if not self.fake:
+            try:
+                found = {d["host"]: d["name"] for d in await self.loop.run_in_executor(None, mdns_discover) if d.get("name")}
+            except Exception:  # noqa: BLE001
+                found = {}
+        label, src = found.get(host), "mdns"
+        if not label:
+            if t.get("name") not in (None, "", host):
+                return                        # keep the list name / device label; mDNS is tried again at the next connect
+            try:
+                di = self.remote.device_info or {}
+                label = " ".join(str(di.get(k) or "").strip() for k in ("manufacturer", "model")).strip()
+            except Exception:  # noqa: BLE001
+                label = ""
+            src = "device"
+        if label:
+            t["name"], t["name_src"] = label[:40], src
+            if self.cfg.get("host") == host:
+                self.cfg["name"] = t["name"]
+            self._save_cfg()
 
     def _make_remote(self, host):
         if self.fake:
@@ -331,7 +378,8 @@ class TV:
             "is_on": (r.is_on if r and self.phase == "ready" else None),
             "current_app": (r.current_app if r and self.phase == "ready" else None),
             "volume": vol if self.phase == "ready" else None,
-            "error": self.error, "fake": self.fake, "paired": self.cfg_path.exists(),
+            "error": self.error, "fake": self.fake, "paired": bool(self.tvs),
+            "tvs": [{"host": h, "name": t.get("name") or h, "active": h == self.cfg.get("host")} for h, t in self.tvs.items()],
         }
 
     # -- connecting (after a pairing, and at every start)
@@ -360,6 +408,7 @@ class TV:
                 self.remote.keep_reconnecting(self._invalid_auth)
                 self.phase, self.error = "ready", ""
                 LOG.info("connected to %s", host)
+                await self._learn_name(host)
                 return
             except InvalidAuth:
                 self.phase, self.error = "unpaired", "The TV does not know this tablet yet — pair it again."
@@ -389,8 +438,9 @@ class TV:
                 self.remote.disconnect()
             except Exception:  # noqa: BLE001
                 pass
+        prev = dict(self.cfg)
         self.remote = self._make_remote(host)
-        self.cfg = {"host": host, "name": name or host}
+        self.cfg = {"host": host, "name": name or (self.tvs.get(host) or {}).get("name") or host}
         self.error = ""
         try:
             await self.remote.async_generate_cert_if_missing()
@@ -398,7 +448,9 @@ class TV:
             self.phase = "pairing"
         except (CannotConnect, ConnectionClosed, OSError) as e:
             self.phase, self.error = "pair_failed", f"Could not reach the TV at {host} ({type(e).__name__}). Is it on?"
-            self.cfg = {}
+            self.cfg = prev if prev.get("host") in self.tvs else {}
+            if self.cfg:
+                await self._start_connect()   # back to the TV we were steering; the panel already shows the message
         return self.status()
 
     async def _pair_finish(self, code):
@@ -408,13 +460,16 @@ class TV:
         try:
             await self.remote.async_finish_pairing(code)
         except InvalidAuth:
-            self.phase, self.error = "pair_failed", "That was not the number on the TV. Try again."
+            self.phase, self.error = "pair_failed", "That was not the code on the TV. Try again."
             return self.status()
         except (ConnectionClosed, OSError) as e:
             self.phase, self.error = "pair_failed", f"The TV stopped the pairing ({type(e).__name__})."
             return self.status()
+        host = self.cfg["host"]
+        self.tvs[host] = {"name": self.cfg.get("name") or host, "fake_paired": self.fake,
+                          "name_src": "mdns" if self.cfg.get("name") not in (None, "", host) else "typed"}
         if self.fake:
-            self.cfg["fake_paired"] = True
+            self.fake_store["paired"][host] = True
         self._save_cfg()
         self.error = ""
         self.phase = "connecting"
@@ -428,14 +483,20 @@ class TV:
                 self.remote.disconnect()
             except Exception:  # noqa: BLE001
                 pass
-        if self.cfg_path.exists():
-            self.cfg = self._load_cfg()
+        if self.tvs:
+            self.cfg = self._load_cfg()      # back to the saved active TV
             await self._start_connect()
         else:
             self.cfg, self.phase = {}, "unpaired"
         return self.status()
 
-    async def _forget(self):
+    async def _forget(self, host=None):
+        host = host or self.cfg.get("host")
+        self.tvs.pop(host, None)
+        self.fake_store["paired"].pop(host, None)
+        if host and host != self.cfg.get("host"):
+            self._save_cfg()                 # a TV we were not steering: nothing to disconnect
+            return self.status()
         if self._task:
             self._task.cancel()
             self._task = None
@@ -445,13 +506,31 @@ class TV:
             except Exception:  # noqa: BLE001
                 pass
         self.remote = None
+        if self.tvs:                          # another paired TV takes over
+            nxt = next(iter(self.tvs))
+            self.cfg, self.error = {"host": nxt, "name": self.tvs[nxt].get("name") or nxt}, ""
+            self._save_cfg()
+            await self._start_connect()
+            await asyncio.sleep(0.3)
+            return self.status()
         for p in (self.cfg_path, Path(self.certfile), Path(self.keyfile)):
             try:
                 p.unlink()
             except FileNotFoundError:
                 pass
         self.cfg, self.phase, self.error = {}, "unpaired", ""
-        self.fake_store["paired"] = False
+        return self.status()
+
+    async def _select(self, host):
+        """Steer another TV that is already paired (the kid-side picker); no code needed."""
+        if host not in self.tvs:
+            return {**self.status(), "ok": False, "error": "That TV is not paired yet - a grown-up pairs it first."}
+        if host == self.cfg.get("host") and self.phase == "ready":
+            return self.status()
+        self.cfg, self.error = {"host": host, "name": self.tvs[host].get("name") or host}, ""
+        self._save_cfg()
+        await self._start_connect()
+        await asyncio.sleep(0.3)
         return self.status()
 
     # -- commands
@@ -518,7 +597,8 @@ def serve(tv: TV, port: int):
                 if time.time() - disc_cache["t"] > 8:
                     if tv.fake:
                         disc_cache["list"] = [{"name": "Pretend TV", "host": "10.0.0.99", "port": 6466},
-                                              {"name": "Sleeping TV", "host": "10.0.0.98", "port": 6466}]
+                                              {"name": "Sleeping TV", "host": "10.0.0.98", "port": 6466},
+                                              {"name": "Pretend TV 2", "host": "10.0.0.97", "port": 6466}]
                     else:
                         try:
                             disc_cache["list"] = mdns_discover()
@@ -528,7 +608,7 @@ def serve(tv: TV, port: int):
                     disc_cache["t"] = time.time()
                 return self._send(200, disc_cache["list"])
             if p == "/fake/log" and tv.fake:
-                return self._send(200, {"log": tv.fake_store["log"], "paired": tv.fake_store["paired"]})
+                return self._send(200, {"log": tv.fake_store["log"], "paired": bool(tv.fake_store["paired"])})
             self._send(404, {"error": "no such route"})
 
         def do_POST(self):
@@ -543,14 +623,19 @@ def serve(tv: TV, port: int):
                         return self._send(503, tv.status())
                     return self._send(200, tv.call(tv._pair_start(host, str(b.get("name", ""))[:60])))
                 if p == "/pair/finish":
-                    code = "".join(ch for ch in str(b.get("code", "")) if ch.isdigit())
+                    code = "".join(ch for ch in str(b.get("code", "")).upper() if ch in "0123456789ABCDEF")  # hex, as the TV shows it
                     if len(code) != 6:
-                        return self._send(400, {"error": "the code is 6 digits", "phase": tv.phase})
+                        return self._send(400, {"error": "the code is 6 characters (0-9, A-F)", "phase": tv.phase})
                     return self._send(200, tv.call(tv._pair_finish(code), timeout=30))
                 if p == "/pair/cancel":
                     return self._send(200, tv.call(tv._pair_cancel()))
                 if p == "/forget":
-                    return self._send(200, tv.call(tv._forget()))
+                    return self._send(200, tv.call(tv._forget(str(b.get("host", "")).strip() or None)))
+                if p == "/tv/select":
+                    host = str(b.get("host", "")).strip()
+                    if not private_host(host):
+                        return self._send(400, {"error": "that is not an address on this home network", "phase": tv.phase})
+                    return self._send(200, tv.call(tv._select(host)))
                 if p == "/key":
                     key = str(b.get("key", "")).upper().replace("KEYCODE_", "")
                     direction = str(b.get("direction", "SHORT")).upper()
@@ -559,9 +644,15 @@ def serve(tv: TV, port: int):
                     return self._send(200, tv.call(tv._key(key, direction), timeout=5))
                 if p == "/app":
                     link = str(b.get("id", "")).strip()
-                    okid = link.startswith("https://") or (link.replace(".", "").replace("_", "").isalnum() and "." in link)
-                    if not okid or len(link) > 200:
+                    is_pkg = link.replace(".", "").replace("_", "").isalnum() and "." in link
+                    if not (link.startswith("https://") or is_pkg) or len(link) > 200:
                         return self._send(400, {"ok": False, "error": "not an app id or https link"})
+                    if is_pkg:
+                        # Joe's Google TV answers an error to market://launch?id=<pkg> (the library's default for a bare
+                        # id); an explicit launcher intent for the package is what the TV's own launcher sends. Only this
+                        # exact shape is ever built here - the tile cannot pass a raw intent URI.
+                        link = ("intent:#Intent;action=android.intent.action.MAIN;"
+                                f"category=android.intent.category.LEANBACK_LAUNCHER;package={link};end")
                     return self._send(200, tv.call(tv._app(link), timeout=5))
             except Exception as e:  # noqa: BLE001
                 LOG.error("%s: %s", p, traceback.format_exc())
