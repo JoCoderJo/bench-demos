@@ -1,0 +1,18 @@
+{
+ "voice": "en_US-kristin-medium",
+ "length_scale": 1.05,
+ "labels": {
+  "build": {
+   "file": "label_build.mp3",
+   "text": "Build"
+  },
+  "family": {
+   "file": "label_family.mp3",
+   "text": "Change it"
+  },
+  "which": {
+   "file": "label_which.mp3",
+   "text": "Which word?"
+  }
+ }
+}

@@ -1,0 +1,15 @@
+pack: 1
+id: yoto
+name: Yoto
+version: 1.0.0
+icon: 🎧
+color: "#f2572b"
+description: our Yoto library
+tier: pre-reader
+tile:
+  start_url: index.html
+needs: [autoplay]
+permissions: [audio, bench]
+data: data/yoto
+data_version: 1
+owner: Argon

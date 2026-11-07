@@ -1,0 +1,15 @@
+pack: 1
+id: letters
+name: Letter Sounds
+version: 1.0.0
+icon: 🔤
+color: "#d98e2b"
+description: tap a letter, hear its sound
+tier: pre-reader
+tile:
+  start_url: index.html
+needs: [autoplay]
+permissions: [audio]
+data: data/letters
+data_version: 1
+owner: Argon

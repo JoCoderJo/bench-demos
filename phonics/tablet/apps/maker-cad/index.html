@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>3D CAD Studio</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <style>
   :root{
     --bg:#0d1322; --panel:#162038; --card:#1e2b4a; --ink:#f5f8ff; --muted:#9fb2d8;
@@ -57,6 +58,13 @@
   .scad-modal.open{display:flex}
   .scad-box{background:var(--panel);border:2px solid var(--accent);border-radius:18px;width:min(760px,95vw);max-height:85vh;display:flex;flex-direction:column;padding:16px;gap:10px}
   .scad-pre{background:#090e1a;color:#a5d6ff;padding:12px;border-radius:12px;font:600 13px/1.4 monospace;overflow:auto;flex:1;margin:0;user-select:text}
+/* ---- K2 tiers (PLAN §15 D-054) — appended by Fable 2026-11-06 at Joe's ask; Argon owns this tile. Sizes from the design system,
+   the tile's own palette stays. ---- */
+:root{--tgt:var(--kt-target-min,48px)}
+html,body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
+body{grid-template-rows:auto auto 1fr}
+.mode-pill,.diy-step,.tpl-tab,.slot-tab,.prim-btn,.mini-btn,.stepPill,.act-btn,.cam-btn{min-height:min(var(--tgt),48px);min-width:min(var(--tgt),48px)}
+.stock-badge,.sku,.sku.num-only,div.sku,.mini-btn,.mode-pill{font-size:max(12px,var(--kt-type-min,12px))}
 </style>
 </head>
 <body>

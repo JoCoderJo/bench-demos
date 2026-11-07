@@ -1,0 +1,38 @@
+{
+ "voice": "en_US-kristin-medium",
+ "length_scale": 1.05,
+ "labels": {
+  "howto": {
+   "file": "label_howto.mp3",
+   "text": "How to play"
+  },
+  "whatisit": {
+   "file": "label_whatisit.mp3",
+   "text": "What is it?"
+  },
+  "mythings": {
+   "file": "label_mythings.mp3",
+   "text": "My things"
+  },
+  "done": {
+   "file": "label_done.mp3",
+   "text": "Done"
+  },
+  "rotate": {
+   "file": "label_rotate.mp3",
+   "text": "Turn the picture"
+  },
+  "sayit": {
+   "file": "label_sayit.mp3",
+   "text": "Say it"
+  },
+  "keepit": {
+   "file": "label_keepit.mp3",
+   "text": "Keep it"
+  },
+  "another": {
+   "file": "label_another.mp3",
+   "text": "Show another"
+  }
+ }
+}

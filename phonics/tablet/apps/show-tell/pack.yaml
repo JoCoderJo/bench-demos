@@ -1,0 +1,16 @@
+pack: 1
+id: show-tell
+name: Show & Tell
+version: 1.0.0
+icon: 🔍
+color: "#ef8f3c"
+description: what is it?
+tier: pre-reader
+tile:
+  start_url: index.html
+needs: []
+permissions: [camera, audio, bench]
+data: data/show-tell
+data_version: 1
+single_instance: true
+owner: Claude

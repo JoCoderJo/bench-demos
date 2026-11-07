@@ -1,0 +1,15 @@
+pack: 1
+id: maker-light
+name: Light Lab
+version: 1.0.0
+icon: 💡
+color: "#f2b632"
+description: draw with real lights
+tier: tinkerer
+tile:
+  start_url: index.html
+needs: [autoplay]
+permissions: [i2c, audio]
+data: data/maker-light
+data_version: 1
+owner: Argon

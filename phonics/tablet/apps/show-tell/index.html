@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Show &amp; Tell</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <!--
   tablet/apps/show-tell — Show-and-tell (PLAN.md §9.3 #3, D-018 revised). The child holds something up to the camera and taps
   the big button; the tablet names it in the project voice, shows the word in big letters, and keeps it in the child's collection.
@@ -88,6 +89,16 @@
     #go .big { font-size:38px; }
     #st { display:none; }
   }
+
+/* ---- K2 tiers (PLAN §15 D-054): sizes from the design system (design/tiers.css + kt.js, copied in by build.py);
+   the tile's own palette stays as its identity. Under pre-reader a few grown-up controls are hidden so every tappable
+   can be 112 px and nothing sits in the bottom 60 px; the ○ home pill in the nav bar always leaves a tile. ---- */
+:root{--tgt:var(--kt-target-min,64px)}
+html,body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
+button{min-height:max(64px,var(--tgt));min-width:max(64px,var(--tgt))}
+#go{width:max(150px,var(--tgt));height:max(150px,var(--tgt));min-height:max(150px,var(--tgt))}
+:root[data-tier=pre-reader] #side{justify-content:flex-start}
+:root[data-tier=pre-reader] #bRot,:root[data-tier=pre-reader] #bDone{display:none}
 </style>
 </head>
 <body>
@@ -104,13 +115,13 @@
       <div id="word"></div>
       <div id="say"></div>
       <div id="hint"></div>
-      <div class="cardbtns"><button id="bSayAgain">🔊 Say it</button><button id="bKeep" class="go">⭐ Keep it</button><button id="bNext">Show another</button></div>
+      <div class="cardbtns"><button id="bSayAgain" data-say="voice/label_sayit.mp3">🔊 Say it</button><button id="bKeep" class="go">⭐ Keep it</button><button id="bNext" data-say="voice/label_another.mp3">Show another</button></div>
     </div></div>
   </div>
   <div id="side">
-    <div class="grp"><button id="bRot">↻</button><button id="bIntro">🔊 How to play</button></div>
+    <div class="grp"><button id="bRot" data-say="voice/label_rotate.mp3">↻</button><button id="bIntro" data-say="voice/label_howto.mp3">🔊 How to play</button></div>
     <div class="grp"><button id="go"><span class="big">🔍</span>What is it?<small>hold it up &amp; tap</small></button><div id="st">…</div></div>
-    <div class="grp"><button id="bColl">📚 My things <span class="badge" id="nColl">0</span></button><button id="bDone">Done</button></div>
+    <div class="grp"><button id="bColl" data-say="voice/label_mythings.mp3">📚 My things <span class="badge" id="nColl">0</span></button><button id="bDone" data-say="voice/label_done.mp3">Done</button></div>
   </div>
 </div>
 

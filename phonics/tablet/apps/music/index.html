@@ -2,6 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Music Pads</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <!-- tablet/apps/music — Music Pads (S3c, 2026-10-25): three ways to make music with the same eight bars and four drums.
        Play     a rainbow xylophone (C major, C4–C5) and four drum pads — tap and hear, nothing to get wrong.
        Songs    follow the lights: the friend plays a few notes of a song (bars light up), then "your turn" — tap them back.
@@ -13,32 +14,35 @@
      made once by make-voice.py (D-010). Tap-first (D-009). Progress per kid: /api/store/music/<kid>/progress.json via the
      launcher's hello message (D-008), localStorage on a laptop. window.MP exposes read-only state for tests/music_dom.py. -->
 <style>
-:root{--ink:#1d2a3a;--dim:#5b6b80;--card:#fff;--accent:#ff8a3d;--ok:#3fb950;--bad:#e05a4f;--purple:#ab47bc;--r:22px;--shadow:0 8px 24px rgba(20,40,80,.16)}
+:root{--ink:var(--kt-ink,#1d2a3a);--dim:var(--kt-dim,#5b6b80);--card:var(--kt-surface,#fff);--accent:var(--kt-accent,#ff8a3d);--ok:var(--kt-ok,#3fb950);--bad:var(--kt-bad,#e05a4f);--tgt:var(--kt-target-min,75px);--gap:var(--kt-target-gap,10px);--t:calc(var(--kt-motion-base,160ms) * var(--motion-scale,1));--purple:#ab47bc;--r:var(--kt-radius-card,22px);--shadow:0 8px 24px var(--kt-shadow,rgba(20,40,80,.16))}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(160deg,#f3e5f5,#fdf7ff);color:var(--ink);font:20px system-ui,sans-serif;touch-action:manipulation}
+html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(160deg,#f3e5f5,#fdf7ff);color:var(--ink);font:var(--kt-type-body,20px)/1.3 var(--kt-font-ui,system-ui,sans-serif);touch-action:manipulation}
+:root[data-theme=dark] body{background:linear-gradient(160deg,var(--kt-bg-2),var(--kt-bg))}
+body{display:flex;flex-direction:column}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
-#bar{display:flex;align-items:center;gap:10px;padding:10px 18px;height:72px}
-#bar h1{font-size:24px;margin:0 6px 0 0}
+#bar{display:flex;align-items:center;gap:10px;padding:8px 18px;min-height:72px;flex:none}
+#bar h1{font-size:var(--kt-type-label,24px);margin:0 6px 0 0}
 .tabs{display:flex;background:rgba(0,0,0,.08);border-radius:30px;padding:4px;gap:2px}
-.tabs button{padding:9px 18px;border-radius:26px;font-weight:700;font-size:17px;white-space:nowrap}
+.tabs button{padding:6px 18px;border-radius:999px;font-weight:700;font-size:var(--kt-type-label,17px);white-space:nowrap;min-width:var(--tgt);min-height:var(--tgt);display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.tabs .kt-icon{font-size:calc(var(--tgt) * .5)}
 .tabs button.on{background:var(--card);box-shadow:var(--shadow)}
-#who{margin-left:auto;color:var(--dim);font-size:16px;font-weight:600}
+#who{margin-left:auto;color:var(--dim);font-size:var(--kt-type-label,16px);font-weight:600}
 #stars{font-size:22px;min-width:90px;text-align:right}
-.screen{position:absolute;inset:72px 0 0 0;display:none;flex-direction:column;align-items:center;gap:14px;padding:4px 30px 16px}
+.screen{display:none;flex:1;min-height:0;flex-direction:column;align-items:center;gap:14px;padding:4px 30px 16px}
 .screen.on{display:flex}
-.msg{font-size:24px;color:var(--dim);min-height:30px;text-align:center}
+.msg{font-size:var(--kt-type-body,24px);color:var(--dim);min-height:30px;text-align:center}
 .top{display:flex;align-items:center;gap:18px;min-height:70px}
-.round{width:76px;height:76px;border-radius:50%;background:var(--accent);color:#fff;font-size:36px;display:grid;place-items:center;box-shadow:var(--shadow)}
+.round{width:max(76px,var(--tgt));height:max(76px,var(--tgt));border-radius:50%;background:var(--accent);color:#fff;font-size:calc(max(76px,var(--tgt)) * .46);display:grid;place-items:center;box-shadow:var(--shadow)}
 .round:active,.key:active,.pad:active,.chip:active{transform:scale(.96)}
 /* xylophone: eight bars, tall to short like the real thing */
 .xylo{display:flex;align-items:flex-end;gap:12px;height:300px}
-.key{width:118px;border-radius:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:12px;color:#fff;font-size:30px;font-weight:800;position:relative;transition:transform .08s,filter .08s;text-shadow:0 2px 4px rgba(0,0,0,.25)}
+.key{width:max(118px,var(--tgt));min-height:var(--tgt);border-radius:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:12px;color:#fff;font-size:30px;font-weight:800;position:relative;transition:transform .08s,filter .08s;text-shadow:0 2px 4px rgba(0,0,0,.25)}
 .key::before,.key::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.75);left:50%;transform:translateX(-50%)}
 .key::before{top:14px}.key::after{bottom:46px}
 .key.lit{filter:brightness(1.35) saturate(1.2);transform:translateY(-10px) scale(1.04);box-shadow:0 0 0 6px rgba(255,255,255,.9),0 14px 30px rgba(0,0,0,.25)}
 .key.hint{animation:pulse .7s ease-in-out infinite}
 .key.nope{animation:shake .4s}
-.xylo.small{height:210px}.xylo.small .key{width:104px;font-size:24px}
+.xylo.small{height:210px}.xylo.small .key{width:max(104px,var(--tgt));font-size:24px}
 /* drums */
 .drums{display:flex;gap:22px}
 .pad{width:200px;height:130px;border-radius:26px;background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:22px;font-weight:800;border-bottom:8px solid var(--purple);transition:transform .08s,filter .08s}
@@ -49,9 +53,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .drums.big .pad{width:250px;height:190px;font-size:26px}.drums.big .pad span{font-size:64px}
 @keyframes pulse{50%{box-shadow:0 0 0 8px var(--accent),var(--shadow)}}
 @keyframes shake{20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-8px)}80%{transform:translateX(8px)}}
+@media (prefers-reduced-motion:reduce){.good,.nope,.new,[class*=good],[class*=nope]{animation:none}}
 /* songs */
 .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;max-width:1150px}
-.chip{padding:10px 18px;border-radius:24px;background:rgba(255,255,255,.75);font-weight:800;font-size:19px;box-shadow:var(--shadow)}
+.chip{padding:10px 18px;min-height:var(--tgt);min-width:var(--tgt);display:inline-flex;align-items:center;justify-content:center;border-radius:24px;background:rgba(255,255,255,.75);font-weight:800;font-size:19px;box-shadow:var(--shadow)}
 .chip.on{background:var(--purple);color:#fff}
 .chip.done::after{content:" ⭐"}
 .dots{display:flex;gap:8px;min-height:16px}
@@ -60,7 +65,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 #beatRound{font-size:22px;font-weight:800;color:var(--purple)}
 </style></head><body>
 <div id="bar"><h1>Music</h1>
-  <div class="tabs" id="tabs"><button data-tab="play" class="on">Play</button><button data-tab="songs">Songs</button><button data-tab="beat">Beat</button></div>
+  <div class="tabs" id="tabs"><button data-tab="play" data-say="voice/label_play.mp3" class="on" data-say-text="Play"><span class="kt-icon">🎹</span><span class="kt-label">Play</span></button><button data-tab="songs" data-say="voice/label_songs.mp3" data-say-text="Songs"><span class="kt-icon">🎵</span><span class="kt-label">Songs</span></button><button data-tab="beat" data-say="voice/label_beat.mp3" data-say-text="Beat"><span class="kt-icon">🥁</span><span class="kt-label">Beat</span></button></div>
   <div id="who"></div><div id="stars"></div></div>
 
 <div class="screen on" id="play">
@@ -82,9 +87,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 
 <script>
 'use strict';
-// Forgiving touch-tap helper for X11 touchscreen: synthesize click if pointerdown+pointerup stays within 36px
-(function(){
-  let pt=null,lastClick=0;
+// The forgiving touch-tap helper lives in design/kt.js since K2 (tier-aware); this fallback covers the page opened from the repo
+// on a laptop, where build.py has not copied design/ in.
+if(!window.KT)(function(){
+let pt=null,lastClick=0;
   document.addEventListener("click",()=>{lastClick=Date.now();},true);
   document.addEventListener("pointerdown",e=>{
     if(e.pointerType==="mouse")return;
@@ -115,7 +121,7 @@ const SONGS=[
  {key:'rain',name:'Rain Rain Go Away',lines:[[4,2,4,4,2],[4,4,2,5,4,4,2]]},
 ];
 let DATA=null,tab='play',kid={id:'default',name:'',age:5},prog={stars:0,songs:{},beat:0},seq=0,audio=null,progLoaded=false;
-const kt=m=>{try{parent.postMessage(m,'*');}catch(e){}};
+const kt=m=>{if(m&&m.kt==='blip'&&window.KT)return;try{parent.postMessage(m,'*');}catch(e){}};   // blips are kt.js's job when it is loaded (one click per tap)
 const MP={get state(){return {tab,level:level(),song:song.s&&song.s.key,line:song.li,chunk:song.chunk.slice(),expect:song.expect,busy:tab==='songs'?song.busy:(tab==='beat'?beat.busy:false),pattern:beat.pattern.slice(),round:beat.pattern.length,bexpect:beat.expect,stars:prog.stars,kid:kid.id,last:lastPlayed};}};
 window.MP=MP;
 let lastPlayed=null;
@@ -134,7 +140,7 @@ async function loadProg(){let p=null;
 let saveT=null;
 function saveProg(){clearTimeout(saveT);saveT=setTimeout(async()=>{const body=JSON.stringify(prog);try{localStorage.setItem(progKey(),body);}catch(e){}
   if(LIVE){try{await fetch('/api/store/music/'+encodeURIComponent(kid.id)+'/progress.json',{method:'PUT',headers:{'Content-Type':'application/json'},body});}catch(e){}}},400);}
-function star(n){prog.stars+=n||1;drawStars();saveProg();kt({kt:'blip',f:720});}
+function star(n){prog.stars+=n||1;drawStars();saveProg();if(window.KT)KT.sound('success',$('stars'));else kt({kt:'blip',f:720});}
 function drawStars(){$('stars').textContent=prog.stars?('⭐'.repeat(Math.min(prog.stars,5))+(prog.stars>5?' '+prog.stars:'')):'';$('who').textContent=kid.name||'';}
 function level(){const a=kid.age||5,s=prog.stars;if(a<=4&&s<12)return 1;if(a>=7||s>=30)return 3;return 2;}
 
@@ -169,7 +175,7 @@ function xylo(el,onTap){el.innerHTML=NOTES.map((n,i)=>'<button class="key" data-
 function drumRow(el,onTap){el.innerHTML=DRUMS.map(d=>'<button class="pad" data-k="'+d.k+'"><span>'+d.e+'</span>'+d.n+'</button>').join('');
   el.querySelectorAll('.pad').forEach(b=>wireInst(b,()=>onTap(b.dataset.k,b)));}
 function light(b,ms){if(!b)return;b.classList.add('lit');setTimeout(()=>b.classList.remove('lit'),ms||260);}
-function shakeIt(b){if(!b)return;b.classList.remove('nope');void b.offsetWidth;b.classList.add('nope');}
+function shakeIt(b){if(!b)return;b.classList.remove('nope');void b.offsetWidth;b.classList.add('nope');if(window.KT)KT.sound('error',b);}
 function buzz(){try{const c=ac(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.value=110;g.gain.setValueAtTime(.25,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.26);}catch(e){}}
 
 // ---------- PLAY: free play
@@ -216,7 +222,7 @@ xylo($('sXylo'),async(i,b)=>{
       song.li++;song.ci=0;star(1);drawDots();
       if(song.li>=s.lines.length){
         prog.songs[s.key]=(prog.songs[s.key]||0)+1;saveProg();drawChips();
-        $('sMsg').textContent='You played the whole song!';await say('song_done');
+        $('sMsg').textContent='You played the whole song!';if(window.KT)KT.sound('success',$('sDots'));await say('song_done');
         if(song.s!==s)return;
         await playSong(s);if(song.s!==s)return;
         song.li=0;song.ci=0;drawDots();$('sMsg').textContent='Again? Watch the lights…';await wait(600);if(song.s===s)teach(true);return;
@@ -259,7 +265,7 @@ drumRow($('bDrums'),async(k,b)=>{
     drum(k);light(b);beat.expect++;
     if(beat.expect<beat.pattern.length)return;
     beat.busy=true;beat.best=Math.max(beat.best,beat.pattern.length);prog.beat=Math.max(prog.beat,beat.pattern.length);star(1);
-    $('bMsg').textContent="You've got the beat!";await say('beat_done');await wait(300);newBeat(true);
+    $('bMsg').textContent="You've got the beat!";if(window.KT)KT.sound('success',$('bDrums'));await say('beat_done');await wait(300);newBeat(true);
   }else{
     buzz();shakeIt(b);beat.busy=true;$('bMsg').textContent='Not that one — listen again';await say('again');showBeat();
   }

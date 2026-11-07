@@ -1,0 +1,15 @@
+pack: 1
+id: stories
+name: Stories
+version: 1.0.0
+icon: 📖
+color: "#5f87ad"
+description: read along with your friend
+tier: pre-reader
+tile:
+  start_url: index.html
+needs: [autoplay]
+permissions: [audio]
+data: data/stories
+data_version: 1
+owner: Argon

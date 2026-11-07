@@ -1,0 +1,15 @@
+pack: 1
+id: maker-cad
+name: 3D CAD Studio
+version: 1.0.0
+icon: 🧱
+color: "#e67e22"
+description: design parts for the tablet
+tier: maker
+tile:
+  start_url: index.html
+needs: []
+permissions: [bench]
+data: data/maker-cad
+data_version: 1
+owner: Argon

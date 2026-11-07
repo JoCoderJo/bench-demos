@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Camera</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <!--
   tablet/apps/camera — the photo booth (PLAN.md §8, D-017). Live picture from the tablet's two IMX219 cameras, hats and
   glasses the child drags onto the picture, a shutter with a 3-2-1 countdown, and a per-kid gallery.
@@ -100,6 +101,22 @@
     #camsw { flex-direction:row; width:auto; }
     #st { display:none; }
   }
+
+/* ---- K2 tiers (PLAN §15 D-054): sizes from the design system (design/tiers.css + kt.js, copied in by build.py);
+   the tile's own palette stays as its identity. Under pre-reader a few grown-up controls are hidden so every tappable
+   can be 112 px and nothing sits in the bottom 60 px; the ○ home pill in the nav bar always leaves a tile. ---- */
+:root{--tgt:var(--kt-target-min,64px)}
+html,body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
+button{min-height:max(64px,var(--tgt));min-width:max(64px,var(--tgt))}
+#shutter{width:max(108px,var(--tgt));height:max(108px,var(--tgt));min-height:max(108px,var(--tgt))}
+#camsw button{min-height:max(56px,var(--tgt))}
+.pick{width:max(84px,var(--tgt));height:max(84px,var(--tgt))}
+#drawer .row button,#colpanel .row button{min-height:max(52px,var(--tgt))!important}
+:root[data-tier=reader] #side{gap:6px;padding:8px 10px}
+:root[data-tier=reader] #st{min-height:1.3em}
+:root[data-tier=pre-reader] #side{justify-content:flex-start}
+:root[data-tier=pre-reader] #drawer,:root[data-tier=pre-reader] #colpanel{bottom:72px}
+:root[data-tier=pre-reader] #bRot,:root[data-tier=pre-reader] #bMir,:root[data-tier=pre-reader] #bCol,:root[data-tier=pre-reader] #bDone{display:none}
 </style>
 </head>
 <body>
@@ -133,19 +150,19 @@
   </div>
   <div id="side">
     <div class="grp">
-      <div id="camsw"><button data-cam="front">🙂 Front</button><button data-cam="rear">🌳 Rear</button></div>
-      <button id="bStick">🎩 Dress up</button>
-      <button id="bRot">↻ 0°</button>
-      <button id="bMir">⇔ Mirror</button>
-      <button id="bCol">🎨 Colour</button>
+      <div id="camsw"><button data-cam="front" data-say="voice/label_front.mp3">🙂 Front</button><button data-cam="rear" data-say="voice/label_rear.mp3">🌳 Rear</button></div>
+      <button id="bStick" data-say="voice/label_dressup.mp3">🎩 Dress up</button>
+      <button id="bRot" data-say="voice/label_rotate.mp3">↻ 0°</button>
+      <button id="bMir" data-say="voice/label_mirror.mp3">⇔ Mirror</button>
+      <button id="bCol" data-say="voice/label_colour.mp3">🎨 Colour</button>
     </div>
     <div class="grp">
       <button id="shutter" aria-label="Take a picture"></button>
       <div id="st">…</div>
     </div>
     <div class="grp">
-      <button id="bGal">🖼 Pictures <span class="badge" id="nPics">0</span></button>
-      <button id="bDone">Done</button>
+      <button id="bGal" data-say="voice/label_pictures.mp3">🖼 Pictures <span class="badge" id="nPics">0</span></button>
+      <button id="bDone" data-say="voice/label_done.mp3">Done</button>
     </div>
   </div>
 </div>
@@ -412,6 +429,7 @@ let stickers = [], selId = null, nextId = 1;
 for (const [kind, v] of SHELF) {
   const b = document.createElement('button'); b.className = 'pick';
   b.innerHTML = kind === 'e' ? v : SVGS[v].svg;
+  b.setAttribute('aria-label', kind === 'e' ? v : String(v).replace(/[-_]+/g, ' '));   // hold-to-hear + the tier audit need a name
   b.onclick = () => addSticker(kind, v);
   $('shelf').appendChild(b);
 }

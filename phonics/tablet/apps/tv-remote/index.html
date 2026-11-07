@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>TV Remote</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <!--
   tablet/apps/tv-remote — a kid-sized remote for the family's Google TV (PLAN.md §14, D-046).
 
@@ -99,6 +100,21 @@
   @keyframes shake { 25% { transform:translateX(-12px);} 75% { transform:translateX(12px);} }
   #pair .mid { display:grid; grid-template-columns:1fr 1fr; gap:20px; flex:1; align-items:center; }
   #pair .tvside { text-align:center; } #pair .tvside .em { font-size:120px; }
+
+/* ---- K2 tiers (PLAN §15 D-054): sizes from the design system (design/tiers.css + kt.js, copied in by build.py);
+   the tile's own palette stays as its identity. Under pre-reader a few grown-up controls are hidden so every tappable
+   can be 112 px and nothing sits in the bottom 60 px; the ○ home pill in the nav bar always leaves a tile. ---- */
+:root{--tgt:var(--kt-target-min,64px)}
+html,body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
+button{min-height:max(64px,var(--tgt));min-width:max(64px,var(--tgt))}
+#tvpick button,#veilPick button,.veil button,#nav button,#vol button,#vol button.wide,#media button,#apps button,#gear,#power,#tvs .row button{min-height:max(48px,var(--tgt))}
+:root[data-tier=reader] #mediarow{grid-template-columns:1fr 1fr 1fr}
+:root[data-tier=pre-reader] #mediarow{grid-template-columns:1fr}
+:root[data-tier=pre-reader] #mediarow button[aria-label=rewind],:root[data-tier=pre-reader] #mediarow button[aria-label=forward]{display:none}
+:root[data-tier=pre-reader] #gear{order:-1;align-self:flex-start}
+#gear{min-width:max(48px,var(--tgt))}
+:root[data-tier=pre-reader] #left{padding-bottom:50px}
+:root[data-tier=pre-reader] #power{margin-top:0}
 </style>
 </head>
 <body>

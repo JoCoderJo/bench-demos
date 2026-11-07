@@ -2,6 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Yoto</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <!-- tablet/apps/yoto — the family's Yoto library, played through the tablet agent (/api/yoto/*), which holds the
      sign-in and streams the audio. Shelf of covers → player with chapters, big play/pause, next/previous, seek.
      Works with Yoto; not an official Yoto app. -->
@@ -51,14 +52,28 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .ch:active{background:#fde7dd}
 #toast{position:fixed;left:50%;bottom:70px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:20px;font-size:15px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;max-width:90vw;text-align:center}
 #toast.on{opacity:.95}
+/* ---- K2 tiers (PLAN §15 D-054) — appended by Fable 2026-11-06 at Joe's ask; Argon owns this tile. Sizes from the design system,
+   the tile's own palette stays. ---- */
+:root{--tgt:var(--kt-target-min,64px)}
+html,body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
+body{display:flex;flex-direction:column}
+#bar{height:auto;min-height:72px;flex:none;flex-wrap:wrap;padding:8px 20px}
+.screen{position:static;inset:auto;flex:1;min-height:0;height:auto}
+.tabs button{min-width:var(--tgt);min-height:var(--tgt);border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:var(--kt-type-label,16px)}
+.tabs .kt-icon{font-size:calc(var(--tgt) * .5)}
+.btn{min-height:var(--tgt);min-width:var(--tgt);justify-content:center}
+#shelf{height:auto}
+#player.on{display:grid}
+#ctl button{min-width:max(64px,var(--tgt));min-height:max(64px,var(--tgt))}
+.ch{min-height:var(--tgt)}
 </style></head><body>
-<div id="bar"><h1 id="title">Yoto</h1><div class="tabs" id="filters"><button data-f="mine" class="on">My cards</button><button data-f="shared">Shared</button><button data-f="free">Free from Yoto</button></div><button class="btn" id="back" style="display:none">◀ Library</button><button class="btn" id="refresh">↻</button></div>
+<div id="bar"><h1 id="title">Yoto</h1><div class="tabs" id="filters"><button data-f="mine" class="on" data-say="voice/label_mine.mp3" data-say-text="My cards"><span class="kt-icon">🎒</span><span class="kt-label">My cards</span></button><button data-f="shared" data-say="voice/label_shared.mp3" data-say-text="Shared"><span class="kt-icon">👪</span><span class="kt-label">Shared</span></button><button data-f="free" data-say="voice/label_free.mp3" data-say-text="Free from Yoto"><span class="kt-icon">🎁</span><span class="kt-label">Free from Yoto</span></button></div><button class="btn" id="back" style="display:none">◀ Library</button><button class="btn" id="refresh" aria-label="reload the library">↻</button></div>
 <div id="shelf" class="screen on"></div>
 <div id="player" class="screen">
   <div id="left">
     <img id="cover" alt="">
     <div id="now"></div>
-    <div id="ctl"><button id="prev">⏮</button><button id="play">▶</button><button id="next">⏭</button></div>
+    <div id="ctl"><button id="prev" aria-label="previous chapter">⏮</button><button id="play" aria-label="play or pause">▶</button><button id="next" aria-label="next chapter">⏭</button></div>
     <div id="seek"><span id="t0">0:00</span><input type="range" id="pos" min="0" max="1000" value="0"><span id="t1">0:00</span></div>
   </div>
   <div id="chapters"></div>

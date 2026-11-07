@@ -1,0 +1,18 @@
+{
+ "voice": "en_US-kristin-medium",
+ "length_scale": 1.05,
+ "labels": {
+  "read": {
+   "file": "label_read.mp3",
+   "text": "Read"
+  },
+  "find": {
+   "file": "label_find.mp3",
+   "text": "Find it"
+  },
+  "fix": {
+   "file": "label_fix.mp3",
+   "text": "Fix it"
+  }
+ }
+}

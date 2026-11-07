@@ -1,0 +1,16 @@
+pack: 1
+id: camera
+name: Camera
+version: 1.0.0
+icon: 📷
+color: "#5c6bc0"
+description: see through the cameras
+tier: pre-reader
+tile:
+  start_url: index.html
+needs: []
+permissions: [camera, audio]
+data: data/camera
+data_version: 1
+single_instance: true
+owner: Claude

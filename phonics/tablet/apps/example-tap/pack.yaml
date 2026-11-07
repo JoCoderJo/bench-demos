@@ -1,0 +1,15 @@
+pack: 1
+id: example-tap
+name: Tap the Frog
+version: 1.0.0
+icon: 🐸
+color: "#2e7d32"
+description: example game
+tier: pre-reader
+tile:
+  start_url: index.html
+needs: [autoplay]
+permissions: [audio]
+data: data/example-tap
+data_version: 1
+owner: Argon

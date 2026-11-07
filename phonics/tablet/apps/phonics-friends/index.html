@@ -14,6 +14,9 @@
      through their vendor's cloud speech service. The page's own only network use is
      loading its recorded phoneme clips from audio/ when any are listed in SAMPLES.
      Source of truth: reference/Phonics_Frog_Architecture_Guide.pdf -->
+<script>/* kids tablet tiers (tablet/design, PLAN §15 D-054): loaded only when this page is served from the tablet bundle; the public
+   page never requests it (no 404s, no behaviour change). kt.js sets <html data-tier> from the launcher's hello. */
+if(/\/apps\/phonics-friends\//.test(location.pathname)){document.write('<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"><\/script>');}</script>
 <style>
  :root{--bg:#eef6ea;--card:#fff;--ink:#1d3021;--dim:#5b7261;--green:#3f9b4f;--deep:#2c6e3a;
        --lily:#cfe8c6;--warm:#f0a441;--edge:#cfe0cb}
@@ -107,6 +110,13 @@
  #uart{font:12px/1.5 ui-monospace,monospace;background:#f2f7ef;border-radius:8px;
        padding:8px 10px;margin-top:8px;max-height:120px;overflow-y:auto;color:#31503a}
  .foot{text-align:center;color:var(--dim);font-size:12px;margin-top:14px}
+
+ /* kids tablet tiers: no effect on the public page (--kt-target-min exists only with tablet/design/tiers.css) */
+ :root{--tgt:var(--kt-target-min,0px)}
+ .pets button,#savepet,#go,#switch{min-height:var(--tgt);min-width:var(--tgt)}
+ :root[data-tier] body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
+ :root[data-tier=pre-reader] #switch,:root[data-tier=reader] #switch{font-size:18px;color:var(--ink);background:var(--card);border-radius:16px}
+ :root[data-tier] #pick:not([style*="none"]) ~ .row{display:none}   /* while the friend picker is open, the Start / Change-friend rows wait below the fold: hide them */
 </style>
 <div class="wrap">
   <h1 id="title">🐸 Phonics Friends</h1>

@@ -1,0 +1,18 @@
+{
+ "voice": "en_US-kristin-medium",
+ "length_scale": 1.05,
+ "labels": {
+  "play": {
+   "file": "label_play.mp3",
+   "text": "Play"
+  },
+  "songs": {
+   "file": "label_songs.mp3",
+   "text": "Songs"
+  },
+  "beat": {
+   "file": "label_beat.mp3",
+   "text": "Beat"
+  }
+ }
+}

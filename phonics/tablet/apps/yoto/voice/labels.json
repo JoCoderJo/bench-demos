@@ -1,0 +1,18 @@
+{
+ "voice": "en_US-kristin-medium",
+ "length_scale": 1.05,
+ "labels": {
+  "mine": {
+   "file": "label_mine.mp3",
+   "text": "My cards"
+  },
+  "shared": {
+   "file": "label_shared.mp3",
+   "text": "Shared"
+  },
+  "free": {
+   "file": "label_free.mp3",
+   "text": "Free from Yoto"
+  }
+ }
+}

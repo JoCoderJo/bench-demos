@@ -2,6 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Stories</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <!-- tablet/apps/stories — read-along pages. The friend says the [bracketed] words (real recordings from
      demo/audio/free/words, copied in by build.py); the child taps any of them to hear it again. -->
 <style>
@@ -38,6 +39,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .arrow{width:78px;height:64px;border-radius:20px;background:#fff;box-shadow:var(--shadow);font-size:30px;font-weight:800;display:grid;place-items:center}
 .arrow:active{transform:scale(.95)}
 .arrow[disabled]{opacity:.3}
+/* ---- K2 tiers (PLAN §15 D-054) — appended by Fable 2026-11-06 at Joe's ask; Argon owns this tile. Sizes from the design system,
+   the tile's own palette stays. ---- */
+:root{--tgt:var(--kt-target-min,64px)}
+html,body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
 </style></head><body>
 <div id="bar"><h1 id="title">Stories</h1><button class="btn" id="back" style="display:none">◀ Books</button></div>
 <div id="shelf" class="screen on"></div>

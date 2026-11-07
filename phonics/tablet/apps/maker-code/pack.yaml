@@ -1,0 +1,15 @@
+pack: 1
+id: maker-code
+name: Code & Blocks
+version: 1.0.0
+icon: 🧩
+color: "#7c4dff"
+description: lessons & Spark blocks
+tier: tinkerer
+tile:
+  start_url: index.html
+needs: [autoplay]
+permissions: [i2c, audio]
+data: data/maker-code
+data_version: 1
+owner: Argon

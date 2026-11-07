@@ -1,0 +1,30 @@
+{
+ "voice": "en_US-kristin-medium",
+ "length_scale": 1.05,
+ "labels": {
+  "letters": {
+   "file": "label_letters.mp3",
+   "text": "Letters"
+  },
+  "digraphs": {
+   "file": "label_digraphs.mp3",
+   "text": "Two letters"
+  },
+  "blends": {
+   "file": "label_blends.mp3",
+   "text": "Blends"
+  },
+  "families": {
+   "file": "label_families.mp3",
+   "text": "Word families"
+  },
+  "explore": {
+   "file": "label_explore.mp3",
+   "text": "Explore"
+  },
+  "find": {
+   "file": "label_find.mp3",
+   "text": "Find it"
+  }
+ }
+}

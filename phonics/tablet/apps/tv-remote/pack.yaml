@@ -1,0 +1,21 @@
+pack: 1
+id: tv-remote
+name: TV Remote
+version: 1.0.0
+icon: 📺
+color: "#2b7a78"
+description: steer the family TV
+tier: pre-reader
+tile:
+  start_url: index.html
+needs: []
+permissions: [audio]
+data: data/tv-remote
+data_version: 1
+service:
+  exec: helper/tvremote.py
+  port: 8097
+  health: /status
+  startup: boot
+  restart: on-failure
+owner: Claude

@@ -2,6 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Tap the Frog</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <!-- tablet/apps/example-tap — the smallest game that uses the launcher bridge (see tablet/apps/README.md).
      Copy this folder to start a new game. Offline, no network, finger-sized targets. -->
 <style>
@@ -13,6 +14,11 @@ html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#bfe8f
 #frog{position:absolute;width:150px;height:150px;border-radius:50%;background:#3fb950;display:grid;place-items:center;font-size:92px;
   box-shadow:0 12px 30px rgba(0,0,0,.2);transition:transform .08s}
 #frog:active{transform:scale(.9)}
+/* ---- K2 tiers (PLAN §15 D-054) — appended by Fable 2026-11-06 at Joe's ask; Argon owns this tile. Sizes from the design system,
+   the tile's own palette stays. ---- */
+:root{--tgt:var(--kt-target-min,64px)}
+html,body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
+#done{min-width:var(--tgt);min-height:var(--tgt)}
 </style></head><body>
 <div id="bar"><span id="hi">Tap the frog!</span><span id="score">0</span><button id="done">Done</button></div>
 <div id="frog">🐸</div>

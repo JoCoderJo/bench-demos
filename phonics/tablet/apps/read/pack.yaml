@@ -1,0 +1,15 @@
+pack: 1
+id: read
+name: Read It
+version: 1.0.0
+icon: 📖
+color: "#7e57c2"
+description: tap the words, read the line
+tier: reader
+tile:
+  start_url: index.html
+needs: [autoplay]
+permissions: [audio]
+data: data/read
+data_version: 1
+owner: Claude

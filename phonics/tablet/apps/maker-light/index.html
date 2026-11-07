@@ -2,6 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Light Lab</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <!-- tablet/apps/maker-light — Light Lab (PLAN.md §10 M2 & §13 DIY-1, Step 1 of the DIY Modular Tablet Pipeline).
      A live picture of the UNO Q: tap the 8×13 LED matrix to draw on the REAL matrix, flip header pins, and when a Modulino
      node is plugged in its card pops up (knob, buttons, buzzer, pixels, distance, movement, thermo). Includes the top DIY
@@ -105,6 +106,22 @@ body.pre #vbenchBtn span{display:none}
 #galEmpty{opacity:.7}
 #toast{position:fixed;left:50%;top:84px;transform:translateX(-50%);background:#f2b632;color:#2a1a00;font-weight:800;padding:12px 22px;border-radius:999px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:20}
 #toast.on{opacity:1}
+/* ---- K2 tiers (PLAN §15 D-054) — appended by Fable 2026-11-06 at Joe's ask; Argon owns this tile. Sizes from the design system,
+   the tile's own palette stays. ---- */
+:root{--tgt:var(--kt-target-min,56px)}
+html,body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
+/* the 13-column LED matrix: 56 px cells are the most this panel fits beside the modules, so the tile's tier is tinkerer;
+   a reader/pre-reader kid still gets 56 px cells (capped) and full-size buttons elsewhere */
+:root[data-tier=pre-reader] main,:root[data-tier=reader] main,:root[data-tier=tinkerer] main{grid-template-columns:1fr 340px}
+:root[data-tier=pre-reader] #board,:root[data-tier=reader] #board,:root[data-tier=tinkerer] #board{padding:12px 12px 10px}
+:root[data-tier=pre-reader] #matrix,:root[data-tier=reader] #matrix,:root[data-tier=tinkerer] #matrix{gap:6px;padding:10px}
+#matrix button{width:min(max(46px,var(--tgt)),56px);height:min(max(46px,var(--tgt)),56px)}
+.stepPill,#diyProj{min-height:min(var(--tgt),56px)}
+.stepPill{min-width:min(var(--tgt),56px)}
+#diyProj{font-size:max(14px,var(--kt-type-min,12px))}
+.pin{height:max(44px,min(var(--tgt),56px));min-width:min(var(--tgt),56px)}
+:root[data-tier=pre-reader] .pinrow,:root[data-tier=reader] .pinrow,:root[data-tier=tinkerer] .pinrow{gap:4px}
+:root[data-tier=pre-reader] .pinrow .lab,:root[data-tier=reader] .pinrow .lab,:root[data-tier=tinkerer] .pinrow .lab{width:22px}
 </style></head><body>
 <div id="bar">💡 <span id="title">Light Lab</span><span id="hi"></span>
   <div id="diyBar" aria-label="DIY Pipeline">

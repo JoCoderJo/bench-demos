@@ -2,6 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Read It</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <!-- tablet/apps/read — Read It (PLAN §12 D-030, C5, 2026-10-31): decodable lines from the Word Builder words, three ways:
        Read      the line as word cards. Tap each word in order to read it (any word tapped is spoken — tapping is
                  reading support, never a penalty; only the NEXT word advances). When the line is read the friend reads
@@ -17,32 +18,35 @@
      question is up returns to the line (handled); otherwise the launcher goes home. window.RD = read-only state for
      tablet/tests/read_dom.py. -->
 <style>
-:root{--ink:#1d2a3a;--dim:#5b6b80;--card:#fff;--accent:#7e57c2;--ok:#3fb950;--bad:#e05a4f;--warm:#ff8a3d;--r:22px;--shadow:0 8px 24px rgba(40,30,80,.16)}
+:root{--ink:var(--kt-ink,#1d2a3a);--dim:var(--kt-dim,#5b6b80);--card:var(--kt-surface,#fff);--accent:var(--kt-accent,#7e57c2);--ok:var(--kt-ok,#3fb950);--bad:var(--kt-bad,#e05a4f);--tgt:var(--kt-target-min,75px);--gap:var(--kt-target-gap,10px);--t:calc(var(--kt-motion-base,160ms) * var(--motion-scale,1));--warm:#ff8a3d;--r:var(--kt-radius-card,22px);--shadow:0 8px 24px var(--kt-shadow,rgba(40,30,80,.16))}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(160deg,#e8dff8,#fbf8ff);color:var(--ink);font:20px system-ui,sans-serif;touch-action:manipulation}
+html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(160deg,#e8dff8,#fbf8ff);color:var(--ink);font:var(--kt-type-body,20px)/1.3 var(--kt-font-ui,system-ui,sans-serif);touch-action:manipulation}
+:root[data-theme=dark] body{background:linear-gradient(160deg,var(--kt-bg-2),var(--kt-bg))}
+body{display:flex;flex-direction:column}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
-#bar{display:flex;align-items:center;gap:10px;padding:10px 18px;height:72px}
-#bar h1{font-size:24px;margin:0 6px 0 0}
+#bar{display:flex;align-items:center;gap:10px;padding:8px 18px;min-height:72px;flex:none}
+#bar h1{font-size:var(--kt-type-label,24px);margin:0 6px 0 0}
 .tabs{display:flex;background:rgba(0,0,0,.08);border-radius:30px;padding:4px;gap:2px}
-.tabs button{padding:9px 18px;border-radius:26px;font-weight:700;font-size:17px;white-space:nowrap}
+.tabs button{padding:6px 18px;border-radius:999px;font-weight:700;font-size:var(--kt-type-label,17px);white-space:nowrap;min-width:var(--tgt);min-height:var(--tgt);display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.tabs .kt-icon{font-size:calc(var(--tgt) * .5)}
 .tabs button.on{background:var(--card);box-shadow:var(--shadow)}
-#who{margin-left:auto;color:var(--dim);font-size:16px;font-weight:600}
+#who{margin-left:auto;color:var(--dim);font-size:var(--kt-type-label,16px);font-weight:600}
 #stars{font-size:22px;min-width:90px;text-align:right}
-.screen{position:absolute;inset:72px 0 0 0;display:none;flex-direction:column;align-items:center;gap:18px;padding:6px 30px 16px}
+.screen{display:none;flex:1;min-height:0;flex-direction:column;align-items:center;gap:18px;padding:6px 30px 16px}
 .screen.on{display:flex}
-.msg{font-size:24px;color:var(--dim);min-height:30px;text-align:center}
+.msg{font-size:var(--kt-type-body,24px);color:var(--dim);min-height:30px;text-align:center}
 .row{display:flex;align-items:center;gap:26px}
 .pics{font-size:66px;line-height:1;min-height:74px;letter-spacing:6px}
 .pics.small{font-size:50px;min-height:56px}
-.round{width:88px;height:88px;border-radius:50%;background:var(--accent);color:#fff;font-size:40px;display:grid;place-items:center;box-shadow:var(--shadow);transition:transform .1s}
+.round{width:max(88px,var(--tgt));height:max(88px,var(--tgt));border-radius:50%;background:var(--accent);color:#fff;font-size:calc(max(88px,var(--tgt)) * .46);display:grid;place-items:center;box-shadow:var(--shadow);transition:transform .1s}
 .round.alt{background:#26a69a}.round.next{background:var(--warm)}
 .round:active,.wd:active,.opt:active{transform:scale(.94)}
 .line{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:14px;max-width:1200px;min-height:104px}
-.wd{min-width:96px;height:96px;padding:0 22px;border-radius:20px;background:var(--card);box-shadow:var(--shadow);font-size:50px;font-weight:800;display:grid;place-items:center;border-bottom:6px solid var(--accent);transition:transform .1s,background .2s;letter-spacing:.02em}
+.wd{min-width:max(96px,var(--tgt));height:max(96px,var(--tgt));padding:0 22px;border-radius:20px;background:var(--card);box-shadow:var(--shadow);font-size:50px;font-weight:800;display:grid;place-items:center;border-bottom:6px solid var(--accent);transition:transform .1s,background .2s;letter-spacing:.02em}
 .dot{font-size:50px;font-weight:800;margin-left:-8px}
 .wd.read{background:#ede7f6;border-bottom-color:var(--ok)}
 .wd.now{box-shadow:0 0 0 5px var(--warm),var(--shadow);transform:scale(1.06)}
-.wd.good{background:#dff7e3;animation:pop .35s}
+.wd.good{background:var(--kt-ok-soft,#dff7e3);animation:pop .35s}
 .wd.nope{animation:shake .4s;border-bottom-color:var(--bad)}
 .wd.hint{animation:pulse 1s infinite}
 .wd.used{visibility:hidden}
@@ -56,15 +60,16 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .qTitle{font-size:26px;font-weight:700}
 .qOpts{display:flex;gap:26px}
 .opt{width:250px;height:170px;border-radius:var(--r);background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;font-size:66px;letter-spacing:6px;border-bottom:6px solid var(--accent);transition:transform .1s}
-.opt.good{background:#dff7e3;animation:pop .35s}
+.opt.good{background:var(--kt-ok-soft,#dff7e3);animation:pop .35s}
 .opt.nope{animation:shake .4s}
 .opt.show{outline:5px solid var(--ok)}
 @keyframes pop{50%{transform:scale(1.08)}}
 @keyframes shake{20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-8px)}80%{transform:translateX(8px)}}
+@media (prefers-reduced-motion:reduce){.good,.nope,.new,[class*=good],[class*=nope]{animation:none}}
 @keyframes pulse{50%{box-shadow:0 0 0 7px var(--warm),var(--shadow)}}
 </style></head><body>
 <div id="bar"><h1>Read It</h1>
-  <div class="tabs" id="tabs"><button data-tab="read" class="on">Read</button><button data-tab="find">Find it</button><button data-tab="fix">Fix it</button></div>
+  <div class="tabs" id="tabs"><button data-tab="read" data-say="voice/label_read.mp3" class="on" data-say-text="Read"><span class="kt-icon">📖</span><span class="kt-label">Read</span></button><button data-tab="find" data-say="voice/label_find.mp3" data-say-text="Find it"><span class="kt-icon">🔎</span><span class="kt-label">Find it</span></button><button data-tab="fix" data-say="voice/label_fix.mp3" data-say-text="Fix it"><span class="kt-icon">🧩</span><span class="kt-label">Fix it</span></button></div>
   <div id="who"></div><div id="stars"></div></div>
 
 <div class="screen on" id="read">
@@ -90,9 +95,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 
 <script>
 'use strict';
-// Forgiving touch-tap helper for X11 touchscreen: synthesize click if pointerdown+pointerup stays within 36px
-(function(){
-  let pt=null,lastClick=0;
+// The forgiving touch-tap helper lives in design/kt.js since K2 (tier-aware); this fallback covers the page opened from the repo
+// on a laptop, where build.py has not copied design/ in.
+if(!window.KT)(function(){
+let pt=null,lastClick=0;
   document.addEventListener("click",()=>{lastClick=Date.now();},true);
   document.addEventListener("pointerdown",e=>{
     if(e.pointerType==="mouse")return;
@@ -113,7 +119,7 @@ const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>
 const LIVE=location.protocol.startsWith('http');
 const DIGRAPHS=['sh','th','ch','ck','ee','oo','qu'];
 let DATA=null,tab='read',kid={id:'default',name:'',age:5},prog={stars:0,read:{},found:0,fixed:{}},seq=0,audio=null,progLoaded=false,lastWord=null;
-const kt=m=>{try{parent.postMessage(m,'*');}catch(e){}};
+const kt=m=>{if(m&&m.kt==='blip'&&window.KT)return;try{parent.postMessage(m,'*');}catch(e){}};   // blips are kt.js's job when it is loaded (one click per tap)
 const rd={s:null,i:0,quiz:null,busy:false},fd={s:null,t:-1,used:[],got:0,tries:0,busy:false},fx={s:null,next:0,tries:0,busy:false};
 const RD={get state(){return {tab,level:level(),stars:prog.stars,kid:kid.id,last:lastWord,
   read:rd.s?{id:rd.s.id,text:rd.s.text,next:rd.i,n:rd.s.words.length,quiz:rd.quiz?rd.quiz.answer:null,busy:rd.busy}:null,
@@ -177,7 +183,7 @@ function level(){const a=kid.age||5,s=prog.stars;if(a<=4&&s<12)return 1;if(a>=7|
 function pool(){const L=level();let ls=DATA.lines.filter(l=>l.level<=L);if(!ls.length)ls=DATA.lines;return ls;}
 function pickLine(counts,avoid){const ls=pool();const min=Math.min(...ls.map(l=>counts[l.id]||0));const c=ls.filter(l=>(counts[l.id]||0)===min&&l.id!==avoid);return pick(c.length?c:ls);}
 function drawLine(el,s){el.innerHTML=s.words.map((x,i)=>`<button class="wd" data-i="${i}">${E(show(x.w,i))}</button>`).join('')+'<span class="dot">.</span>';}
-function shake(el){el.classList.remove('nope');void el.offsetWidth;el.classList.add('nope');kt({kt:'blip',f:220});}
+function shake(el){el.classList.remove('nope');void el.offsetWidth;el.classList.add('nope');if(window.KT)KT.sound('error',el);else kt({kt:'blip',f:220});}
 
 // ---------- Read
 function newRead(){stopAudio();rd.s=pickLine(prog.read,rd.s&&rd.s.id);rd.i=0;rd.quiz=null;rd.busy=false;
@@ -198,7 +204,7 @@ async function lineDone(){rd.busy=true;const my=++seq;$('rMsg').textContent='Now
   $('rQuiz').classList.add('on');$('rMsg').textContent='';play(V('which'));}
 function closeQuiz(){stopAudio();rd.quiz=null;rd.i=0;$('rQuiz').classList.remove('on');$('rLine').querySelectorAll('.wd').forEach(b=>b.classList.remove('read','now'));$('rMsg').textContent='Tap each word to read the line';}
 $('rOpts').onclick=async e=>{const o=e.target.closest('.opt');if(!o||!rd.quiz||rd.busy)return;stopAudio();
-  if(o.dataset.id===rd.quiz.answer){rd.busy=true;o.classList.add('good');star(1);
+  if(o.dataset.id===rd.quiz.answer){rd.busy=true;o.classList.add('good');if(window.KT)KT.sound('success',o);star(1);
     $('rMsg').textContent=['Yes!','You read it!','Great reading'+(kid.name?', '+kid.name:'')+'!','Super!'][prog.stars%4];
     const my=seq;await play(V(rd.quiz.first?'hooray':'yes'));if(my!==seq)return;await wait(900);if(my===seq)newRead();}
   else{shake(o);rd.quiz.tries++;const my=++seq;$('rMsg').textContent='Listen again…';await play(V('again'));if(my!==seq)return;
@@ -216,7 +222,7 @@ async function nextTarget(){const free=fd.s.words.map((w,i)=>i).filter(i=>!fd.us
   const my=++seq;await play(V('find'));if(my!==seq)return;await play(fd.s.words[fd.t].clip);}
 $('fLine').onclick=async e=>{const b=e.target.closest('.wd');if(!b||fd.busy||fd.t<0)return;const i=+b.dataset.i;const w=fd.s.words[i];lastWord=w;stopAudio();
   if(w.w===fd.s.words[fd.t].w){fd.busy=true;b.classList.add('good');b.classList.remove('hint');fd.got++;drawTicks();kt({kt:'blip',f:720});const my=seq;await play(w.clip);if(my!==seq)return;
-    if(fd.got>=3){star(1);$('fMsg').textContent=['Yes!','You found them all!','Great reading!','Super!'][prog.stars%4];await play(V('great'));if(my!==seq)return;await wait(700);if(my===seq)newFind();}
+    if(fd.got>=3){star(1);if(window.KT)KT.sound('success',$('fLine'));$('fMsg').textContent=['Yes!','You found them all!','Great reading!','Super!'][prog.stars%4];await play(V('great'));if(my!==seq)return;await wait(700);if(my===seq)newFind();}
     else{await wait(350);if(my===seq)nextTarget();}}
   else{shake(b);fd.tries++;const my=++seq;await play(V('again'));if(my!==seq)return;
     if(fd.tries>=2)$('fLine').querySelectorAll('.wd').forEach(x=>{if(fd.s.words[+x.dataset.i].w===fd.s.words[fd.t].w)x.classList.add('hint');});await play(fd.s.words[fd.t].clip);}};
@@ -235,7 +241,7 @@ $('xBank').onclick=async e=>{const b=e.target.closest('.wd');if(!b||fx.busy||b.c
     const i=fx.next,w=fx.s.words[i];const slot=$('xSlots').querySelector(`.slot[data-i="${i}"]`);slot.textContent=show(w.w,i);slot.classList.add('full');slot.classList.remove('next');
     fx.next++;fx.tries=0;const nx=$('xSlots').querySelector(`.slot[data-i="${fx.next}"]`);if(nx)nx.classList.add('next');
     kt({kt:'blip',f:620});const my=seq;await play(w.clip);if(my!==seq)return;
-    if(fx.next>=fx.s.words.length){fx.busy=true;prog.fixed[fx.s.id]=(prog.fixed[fx.s.id]||0)+1;star(1);
+    if(fx.next>=fx.s.words.length){fx.busy=true;if(window.KT)KT.sound('success',$('xSlots'));prog.fixed[fx.s.id]=(prog.fixed[fx.s.id]||0)+1;star(1);
       $('xMsg').textContent=['You fixed it!','Yes!','Great reading!','Super!'][prog.stars%4];
       await readAlong(fx.s,[...$('xSlots').querySelectorAll('.slot')],my);if(my!==seq)return;await play(V('nice'));if(my!==seq)return;await wait(700);if(my===seq)newFix();}}
   else{shake(b);fx.tries++;const my=++seq;$('xMsg').textContent='Not that one — listen again';await play(V('again'));if(my!==seq)return;

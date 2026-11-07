@@ -2,6 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Letter Sounds</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <!-- tablet/apps/letters — four dimensions of phonics on one screen:
        Letters · Two letters (digraphs, vowel teams) · Blends (two letter sounds slid together) · Word families.
      Explore: tap a card, hear it, hear its word. Find it: hear one, tap the right card (words in a family for
@@ -68,10 +69,25 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 @keyframes pop{50%{transform:scale(1.1)}}
 @keyframes shake{20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-8px)}80%{transform:translateX(8px)}}
 #msg{font-size:24px;color:var(--dim);min-height:30px;text-align:center}
+/* ---- K2 tiers (PLAN §15 D-054) — appended by Fable 2026-11-06 at Joe's ask; Argon owns this tile. Sizes from the design system,
+   the tile's own palette stays. ---- */
+:root{--tgt:var(--kt-target-min,64px)}
+html,body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
+body{display:flex;flex-direction:column}
+#bar{height:auto;min-height:72px;flex:none;flex-wrap:wrap;padding:8px 18px}
+.screen{position:static;inset:auto;flex:1;min-height:0;height:auto}
+.tabs button{min-width:var(--tgt);min-height:var(--tgt);border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:var(--kt-type-label,17px)}
+.tabs .kt-icon{font-size:calc(var(--tgt) * .5)}
+#grid{height:auto}
+:root[data-tier=pre-reader] #grid{padding-bottom:72px}
+#play{width:max(104px,var(--tgt));height:max(104px,var(--tgt))}
+.btn,#bigParts button,#bigWords button{min-height:var(--tgt)}
+.card.good{background:var(--kt-ok-soft,#dff7e3)}
+@media (prefers-reduced-motion:reduce){.card.good,.card.nope{animation:none}}
 </style></head><body>
 <div id="bar"><h1>Sounds</h1>
-  <div class="tabs" id="tabs"><button data-tab="letters" class="on">Letters</button><button data-tab="digraphs">Two letters</button><button data-tab="blends">Blends</button><button data-tab="families">Word families</button></div>
-  <div class="tabs" id="modes"><button data-mode="explore" class="on">Explore</button><button data-mode="find">Find it</button></div>
+  <div class="tabs" id="tabs"><button data-tab="letters" class="on" data-say="voice/label_letters.mp3" data-say-text="Letters"><span class="kt-icon">🔤</span><span class="kt-label">Letters</span></button><button data-tab="digraphs" data-say="voice/label_digraphs.mp3" data-say-text="Two letters"><span class="kt-icon">🔡</span><span class="kt-label">Two letters</span></button><button data-tab="blends" data-say="voice/label_blends.mp3" data-say-text="Blends"><span class="kt-icon">🧩</span><span class="kt-label">Blends</span></button><button data-tab="families" data-say="voice/label_families.mp3" data-say-text="Word families"><span class="kt-icon">🏠</span><span class="kt-label">Word families</span></button></div>
+  <div class="tabs" id="modes"><button data-mode="explore" class="on" data-say="voice/label_explore.mp3" data-say-text="Explore"><span class="kt-icon">🔍</span><span class="kt-label">Explore</span></button><button data-mode="find" data-say="voice/label_find.mp3" data-say-text="Find it"><span class="kt-icon">🎯</span><span class="kt-label">Find it</span></button></div>
   <div id="stars"></div></div>
 <div id="grid" class="screen on"></div>
 <div id="find" class="screen">

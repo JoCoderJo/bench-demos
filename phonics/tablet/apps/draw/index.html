@@ -2,6 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Draw</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <!-- tablet/apps/draw — finger painting with a library.
      Every drawing is a PNG kept by the tablet agent (/api/store/draw/<id>.png + a thumbnail), saved automatically a
      moment after each stroke, so a child never has to "save". The gallery offers: carry on with any drawing, a clean
@@ -51,6 +52,22 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 #tplpick .card .t{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.9);padding:6px;font-size:18px}
 #toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:20px;font-size:15px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30}
 #toast.on{opacity:.95}
+/* ---- K2 tiers (PLAN §15 D-054) — appended by Fable 2026-11-06 at Joe's ask; Argon owns this tile. Sizes from the design system,
+   the tile's own palette stays. ---- */
+:root{--tgt:var(--kt-target-min,64px)}
+html,body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
+.pot{width:max(64px,var(--tgt));height:max(64px,var(--tgt))}
+.tool{height:max(66px,var(--tgt));min-width:max(66px,var(--tgt))}
+.hbtn{min-height:var(--tgt)}
+#wrap{grid-template-rows:1fr max(92px,calc(var(--tgt) + 26px))}
+/* pre-reader + reader: two columns of pots (ten pots do not fit one column at 75 px or more) */
+:root[data-tier=pre-reader] #wrap,:root[data-tier=reader] #wrap{grid-template-columns:calc(2 * var(--tgt) + 44px) 1fr}
+:root[data-tier=pre-reader] #pots,:root[data-tier=reader] #pots{display:grid;grid-template-columns:1fr 1fr;justify-items:center;align-content:start;gap:10px 0}
+/* pre-reader: the tool row moves to the top (nothing tappable in the bottom 60 px), fewer tools, the big brush (script below) */
+:root[data-tier=pre-reader] #wrap{grid-template-rows:calc(var(--tgt) + 26px) 1fr}
+:root[data-tier=pre-reader] #tools{grid-row:1;gap:8px}
+:root[data-tier=pre-reader] #canvas{grid-row:2}
+:root[data-tier=pre-reader] #gal,:root[data-tier=pre-reader] .sep,:root[data-tier=pre-reader] .sz[data-size="8"],:root[data-tier=pre-reader] .sz[data-size="18"],:root[data-tier=pre-reader] .stamp[data-stamp="🌸"],:root[data-tier=pre-reader] .stamp[data-stamp="🚗"],:root[data-tier=pre-reader] .stamp[data-stamp="🦋"]{display:none}
 </style></head><body>
 <div id="wrap">
   <div id="pots"></div>
@@ -279,4 +296,14 @@ function openTemplates(){
   if(list.length){await load(list[0].id);return;}
   current=null; // a clean sheet; it gets an id on the first stroke
 })();
-</script></body></html>
+</script><script>
+// K2 (Fable, 2026-11-06): names for hold-to-hear + the tier audit, and the big brush for pre-readers (PLAN §15 D-054); Argon's code above is untouched
+(function(){const N=['black','red','orange','yellow','green','blue','purple','pink','brown','white'];
+document.querySelectorAll('#pots .pot').forEach((p,i)=>p.setAttribute('aria-label',(N[i]||'colour')+' paint'));
+const L={gal:'my drawings',fill:'fill',eraser:'eraser',undo:'undo',clear:'start again'};for(const id in L){const b=document.getElementById(id);if(b)b.setAttribute('aria-label',L[id]);}
+document.querySelectorAll('.sz').forEach(b=>b.setAttribute('aria-label',({8:'small brush',18:'medium brush',36:'big brush'})[b.dataset.size]||'brush'));
+document.querySelectorAll('.stamp').forEach(b=>b.setAttribute('aria-label','stamp '+b.dataset.stamp));
+const pre=()=>{if(window.KT&&KT.tier==='pre-reader'){const b=document.querySelector('.sz[data-size="36"]');if(b&&!b.classList.contains('on'))b.click();}};
+pre();window.addEventListener('kt:tier',pre);})();
+</script>
+</body></html>

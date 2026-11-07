@@ -1,0 +1,15 @@
+pack: 1
+id: words
+name: Word Builder
+version: 1.0.0
+icon: 🧩
+color: "#26a69a"
+description: tap the letters, make the word
+tier: reader
+tile:
+  start_url: index.html
+needs: [autoplay]
+permissions: [audio]
+data: data/words
+data_version: 1
+owner: Claude

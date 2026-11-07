@@ -1,0 +1,16 @@
+pack: 1
+id: mystuff
+name: My Stuff
+version: 1.0.0
+icon: 🎒
+color: "#2e8b7a"
+description: your pictures, words and makes
+tier: pre-reader
+tile:
+  start_url: index.html
+needs: []
+permissions: [bench]
+data: data/mystuff
+data_version: 1
+open_with: [image/*, application/x-kt-make, text/plain]
+owner: Claude

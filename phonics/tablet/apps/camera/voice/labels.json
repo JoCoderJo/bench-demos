@@ -1,0 +1,42 @@
+{
+ "voice": "en_US-kristin-medium",
+ "length_scale": 1.05,
+ "labels": {
+  "front": {
+   "file": "label_front.mp3",
+   "text": "Front camera"
+  },
+  "rear": {
+   "file": "label_rear.mp3",
+   "text": "Back camera"
+  },
+  "dressup": {
+   "file": "label_dressup.mp3",
+   "text": "Dress up"
+  },
+  "shutter": {
+   "file": "label_shutter.mp3",
+   "text": "Take a picture"
+  },
+  "pictures": {
+   "file": "label_pictures.mp3",
+   "text": "Pictures"
+  },
+  "rotate": {
+   "file": "label_rotate.mp3",
+   "text": "Turn the picture"
+  },
+  "mirror": {
+   "file": "label_mirror.mp3",
+   "text": "Mirror"
+  },
+  "colour": {
+   "file": "label_colour.mp3",
+   "text": "Colour"
+  },
+  "done": {
+   "file": "label_done.mp3",
+   "text": "Done"
+  }
+ }
+}

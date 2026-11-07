@@ -1,0 +1,18 @@
+{
+ "voice": "en_US-kristin-medium",
+ "length_scale": 1.05,
+ "labels": {
+  "count": {
+   "file": "label_count.mp3",
+   "text": "Count"
+  },
+  "shapes": {
+   "file": "label_shapes.mp3",
+   "text": "Shapes"
+  },
+  "add": {
+   "file": "label_add.mp3",
+   "text": "Add"
+  }
+ }
+}

@@ -1,0 +1,15 @@
+pack: 1
+id: draw
+name: Draw
+version: 1.0.0
+icon: 🎨
+color: "#c25048"
+description: finger painting
+tier: pre-reader
+tile:
+  start_url: index.html
+needs: []
+permissions: []
+data: data/draw
+data_version: 1
+owner: Argon

@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>My Stuff</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <!--
   My Stuff — one per-kid gallery over the stores the other tiles already keep (PLAN §12 C6, D-031). READ ONLY: nothing is
   deleted or edited here (that stays in the owning app); a kid looks at what is theirs and jumps to the app that makes more.
@@ -60,6 +61,17 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 #big .led{width:min(90vw,calc(70vh * 13 / 8))}
 #big .cap{font-size:40px;font-weight:800;color:#fff}
 #big .x{position:absolute;top:12px;right:16px;width:64px;height:64px;border-radius:32px;background:#fff3;font-size:30px}
+
+/* ---- K2 tiers (PLAN §15 D-054): sizes from the design system (design/tiers.css + kt.js, copied in by build.py);
+   the tile's own palette stays as its identity. Under pre-reader a few grown-up controls are hidden so every tappable
+   can be 112 px and nothing sits in the bottom 60 px; the ○ home pill in the nav bar always leaves a tile. ---- */
+:root{--tgt:var(--kt-target-min,64px)}
+html,body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
+button{min-height:max(64px,var(--tgt));min-width:max(64px,var(--tgt))}
+.chip{height:max(64px,var(--tgt))}
+#body{top:calc(150px + max(0px, var(--tgt) - 64px))}
+.go{height:max(66px,var(--tgt))}
+#big .x{width:max(64px,var(--tgt));height:max(64px,var(--tgt))}
 </style></head><body>
 <div id="top"><span class="av" id="av">🎒</span><h1 id="who">My stuff</h1><span class="tot" id="tot"></span></div>
 <div id="chips"></div>
@@ -82,7 +94,7 @@ const GAMES=[{app:'words',ic:'🔤',name:'Word Builder',key:'built',unit:'words 
   {app:'count',ic:'🔢',name:'Count With Me',key:'counted',unit:'numbers counted'},{app:'music',ic:'🎹',name:'Music Pads',key:'songs',unit:'songs played'}];
 let kid={id:'default',name:'',age:5,avatar:'frog'},tab=null,D=null,seq=0,bigOpen=false;
 window.MS={get state(){return {kid:kid.id,tab,big:bigOpen,counts:D?counts():null,loaded:!!D};}};
-const kt=m=>{try{parent.postMessage(m,'*');}catch(e){}};
+const kt=m=>{if(m&&m.kt==='blip'&&window.KT)return;try{parent.postMessage(m,'*');}catch(e){}};   // blips are kt.js's job when it is loaded (one click per tap)
 const base=app=>'/api/store/'+encodeURIComponent(app)+'/'+encodeURIComponent(kid.id)+'/';
 async function files(app){try{const r=await fetch(base(app),{cache:'no-store'});if(!r.ok)return [];const j=await r.json();return (Array.isArray(j)?j:(j.files||[])).map(e=>typeof e==='string'?e:e.name);}catch(e){return [];}}
 async function json(url){try{const r=await fetch(url,{cache:'no-store'});return r.ok?await r.json():null;}catch(e){return null;}}
@@ -139,11 +151,11 @@ function drawTop(){
   const c=D?counts():null;$('tot').textContent=c&&c.stars?'⭐ '+c.stars:'';
 }
 function drawChips(){const c=counts();
-  $('chips').innerHTML=SECS.map(s=>'<button class="chip'+(s.id===tab?' on':'')+(c[s.id]?'':' zero')+'" data-tab="'+s.id+'"><span class="ic">'+s.ic+'</span>'+E(s.name)+'<span class="n">'+c[s.id]+'</span></button>').join('');
+  $('chips').innerHTML=SECS.map(s=>'<button class="chip kt-hear'+(s.id===tab?' on':'')+(c[s.id]?'':' zero')+'" data-tab="'+s.id+'" data-say-text="'+E(s.name)+'"><span class="ic">'+s.ic+'</span>'+E(s.name)+'<span class="n">'+c[s.id]+'</span></button>').join('');
   $('chips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;kt({kt:'blip',f:620});drawChips();draw();});
 }
 function empty(s){return '<div class="empty"><div class="big">'+s.ic+'</div><p>'+E(s.hint)+'</p><button class="go" data-open="'+s.app+'">'+s.ic+' Open '+E(s.appName)+'</button></div>';}
-function picHTML(p,extra){return '<button class="pic" data-big="'+E(p.id)+'">'+(p.tag?'<span class="tag">'+p.tag+'</span>':'')+'<img src="'+E(p.thumb||p.url)+'" alt="" loading="lazy">'+(extra||'')+'</button>';}
+function picHTML(p,extra){return '<button class="pic" data-big="'+E(p.id)+'" aria-label="'+E(p.cap||p.name||p.word||'picture')+'">'+(p.tag?'<span class="tag">'+p.tag+'</span>':'')+'<img src="'+E(p.thumb||p.url)+'" alt="" loading="lazy">'+(extra||'')+'</button>';}
 function ledHTML(rows){return '<div class="led">'+rows.map(r=>String(r).padEnd(13,'0').slice(0,13).split('').map(ch=>'<i class="'+(ch==='1'?'on':'')+'"></i>').join('')).join('')+'</div>';}
 function draw(){
   const s=SECS.find(x=>x.id===tab),b=$('body');let h='';

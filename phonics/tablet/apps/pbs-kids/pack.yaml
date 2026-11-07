@@ -1,0 +1,14 @@
+pack: 1
+id: pbs-kids
+name: PBS Kids
+version: 1.0.0
+icon: 📺
+color: "#2e9e44"
+description: shows and games
+tier: pre-reader
+tile:
+  url: https://pbskids.org
+  display: strip
+needs: []
+permissions: [audio]
+owner: Argon

@@ -2,6 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Code &amp; Blocks</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <!-- tablet/apps/maker-code — Code & Blocks (PLAN.md §10 M3/M4 & §13 DIY-2, Step 2 of the DIY Modular Tablet Pipeline).
      Combines guided DIY Lessons/Recipes and the visual Spark WHEN -> DO Block Builder.
      Talks to 127.0.0.1:7000 (/maker/program, /maker/events) when up, and runs an identical in-browser Spark engine when asleep. -->
@@ -94,6 +95,11 @@ footer{position:fixed;left:0;right:0;bottom:0;height:88px;display:flex;align-ite
 footer .sep{flex:1}
 #toast{position:fixed;left:50%;top:76px;transform:translateX(-50%);background:#f2b632;color:#2a1a00;font-weight:800;padding:10px 20px;border-radius:999px;opacity:0;transition:opacity .22s;pointer-events:none;z-index:20}
 #toast.on{opacity:1}
+/* ---- K2 tiers (PLAN §15 D-054) — appended by Fable 2026-11-06 at Joe's ask; Argon owns this tile. Sizes from the design system,
+   the tile's own palette stays. ---- */
+:root{--tgt:var(--kt-target-min,56px)}
+html,body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
+.tabBtn,.trigBtn,.stepPill,.dBadge,.delRule,.blkChip,#diyProj{min-height:min(var(--tgt),56px);min-width:min(var(--tgt),56px)}
 </style></head><body>
 <div id="bar">🧩 <span id="title">Code &amp; Blocks</span><span id="hi"></span>
   <div id="diyBar" aria-label="DIY Pipeline">
