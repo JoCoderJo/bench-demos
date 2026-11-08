@@ -10,7 +10,7 @@
      sounds   6 structured earcons (press, success, error, navigate, time-warning, time-up) made with WebAudio; sound on
               every touch for the kid tiers; every sound adds a .kt-pulse-<name> class on its target = the visual twin
      hear     hold-to-hear: data-say="clip.mp3" plays the clip; else data-say-text / aria-label is sent to the launcher
-              as {kt:'say', text} (the launcher owns the voice); the element pulses while it speaks
+              as {kt:'tts', text} (the launcher's existing bridge → the agent's /api/tts); the element pulses while it speaks
      focus    arrow keys (a D-pad / knob / keyboard) move focus between tappables geometrically; Enter/Space activate
      audit    KT.audit() lists what breaks the current tier (target size, bottom dead zone, 12 px type floor, no label);
               tests/tier_audit.py runs its own copy of the same rules from outside the page
@@ -23,7 +23,7 @@
   const NAMES = ['pre-reader', 'reader', 'tinkerer', 'maker'];
   const TAP = 'button,select,[role=button],a[href],.kt-tap,[data-kt-tap],.card,.item,.wd,.tile,.thing,.num,.shape,.opt,.fw';
   const html = document.documentElement;
-  const KT = { version: '1.1.0', TIERS, tier: null, ceiling: 1, _hello: null };
+  const KT = { version: '1.1.1', TIERS, tier: null, ceiling: 1, _hello: null };
   const T = () => TIERS[KT.tier] || TIERS.reader;
   const now = () => Date.now();
   const post = m => { try { if (parent !== window) parent.postMessage(m, '*'); } catch (e) { } };
@@ -108,9 +108,9 @@
     if (saying) { try { saying.pause(); } catch (e) { } saying = null; }
     if (clip && clip.match(/\.(mp3|wav|ogg|m4a|webm)$/i)) {
       const a = new Audio(clip); a.volume = Math.max(0, Math.min(1, (TIERS._gain ? TIERS._gain.voice : 1) * KT.ceiling));
-      saying = a; const p = a.play(); if (p && p.catch) p.catch(() => post({ kt: 'say', text }));
+      saying = a; const p = a.play(); if (p && p.catch) p.catch(() => post({ kt: 'tts', text }));
     } else {
-      post({ kt: 'say', text });
+      post({ kt: 'tts', text });
     }
     window.dispatchEvent(new CustomEvent('kt:say', { detail: { text, clip, el } }));
     return true;

@@ -84,7 +84,7 @@ body{display:flex;flex-direction:column}
 'use strict';
 const $=id=>document.getElementById(id);
 const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const kt=m=>{try{parent.postMessage(m,'*');}catch(e){}};
+const kt=m=>{if(m&&m.kt==='blip'&&window.KT)return;try{parent.postMessage(m,'*');}catch(e){}};   // blips are kt.js's job when it is loaded (one click per tap)
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2600);}
 const img=u=>u?('/api/yoto/image?u='+encodeURIComponent(u)):'';
 const fmt=s=>{s=Math.max(0,Math.floor(s||0));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0');};

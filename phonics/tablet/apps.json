@@ -7,6 +7,8 @@
    "subtitle": "spell with your friend",
    "icon": "🐸",
    "color": "#3fb950",
+   "tier": "pre-reader",
+   "group": "read",
    "path": "apps/phonics-friends/index.html",
    "needs": [
     "microphone",
@@ -22,7 +24,14 @@
    "color": "#5c6bc0",
    "path": "apps/camera/index.html",
    "needs": [],
-   "source": "tablet/apps/camera"
+   "source": "tablet/apps/camera",
+   "tier": "pre-reader",
+   "group": "make",
+   "version": "1.0.0",
+   "permissions": [
+    "camera",
+    "audio"
+   ]
   },
   {
    "id": "count",
@@ -34,7 +43,13 @@
    "needs": [
     "autoplay"
    ],
-   "source": "tablet/apps/count"
+   "source": "tablet/apps/count",
+   "tier": "pre-reader",
+   "group": "play",
+   "version": "1.0.0",
+   "permissions": [
+    "audio"
+   ]
   },
   {
    "id": "draw",
@@ -44,7 +59,10 @@
    "color": "#c25048",
    "path": "apps/draw/index.html",
    "needs": [],
-   "source": "tablet/apps/draw"
+   "source": "tablet/apps/draw",
+   "tier": "pre-reader",
+   "group": "play",
+   "version": "1.0.0"
   },
   {
    "id": "example-tap",
@@ -56,7 +74,13 @@
    "needs": [
     "autoplay"
    ],
-   "source": "tablet/apps/example-tap"
+   "source": "tablet/apps/example-tap",
+   "tier": "pre-reader",
+   "group": "play",
+   "version": "1.0.0",
+   "permissions": [
+    "audio"
+   ]
   },
   {
    "id": "letters",
@@ -68,7 +92,13 @@
    "needs": [
     "autoplay"
    ],
-   "source": "tablet/apps/letters"
+   "source": "tablet/apps/letters",
+   "tier": "pre-reader",
+   "group": "read",
+   "version": "1.0.0",
+   "permissions": [
+    "audio"
+   ]
   },
   {
    "id": "maker-bench",
@@ -78,7 +108,13 @@
    "color": "#27ae60",
    "path": "apps/maker-bench/index.html",
    "needs": [],
-   "source": "tablet/apps/maker-bench"
+   "source": "tablet/apps/maker-bench",
+   "tier": "maker",
+   "group": "make",
+   "version": "1.0.0",
+   "permissions": [
+    "bench"
+   ]
   },
   {
    "id": "maker-cad",
@@ -88,7 +124,13 @@
    "color": "#e67e22",
    "path": "apps/maker-cad/index.html",
    "needs": [],
-   "source": "tablet/apps/maker-cad"
+   "source": "tablet/apps/maker-cad",
+   "tier": "maker",
+   "group": "make",
+   "version": "1.0.0",
+   "permissions": [
+    "bench"
+   ]
   },
   {
    "id": "maker-code",
@@ -100,7 +142,14 @@
    "needs": [
     "autoplay"
    ],
-   "source": "tablet/apps/maker-code"
+   "source": "tablet/apps/maker-code",
+   "tier": "tinkerer",
+   "group": "make",
+   "version": "1.0.0",
+   "permissions": [
+    "i2c",
+    "audio"
+   ]
   },
   {
    "id": "maker-light",
@@ -112,7 +161,14 @@
    "needs": [
     "autoplay"
    ],
-   "source": "tablet/apps/maker-light"
+   "source": "tablet/apps/maker-light",
+   "tier": "tinkerer",
+   "group": "make",
+   "version": "1.0.0",
+   "permissions": [
+    "i2c",
+    "audio"
+   ]
   },
   {
    "id": "music",
@@ -124,7 +180,13 @@
    "needs": [
     "autoplay"
    ],
-   "source": "tablet/apps/music"
+   "source": "tablet/apps/music",
+   "tier": "pre-reader",
+   "group": "play",
+   "version": "1.0.0",
+   "permissions": [
+    "audio"
+   ]
   },
   {
    "id": "mystuff",
@@ -134,7 +196,13 @@
    "color": "#2e8b7a",
    "path": "apps/mystuff/index.html",
    "needs": [],
-   "source": "tablet/apps/mystuff"
+   "source": "tablet/apps/mystuff",
+   "tier": "pre-reader",
+   "group": "mine",
+   "version": "1.0.0",
+   "permissions": [
+    "bench"
+   ]
   },
   {
    "id": "pbs-kids",
@@ -145,7 +213,13 @@
    "path": "apps/pbs-kids/index.html",
    "needs": [],
    "source": "tablet/apps/pbs-kids",
-   "url": "https://pbskids.org"
+   "tier": "pre-reader",
+   "group": "play",
+   "version": "1.0.0",
+   "url": "https://pbskids.org",
+   "permissions": [
+    "audio"
+   ]
   },
   {
    "id": "read",
@@ -157,7 +231,13 @@
    "needs": [
     "autoplay"
    ],
-   "source": "tablet/apps/read"
+   "source": "tablet/apps/read",
+   "tier": "reader",
+   "group": "read",
+   "version": "1.0.0",
+   "permissions": [
+    "audio"
+   ]
   },
   {
    "id": "show-tell",
@@ -167,7 +247,15 @@
    "color": "#ef8f3c",
    "path": "apps/show-tell/index.html",
    "needs": [],
-   "source": "tablet/apps/show-tell"
+   "source": "tablet/apps/show-tell",
+   "tier": "pre-reader",
+   "group": "make",
+   "version": "1.0.0",
+   "permissions": [
+    "camera",
+    "audio",
+    "bench"
+   ]
   },
   {
    "id": "stories",
@@ -179,7 +267,13 @@
    "needs": [
     "autoplay"
    ],
-   "source": "tablet/apps/stories"
+   "source": "tablet/apps/stories",
+   "tier": "pre-reader",
+   "group": "read",
+   "version": "1.0.0",
+   "permissions": [
+    "audio"
+   ]
   },
   {
    "id": "tv-remote",
@@ -189,7 +283,13 @@
    "color": "#2b7a78",
    "path": "apps/tv-remote/index.html",
    "needs": [],
-   "source": "tablet/apps/tv-remote"
+   "source": "tablet/apps/tv-remote",
+   "tier": "pre-reader",
+   "group": "play",
+   "version": "1.0.0",
+   "permissions": [
+    "audio"
+   ]
   },
   {
    "id": "words",
@@ -201,7 +301,13 @@
    "needs": [
     "autoplay"
    ],
-   "source": "tablet/apps/words"
+   "source": "tablet/apps/words",
+   "tier": "reader",
+   "group": "read",
+   "version": "1.0.0",
+   "permissions": [
+    "audio"
+   ]
   },
   {
    "id": "yoto",
@@ -213,7 +319,14 @@
    "needs": [
     "autoplay"
    ],
-   "source": "tablet/apps/yoto"
+   "source": "tablet/apps/yoto",
+   "tier": "pre-reader",
+   "group": "play",
+   "version": "1.0.0",
+   "permissions": [
+    "audio",
+    "bench"
+   ]
   }
  ]
 }

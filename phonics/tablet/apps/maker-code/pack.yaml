@@ -5,6 +5,7 @@ version: 1.0.0
 icon: 🧩
 color: "#7c4dff"
 description: lessons & Spark blocks
+group: make
 tier: tinkerer
 tile:
   start_url: index.html

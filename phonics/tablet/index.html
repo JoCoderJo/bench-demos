@@ -3,6 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Kids Tablet</title>
+<link rel="stylesheet" href="design/tiers.css">
 <!-- tablet/launcher/index.html — the kids tablet's home screen (the "shell"). Offline, no fonts, no CDN.
      Runs in Chromium kiosk on the UNO Q, served by tablet/agent/kids_tablet_agent.py at http://127.0.0.1:8090/
      (a secure context, so the apps' microphone works with no certificate). Also opens as a plain file or on the
@@ -334,6 +335,34 @@ body.locked #home{visibility:hidden}   /* the lock screen shows the wallpaper, n
 .acc.on{border-color:var(--ink)}
 #stTiles button{padding:10px 18px;border-radius:18px;background:rgba(127,127,127,.15);font-weight:700}
 #stTiles button.on{background:var(--accent);color:#fff}
+
+/* ---- K2 tiers in the launcher (PLAN §15 D-054 / D-055) — Fable 2026-11-07 at Joe's ask; Argon owns this file. Additive. ----
+   <html data-tier> is set from the active kid (kid.tier, else age) by the block at the end of the script. */
+:root[data-tier] body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
+/* pre-reader home = the big grid (Assistive Access "Grid"): four across, icons only, the name is heard on a hold */
+:root[data-tier=pre-reader]{--tmin:250px;--ticon:150px;--tpad:16px;--tgap:24px}
+:root[data-tier=pre-reader] #grid{grid-template-columns:repeat(4,1fr);max-width:1180px}
+:root[data-tier=pre-reader] .tile{aspect-ratio:1/0.9;gap:0}
+/* four tiles or fewer: two by two, bigger, so the screen is not half empty */
+:root[data-tier=pre-reader] #grid.few{grid-template-columns:repeat(2,1fr);--ticon:190px;--tgap:28px}
+:root[data-tier=pre-reader] #grid.few .tile{aspect-ratio:2/1.02}
+:root[data-tier=pre-reader] .tile .t,:root[data-tier=pre-reader] .tile .s{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:root[data-tier=pre-reader] #hello{font-size:30px}
+:root[data-tier=pre-reader] #hello small{font-size:18px}
+/* reader home: 2–4-word labels, no subtitles; verb tabs when there are more than eight tiles */
+:root[data-tier=reader]{--tmin:200px;--ticon:112px;--tfont:22px}
+:root[data-tier=reader] .tile .s{display:none}
+#verbs{display:none;gap:10px;flex:none;padding:6px 6px 0;max-width:1180px;margin:0 auto;width:100%}
+#verbs.on{display:flex}
+#verbs button{min-height:var(--kt-target-min,75px);min-width:var(--kt-target-min,75px);padding:0 22px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-weight:700;font-size:var(--kt-type-label,20px);display:inline-flex;align-items:center;gap:10px}
+#verbs button.on{background:var(--accent);color:#fff}
+.vsec{grid-column:1/-1;display:flex;align-items:center;gap:10px;font-size:var(--kt-type-label,20px);font-weight:800;color:var(--dim);padding:6px 4px 0;scroll-margin-top:8px}
+.vsec .kt-icon{font-size:calc(var(--kt-type-label,20px) * 1.3)}
+#verbs .kt-icon{font-size:calc(var(--kt-target-min,75px) * .5)}
+:root[data-tier=pre-reader] #verbs{display:none!important}
+.tile.hear{box-shadow:0 0 0 6px var(--accent),var(--shadow)}
+.lkk.hear{box-shadow:0 0 0 6px #fff,0 6px 18px rgba(0,0,0,.3)}#verbs button.hear{box-shadow:0 0 0 6px var(--accent),var(--shadow)}
+#hello.warn small{color:var(--accent);font-weight:800}
 </style></head><body>
 
 <div class="screen on" id="home">
@@ -341,6 +370,7 @@ body.locked #home{visibility:hidden}   /* the lock screen shows the wallpaper, n
     <div id="faces"></div>
     <div id="hello">Hi!<small>pick something to play</small></div>
   </div>
+  <div id="verbs"></div>
   <div id="grid"></div>
   <button id="editDone" onclick="endEdit()">Done</button>
 </div>
@@ -521,7 +551,7 @@ body.locked #home{visibility:hidden}   /* the lock screen shows the wallpaper, n
     </div>
   </div>
 </div>
-<script>window.KT_INLINE=null;window.KT_INLINE={"defaults":{"_doc":"Kids tablet settings \u2014 ONE file is the whole state. The Bench/laptop pushes this with the bundle; the launcher reads it from the tablet agent (/api/settings) and the agent applies the hardware parts (brightness, volume, rotation, screen sleep). Edits made on the tablet (parent gate) are saved as overrides in the agent's state dir and survive bundle updates. v2 (2026-10-25): kids[] profiles with per-kid tiles + daily minutes, budget rules; `child` is the fallback when kids is empty.","version":2,"child":{"name":"","avatar":"frog"},"kids":[{"id":"kid1","name":"","age":4,"avatar":"frog","apps_allowed":["phonics-friends","letters","draw","yoto"],"budget_min":45,"look":null},{"id":"kid2","name":"","age":6,"avatar":"fox","apps_allowed":null,"budget_min":60,"look":null}],"budget":{"enabled":true,"exempt_apps":["yoto"],"grace_min":15,"reset_hour":5,"count_home":false},"pin":"1234","screen":{"brightness":70,"rotation":"right","theme":"sky","tile_size":"medium","sleep_after_min":0,"look":{"wallpaper":"sky","dark":false,"accent":"#ff8a3d"}},"sound":{"volume":40,"max_volume":80,"tap_sounds":true,"output":"lineout","eq":{"enabled":true,"bass_db":0,"treble_db":0,"highpass_hz":170,"preamp_db":0}},"apps":{"allowed":["phonics-friends","camera","count","draw","example-tap","letters","maker-bench","maker-cad","maker-code","maker-light","music","mystuff","pbs-kids","read","show-tell","stories","tv-remote","words","yoto"],"order":["phonics-friends","letters","stories","draw","camera","count","example-tap","maker-bench","maker-cad","maker-code","maker-light","music","mystuff","pbs-kids","read","show-tell","tv-remote","words","yoto"]},"bedtime":{"enabled":false,"start":"19:30","end":"07:00"},"kiosk":{"home_button":"tap","parent_hold_ms":1500,"show_clock":true,"clock_24h":false,"kid_volume":true,"lock_on_start":true,"lock_after_min":10},"bench":{"url":"https://bench.tail81b22c.ts.net","updates":"manual"}},"apps":{"_doc":"The home screen. One entry per tile; `path` is relative to the bundle root. Games in tablet/apps/<id>/ are added automatically by build-bundle.py (see tablet/apps/README.md); list one here only to override its tile or to pull a folder from elsewhere with `source_dir`. `needs` lists iframe permissions the app wants.","apps":[{"id":"phonics-friends","title":"Phonics Friends","subtitle":"spell with your friend","icon":"\ud83d\udc38","color":"#3fb950","path":"apps/phonics-friends/index.html","needs":["microphone","autoplay"],"source":"demo/ via tools/make-offline-bundle.py"},{"id":"camera","title":"Camera","subtitle":"see through the cameras","icon":"\ud83d\udcf7","color":"#5c6bc0","path":"apps/camera/index.html","needs":[],"source":"tablet/apps/camera"},{"id":"count","title":"Count With Me","subtitle":"count, find shapes, add","icon":"\ud83d\udc38","color":"#5c6bc0","path":"apps/count/index.html","needs":["autoplay"],"source":"tablet/apps/count"},{"id":"draw","title":"Draw","subtitle":"finger painting","icon":"\ud83c\udfa8","color":"#c25048","path":"apps/draw/index.html","needs":[],"source":"tablet/apps/draw"},{"id":"example-tap","title":"Tap the Frog","subtitle":"example game","icon":"\ud83d\udc38","color":"#2e7d32","path":"apps/example-tap/index.html","needs":["autoplay"],"source":"tablet/apps/example-tap"},{"id":"letters","title":"Letter Sounds","subtitle":"tap a letter, hear its sound","icon":"\ud83d\udd24","color":"#d98e2b","path":"apps/letters/index.html","needs":["autoplay"],"source":"tablet/apps/letters"},{"id":"maker-bench","title":"Sim & Inventory","subtitle":"3D fit check & shop parts","icon":"\ud83d\udd29","color":"#27ae60","path":"apps/maker-bench/index.html","needs":[],"source":"tablet/apps/maker-bench"},{"id":"maker-cad","title":"3D CAD Studio","subtitle":"design parts for the tablet","icon":"\ud83e\uddf1","color":"#e67e22","path":"apps/maker-cad/index.html","needs":[],"source":"tablet/apps/maker-cad"},{"id":"maker-code","title":"Code & Blocks","subtitle":"lessons & Spark blocks","icon":"\ud83e\udde9","color":"#7c4dff","path":"apps/maker-code/index.html","needs":["autoplay"],"source":"tablet/apps/maker-code"},{"id":"maker-light","title":"Light Lab","subtitle":"draw with real lights","icon":"\ud83d\udca1","color":"#f2b632","path":"apps/maker-light/index.html","needs":["autoplay"],"source":"tablet/apps/maker-light"},{"id":"music","title":"Music Pads","subtitle":"xylophone, drums, follow the lights","icon":"\ud83c\udfb5","color":"#ab47bc","path":"apps/music/index.html","needs":["autoplay"],"source":"tablet/apps/music"},{"id":"mystuff","title":"My Stuff","subtitle":"your pictures, words and makes","icon":"\ud83c\udf92","color":"#2e8b7a","path":"apps/mystuff/index.html","needs":[],"source":"tablet/apps/mystuff"},{"id":"pbs-kids","title":"PBS Kids","subtitle":"shows and games","icon":"\ud83d\udcfa","color":"#2e9e44","path":"apps/pbs-kids/index.html","needs":[],"source":"tablet/apps/pbs-kids","url":"https://pbskids.org"},{"id":"read","title":"Read It","subtitle":"tap the words, read the line","icon":"\ud83d\udcd6","color":"#7e57c2","path":"apps/read/index.html","needs":["autoplay"],"source":"tablet/apps/read"},{"id":"show-tell","title":"Show & Tell","subtitle":"what is it?","icon":"\ud83d\udd0d","color":"#ef8f3c","path":"apps/show-tell/index.html","needs":[],"source":"tablet/apps/show-tell"},{"id":"stories","title":"Stories","subtitle":"read along with your friend","icon":"\ud83d\udcd6","color":"#5f87ad","path":"apps/stories/index.html","needs":["autoplay"],"source":"tablet/apps/stories"},{"id":"tv-remote","title":"TV Remote","subtitle":"steer the family TV","icon":"\ud83d\udcfa","color":"#2b7a78","path":"apps/tv-remote/index.html","needs":[],"source":"tablet/apps/tv-remote"},{"id":"words","title":"Word Builder","subtitle":"tap the letters, make the word","icon":"\ud83e\udde9","color":"#26a69a","path":"apps/words/index.html","needs":["autoplay"],"source":"tablet/apps/words"},{"id":"yoto","title":"Yoto","subtitle":"our Yoto library","icon":"\ud83c\udfa7","color":"#f2572b","path":"apps/yoto/index.html","needs":["autoplay"],"source":"tablet/apps/yoto"}]}};</script>
+<script>window.KT_INLINE=null;window.KT_INLINE={"defaults":{"_doc":"Kids tablet settings \u2014 ONE file is the whole state. The Bench/laptop pushes this with the bundle; the launcher reads it from the tablet agent (/api/settings) and the agent applies the hardware parts (brightness, volume, rotation, screen sleep). Edits made on the tablet (parent gate) are saved as overrides in the agent's state dir and survive bundle updates. v2 (2026-10-25): kids[] profiles with per-kid tiles + daily minutes, budget rules; `child` is the fallback when kids is empty.","version":2,"child":{"name":"","avatar":"frog"},"kids":[{"id":"kid1","name":"","age":4,"avatar":"frog","tier":null,"hand":"right","apps_allowed":["phonics-friends","letters","draw","yoto"],"budget_min":45,"look":null},{"id":"kid2","name":"","age":6,"avatar":"fox","tier":null,"hand":"right","apps_allowed":null,"budget_min":60,"look":null}],"budget":{"enabled":true,"exempt_apps":["yoto"],"grace_min":15,"reset_hour":5,"count_home":false},"pin":"1234","screen":{"brightness":70,"rotation":"right","theme":"sky","tile_size":"medium","sleep_after_min":0,"look":{"wallpaper":"sky","dark":false,"accent":"#ff8a3d"}},"sound":{"volume":40,"max_volume":80,"tap_sounds":true,"output":"lineout","eq":{"enabled":true,"bass_db":0,"treble_db":0,"highpass_hz":170,"preamp_db":0}},"apps":{"allowed":["phonics-friends","camera","count","draw","example-tap","letters","maker-bench","maker-cad","maker-code","maker-light","music","mystuff","pbs-kids","read","show-tell","stories","tv-remote","words","yoto"],"order":["phonics-friends","letters","stories","draw","camera","count","example-tap","maker-bench","maker-cad","maker-code","maker-light","music","mystuff","pbs-kids","read","show-tell","tv-remote","words","yoto"]},"bedtime":{"enabled":false,"start":"19:30","end":"07:00"},"kiosk":{"home_button":"tap","parent_hold_ms":1500,"show_clock":true,"clock_24h":false,"kid_volume":true,"lock_on_start":true,"lock_after_min":10},"bench":{"url":"https://bench.tail81b22c.ts.net","updates":"manual"}},"apps":{"_doc":"The home screen. One entry per tile; `path` is relative to the bundle root. Games in tablet/apps/<id>/ are added automatically by build-bundle.py (see tablet/apps/README.md); list one here only to override its tile or to pull a folder from elsewhere with `source_dir`. `needs` lists iframe permissions the app wants.","apps":[{"id":"phonics-friends","title":"Phonics Friends","subtitle":"spell with your friend","icon":"\ud83d\udc38","color":"#3fb950","tier":"pre-reader","group":"read","path":"apps/phonics-friends/index.html","needs":["microphone","autoplay"],"source":"demo/ via tools/make-offline-bundle.py"},{"id":"camera","title":"Camera","subtitle":"see through the cameras","icon":"\ud83d\udcf7","color":"#5c6bc0","path":"apps/camera/index.html","needs":[],"source":"tablet/apps/camera","tier":"pre-reader","group":"make","version":"1.0.0","permissions":["camera","audio"]},{"id":"count","title":"Count With Me","subtitle":"count, find shapes, add","icon":"\ud83d\udc38","color":"#5c6bc0","path":"apps/count/index.html","needs":["autoplay"],"source":"tablet/apps/count","tier":"pre-reader","group":"play","version":"1.0.0","permissions":["audio"]},{"id":"draw","title":"Draw","subtitle":"finger painting","icon":"\ud83c\udfa8","color":"#c25048","path":"apps/draw/index.html","needs":[],"source":"tablet/apps/draw","tier":"pre-reader","group":"play","version":"1.0.0"},{"id":"example-tap","title":"Tap the Frog","subtitle":"example game","icon":"\ud83d\udc38","color":"#2e7d32","path":"apps/example-tap/index.html","needs":["autoplay"],"source":"tablet/apps/example-tap","tier":"pre-reader","group":"play","version":"1.0.0","permissions":["audio"]},{"id":"letters","title":"Letter Sounds","subtitle":"tap a letter, hear its sound","icon":"\ud83d\udd24","color":"#d98e2b","path":"apps/letters/index.html","needs":["autoplay"],"source":"tablet/apps/letters","tier":"pre-reader","group":"read","version":"1.0.0","permissions":["audio"]},{"id":"maker-bench","title":"Sim & Inventory","subtitle":"3D fit check & shop parts","icon":"\ud83d\udd29","color":"#27ae60","path":"apps/maker-bench/index.html","needs":[],"source":"tablet/apps/maker-bench","tier":"maker","group":"make","version":"1.0.0","permissions":["bench"]},{"id":"maker-cad","title":"3D CAD Studio","subtitle":"design parts for the tablet","icon":"\ud83e\uddf1","color":"#e67e22","path":"apps/maker-cad/index.html","needs":[],"source":"tablet/apps/maker-cad","tier":"maker","group":"make","version":"1.0.0","permissions":["bench"]},{"id":"maker-code","title":"Code & Blocks","subtitle":"lessons & Spark blocks","icon":"\ud83e\udde9","color":"#7c4dff","path":"apps/maker-code/index.html","needs":["autoplay"],"source":"tablet/apps/maker-code","tier":"tinkerer","group":"make","version":"1.0.0","permissions":["i2c","audio"]},{"id":"maker-light","title":"Light Lab","subtitle":"draw with real lights","icon":"\ud83d\udca1","color":"#f2b632","path":"apps/maker-light/index.html","needs":["autoplay"],"source":"tablet/apps/maker-light","tier":"tinkerer","group":"make","version":"1.0.0","permissions":["i2c","audio"]},{"id":"music","title":"Music Pads","subtitle":"xylophone, drums, follow the lights","icon":"\ud83c\udfb5","color":"#ab47bc","path":"apps/music/index.html","needs":["autoplay"],"source":"tablet/apps/music","tier":"pre-reader","group":"play","version":"1.0.0","permissions":["audio"]},{"id":"mystuff","title":"My Stuff","subtitle":"your pictures, words and makes","icon":"\ud83c\udf92","color":"#2e8b7a","path":"apps/mystuff/index.html","needs":[],"source":"tablet/apps/mystuff","tier":"pre-reader","group":"mine","version":"1.0.0","permissions":["bench"]},{"id":"pbs-kids","title":"PBS Kids","subtitle":"shows and games","icon":"\ud83d\udcfa","color":"#2e9e44","path":"apps/pbs-kids/index.html","needs":[],"source":"tablet/apps/pbs-kids","tier":"pre-reader","group":"play","version":"1.0.0","url":"https://pbskids.org","permissions":["audio"]},{"id":"read","title":"Read It","subtitle":"tap the words, read the line","icon":"\ud83d\udcd6","color":"#7e57c2","path":"apps/read/index.html","needs":["autoplay"],"source":"tablet/apps/read","tier":"reader","group":"read","version":"1.0.0","permissions":["audio"]},{"id":"show-tell","title":"Show & Tell","subtitle":"what is it?","icon":"\ud83d\udd0d","color":"#ef8f3c","path":"apps/show-tell/index.html","needs":[],"source":"tablet/apps/show-tell","tier":"pre-reader","group":"make","version":"1.0.0","permissions":["camera","audio","bench"]},{"id":"stories","title":"Stories","subtitle":"read along with your friend","icon":"\ud83d\udcd6","color":"#5f87ad","path":"apps/stories/index.html","needs":["autoplay"],"source":"tablet/apps/stories","tier":"pre-reader","group":"read","version":"1.0.0","permissions":["audio"]},{"id":"tv-remote","title":"TV Remote","subtitle":"steer the family TV","icon":"\ud83d\udcfa","color":"#2b7a78","path":"apps/tv-remote/index.html","needs":[],"source":"tablet/apps/tv-remote","tier":"pre-reader","group":"play","version":"1.0.0","permissions":["audio"]},{"id":"words","title":"Word Builder","subtitle":"tap the letters, make the word","icon":"\ud83e\udde9","color":"#26a69a","path":"apps/words/index.html","needs":["autoplay"],"source":"tablet/apps/words","tier":"reader","group":"read","version":"1.0.0","permissions":["audio"]},{"id":"yoto","title":"Yoto","subtitle":"our Yoto library","icon":"\ud83c\udfa7","color":"#f2572b","path":"apps/yoto/index.html","needs":["autoplay"],"source":"tablet/apps/yoto","tier":"pre-reader","group":"play","version":"1.0.0","permissions":["audio","bench"]}]}};</script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
@@ -770,7 +800,7 @@ function speakTts(text){
 function sendHello(){
   try{
     const f=$('frame');if(!f||!f.contentWindow)return;
-    const ak=activeKid(),kidObj=ak?{id:ak.id,name:ak.name||'',age:ak.age||5,avatar:ak.avatar||'frog'}:{id:'default',name:S.child.name||'',age:5,avatar:S.child.avatar||'frog'};
+    const ak=activeKid(),kidObj=ak?{id:ak.id,name:ak.name||'',age:ak.age||5,avatar:ak.avatar||'frog',tier:(window.tierFor?tierFor(ak):undefined),hand:ak.hand||'right'}:{id:'default',name:S.child.name||'',age:5,avatar:S.child.avatar||'frog',tier:(window.tierFor?tierFor(null):undefined),hand:'right'};
     f.contentWindow.postMessage({kt:'hello',child:{name:kidObj.name,avatar:kidObj.avatar},kid:kidObj,caps:STATUS.caps||{mic:false,camera:false},theme:S.screen.theme,
       sound:{volume:S.sound.volume,max_volume:S.sound.max_volume},app:current&&current.id},'*');
   }catch(e){}
@@ -782,7 +812,7 @@ window.addEventListener('message',e=>{
   else if(d.kt==='tts'&&d.text)speakTts(d.text);
   else if(d.kt==='open'&&d.id){if(d.project){try{localStorage.setItem('kt.maker.active',String(d.project));}catch(x){}}openApp(String(d.id));}
 });
-$('frame').addEventListener('load',sendHello);
+$('frame').addEventListener('load',()=>sendHello());
 function openApp(id){
   const a=APPS.find(x=>x.id===id);if(!a)return;
   if(editing)return;
@@ -836,9 +866,10 @@ function syncOverlayHold(){
   extHold(4000);
   gateHoldT=setInterval(()=>{if($('gate').classList.contains('on')||$('settings').classList.contains('on'))extHold(4000);else clearInterval(gateHoldT);},2500);
 }
-function openQuick(where){quickOpen=true;$('quick').className='on '+(where||'top');$('volPop').classList.remove('on');drawQuick();pollBt();extHold(4000);
+function btWindow(sec){if(agent)fetch('http://127.0.0.1:8098/bt/window',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({seconds:sec})}).catch(()=>{});}
+function openQuick(where){quickOpen=true;$('quick').className='on '+(where||'top');$('volPop').classList.remove('on');drawQuick();pollBt();btWindow(120);extHold(4000);
   clearInterval(quickT);quickT=setInterval(()=>{if(!quickOpen)return;extHold(4000);pollBt();},2500);}
-function closeQuick(){if(!quickOpen)return;quickOpen=false;$('quick').className='';clearInterval(quickT);}
+function closeQuick(){if(!quickOpen)return;quickOpen=false;$('quick').className='';clearInterval(quickT);btWindow(0);}
 function qbars(el,v,cap){el.innerHTML=Array.from({length:10},(_,i)=>{const p=(i+1)*10;return '<i data-v="'+p+'" class="'+(p<=v?'on':(p>cap?'cap':''))+'"></i>';}).join('');}
 function drawQuick(){
   const cap=S.sound.max_volume||80,v=S.sound.volume||0,b=S.screen.brightness??70,locked=!kidVol(),out=(S.sound&&S.sound.output)||'lineout';
@@ -894,7 +925,7 @@ async function btAct(act,mac,btn){
   drawBt();
   setTimeout(()=>{if(agent)jget('/api/status').then(s=>{STATUS=s;drawBt();}).catch(()=>{});},1500);
 }
-async function btScan(){if(!btUnlocked()){closeQuick();openGate('bt');return;}try{BT=await btPost('scan',{seconds:60});}catch(e){toast('Bluetooth: '+e.message);}drawBt();}
+async function btScan(){if(!btUnlocked()){closeQuick();openGate('bt');return;}btWindow(120);try{BT=await btPost('scan',{seconds:60});}catch(e){toast('Bluetooth: '+e.message);}drawBt();}
 // System row: Sleep for everyone (screen off, a touch wakes it), Restart / Power off / Settings behind the grown-up code
 async function powerDo(action){
   if(!agent){toast('Only on the tablet');return;}
@@ -971,6 +1002,10 @@ function drawSettings(){
      +'<div class="kbd">'+LETTERS.split('').map(l=>'<button data-l="'+l+'">'+l+'</button>').join('')+'<button data-l=" ">␣</button><button data-l="⌫" class="wide">⌫</button></div>'
      +row('Friend','picture on the home bar','<div class="avs">'+Object.keys(AV).map(k=>'<button data-av="'+k+'" class="'+(ek.avatar===k?'on':'')+'">'+AV[k]+'</button>').join('')+'</div>')
      +row('Age','used by games to pick difficulty','<div class="stepper"><button id="ageDn">−</button><span class="v" style="min-width:60px;text-align:center;color:inherit" id="ageVal">'+(ek.age||5)+' yr</span><button id="ageUp">+</button></div>')
+     +row('Stage &amp; hand','Auto picks from age; left flips toolbars','<div style="display:flex;flex-wrap:wrap;gap:6px">'
+          +[['','Auto'],['pre-reader','Pre-reader'],['reader','Reader'],['tinkerer','Tinkerer'],['maker','Maker']].map(o=>'<button class="btn'+((ek.tier||'')===o[0]?' go':'')+'" data-ktier="'+o[0]+'">'+o[1]+'</button>').join('')
+          +'<span style="width:8px"></span>'
+          +[['right','✋ Right'],['left','🤚 Left']].map(o=>'<button class="btn'+((ek.hand||'right')===o[0]?' go':'')+'" data-khand="'+o[0]+'">'+o[1]+'</button>').join('')+'</div>')
      +row('Daily time limit',usedMin+' min used today'+(ek.budget_min?' · '+remMin+' min left':''),
           '<div class="stepper"><button id="bgDn">−</button><span class="v" style="min-width:80px;text-align:center;color:inherit" id="bgVal">'+(ek.budget_min?ek.budget_min+' min':'no limit')+'</span><button id="bgUp">+</button>'
           +(ek.budget_min?'<button class="btn" id="bgGrace">+'+(S.budget.grace_min||15)+'m today</button>':'')+'</div>')
@@ -1028,13 +1063,15 @@ function drawSettings(){
    +'</div></div>';
   const m=$('smain');
   m.querySelectorAll('[data-ek]').forEach(b=>b.onclick=()=>{editKidIdx=+b.dataset.ek;drawSettings();});
-  if($('addKid'))$('addKid').onclick=()=>{const n=ks.length+1,id='kid'+Date.now().toString(36).slice(-4);S.kids.push({id,name:'',age:5,avatar:Object.keys(AV)[n%Object.keys(AV).length],apps_allowed:null,budget_min:45});editKidIdx=S.kids.length-1;save();drawSettings();};
+  if($('addKid'))$('addKid').onclick=()=>{const n=ks.length+1,id='kid'+Date.now().toString(36).slice(-4);S.kids.push({id,name:'',age:5,avatar:Object.keys(AV)[n%Object.keys(AV).length],tier:null,hand:'right',apps_allowed:null,budget_min:45});editKidIdx=S.kids.length-1;save();drawSettings();};
   if($('delKid'))$('delKid').onclick=()=>{if(ks.length<=1)return;S.kids.splice(editKidIdx,1);editKidIdx=0;if(kidId&&!S.kids.find(x=>x.id===kidId))kidId=S.kids[0].id;save();drawSettings();};
   m.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{blip(600);const t=ek||S.child;let n=t.name||'';const l=b.dataset.l;if(l==='⌫')n=n.slice(0,-1);else if(n.length<14)n+=(l===' '?' ':(n.length===0||n.endsWith(' ')?l:l.toLowerCase()));t.name=n;$('nameOut').textContent=n;save();});
   m.querySelectorAll('[data-av]').forEach(b=>b.onclick=()=>{const t=ek||S.child;t.avatar=b.dataset.av;m.querySelectorAll('[data-av]').forEach(x=>x.classList.toggle('on',x===b));save();});
   if(ek){
     $('ageDn').onclick=()=>{ek.age=Math.max(1,(ek.age||5)-1);$('ageVal').textContent=ek.age+' yr';save();};
     $('ageUp').onclick=()=>{ek.age=Math.min(16,(ek.age||5)+1);$('ageVal').textContent=ek.age+' yr';save();};
+    m.querySelectorAll('[data-ktier]').forEach(b=>b.onclick=()=>{ek.tier=b.dataset.ktier||null;save();drawSettings();});
+    m.querySelectorAll('[data-khand]').forEach(b=>b.onclick=()=>{ek.hand=b.dataset.khand||'right';save();drawSettings();});
     $('bgDn').onclick=()=>{ek.budget_min=Math.max(0,(ek.budget_min||0)-15);$('bgVal').textContent=ek.budget_min?ek.budget_min+' min':'no limit';save();};
     $('bgUp').onclick=()=>{ek.budget_min=Math.min(240,(ek.budget_min||0)+15);$('bgVal').textContent=ek.budget_min?ek.budget_min+' min':'no limit';save();};
     if($('bgGrace'))$('bgGrace').onclick=async()=>{await grantGrace(ek);drawSettings();};
@@ -1131,8 +1168,8 @@ async function budgetTick(){
   applyLook();tick();
 }
 function fmt12(t){const [h,m]=t.split(':').map(Number);return S.kiosk.clock_24h?t:(((h%12)||12)+':'+String(m).padStart(2,'0')+(h<12?' am':' pm'));}
-setInterval(tick,20000);
-setInterval(budgetTick,30000);
+setInterval(()=>tick(),20000);
+setInterval(()=>budgetTick(),30000);
 (function(){const s=$('sleep');let t=null;s.addEventListener('pointerdown',e=>{if(e.target.closest('#sleepKids'))return;try{s.setPointerCapture(e.pointerId);}catch(x){}t=setTimeout(()=>openGate(sleepKind==='budget'?'grace':'wake'),S.kiosk.parent_hold_ms||1500)});['pointerup','pointercancel'].forEach(ev=>s.addEventListener(ev,()=>clearTimeout(t)));})();
 async function poll(){
   // keeps going even while the agent restarts (push.sh --install re-execs it): a miss is not the end
@@ -1754,6 +1791,130 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
   const initOn=urlDbg==='1'||(urlDbg!=='0'&&localStorage.getItem(LS_EN)==='1');
   setDebugEnabled(initOn,true);
   window.KTDBG={enable:()=>setDebugEnabled(true,true),disable:()=>setDebugEnabled(false,true),startAim,inspectPoint,openReportModal,saveIssue,target:()=>lastTarget,get issues(){return issues;},get touchLog(){return touchLog;},get errLog(){return errLog;}};
+})();
+
+// ===== K2 tiers & K1/K3 device broker events in the launcher (PLAN §15 D-054 / D-055 / D-057) — owned by Argon.
+// Wraps render, tick, tileDown/tileUp/tileCancel, drawLock, openLock by reassignment.
+(function(){
+  const TIERS=['pre-reader','reader','tinkerer','maker'];
+  function tierFor(k){if(!k)return 'reader';if(TIERS.includes(k.tier))return k.tier;const a=+k.age||0;return !a?'reader':a<=5?'pre-reader':a<=8?'reader':a<=12?'tinkerer':'maker';}
+  window.tierFor=tierFor;
+  // build-bundle.py carries pack.yaml `group` into apps.json; GROUP is the fallback when opened unbundled from disk
+  const GROUP={'phonics-friends':'read',letters:'read',words:'read',read:'read',stories:'read',count:'play',music:'play',draw:'play','example-tap':'play',yoto:'play','pbs-kids':'play','tv-remote':'play',camera:'make','show-tell':'make','maker-light':'make','maker-code':'make','maker-cad':'make','maker-bench':'make',mystuff:'mine'};
+  const VERBS=[['play','🎲','Play'],['read','📖','Read'],['make','🔧','Make'],['mine','🎒','Mine']];
+  const groupOf=a=>(a&&a.group)||GROUP[a&&a.id]||'play';
+  let verb=null;
+  // hold-to-hear (D-054): a 350 ms hold on a control says its label and is NOT a tap; `lastSaid` is what the tests read (no audio in CI)
+  const HEAR_MS=350;let lastSaid='',pressing=0;   // pressing = fingers down on hold-to-hear controls (the lock redraw must not rebuild under one)
+  function holdToHear(b,speak){
+    let h=null,heard=false,down=false;const click=b.onclick;
+    b.onclick=function(e){if(heard){heard=false;return;}return click?click.call(this,e):undefined;};
+    b.addEventListener('pointerdown',()=>{if(!down){down=true;pressing++;}heard=false;clearTimeout(h);h=setTimeout(()=>{heard=true;b.classList.add('hear');speak();setTimeout(()=>b.classList.remove('hear'),900);},HEAR_MS);});
+    ['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>{clearTimeout(h);if(down){down=false;pressing=Math.max(0,pressing-1);}}));
+  }
+  function sayText(t){t=String(t||'').trim();if(!t)return;lastSaid='tts:'+t;speakTts(t);}   // names are typed on the Bench — Piper, not a clip
+  function applyTier(){
+    const ak=activeKid(),t=tierFor(ak);
+    document.documentElement.dataset.tier=t;
+    document.documentElement.dataset.hand=(ak&&ak.hand)||'right';
+    return t;
+  }
+  function vol(){const v=+(S.sound&&S.sound.volume);const m=+(S.sound&&S.sound.max_volume)||100;return Math.max(0,Math.min(1,(isNaN(v)?60:Math.min(v,m))/100));}
+  function say(key){lastSaid=key;try{const a=new Audio('design/voice/label_'+key+'.mp3');a.volume=vol();a.play().catch(()=>{});}catch(e){}}
+  window.ktSay=say;
+  // render: tier on <html>; verb tabs for reader+ when the kid has more than eight tiles; every tile gets an aria-label
+  const _render=render;
+  render=function(){
+    const t=applyTier();_render();
+    const ak=activeKid(),tiles=[...$('grid').querySelectorAll('.tile')],vb=$('verbs');
+    tiles.forEach(x=>{if(!x.getAttribute('aria-label')){const n=x.querySelector('.t');if(n)x.setAttribute('aria-label',n.textContent);}});
+    $('grid').classList.toggle('few',tiles.length<=4);
+    if(!vb)return;
+    const want=(t!=='pre-reader')&&tiles.length>8;
+    const g=$('grid');g.querySelectorAll('.vsec').forEach(x=>x.remove());
+    if(!want){vb.classList.remove('on');vb.innerHTML='';return;}
+    // sections, not filters: tiles are grouped under Play / Read / Make / Mine headings (nothing disappears); the tabs jump to a section
+    const byId=id=>APPS.find(a=>a.id===id);
+    const gof=x=>groupOf(byId(x.dataset.id)||{id:x.dataset.id});
+    const vs=VERBS.filter(v=>tiles.some(x=>gof(x)===v[0]));
+    for(const v of vs){
+      const sec=document.createElement('div');sec.className='vsec';sec.dataset.verb=v[0];sec.innerHTML='<span class="kt-icon">'+v[1]+'</span>'+v[2];
+      g.appendChild(sec);tiles.filter(x=>gof(x)===v[0]).forEach(x=>g.appendChild(x));
+    }
+    const key='kt.verb.'+(ak?ak.id:'d');
+    if(!verb){try{verb=localStorage.getItem(key)||null;}catch(e){}}
+    if(!verb||!vs.some(v=>v[0]===verb))verb=vs[0][0];
+    vb.innerHTML=vs.map(v=>'<button data-verb="'+v[0]+'"'+(v[0]===verb?' class="on"':'')+' aria-label="'+v[2]+'"><span class="kt-icon">'+v[1]+'</span><span class="kt-label">'+v[2]+'</span></button>').join('');
+    vb.classList.add('on');
+    const jump=(v,smooth)=>{const sec=g.querySelector('.vsec[data-verb="'+v+'"]');if(sec)sec.scrollIntoView({block:'start',behavior:smooth?'smooth':'auto'});vb.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.verb===v));};
+    vb.querySelectorAll('button').forEach(b=>{b.onclick=()=>{verb=b.dataset.verb;try{localStorage.setItem(key,verb);}catch(e){}blip(520);jump(verb,true);};holdToHear(b,()=>say('verb-'+b.dataset.verb));});
+    // the highlighted tab follows the scroll
+    g.onscroll=()=>{const top=g.getBoundingClientRect().top+20;let cur=vs[0][0];g.querySelectorAll('.vsec').forEach(sec=>{if(sec.getBoundingClientRect().top<=top)cur=sec.dataset.verb;});vb.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.verb===cur));};
+    if(verb!==vs[0][0])jump(verb,false);
+  };
+  // tiles: a hold (350 ms) says the tile's name for pre-readers and readers and is not an open; pre-readers have no rearrange hold
+  let hear=null;
+  const _down=tileDown,_up=tileUp,_cancel=tileCancel;
+  tileDown=function(e){
+    _down(e);
+    const t=document.documentElement.dataset.tier;if(t!=='pre-reader'&&t!=='reader')return;
+    const el=e.currentTarget;
+    if(t==='pre-reader'&&drag&&drag.hold){clearTimeout(drag.hold);drag.hold=null;}
+    if(hear)clearTimeout(hear.t);
+    hear={el,heard:false,t:setTimeout(()=>{if(!drag||drag.t!==el||drag.moved)return;hear.heard=true;el.classList.add('hear');say('tile-'+el.dataset.id);setTimeout(()=>el.classList.remove('hear'),900);},HEAR_MS)};
+  };
+  tileUp=function(e){
+    const h=hear;hear=null;
+    if(h){clearTimeout(h.t);if(h.heard&&h.el===e.currentTarget&&drag&&drag.t===h.el){drag.moved=true;}}   // heard = not an open
+    _up(e);
+  };
+  tileCancel=function(e){if(hear){clearTimeout(hear.t);hear=null;}_cancel(e);};
+  // soft time warning (D-055, Switch-style): five minutes and one minute before the moon — a toast, two notes, the voice line; once a day per kid
+  const warned={};
+  const _tick=tick;
+  tick=function(){
+    _tick();
+    const ak=activeKid();const h=$('hello');
+    if(!ak||!(S.budget&&S.budget.enabled&&ak.budget_min>0)){if(h)h.classList.remove('warn');return;}
+    const r=remS(ak),day=(typeof BUDGET==='object'&&BUDGET&&BUDGET.date)||'';
+    for(const [lim,key,txt] of [[300,'warn-5','5 minutes left'],[60,'warn-1','1 minute left']]){
+      const k=ak.id+'|'+day+'|'+lim;
+      if(r<=lim&&r>0&&!warned[k]){warned[k]=1;toast((kidLabel(ak)||'')+' — '+txt);blip(660);setTimeout(()=>blip(880),140);say(key);}
+    }
+    if(h)h.classList.toggle('warn',r>0&&r<=300);
+  };
+  // lock screen (D-054/D-055): a hold on a kid card says that kid's name (and is not a pick); "Who's playing?" is spoken when a HAND opened the
+  // lock (chip, shade, start) — not when the idle timer or the moon did, so nothing talks to an empty room or a dark screen
+  const _drawLock=drawLock;
+  drawLock=function(){
+    if(pressing&&locked){const d=new Date(),h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0');$('lkClock').textContent=(S.kiosk&&S.kiosk.clock_24h)?String(h).padStart(2,'0')+':'+m:((h%12)||12)+':'+m;return;}   // a finger is on a card: clock only
+    _drawLock();
+    $('lkKids').querySelectorAll('.lkk').forEach(b=>holdToHear(b,()=>{const n=b.querySelector('.nm');sayText(n?n.textContent:'');}));
+  };
+  const _openLock=openLock;
+  openLock=function(){
+    const was=locked,byHand=Date.now()-lastInput<3000;
+    _openLock();
+    if(!was&&locked&&byHand){const ks=kidsList();if(ks&&ks.length>1&&!$('sleep').classList.contains('on'))setTimeout(()=>say('who'),250);}
+  };
+  window.openLock=openLock;
+  // K1/K3 device broker SSE (127.0.0.1:8098/events): toast + chime when a Modulino, gamepad, USB or Bluetooth device is plugged in
+  if(LIVE&&window.EventSource){
+    try{
+      const es=new EventSource('http://127.0.0.1:8098/events');
+      es.addEventListener('device.added',e=>{
+        try{
+          const d=JSON.parse(e.data||'{}'),nm=d.name||d.id||'Device';
+          const ico=d.class==='modulino'?'🧩':d.class==='gamepad'?'🎮':d.class==='audio'?'🎧':'🔌';
+          toast(ico+' '+nm+' plugged in');
+          blip(660);setTimeout(()=>blip(880),120);
+          if(document.documentElement.dataset.tier==='pre-reader')sayText(nm+' plugged in');
+        }catch(_){}
+      });
+      es.onerror=()=>{try{es.close();}catch(_){}};
+    }catch(_){}
+  }
+  window.ktTier={tierFor,applyTier,say,sayText,verbs:()=>verb,get last(){return lastSaid;}};
 })();
 
 loadAll();

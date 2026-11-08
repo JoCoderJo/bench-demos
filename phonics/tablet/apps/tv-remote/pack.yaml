@@ -5,6 +5,7 @@ version: 1.0.0
 icon: 📺
 color: "#2b7a78"
 description: steer the family TV
+group: play
 tier: pre-reader
 tile:
   start_url: index.html

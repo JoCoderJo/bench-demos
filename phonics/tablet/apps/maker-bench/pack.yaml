@@ -5,6 +5,7 @@ version: 1.0.0
 icon: 🔩
 color: "#27ae60"
 description: 3D fit check & shop parts
+group: make
 tier: maker
 tile:
   start_url: index.html

@@ -30,7 +30,7 @@ const frog=document.getElementById('frog'),out=document.getElementById('score');
 window.addEventListener('message',e=>{const d=e.data||{};if(d.kt==='hello'&&d.child&&d.child.name){name=d.child.name;document.getElementById('hi').textContent='Tap the frog, '+name+'!';}});
 function place(){const w=innerWidth-170,h=innerHeight-240;frog.style.left=(10+Math.random()*w)+'px';frog.style.top=(80+Math.random()*h)+'px';}
 frog.addEventListener('pointerdown',e=>{e.preventDefault();score++;out.textContent=score;place();
-  parent.postMessage({kt:'blip',f:500+Math.min(score,20)*25},'*');
+  if(!window.KT)parent.postMessage({kt:'blip',f:500+Math.min(score,20)*25},'*');
   if(score%10===0)parent.postMessage({kt:'toast',text:(name?name+', ':'')+score+' frogs!'},'*');});
 document.getElementById('done').onclick=()=>parent.postMessage({kt:'home'},'*');
 place();

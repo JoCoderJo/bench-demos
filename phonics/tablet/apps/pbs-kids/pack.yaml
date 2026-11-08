@@ -5,6 +5,7 @@ version: 1.0.0
 icon: 📺
 color: "#2e9e44"
 description: shows and games
+group: play
 tier: pre-reader
 tile:
   url: https://pbskids.org

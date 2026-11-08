@@ -5,6 +5,7 @@ version: 1.0.0
 icon: 💡
 color: "#f2b632"
 description: draw with real lights
+group: make
 tier: tinkerer
 tile:
   start_url: index.html

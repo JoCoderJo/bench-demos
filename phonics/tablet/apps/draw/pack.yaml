@@ -5,6 +5,7 @@ version: 1.0.0
 icon: 🎨
 color: "#c25048"
 description: finger painting
+group: play
 tier: pre-reader
 tile:
   start_url: index.html

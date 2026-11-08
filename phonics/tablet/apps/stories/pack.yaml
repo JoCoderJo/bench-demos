@@ -5,6 +5,7 @@ version: 1.0.0
 icon: 📖
 color: "#5f87ad"
 description: read along with your friend
+group: read
 tier: pre-reader
 tile:
   start_url: index.html

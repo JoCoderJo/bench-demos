@@ -5,6 +5,7 @@ version: 1.0.0
 icon: 🐸
 color: "#2e7d32"
 description: example game
+group: play
 tier: pre-reader
 tile:
   start_url: index.html

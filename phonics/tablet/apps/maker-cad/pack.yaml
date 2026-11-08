@@ -5,6 +5,7 @@ version: 1.0.0
 icon: 🧱
 color: "#e67e22"
 description: design parts for the tablet
+group: make
 tier: maker
 tile:
   start_url: index.html

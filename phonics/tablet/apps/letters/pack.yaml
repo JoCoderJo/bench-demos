@@ -5,6 +5,7 @@ version: 1.0.0
 icon: 🔤
 color: "#d98e2b"
 description: tap a letter, hear its sound
+group: read
 tier: pre-reader
 tile:
   start_url: index.html

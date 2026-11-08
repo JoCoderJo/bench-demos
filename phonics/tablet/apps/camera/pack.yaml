@@ -5,6 +5,7 @@ version: 1.0.0
 icon: 📷
 color: "#5c6bc0"
 description: see through the cameras
+group: make
 tier: pre-reader
 tile:
   start_url: index.html

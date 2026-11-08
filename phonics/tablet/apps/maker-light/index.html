@@ -236,7 +236,7 @@ document.querySelectorAll('#diyBar .stepPill').forEach(btn=>{
 let voices=new Set(),cur=null;
 fetch('voice/index.json').then(r=>r.json()).then(l=>{voices=new Set(l);}).catch(()=>{});
 function say(key){if(!voices.has(key))return;try{if(cur){cur.pause();}cur=new Audio('voice/'+key+'.mp3');cur.play().catch(()=>{});}catch(e){}}
-function blip(f){parent.postMessage({kt:'blip',f:f||600},'*');}
+function blip(f){if(window.KT)return;parent.postMessage({kt:'blip',f:f||600},'*');}
 let toastT;function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('on'),1600);}
 
 // ---- WebAudio for the simulator's tones (on the tablet the real buzzer plays, the brain says source:'ppq')

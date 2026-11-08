@@ -56,7 +56,7 @@ const $=id=>document.getElementById(id);
 const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let STORIES=[],st=null,pg=0,reading=false,audio=null,child='';
 window.addEventListener('message',e=>{const d=e.data||{};if(d.kt==='hello'&&d.child&&d.child.name)child=d.child.name;});
-const kt=m=>{try{parent.postMessage(m,'*');}catch(e){}};
+const kt=m=>{if(m&&m.kt==='blip'&&window.KT)return;try{parent.postMessage(m,'*');}catch(e){}};   // blips are kt.js's job when it is loaded (one click per tap)
 function play(word,cb){
   if(audio){try{audio.pause();}catch(e){}}
   audio=new Audio('audio/'+word.toLowerCase()+'.mp3');

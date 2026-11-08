@@ -5,6 +5,7 @@ version: 1.0.0
 icon: 🎵
 color: "#ab47bc"
 description: xylophone, drums, follow the lights
+group: play
 tier: pre-reader
 tile:
   start_url: index.html

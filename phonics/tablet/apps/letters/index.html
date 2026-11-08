@@ -104,29 +104,12 @@ body{display:flex;flex-direction:column}
 </div></div>
 <script>
 'use strict';
-// Forgiving touch-tap helper for X11 touchscreen: synthesize click if pointerdown+pointerup stays within 36px
-(function(){
-  let pt=null,lastClick=0;
-  document.addEventListener("click",()=>{lastClick=Date.now();},true);
-  document.addEventListener("pointerdown",e=>{
-    if(e.pointerType==="mouse")return;
-    const b=e.target.closest("button,[role=button],.card,.item,.wd,.tile,.thing,.num,.shape,.opt,.fw");
-    if(!b)return;
-    pt={b,x:e.clientX,y:e.clientY,t:Date.now(),id:e.pointerId};
-  },true);
-  document.addEventListener("pointerup",e=>{
-    if(!pt||e.pointerId!==pt.id)return;
-    const p=pt;pt=null;
-    if(Date.now()-p.t>750||Math.hypot(e.clientX-p.x,e.clientY-p.y)>36)return;
-    setTimeout(()=>{if(Date.now()-lastClick>80&&!p.b.disabled)p.b.click();},35);
-  },true);
-  document.addEventListener("pointercancel",()=>{pt=null;},true);
-})();
 const $=id=>document.getElementById(id);
 const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let DATA=null,tab='letters',mode='explore',cur=null,stars=0,quiz=null,child='',seq=0;
 window.addEventListener('message',e=>{const d=e.data||{};if(d.kt==='hello'&&d.child&&d.child.name)child=d.child.name;else if(d.kt==='back'&&$('big').classList.contains('on')){$('bClose').onclick();kt({kt:'back',handled:true});}});
-const kt=m=>{try{parent.postMessage(m,'*');}catch(e){}};
+const kt=m=>{if(m&&m.kt==='blip'&&window.KT)return;try{parent.postMessage(m,'*');}catch(e){}};   // blips are kt.js's job when it is loaded (one click per tap)
+const snd=(n,el)=>{if(window.KT){KT.sound(n,el);return true;}return false;};
 const byKey={};
 
 // ---- audio: one player, sequences cancel each other
@@ -245,13 +228,13 @@ $('play').onclick=()=>{if(quiz){stopAudio();quiz.playIt();}};
 async function answer(c){
   if(!quiz)return;
   if(c.dataset.k===quiz.key){
-    c.classList.add('good');stars++;drawStars();kt({kt:'blip',f:720});
+    c.classList.add('good');stars++;drawStars();snd('success',c)||kt({kt:'blip',f:720});
     $('msg').textContent=['Yes!','That is it!','Great ears!','You got it'+(child?', '+child:'')+'!'][stars%4];
     const q=quiz;quiz=null;stopAudio();
     if(q.word)await play(q.word);
     setTimeout(nextQuiz,500);
   }else{
-    quiz.tries++;c.classList.remove('nope');void c.offsetWidth;c.classList.add('nope');kt({kt:'blip',f:220});
+    quiz.tries++;c.classList.remove('nope');void c.offsetWidth;c.classList.add('nope');snd('error',c)||kt({kt:'blip',f:220});
     $('msg').textContent=quiz.tries>=2?'It is this one':'Listen again…';
     if(quiz.tries>=2){const r=$('choices').querySelector('[data-k="'+quiz.key+'"]');if(r)r.style.outline='5px solid var(--ok)';}
     stopAudio();setTimeout(()=>quiz&&quiz.playIt(),350);

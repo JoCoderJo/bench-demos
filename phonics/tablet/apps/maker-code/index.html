@@ -276,7 +276,7 @@ window.KTMC={state:S};
 
 let AC=null;
 function beep(hz,ms){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=hz||660;g.gain.value=.08;o.connect(g).connect(AC.destination);o.start();o.stop(AC.currentTime+Math.min(ms||200,1000)/1000);}catch(e){}}
-function blip(f){parent.postMessage({kt:'blip',f:f||600},'*');}
+function blip(f){if(window.KT)return;parent.postMessage({kt:'blip',f:f||600},'*');}
 let toastT;function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('on'),1600);}
 
 // ---- DIY Pipeline bar

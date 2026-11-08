@@ -101,7 +101,7 @@ const COLORS=['#1d2a3a','#e0564f','#ff8a3d','#ffd166','#3fb950','#1e88e5','#7c4d
 const cv=$('canvas'),ctx=cv.getContext('2d',{willReadFrequently:true});
 let color=COLORS[0],size=8,tool='brush',stamp='⭐',undoStack=[],current=null,dirty=false;
 const strokes=new Map();
-const kt=m=>{try{parent.postMessage(m,'*');}catch(e){}};
+const kt=m=>{if(m&&m.kt==='blip'&&window.KT)return;try{parent.postMessage(m,'*');}catch(e){}};   // blips are kt.js's job when it is loaded (one click per tap)
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2200);}
 
 // ---------------- the library: agent store when there is one, localStorage otherwise

@@ -1,6 +1,6 @@
 {
- "version": "be574fa",
- "sha": "15d9a159fa84047acbd9104938617469ea85a957859d5c05ee9d1979c9fba9e3",
+ "version": "29ef088",
+ "sha": "03ae8f869863dbaecd18e112b673608fb0cf26658375e56e35dd98d898bce87f",
  "apps": [
   "phonics-friends",
   "camera",
@@ -22,7 +22,7 @@
   "words",
   "yoto"
  ],
- "files": 1143,
- "bytes": 13304563,
+ "files": 1170,
+ "bytes": 13502225,
  "public": true
 }
