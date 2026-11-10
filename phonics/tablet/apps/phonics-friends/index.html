@@ -114,9 +114,60 @@ if(/\/apps\/phonics-friends\//.test(location.pathname)){document.write('<link re
  /* kids tablet tiers: no effect on the public page (--kt-target-min exists only with tablet/design/tiers.css) */
  :root{--tgt:var(--kt-target-min,0px)}
  .pets button,#savepet,#go,#switch{min-height:var(--tgt);min-width:var(--tgt)}
+ #go{min-width:max(var(--tgt),220px)}   /* the line above had zeroed the Start button's 220px on the public page */
  :root[data-tier] body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
  :root[data-tier=pre-reader] #switch,:root[data-tier=reader] #switch{font-size:18px;color:var(--ink);background:var(--card);border-radius:16px}
  :root[data-tier] #pick:not([style*="none"]) ~ .row{display:none}   /* while the friend picker is open, the Start / Change-friend rows wait below the fold: hide them */
+
+ /* ---- the kids tablet layout (1280×800 landscape; 2026-11-09, after a look at the real panel: the tile was the phone-width public
+    page with its demo copy). Everything here hangs on <html data-tier>, which only tablet/design/kt.js sets — the public page never
+    has it, so nothing below can touch it. Idle: the friend big on the left, the one button on the right. In a word (the letter pad
+    is open): friend · word + prompt · button in one band, the 26 letters full width below at the tier's touch size. ---- */
+ :root[data-tier] .sub,:root[data-tier] details,:root[data-tier] .foot{display:none}
+ :root[data-tier] body{padding:8px 28px 10px;font-size:20px}
+ :root[data-tier] .wrap{max-width:1180px;min-height:calc(100vh - 18px);display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);
+   column-gap:40px;align-content:center;align-items:center}
+ :root[data-tier] .wrap>*{grid-column:2}
+ :root[data-tier] #stage{grid-column:1;grid-row:1/span 6;padding:0 0 6px}
+ :root[data-tier] #frog{width:100%;max-width:470px;height:auto;aspect-ratio:230/200}
+ :root[data-tier] .led{width:18px;height:18px;bottom:0}
+ :root[data-tier] h1{font-size:34px;margin:0 0 4px}
+ :root[data-tier] #say{font-size:26px;line-height:1.3;min-height:72px}
+ :root[data-tier] #say small{font-size:17px}
+ :root[data-tier] #heard{font-size:15px;min-height:20px;text-align:center}
+ :root[data-tier] #mic{font-size:18px;margin:0}
+ :root[data-tier] #word{gap:10px;margin:10px 0 6px;font-size:44px!important}   /* fitWord() sizes for the phone column; here the slots are big */
+ :root[data-tier] #word:has(.slot:nth-child(8)){font-size:34px!important}
+ :root[data-tier] #word:has(.slot:nth-child(11)){font-size:26px!important}
+ :root[data-tier] .slot{max-width:78px;height:88px;border-radius:16px;border-width:3px}
+ :root[data-tier] .row{margin:10px 0}
+ :root[data-tier] #switch{font-size:20px;padding:12px 26px;border-radius:999px;text-decoration:none;background:var(--card);color:var(--ink);box-shadow:0 2px 10px rgba(0,0,0,.08)}
+ :root[data-tier] #go{min-width:340px;min-height:max(var(--tgt),96px);font-size:32px;border-radius:26px;padding:14px 34px}
+ :root[data-tier] #keys{grid-column:1/-1;grid-template-columns:repeat(13,minmax(0,1fr));gap:10px;margin-top:10px}
+ :root[data-tier=pre-reader] #keys{grid-template-columns:repeat(9,minmax(0,1fr))}   /* 9 across = 122 px keys on the 10.1" panel */
+ :root[data-tier] #keys button{min-height:max(var(--tgt),72px);font-size:36px;border-radius:16px}
+ /* in a word: one band above the letters, no title, no friend switch */
+ :root[data-tier] .wrap:has(#keys[style*="grid"]){grid-template-columns:250px minmax(0,1fr) auto;column-gap:28px}
+ :root[data-tier] .wrap:has(#keys[style*="grid"])>h1,:root[data-tier] .wrap:has(#keys[style*="grid"])>.row:has(#switch){display:none}
+ :root[data-tier] .wrap:has(#keys[style*="grid"])>#stage{grid-column:1;grid-row:1/span 3}
+ :root[data-tier] .wrap:has(#keys[style*="grid"])>#word{grid-column:2;grid-row:1}
+ :root[data-tier] .wrap:has(#keys[style*="grid"])>#say{grid-column:2;grid-row:2}
+ :root[data-tier] .wrap:has(#keys[style*="grid"])>#heard{grid-column:2;grid-row:3}
+ :root[data-tier] .wrap:has(#keys[style*="grid"])>.row:has(#go){grid-column:3;grid-row:1/span 2;margin:0}
+ :root[data-tier] .wrap:has(#keys[style*="grid"])>#mic{grid-column:3;grid-row:3}
+ :root[data-tier] .wrap:has(#keys[style*="grid"])>#keys{grid-row:4}
+ :root[data-tier] .wrap:has(#keys[style*="grid"]) #go{min-width:200px;font-size:26px;padding:12px 20px}
+ /* the friend picker takes the screen while it is open */
+ :root[data-tier] #pick{grid-column:1/-1;padding:22px;border-radius:24px;margin:6px 0}
+ :root[data-tier] .wrap:has(#pick:not([style*="none"]))>:not(#pick):not(h1){display:none}
+ :root[data-tier] .wrap:has(#pick:not([style*="none"]))>h1{grid-column:1/-1}
+ :root[data-tier] #pick h2{font-size:28px;margin-bottom:14px}
+ :root[data-tier] .pets{gap:14px}
+ :root[data-tier] .pets button{font-size:20px;padding:14px 4px;border-width:3px;border-radius:20px}
+ :root[data-tier] .pets button .pe{font-size:68px}
+ :root[data-tier] .namerow{margin-top:16px;gap:14px}
+ :root[data-tier] #petname{font-size:22px;padding:14px 16px;border-radius:16px}
+ :root[data-tier] #savepet{font-size:26px;padding:14px 30px;border-radius:20px}
 </style>
 <div class="wrap">
   <h1 id="title">🐸 Phonics Friends</h1>
@@ -669,7 +720,12 @@ function playSound(key,fallbackText,cb){
    it runs with interim results on: a letter is graded on the first running guess that
    matches (earsTurn), not on the final that follows it a second later. The mic pill
    under the button shows "listening" so any wait still reads as on purpose. */
-var SR=window.SpeechRecognition||window.webkitSpeechRecognition, rec=null,
+/* On the kids tablet (this page served from its bundle) the kiosk browser has a SpeechRecognition object but no speech service behind
+   it: the first "say a word" sat there for about ten seconds before the error arrived and the letter pad opened (seen on the real
+   panel 2026-11-09). There the ears are off from the start — words come from the list, letters from the pad. */
+var ON_TABLET=/\/apps\/phonics-friends\//.test(location.pathname)&&!/[?&]mic=1/.test(location.search);
+var SR=ON_TABLET?null:(window.SpeechRecognition||window.webkitSpeechRecognition), rec=null,
+    micPermGranted=false, micPermChecked=false,
     go=document.getElementById('go'), micEl=document.getElementById('mic'),
     micBlocked=!SR,  /* true = voice is off for good: preset words + letter keyboard */
     micOn=false,     /* we want the mic open: restart it whenever the browser ends it */
@@ -727,6 +783,12 @@ function ensureRec(){if(rec)return rec;var r=new SR();rec=r;
   setTimeout(function(){if(micOn&&!running)micStart()},120)};
  return r}
 function micStart(){lastStart=Date.now();
+ if(window.KT&&KT.permission&&!micPermGranted){
+  KT.permission('microphone').then(function(ans){
+   micPermChecked=true;
+   if(!ans||!ans.granted){micOn=false;micBlocked=true;showMic();oops(cur?'letter':'word','not-allowed');return}
+   micPermGranted=true;try{ensureRec().start()}catch(e){}
+  });return}
  try{ensureRec().start()}catch(e){} /* already started: fine, it is open */}
 function micStop(){micOn=false;mode=null;clearTimeout(nudge);
  if(rec&&running){try{rec.abort()}catch(e){}}showMic()}
@@ -836,11 +898,20 @@ function buildKeys(){var h='';'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(fun
    Mid-word it replays the sound (and re-opens a resting mic); otherwise it asks for a word */
 go.onclick=function(){
  if(pick.style.display!=='none')commitPet(); /* Start with the picker open = commit the pick */
+ if(window.KT&&KT.permission&&!micPermChecked){
+  micPermChecked=true;
+  KT.permission('microphone').then(function(ans){
+   if(!ans||!ans.granted){micBlocked=true;showMic()}else{micPermGranted=true}
+   if(goState==='letter'){if(!busy)prompt();return}
+   askWord()
+  });return}
  if(goState==='letter'){if(!busy)prompt();return}
  askWord()};
 document.getElementById('savepet').onclick=function(){commitPet();
+ if(ON_TABLET){speak(named("Hi, I'm "+pet.name+"! Tap the big button and we will spell a word!","Hi! Tap the big button and we will spell a word!"));return}
  speak(named("Hi, I'm "+pet.name+"! Tap the big button and tell me a word to spell!",
   "Hi! Tap the big button and tell me a word to spell!"))};
+if(ON_TABLET){var say0=document.getElementById('say');if(say0)say0.innerHTML='Tap the button and we will spell a word!<small>&nbsp;</small>'}
 document.getElementById('switch').onclick=openPick;
 /* idle blink */
 setInterval(function(){document.querySelectorAll('.pupil').forEach(function(p){

@@ -154,6 +154,8 @@ button{min-height:max(64px,var(--tgt));min-width:max(64px,var(--tgt))}
 })();
 
 const HELPER = 'http://127.0.0.1:8095';        // livecam.py — the live picture
+let permToken = '', permDenied = false;
+const hUrl = (p, q) => HELPER + p + (q ? '?' + q + (permToken ? '&token=' + encodeURIComponent(permToken) : '') : (permToken ? '?token=' + encodeURIComponent(permToken) : ''));
 const BRAIN = 'http://127.0.0.1:7000';          // tablet/arduino/show-tell — the naming
 const LIVE = location.protocol.startsWith('http');
 const MIN_CONF = 22;                            // % from mobilenet top-1; below this the tablet says it is not sure
@@ -229,7 +231,7 @@ let tuning = false;
 async function tuneLoop() {
   if (helperUp && !busy && !tuning) {
     tuning = true;
-    try { const m = measure(await createImageBitmap(await (await fetch(HELPER + '/snap.jpg?t=' + Date.now(), { cache: 'no-store' })).blob()));
+    try { const m = measure(await createImageBitmap(await (await fetch(hUrl('/snap.jpg', 't=' + Date.now()), { cache: 'no-store' })).blob()));
       const a = tune.n === 0 ? 1 : 0.25; tune.wb = tune.wb.map((v, i) => v + (m.wb[i] - v) * a); tune.gain += (m.gain - tune.gain) * a; tune.off += (m.off - tune.off) * a; tune.n++; setColour(); } catch (e) {}
     tuning = false;
   }
@@ -267,19 +269,21 @@ function fit() {
   live.style.transform = `translate(-50%,-50%) rotate(${rot()}deg) scaleX(${mir() ? -1 : 1})`;
   live.style.filter = 'url(#ccm)';
 }
-function stream() { live.src = HELPER + '/stream?t=' + Date.now(); }
+function stream() { live.src = hUrl('/stream', 't=' + Date.now()); }
 $('bRot').onclick = () => { V.rot[active] = (rot() + 90) % 360; try { localStorage.setItem('kt-camera-view', JSON.stringify(V)); } catch (e) {} fit(); };
 window.addEventListener('resize', fit);
 live.onerror = () => { if (helperUp) setTimeout(stream, 1500); };
 function setStatus() {
   const go = $('go');
+  if (permDenied) { box.classList.add('off'); veil.textContent = 'Camera permission is turned off for Show & Tell. A grown-up can allow it in Settings → Apps & permissions.'; go.disabled = true; $('st').textContent = 'permission off'; return; }
   if (!helperUp) { box.classList.add('off'); veil.textContent = 'The camera helper is not running on this tablet.'; go.disabled = true; $('st').textContent = 'camera offline'; return; }
   box.classList.remove('off');
   if (!brainUp) { go.disabled = true; $('st').textContent = 'the naming helper is not running (Arduino app show-tell)'; return; }
   go.disabled = busy; $('st').textContent = busy ? 'looking…' : 'ready';
 }
 async function poll() {
-  try { const j = await (await fetch(HELPER + '/status', { cache: 'no-store' })).json();
+  if (permDenied) return;
+  try { const j = await (await fetch(hUrl('/status'), { cache: 'no-store' })).json();
     const was = helperUp; helperUp = !!(j.camera && j.camera.alive);
     if (j.active) active = j.active; if (j.camera && j.camera.size) { frameW = j.camera.size[0]; frameH = j.camera.size[1]; }
     if (helperUp && !was) { fit(); stream(); }
@@ -299,7 +303,7 @@ async function look() {
   for (const n of [2, 1]) { cnt.textContent = n; cnt.classList.add('on'); blip(n === 1 ? 900 : 600); await sleep(280); }
   cnt.classList.remove('on');
   try {
-    const raw = await (await fetch(HELPER + '/snap.jpg?t=' + Date.now(), { cache: 'no-store' })).blob();
+    const raw = await (await fetch(hUrl('/snap.jpg', 't=' + Date.now()), { cache: 'no-store' })).blob();
     $('flash').classList.add('on'); setTimeout(() => $('flash').classList.remove('on'), 60);
     const bmp = await createImageBitmap(raw);
     // the picture the child sees (turned, mirrored, coloured) — for the card and the collection
@@ -408,8 +412,16 @@ const home = () => { try { parent.postMessage({ kt: 'home' }, '*'); } catch (e) 
 $('bDone').onclick = home; $('bCollDone').onclick = home;
 
 /* ---------- go ---------- */
-setColour(); fit(); poll(); refreshCount(); setTimeout(tuneLoop, 800);
-window.KTST = { get state() { return { helperUp, brainUp, busy, kid: kid.id, last: last && { word: last.word, label: last.label, conf: last.conf, ms: last.ms }, rules: RULES.length, voices: VOICES.size }; }, look, kidWord, pickWord, store };
+setColour(); fit(); refreshCount();
+(async () => {
+  if (window.KT && KT.permission) {
+    const p = await KT.permission('camera');
+    if (!p.granted) { permDenied = true; helperUp = false; setStatus(); return; }
+    permToken = p.token || '';
+  }
+  poll(); setTimeout(tuneLoop, 800);
+})();
+window.KTST = { get state() { return { helperUp, brainUp, busy, permDenied, permToken, kid: kid.id, last: last && { word: last.word, label: last.label, conf: last.conf, ms: last.ms }, rules: RULES.length, voices: VOICES.size }; }, look, kidWord, pickWord, store };
 })();
 </script>
 </body>

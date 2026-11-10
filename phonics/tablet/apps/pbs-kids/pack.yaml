@@ -11,5 +11,5 @@ tile:
   url: https://pbskids.org
   display: strip
 needs: []
-permissions: [audio]
+permissions: [audio, internet]
 owner: Argon

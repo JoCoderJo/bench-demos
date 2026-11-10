@@ -19,6 +19,13 @@ html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#bfe8f
 :root{--tgt:var(--kt-target-min,64px)}
 html,body{font-family:var(--kt-font-ui,system-ui,sans-serif)}
 #done{min-width:var(--tgt);min-height:var(--tgt)}
+/* 2026-11-09: a pond, a frog that visibly hops (it used to teleport), and a frog as big as the tier's finger needs */
+html,body{background:radial-gradient(ellipse 150px 54px at 18% 72%,#8fd19a 98%,transparent 100%),radial-gradient(ellipse 190px 66px at 74% 38%,#9bd8a4 98%,transparent 100%),
+  radial-gradient(ellipse 130px 46px at 46% 86%,#86cb92 98%,transparent 100%),radial-gradient(ellipse 120px 42px at 88% 78%,#93d49e 98%,transparent 100%),linear-gradient(#bfe8ff,#9fd9e8 45%,#7cc6d6)}
+#frog{width:max(150px,calc(var(--tgt)*1.5));height:max(150px,calc(var(--tgt)*1.5));font-size:max(92px,calc(var(--tgt)*.92));
+  transition:left .32s cubic-bezier(.3,1.5,.6,1),top .32s cubic-bezier(.3,1.5,.6,1),transform .1s}
+#frog.hop{animation:hop .32s ease}
+@keyframes hop{40%{transform:scale(1.18) rotate(-6deg)}}
 </style></head><body>
 <div id="bar"><span id="hi">Tap the frog!</span><span id="score">0</span><button id="done">Done</button></div>
 <div id="frog">🐸</div>
@@ -28,10 +35,11 @@ let score=0,name='';
 const frog=document.getElementById('frog'),out=document.getElementById('score');
 // the launcher says hello with the child's name; nothing breaks if it never does (opened on its own)
 window.addEventListener('message',e=>{const d=e.data||{};if(d.kt==='hello'&&d.child&&d.child.name){name=d.child.name;document.getElementById('hi').textContent='Tap the frog, '+name+'!';}});
-function place(){const w=innerWidth-170,h=innerHeight-240;frog.style.left=(10+Math.random()*w)+'px';frog.style.top=(80+Math.random()*h)+'px';}
+function place(){const s=frog.offsetWidth||150,w=Math.max(0,innerWidth-s-20),h=Math.max(0,innerHeight-s-80-70);   // clear of the bar and of the bottom 60 px
+  frog.style.left=(10+Math.random()*w)+'px';frog.style.top=(80+Math.random()*h)+'px';frog.classList.remove('hop');void frog.offsetWidth;frog.classList.add('hop');}
 frog.addEventListener('pointerdown',e=>{e.preventDefault();score++;out.textContent=score;place();
   if(!window.KT)parent.postMessage({kt:'blip',f:500+Math.min(score,20)*25},'*');
-  if(score%10===0)parent.postMessage({kt:'toast',text:(name?name+', ':'')+score+' frogs!'},'*');});
+  if(score%10===0){parent.postMessage({kt:'toast',text:(name?name+', ':'')+score+' frogs!'},'*');if(window.KT&&KT.sound)KT.sound('success',frog);}});
 document.getElementById('done').onclick=()=>parent.postMessage({kt:'home'},'*');
 place();
 </script></body></html>

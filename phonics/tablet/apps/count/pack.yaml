@@ -2,7 +2,7 @@ pack: 1
 id: count
 name: Count With Me
 version: 1.0.0
-icon: 🐸
+icon: 🔢
 color: "#5c6bc0"
 description: count, find shapes, add
 group: play

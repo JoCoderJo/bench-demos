@@ -2,6 +2,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>PBS Kids</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <!-- tablet/apps/pbs-kids — a WEBSITE app (D-014). pbskids.org refuses to run inside a frame (X-Frame-Options: DENY),
      so the tile asks the tablet agent to open it in its own Chromium window (POST /api/open), sized to leave the
      launcher's bottom strip — home pill and volume — showing. This page sits in the launcher's frame underneath:
@@ -31,11 +32,22 @@ const $=id=>document.getElementById(id);
 async function status(){try{return await (await fetch('/api/status',{cache:'no-store'})).json();}catch(e){return null;}}
 async function open(){
   if(!LIVE){$('note').textContent='On the tablet this opens pbskids.org in its own window.';return;}
+  if(window.KT&&KT.permission){
+    const p=await KT.permission('internet');
+    if(!p.granted){$('note').textContent='Internet permission is turned off for PBS Kids. A grown-up can allow it in Settings → Apps & permissions.';$('again').classList.add('on');return;}
+  }
   try{const r=await (await fetch('/api/open',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:'pbs-kids'})})).json();
     if(!r.ok){$('note').textContent='Could not open it: '+(r.error||'unknown');$('again').classList.add('on');}
   }catch(e){$('note').textContent='The tablet helper did not answer.';$('again').classList.add('on');}
 }
 $('again').onclick=()=>{$('again').classList.remove('on');$('note').textContent='Opening…';open();};
+(async()=>{
+  if(!LIVE||window.parent===window||!window.KT||!KT.permission)return;
+  const p=await KT.permission('internet');
+  if(!p.granted){$('note').textContent='Internet permission is turned off for PBS Kids. A grown-up can allow it in Settings → Apps & permissions.';$('again').classList.add('on');return;}
+  const s=await status();
+  if(s&&!s.ext)open();
+})();
 // the launcher already asked the agent to open the window when the tile was tapped; if a few seconds later nothing
 // is open (the window closed, or the open failed) offer the button
 setTimeout(async()=>{const s=await status();if(s&&!s.ext){$('note').textContent='The PBS Kids window is not open.';$('again').classList.add('on');}},6000);

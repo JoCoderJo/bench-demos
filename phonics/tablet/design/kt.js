@@ -15,7 +15,7 @@
      audit    KT.audit() lists what breaks the current tier (target size, bottom dead zone, 12 px type floor, no label);
               tests/tier_audit.py runs its own copy of the same rules from outside the page
    API: KT.tier, KT.TIERS, KT.tierFor(kid), KT.setTier(name), KT.apply(hello), KT.sound(name, el), KT.say(elOrText),
-        KT.tappables(root), KT.audit(root), KT.init(opts), KT.version */
+        KT.permission(resource), KT.usePermission(resource, active), KT.tappables(root), KT.audit(root), KT.init(opts), KT.version */
 (function () {
   'use strict';
   if (window.KT) return;
@@ -23,10 +23,60 @@
   const NAMES = ['pre-reader', 'reader', 'tinkerer', 'maker'];
   const TAP = 'button,select,[role=button],a[href],.kt-tap,[data-kt-tap],.card,.item,.wd,.tile,.thing,.num,.shape,.opt,.fw';
   const html = document.documentElement;
-  const KT = { version: '1.1.1', TIERS, tier: null, ceiling: 1, _hello: null };
+  const KT = { version: '1.2.0', TIERS, tier: null, ceiling: 1, _hello: null, token: '', _tokens: {} };
   const T = () => TIERS[KT.tier] || TIERS.reader;
   const now = () => Date.now();
   const post = m => { try { if (parent !== window) parent.postMessage(m, '*'); } catch (e) { } };
+  let _permSeq = 0;
+  const _permWait = new Map();
+
+  // ---------- permissions (#272)
+  KT.permission = function (resource) {
+    const res = String(resource || '').toLowerCase() === 'mic' ? 'microphone' : String(resource || '').toLowerCase();
+    if (parent === window) {
+      const qTok = new URLSearchParams(location.search).get('token') || KT.token || '';
+      return Promise.resolve({ granted: true, state: 'standalone', token: qTok, resource: res });
+    }
+    return new Promise(resolve => {
+      const reqId = 'p' + (++_permSeq) + '_' + now();
+      _permWait.set(reqId, ans => {
+        if (ans && ans.token) { KT.token = ans.token; KT._tokens[res] = ans.token; }
+        resolve({
+          granted: !!(ans && ans.granted),
+          state: (ans && ans.state) || (ans && ans.granted ? 'while_using' : 'denied'),
+          token: (ans && ans.token) || '',
+          resource: res,
+        });
+      });
+      post({ kt: 'perm', reqId, resource: res });
+    });
+  };
+  KT.usePermission = function (resource, active) {
+    const res = String(resource || '').toLowerCase() === 'mic' ? 'microphone' : String(resource || '').toLowerCase();
+    post({ kt: 'perm-use', resource: res, active: active !== false });
+  };
+  KT.location = function () {
+    if (parent === window) {
+      return Promise.resolve(null);
+    }
+    return new Promise(resolve => {
+      const reqId = 'loc_' + (++_permSeq) + '_' + now();
+      _permWait.set(reqId, ans => {
+        if (!ans || (!ans.granted && !ans.ok) || !ans.place) {
+          resolve(null);
+        } else {
+          resolve({
+            ok: true,
+            place: ans.place,
+            coarse: true,
+            toString() { return this.place; },
+            valueOf() { return this.place; }
+          });
+        }
+      });
+      post({ kt: 'location', reqId });
+    });
+  };
 
   // ---------- tier
   KT.tierFor = function (kid) {
@@ -50,6 +100,7 @@
   };
   KT.apply = function (d) {           // the launcher's hello (apps/README.md "Talking to the launcher")
     KT._hello = d;
+    if (d && d.token) KT.token = String(d.token);
     KT.setTier(KT.tierFor(d.kid || d.child));
     if (d.theme === 'dark' || d.theme === 'light') html.dataset.theme = d.theme; else delete html.dataset.theme;
     if (d.hand === 'left') html.dataset.hand = 'left'; else delete html.dataset.hand;
@@ -243,7 +294,15 @@
     if (!KT.tier) KT.setTier(NAMES.includes(q.get('tier')) ? q.get('tier') : KT.tierFor(opts.kid));
     if (q.get('theme') === 'dark' || q.get('theme') === 'light') html.dataset.theme = q.get('theme');
     if (q.get('hand') === 'left') html.dataset.hand = 'left';
-    window.addEventListener('message', e => { const d = e.data || {}; if (d.kt === 'hello') KT.apply(d); });
+    window.addEventListener('message', e => {
+      const d = e.data || {};
+      if (d.kt === 'hello') KT.apply(d);
+      else if ((d.kt === 'perm' || d.kt === 'location') && d.reqId && _permWait.has(d.reqId)) {
+        const fn = _permWait.get(d.reqId);
+        _permWait.delete(d.reqId);
+        fn(d);
+      }
+    });
     install(opts);
     return KT;
   };

@@ -2,7 +2,7 @@ pack: 1
 id: maker-code
 name: Code & Blocks
 version: 1.0.0
-icon: 🧩
+icon: 🤖
 color: "#7c4dff"
 description: lessons & Spark blocks
 group: make

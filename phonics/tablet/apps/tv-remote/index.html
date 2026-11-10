@@ -202,6 +202,8 @@ button{min-height:max(64px,var(--tgt));min-width:max(64px,var(--tgt))}
 'use strict';
 const $ = id => document.getElementById(id);
 const HELPER = 'http://127.0.0.1:8097';
+let permToken = '', permDenied = false;
+const hUrl = p => HELPER + p + (permToken ? (p.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(permToken) : '');
 /* Kid app shortcuts (Joe's pick, 2026-11-03: no YouTube Kids). `id` = Android package (what the TV reports as
    current_app); `link` = the app's https deep link when it has one. Joe's Google TV answers an error to the Play-Store
    form market://launch?id=... and a LEANBACK_LAUNCHER intent too (helper log, 2026-11-03) but opens https://www.disneyplus.com
@@ -241,7 +243,9 @@ const toast = text => { try { parent.postMessage({ kt: 'toast', text }, '*'); } 
 async function post(path, body, timeout = 8000) {
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), timeout);
   try {
-    const r = await fetch(HELPER + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}), signal: ctl.signal });
+    const hdrs = { 'Content-Type': 'application/json' };
+    if (permToken) hdrs['X-KT-Token'] = permToken;
+    const r = await fetch(hUrl(path), { method: 'POST', headers: hdrs, body: JSON.stringify(body || {}), signal: ctl.signal });
     let j = {}; try { j = await r.json(); } catch (_) {}
     if (!r.ok && j.ok === undefined) j.ok = false;
     return j;
@@ -268,10 +272,11 @@ let pollT = null;
 function schedulePoll(ms) { clearTimeout(pollT); pollT = setTimeout(poll, ms); }
 async function poll() {
   clearTimeout(pollT);
+  if (permDenied) { KTTV.state.helperUp = false; KTTV.state.phase = 'denied'; render(); return; }
   let st = null;
   try {
     const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 2500);
-    st = await (await fetch(HELPER + '/status', { cache: 'no-store', signal: ctl.signal })).json();
+    st = await (await fetch(hUrl('/status'), { cache: 'no-store', signal: ctl.signal })).json();
     clearTimeout(t);
   } catch (e) { st = null; }
   KTTV.state.helperUp = !!st;
@@ -333,7 +338,8 @@ function render() {
   // something covers the remote (the grown-up panel sits above it when open)
   veil.classList.add('on');
   btn.style.display = '';
-  if (phase === 'offline') { title.textContent = 'The TV helper is not running'; text.textContent = 'This tablet needs its TV helper (tvremote.py on port 8097). A grown-up can start it: see helper/install.sh.'; btn.textContent = 'Try again'; btn.onclick = () => poll(); }
+  if (phase === 'denied') { title.textContent = 'TV permission is off'; text.textContent = 'TV Remote needs permission to use the TV. A grown-up can allow it in Settings → Apps & permissions.'; btn.textContent = 'Ask again'; btn.onclick = () => startTv(); }
+  else if (phase === 'offline') { title.textContent = 'The TV helper is not running'; text.textContent = 'This tablet needs its TV helper (tvremote.py on port 8097). A grown-up can start it: see helper/install.sh.'; btn.textContent = 'Try again'; btn.onclick = () => poll(); }
   else if (phase === 'nolib') { title.textContent = 'Almost ready'; text.textContent = 'A grown-up needs to finish setting up the TV helper once (helper/install.sh installs three packages). ' + (st.error || ''); btn.textContent = 'Try again'; btn.onclick = () => poll(); }
   else if (phase === 'unpaired') { title.textContent = st.paired ? 'The TV forgot this tablet' : 'No TV connected yet'; text.textContent = st.error || 'Ask a grown-up to connect the TV: hold the ⚙ corner.'; btn.textContent = 'Grown-ups: connect the TV'; btn.onclick = () => openGrown(); }
   else if (phase === 'connecting') { title.textContent = 'Finding the TV…'; text.textContent = st.name ? 'Connecting to ' + st.name : ''; btn.style.display = 'none'; }
@@ -403,7 +409,7 @@ function renderYourTv() {
 async function scan() {
   $('tvlist').innerHTML = '<div class="none">looking…</div>';
   let list = [];
-  try { list = await (await fetch(HELPER + '/discover', { cache: 'no-store' })).json(); } catch (e) { list = []; }
+  try { list = await (await fetch(hUrl('/discover'), { cache: 'no-store' })).json(); } catch (e) { list = []; }
   if (!Array.isArray(list)) list = [];
   KTTV.state.discovered = list;
   const known = new Set((((KTTV.state.status || {}).tvs) || []).map(t => t.host));   // already paired: a tap switches, no code
@@ -467,7 +473,18 @@ $('pairX').onclick = pairCancel;
 
 wireKeys();
 drawCode();
-poll();
+async function startTv() {
+  if (window.KT && KT.permission) {
+    const p = await KT.permission('tv');
+    if (!p.granted) {
+      permDenied = true; KTTV.state.helperUp = false; KTTV.state.phase = 'denied'; render();
+      return;
+    }
+    permDenied = false; permToken = p.token || '';
+  }
+  poll();
+}
+startTv();
 </script>
 </body>
 </html>

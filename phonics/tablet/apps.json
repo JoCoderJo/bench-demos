@@ -5,7 +5,7 @@
    "id": "phonics-friends",
    "title": "Phonics Friends",
    "subtitle": "spell with your friend",
-   "icon": "🐸",
+   "icon": "🐰",
    "color": "#3fb950",
    "tier": "pre-reader",
    "group": "read",
@@ -13,6 +13,10 @@
    "needs": [
     "microphone",
     "autoplay"
+   ],
+   "permissions": [
+    "audio",
+    "mic"
    ],
    "source": "demo/ via tools/make-offline-bundle.py"
   },
@@ -37,7 +41,7 @@
    "id": "count",
    "title": "Count With Me",
    "subtitle": "count, find shapes, add",
-   "icon": "🐸",
+   "icon": "🔢",
    "color": "#5c6bc0",
    "path": "apps/count/index.html",
    "needs": [
@@ -136,7 +140,7 @@
    "id": "maker-code",
    "title": "Code & Blocks",
    "subtitle": "lessons & Spark blocks",
-   "icon": "🧩",
+   "icon": "🤖",
    "color": "#7c4dff",
    "path": "apps/maker-code/index.html",
    "needs": [
@@ -218,7 +222,8 @@
    "version": "1.0.0",
    "url": "https://pbskids.org",
    "permissions": [
-    "audio"
+    "audio",
+    "internet"
    ]
   },
   {
@@ -261,7 +266,7 @@
    "id": "stories",
    "title": "Stories",
    "subtitle": "read along with your friend",
-   "icon": "📖",
+   "icon": "📚",
    "color": "#5f87ad",
    "path": "apps/stories/index.html",
    "needs": [
@@ -279,7 +284,7 @@
    "id": "tv-remote",
    "title": "TV Remote",
    "subtitle": "steer the family TV",
-   "icon": "📺",
+   "icon": "⏯️",
    "color": "#2b7a78",
    "path": "apps/tv-remote/index.html",
    "needs": [],
@@ -288,7 +293,8 @@
    "group": "play",
    "version": "1.0.0",
    "permissions": [
-    "audio"
+    "audio",
+    "tv"
    ]
   },
   {

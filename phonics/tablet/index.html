@@ -159,9 +159,6 @@ input[type=range]{width:200px;height:36px;accent-color:#ff8a3d}
 .btn.go{background:#1d2a3a;color:#fff}
 .stepper{display:flex;align-items:center;gap:6px}
 .stepper button{width:44px;height:44px;border-radius:12px;background:#e9edf3;font-size:22px}
-.kbd{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;margin:8px 0 4px}
-.kbd button{height:44px;border-radius:10px;background:#e9edf3;font-weight:600;font-size:17px}
-.kbd button.wide{grid-column:span 2}
 #nameOut{font-size:22px;font-weight:700;min-height:30px;letter-spacing:.04em}
 .info{font-size:12px;color:#5b6b80;line-height:1.6;font-family:ui-monospace,Menlo,monospace;word-break:break-all}
 .avs{display:flex;gap:10px}.avs button{width:54px;height:54px;border-radius:50%;background:#e9edf3;font-size:30px;border:3px solid transparent}.avs button.on{border-color:#1d2a3a}
@@ -268,7 +265,7 @@ body{background:var(--wall,linear-gradient(160deg,var(--bg1),var(--bg2)))!import
 [data-wall=forest]{--wall:radial-gradient(circle at 85% 15%,rgba(255,255,255,.55) 0 70px,transparent 71px),linear-gradient(160deg,#a8e6a1,#f0fbea)}
 [data-wall=candy]{--wall:radial-gradient(circle at 20% 30%,rgba(255,255,255,.5) 0 90px,transparent 91px),radial-gradient(circle at 80% 75%,rgba(255,255,255,.45) 0 120px,transparent 121px),linear-gradient(160deg,#ffb3d9,#fff2f8)}
 [data-wall=ocean]{--wall:radial-gradient(ellipse 60% 40% at 20% 108%,#13c2d6 0,transparent 70%),radial-gradient(ellipse 50% 35% at 85% 104%,#1e88e5 0,transparent 70%),linear-gradient(180deg,#9be2ff 0%,#4fb3f6 55%,#1565c0 100%)}
-[data-wall=sunset]{--wall:radial-gradient(circle at 50% 78%,#ffe082 0 70px,transparent 72px),linear-gradient(180deg,#ff9a6c 0%,#ff6f91 48%,#6a4c93 100%)}
+[data-wall=sunset]{--wall:radial-gradient(circle at 83% 27%,#ffe082 0 84px,transparent 86px),linear-gradient(180deg,#ff9a6c 0%,#ff6f91 48%,#6a4c93 100%)}
 [data-wall=bubbles]{--wall:radial-gradient(circle at 15% 25%,rgba(255,255,255,.6) 0 60px,transparent 62px),radial-gradient(circle at 70% 18%,rgba(255,255,255,.45) 0 40px,transparent 42px),radial-gradient(circle at 86% 68%,rgba(255,255,255,.55) 0 85px,transparent 87px),radial-gradient(circle at 38% 82%,rgba(255,255,255,.4) 0 50px,transparent 52px),radial-gradient(circle at 55% 50%,rgba(255,255,255,.3) 0 28px,transparent 30px),linear-gradient(160deg,#7fc8ff,#b388ff)}
 [data-wall=rainbow]{--wall:linear-gradient(180deg,#ff8a80 0%,#ffd180 20%,#fff59d 40%,#b9f6ca 60%,#80d8ff 80%,#b388ff 100%)}
 [data-wall=jungle]{--wall:radial-gradient(circle at 12% 95%,#2e7d32 0 140px,transparent 142px),radial-gradient(circle at 88% 100%,#388e3c 0 190px,transparent 192px),radial-gradient(circle at 70% 12%,#fff176 0 55px,transparent 57px),linear-gradient(180deg,#b9e8b5,#66bb6a)}
@@ -363,6 +360,134 @@ body.locked #home{visibility:hidden}   /* the lock screen shows the wallpaper, n
 .tile.hear{box-shadow:0 0 0 6px var(--accent),var(--shadow)}
 .lkk.hear{box-shadow:0 0 0 6px #fff,0 6px 18px rgba(0,0,0,.3)}#verbs button.hear{box-shadow:0 0 0 6px var(--accent),var(--shadow)}
 #hello.warn small{color:var(--accent);font-weight:800}
+/* ---- home polish 2026-11-09 (found on the real panel) ----
+   pre-reader with four tiles or fewer: the rows share the height that is there — nothing scrolls, nothing is clipped under the header */
+:root[data-tier=pre-reader] #grid.few{grid-template-rows:repeat(var(--rows,2),minmax(0,1fr));align-content:stretch;overflow:hidden;padding-bottom:18px}
+:root[data-tier=pre-reader] #grid.few .tile{aspect-ratio:auto;min-height:0;height:100%;max-height:440px;align-self:center}
+/* sections: tiles fade out under the tab row instead of being cut by it; .vend is the spacer that lets the last section reach the top */
+#grid.scrolled{-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 26px);mask-image:linear-gradient(to bottom,transparent 0,#000 26px)}
+.vend{grid-column:1/-1;height:0;pointer-events:none}
+/* ---- lock-screen passcode 2026-11-09: the grown-up code pad, reused ("Type the code to play") ---- */
+#gateTitle{font-size:22px;font-weight:700;display:flex;align-items:center;gap:10px}
+#gateTitle .av{font-size:40px;line-height:1}
+#gateMsg{min-height:22px}
+.pad.wait{opacity:.3;pointer-events:none}
+/* ---- Settings like a phone + the on-screen keyboard (card #269, part 1 of 5) — additive; drawn by the last block of the script ----
+   #settings.sub = a section page is open (title bar with a back arrow); without it the home list of sections shows */
+#settings header{min-height:77px}
+#settings header #setBack{display:none;width:48px;height:48px;padding:0;border-radius:50%;background:#e9edf3;color:#1d2a3a;place-items:center;flex:none}
+#settings.sub header #setBack{display:grid}
+#setBack svg{width:24px;height:24px;display:block;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+#smain>*{max-width:980px;margin-left:auto;margin-right:auto}
+#setHome{display:none;background:#fff;border:1px solid #dde3ec;border-radius:20px;overflow:hidden}
+#settings:not(.sub) #setHome{display:block}
+.spage{display:none}
+.spage.on{display:block}
+.shrow{display:flex;align-items:center;gap:16px;width:100%;min-height:72px;padding:9px 18px;text-align:left;border-top:1px solid #eef1f6}
+.shrow:first-child{border-top:0}
+.shrow:active{background:#eef2f7}
+.shrow .ic{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;flex:none;color:#fff}
+.shrow .ic svg{width:25px;height:25px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.shrow .tx{flex:1;min-width:0;display:block}
+.shrow .tx b{display:block;font-size:19px;font-weight:700}
+.shrow .tx small{display:block;color:#5b6b80;font-size:15px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shrow .ch{flex:none;width:22px;height:22px;fill:none;stroke:#9aa7b8;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.spage .row .v{white-space:nowrap}
+/* on the pages a row keeps a readable label, and the word choices that sit in a .stepper (Rotation, Tile size, Speakers, "+15m today")
+   are as wide as their words — `.stepper button{width:44px}` is meant for the − / + pair and crushed them */
+.spage .row .l{min-width:190px}
+.spage .stepper{flex-wrap:wrap;justify-content:flex-end}
+.spage .stepper .btn{width:auto;height:auto;min-height:44px;font-size:inherit;white-space:nowrap}
+.snote{font-size:14px;color:#5b6b80;line-height:1.45;padding:10px 0 12px}
+body.locked.shade #settings{z-index:39}   /* Settings opened from the lock screen: the pull-down Bluetooth controls still come out on top */
+/* text fields of the shell: typed with the on-screen keyboard (no OS keyboard on the kiosk) */
+input:not([type=range]),textarea{user-select:text;-webkit-user-select:text}
+.kfield{font:inherit;font-size:20px;font-weight:700;color:#1d2a3a;background:#f3f5f9;border:2px solid #c9d1dc;border-radius:12px;padding:8px 14px;width:320px;max-width:100%;min-height:52px;outline:none}
+.kfield:focus{border-color:var(--accent);background:#fff}
+#ktKbd{position:fixed;left:0;right:0;bottom:var(--nb);z-index:9999;background:#1c1b1f;color:#fff;padding:9px 8px 10px;display:none;flex-direction:column;gap:7px;touch-action:none;border-radius:18px 18px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.35)}
+#ktKbd.on{display:flex;animation:kbUp .12s ease-out}
+@keyframes kbUp{from{transform:translateY(30%);opacity:.4}to{transform:none;opacity:1}}
+body.locked #ktKbd{bottom:0}
+.kbr{display:flex;gap:7px}
+.kbk{flex:1 1 0;min-width:0;height:62px;border-radius:12px;background:#45434e;color:#fff;font-size:27px;font-weight:600;display:grid;place-items:center;line-height:1}
+.kbk.fn{background:#2b2930;font-size:19px;font-weight:700}
+.kbk.go{background:var(--accent);color:#1c1b1f;font-size:19px;font-weight:800}
+.kbk.on{background:#fff;color:#1c1b1f}
+.kbk.dn{background:#77748a}
+.kbk svg{width:28px;height:28px;display:block;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.kbk svg.full{fill:currentColor}
+body.kbd #toast{bottom:calc(var(--nb) + var(--kbh,290px) + 16px)}
+/* ---- Settings → Connected devices & Sound output picker (card #271, part 3 of 5) ---- */
+.bt-dev-row{gap:10px}
+.bt-dev-main{flex:1;min-width:0;display:flex;align-items:center;gap:12px;text-align:left;padding:4px 0}
+.bt-dev-main:active{opacity:.75}
+.bt-ic{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#00897b;display:grid;place-items:center;font-size:22px;flex:none}
+.bt-ic.big{width:54px;height:54px;font-size:28px}
+.bt-dev-row.connected .bt-ic{background:#dff7e3;color:#1e7e34}
+.bt-bat{font-size:14px;font-weight:700;color:#1e7e34;background:#e8f8eb;padding:4px 10px;border-radius:12px;white-space:nowrap}
+.bt-gear{min-width:44px;height:44px;display:grid;place-items:center;font-size:20px;padding:0 12px}
+.bt-banner{border-radius:16px;padding:14px 18px;margin-bottom:14px;display:flex;flex-direction:column;gap:10px;font-size:16px}
+.bt-banner.info{background:#e3f2fd;border:1px solid #90caf9;color:#0d47a1}
+.bt-banner.confirm{background:#fff8e1;border:2px solid #ffb300;color:#1d2a3a}
+.bt-banner.err{background:#ffebee;border:2px solid #ef5350;color:#b71c1c;font-weight:700}
+.bt-conf-title{font-size:17px; line-height:1.35}
+.bt-conf-code{font-size:36px;font-weight:800;letter-spacing:.14em;font-variant-numeric:tabular-nums;background:#fff;padding:10px 20px;border-radius:12px;align-self:flex-start;border:1px solid #ffe082}
+.bt-conf-acts{display:flex;gap:10px}
+#btVisBanner{font-size:14px;color:#00695c;background:#e0f2f1;padding:10px 14px;border-radius:12px;font-weight:600;margin:6px 0}
+#qOutPicker{display:none;flex-wrap:wrap;gap:8px;padding:10px 14px;border-radius:18px;background:rgba(255,255,255,.08)}
+#qOutPicker.on{display:flex}
+.qout-opt{padding:10px 16px;border-radius:14px;background:rgba(255,255,255,.12);color:#fff;font-weight:700;font-size:16px;display:inline-flex;align-items:center;gap:8px}
+.qout-opt.on{background:var(--accent);color:#1c1b1f}
+/* ---- App permissions prompt & status-bar indicator (card #272, part 4 of 5) ---- */
+#sysbar #sbPerm{display:none;align-items:center;gap:5px;height:22px;padding:0 10px;border-radius:11px;background:#2ebd59;color:#05210f;font-size:13px;font-weight:800;margin-right:6px;box-shadow:0 1px 4px rgba(0,0,0,.3);cursor:pointer}
+#sysbar #sbPerm.on{display:inline-flex}
+#permSheet{position:fixed;inset:var(--sb) 0 var(--nb) 0;z-index:7;background:rgba(12,18,32,.78);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px}
+#permSheet.on{display:flex}
+.perm-card{width:min(620px,94vw);background:#fff;color:#1d2a3a;border-radius:30px;padding:28px 30px;box-shadow:0 24px 70px rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px}
+.perm-ic{width:84px;height:84px;border-radius:26px;background:#e8f0fe;color:#1a73e8;display:grid;place-items:center;font-size:46px}
+#permTitle{font-size:28px;font-weight:800;line-height:1.22;margin:0}
+#permSub{font-size:17px;color:#5b6b80;line-height:1.35;margin:0 0 4px}
+.perm-btns{width:100%;display:flex;flex-direction:column;gap:10px}
+.perm-btn{width:100%;min-height:60px;border-radius:18px;background:#eef2f8;color:#1d2a3a;font-size:20px;font-weight:800;padding:12px 20px;display:flex;align-items:center;justify-content:center;gap:10px}
+.perm-btn.primary{background:#1a73e8;color:#fff}
+.perm-btn.deny{background:#fce8e6;color:#a51d24}
+.perm-btn.ask{background:#fff8e1;color:#6d4c00;border:2px solid #ffe082}
+.perm-btn:active{transform:scale(.98)}
+.perm-row-btns{display:flex;flex-wrap:wrap;gap:6px}
+.perm-pill{padding:8px 12px;border-radius:10px;background:#e9edf3;color:#1d2a3a;font-weight:700;font-size:14px}
+.perm-pill.on{background:#1d2a3a;color:#fff}
+.perm-pill.deny.on{background:#c62828;color:#fff}
+/* ---- Tablet Settings part 5: Permission Manager, Privacy Dashboard, Location (#273) ---- */
+.app-nav-row{cursor:pointer;display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:14px;background:#f5f8fc;margin-bottom:8px}
+.app-nav-row:active{background:#e8eff8}
+.app-nav-row .app-ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:26px;flex-shrink:0;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.app-nav-row .app-ic img{width:40px;height:40px;object-fit:contain;border-radius:10px}
+.app-nav-row .ch{width:20px;height:20px;fill:none;stroke:#8b9bb0;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;margin-left:auto}
+.app-detail-hero{display:flex;align-items:center;gap:16px;padding:16px;background:#fff;border-radius:18px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.app-hero-ic{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;font-size:36px;background:#f0f4fa}
+.app-hero-ic img{width:54px;height:54px;object-fit:contain;border-radius:14px}
+.app-detail-info{display:flex;flex-direction:column;gap:3px}
+.app-detail-title{font-size:22px;font-weight:800;color:#1d2a3a}
+.app-detail-sub{font-size:14px;color:#6b7c93}
+.perm-mgr-res{margin-bottom:16px;padding:14px;background:#fff;border-radius:18px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.perm-mgr-res-hdr{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;color:#1d2a3a;margin-bottom:10px}
+.perm-badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:700}
+.perm-badge.allowed{background:#e6f4ea;color:#137333}
+.perm-badge.ask{background:#fef7e0;color:#b06000}
+.perm-badge.denied{background:#fce8e6;color:#c5221f}
+.dash-timeline{display:flex;flex-direction:column;gap:10px}
+.dash-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:#fff;border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.dash-ic{width:42px;height:42px;border-radius:12px;background:#f0f4fa;display:grid;place-items:center;font-size:22px;flex-shrink:0}
+.dash-info{flex:1;display:flex;flex-direction:column;gap:2px}
+.dash-app{font-weight:700;font-size:16px;color:#1d2a3a}
+.dash-res{font-size:13px;color:#5f6368}
+.dash-time{font-size:13px;font-weight:700;color:#1a73e8;white-space:nowrap}
+.loc-chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.loc-chip{padding:10px 16px;border-radius:20px;background:#eef2f7;border:1px solid transparent;font-weight:700;font-size:15px;color:#1d2a3a;cursor:pointer}
+.loc-chip.on{background:#1a73e8;color:#fff}
+.loc-input-row{display:flex;gap:8px;margin-top:8px}
+.loc-inp{flex:1;padding:12px 14px;border-radius:12px;border:1.5px solid #d2dbe5;font-size:16px}
+#qMasterCam.off,#qMasterMic.off{background:#ea4335!important;color:#fff!important}
 </style></head><body>
 
 <div class="screen on" id="home">
@@ -375,7 +500,7 @@ body.locked #home{visibility:hidden}   /* the lock screen shows the wallpaper, n
   <button id="editDone" onclick="endEdit()">Done</button>
 </div>
 
-<div class="screen" id="app"><iframe id="frame" title="app" allow="microphone; autoplay; fullscreen"></iframe></div>
+<div class="screen" id="app"><iframe id="frame" title="app" allow="camera 'none'; microphone 'none'; geolocation 'none'; autoplay; fullscreen"></iframe></div>
 <div id="volPop"><button id="vpDown">−</button><div id="volBar"></div><button id="vpUp">+</button><span id="volNum"></span></div>
 <div id="quick">
   <button id="quickClose" aria-label="close">✕</button>
@@ -388,6 +513,7 @@ body.locked #home{visibility:hidden}   /* the lock screen shows the wallpaper, n
   <div class="qrow"><div class="ql">🎧 Bluetooth</div><button class="sw" id="qBtSw" aria-label="bluetooth on/off"></button><span id="qBtState"></span><button class="qact" id="qOut" title="switch wired output between panel speakers and headphone jack">🔊 Panel</button><button class="qact" id="qPair">Pair new…</button></div>
   <div id="qDevs"></div>
   <div id="qHint"></div>
+  <div class="qrow" id="qSensorsRow"><div class="ql">🛡 Privacy &amp; Sensors</div><button class="qact" id="qMasterCam" title="Camera master switch">📷 Camera on</button><button class="qact" id="qMasterMic" title="Microphone master switch">🎤 Mic on</button></div>
   <div class="qrow"><div class="ql">⏻ System</div><button class="qact" id="qSleep">🌙 Sleep</button><button class="qact" id="qReboot">🔄 Restart 🔒</button><button class="qact" id="qOff">⏻ Power off 🔒</button><button class="qact" id="qSettings">⚙ Settings 🔒</button><button class="qact" id="qBugBtn">🐛 Bug Finder</button><span id="qSysNote" style="flex:1;color:var(--dim);font-size:14px"></span></div>
   <div id="qFoot"><div id="foot"></div></div>
 </div>
@@ -395,6 +521,7 @@ body.locked #home{visibility:hidden}   /* the lock screen shows the wallpaper, n
 <div id="sysbar">
   <div id="sbLeft"><div id="clock"></div><div id="sbNotif"></div></div>
   <div id="sbRight">
+    <button id="sbPerm" class="sb-perm" aria-label="permission in use"></button>
     <div id="dots" title="first = Bench reachable · second = tablet helper running"><span class="dot" id="dBench"></span><span class="dot" id="dAgent"></span></div>
     <button id="volBtn" aria-label="volume">🔊</button>
     <button class="volPill" id="quickPill" aria-label="quick settings">⚙</button>
@@ -426,9 +553,23 @@ body.locked #home{visibility:hidden}   /* the lock screen shows the wallpaper, n
 </div>
 <div id="recents"><div id="rcTitle">Recent apps</div><div id="rcRow"></div><button id="rcClear">Clear all</button></div>
 
+<div id="permSheet" role="dialog" aria-labelledby="permTitle">
+  <div class="perm-card">
+    <div class="perm-ic" id="permIcon">📷</div>
+    <h2 id="permTitle">Allow App to use the camera?</h2>
+    <p id="permSub">A grown-up enters the code to allow this. You can always tap Don’t allow.</p>
+    <div class="perm-btns">
+      <button class="perm-btn primary" id="permWhile" data-perm-ans="while_using">While using the app</button>
+      <button class="perm-btn" id="permOnce" data-perm-ans="only_this_time">Only this time</button>
+      <button class="perm-btn ask" id="permAskGrown" data-perm-ans="ask_grown">Ask a grown-up</button>
+      <button class="perm-btn deny" id="permDeny" data-perm-ans="deny">Don’t allow</button>
+    </div>
+  </div>
+</div>
+
 <div class="screen" id="gate">
   <button class="x" onclick="closeGate()">✕</button>
-  <div style="font-size:22px;font-weight:700">Grown-ups only</div>
+  <div id="gateTitle">Grown-ups only</div>
   <div id="gateMsg"></div>
   <div id="pinDots"><b></b><b></b><b></b><b></b></div>
   <div class="pad" id="pad"></div>
@@ -551,7 +692,7 @@ body.locked #home{visibility:hidden}   /* the lock screen shows the wallpaper, n
     </div>
   </div>
 </div>
-<script>window.KT_INLINE=null;window.KT_INLINE={"defaults":{"_doc":"Kids tablet settings \u2014 ONE file is the whole state. The Bench/laptop pushes this with the bundle; the launcher reads it from the tablet agent (/api/settings) and the agent applies the hardware parts (brightness, volume, rotation, screen sleep). Edits made on the tablet (parent gate) are saved as overrides in the agent's state dir and survive bundle updates. v2 (2026-10-25): kids[] profiles with per-kid tiles + daily minutes, budget rules; `child` is the fallback when kids is empty.","version":2,"child":{"name":"","avatar":"frog"},"kids":[{"id":"kid1","name":"","age":4,"avatar":"frog","tier":null,"hand":"right","apps_allowed":["phonics-friends","letters","draw","yoto"],"budget_min":45,"look":null},{"id":"kid2","name":"","age":6,"avatar":"fox","tier":null,"hand":"right","apps_allowed":null,"budget_min":60,"look":null}],"budget":{"enabled":true,"exempt_apps":["yoto"],"grace_min":15,"reset_hour":5,"count_home":false},"pin":"1234","screen":{"brightness":70,"rotation":"right","theme":"sky","tile_size":"medium","sleep_after_min":0,"look":{"wallpaper":"sky","dark":false,"accent":"#ff8a3d"}},"sound":{"volume":40,"max_volume":80,"tap_sounds":true,"output":"lineout","eq":{"enabled":true,"bass_db":0,"treble_db":0,"highpass_hz":170,"preamp_db":0}},"apps":{"allowed":["phonics-friends","camera","count","draw","example-tap","letters","maker-bench","maker-cad","maker-code","maker-light","music","mystuff","pbs-kids","read","show-tell","stories","tv-remote","words","yoto"],"order":["phonics-friends","letters","stories","draw","camera","count","example-tap","maker-bench","maker-cad","maker-code","maker-light","music","mystuff","pbs-kids","read","show-tell","tv-remote","words","yoto"]},"bedtime":{"enabled":false,"start":"19:30","end":"07:00"},"kiosk":{"home_button":"tap","parent_hold_ms":1500,"show_clock":true,"clock_24h":false,"kid_volume":true,"lock_on_start":true,"lock_after_min":10},"bench":{"url":"https://bench.tail81b22c.ts.net","updates":"manual"}},"apps":{"_doc":"The home screen. One entry per tile; `path` is relative to the bundle root. Games in tablet/apps/<id>/ are added automatically by build-bundle.py (see tablet/apps/README.md); list one here only to override its tile or to pull a folder from elsewhere with `source_dir`. `needs` lists iframe permissions the app wants.","apps":[{"id":"phonics-friends","title":"Phonics Friends","subtitle":"spell with your friend","icon":"\ud83d\udc38","color":"#3fb950","tier":"pre-reader","group":"read","path":"apps/phonics-friends/index.html","needs":["microphone","autoplay"],"source":"demo/ via tools/make-offline-bundle.py"},{"id":"camera","title":"Camera","subtitle":"see through the cameras","icon":"\ud83d\udcf7","color":"#5c6bc0","path":"apps/camera/index.html","needs":[],"source":"tablet/apps/camera","tier":"pre-reader","group":"make","version":"1.0.0","permissions":["camera","audio"]},{"id":"count","title":"Count With Me","subtitle":"count, find shapes, add","icon":"\ud83d\udc38","color":"#5c6bc0","path":"apps/count/index.html","needs":["autoplay"],"source":"tablet/apps/count","tier":"pre-reader","group":"play","version":"1.0.0","permissions":["audio"]},{"id":"draw","title":"Draw","subtitle":"finger painting","icon":"\ud83c\udfa8","color":"#c25048","path":"apps/draw/index.html","needs":[],"source":"tablet/apps/draw","tier":"pre-reader","group":"play","version":"1.0.0"},{"id":"example-tap","title":"Tap the Frog","subtitle":"example game","icon":"\ud83d\udc38","color":"#2e7d32","path":"apps/example-tap/index.html","needs":["autoplay"],"source":"tablet/apps/example-tap","tier":"pre-reader","group":"play","version":"1.0.0","permissions":["audio"]},{"id":"letters","title":"Letter Sounds","subtitle":"tap a letter, hear its sound","icon":"\ud83d\udd24","color":"#d98e2b","path":"apps/letters/index.html","needs":["autoplay"],"source":"tablet/apps/letters","tier":"pre-reader","group":"read","version":"1.0.0","permissions":["audio"]},{"id":"maker-bench","title":"Sim & Inventory","subtitle":"3D fit check & shop parts","icon":"\ud83d\udd29","color":"#27ae60","path":"apps/maker-bench/index.html","needs":[],"source":"tablet/apps/maker-bench","tier":"maker","group":"make","version":"1.0.0","permissions":["bench"]},{"id":"maker-cad","title":"3D CAD Studio","subtitle":"design parts for the tablet","icon":"\ud83e\uddf1","color":"#e67e22","path":"apps/maker-cad/index.html","needs":[],"source":"tablet/apps/maker-cad","tier":"maker","group":"make","version":"1.0.0","permissions":["bench"]},{"id":"maker-code","title":"Code & Blocks","subtitle":"lessons & Spark blocks","icon":"\ud83e\udde9","color":"#7c4dff","path":"apps/maker-code/index.html","needs":["autoplay"],"source":"tablet/apps/maker-code","tier":"tinkerer","group":"make","version":"1.0.0","permissions":["i2c","audio"]},{"id":"maker-light","title":"Light Lab","subtitle":"draw with real lights","icon":"\ud83d\udca1","color":"#f2b632","path":"apps/maker-light/index.html","needs":["autoplay"],"source":"tablet/apps/maker-light","tier":"tinkerer","group":"make","version":"1.0.0","permissions":["i2c","audio"]},{"id":"music","title":"Music Pads","subtitle":"xylophone, drums, follow the lights","icon":"\ud83c\udfb5","color":"#ab47bc","path":"apps/music/index.html","needs":["autoplay"],"source":"tablet/apps/music","tier":"pre-reader","group":"play","version":"1.0.0","permissions":["audio"]},{"id":"mystuff","title":"My Stuff","subtitle":"your pictures, words and makes","icon":"\ud83c\udf92","color":"#2e8b7a","path":"apps/mystuff/index.html","needs":[],"source":"tablet/apps/mystuff","tier":"pre-reader","group":"mine","version":"1.0.0","permissions":["bench"]},{"id":"pbs-kids","title":"PBS Kids","subtitle":"shows and games","icon":"\ud83d\udcfa","color":"#2e9e44","path":"apps/pbs-kids/index.html","needs":[],"source":"tablet/apps/pbs-kids","tier":"pre-reader","group":"play","version":"1.0.0","url":"https://pbskids.org","permissions":["audio"]},{"id":"read","title":"Read It","subtitle":"tap the words, read the line","icon":"\ud83d\udcd6","color":"#7e57c2","path":"apps/read/index.html","needs":["autoplay"],"source":"tablet/apps/read","tier":"reader","group":"read","version":"1.0.0","permissions":["audio"]},{"id":"show-tell","title":"Show & Tell","subtitle":"what is it?","icon":"\ud83d\udd0d","color":"#ef8f3c","path":"apps/show-tell/index.html","needs":[],"source":"tablet/apps/show-tell","tier":"pre-reader","group":"make","version":"1.0.0","permissions":["camera","audio","bench"]},{"id":"stories","title":"Stories","subtitle":"read along with your friend","icon":"\ud83d\udcd6","color":"#5f87ad","path":"apps/stories/index.html","needs":["autoplay"],"source":"tablet/apps/stories","tier":"pre-reader","group":"read","version":"1.0.0","permissions":["audio"]},{"id":"tv-remote","title":"TV Remote","subtitle":"steer the family TV","icon":"\ud83d\udcfa","color":"#2b7a78","path":"apps/tv-remote/index.html","needs":[],"source":"tablet/apps/tv-remote","tier":"pre-reader","group":"play","version":"1.0.0","permissions":["audio"]},{"id":"words","title":"Word Builder","subtitle":"tap the letters, make the word","icon":"\ud83e\udde9","color":"#26a69a","path":"apps/words/index.html","needs":["autoplay"],"source":"tablet/apps/words","tier":"reader","group":"read","version":"1.0.0","permissions":["audio"]},{"id":"yoto","title":"Yoto","subtitle":"our Yoto library","icon":"\ud83c\udfa7","color":"#f2572b","path":"apps/yoto/index.html","needs":["autoplay"],"source":"tablet/apps/yoto","tier":"pre-reader","group":"play","version":"1.0.0","permissions":["audio","bench"]}]}};</script>
+<script>window.KT_INLINE=null;window.KT_INLINE={"defaults":{"_doc":"Kids tablet settings \u2014 ONE file is the whole state. The Bench/laptop pushes this with the bundle; the launcher reads it from the tablet agent (/api/settings) and the agent applies the hardware parts (brightness, volume, rotation, screen sleep). Edits made on the tablet (parent gate) are saved as overrides in the agent's state dir and survive bundle updates. v2 (2026-10-25): kids[] profiles with per-kid tiles + daily minutes, budget rules; `child` is the fallback when kids is empty.","version":2,"child":{"name":"","avatar":"frog"},"kids":[{"id":"kid1","name":"","age":4,"avatar":"frog","tier":null,"hand":"right","apps_allowed":["phonics-friends","letters","draw","yoto"],"budget_min":45,"look":null},{"id":"kid2","name":"","age":6,"avatar":"fox","tier":null,"hand":"right","apps_allowed":null,"budget_min":60,"look":null}],"budget":{"enabled":true,"exempt_apps":["yoto"],"grace_min":15,"reset_hour":5,"count_home":false},"pin":"1234","screen":{"brightness":70,"rotation":"right","theme":"sky","tile_size":"medium","sleep_after_min":0,"look":{"wallpaper":"sky","dark":false,"accent":"#ff8a3d"}},"sound":{"volume":40,"max_volume":80,"tap_sounds":true,"output":"lineout","eq":{"enabled":true,"bass_db":0,"treble_db":0,"highpass_hz":170,"preamp_db":0}},"apps":{"allowed":["phonics-friends","camera","count","draw","example-tap","letters","maker-bench","maker-cad","maker-code","maker-light","music","mystuff","pbs-kids","read","show-tell","stories","tv-remote","words","yoto"],"order":["phonics-friends","letters","stories","draw","camera","count","example-tap","maker-bench","maker-cad","maker-code","maker-light","music","mystuff","pbs-kids","read","show-tell","tv-remote","words","yoto"]},"bedtime":{"enabled":false,"start":"19:30","end":"07:00"},"kiosk":{"home_button":"tap","parent_hold_ms":1500,"lock_code_on":false,"lock_code":"","show_clock":true,"clock_24h":false,"kid_volume":true,"lock_on_start":true,"lock_after_min":10},"bench":{"url":"https://bench.tail81b22c.ts.net","updates":"manual"},"permissions":{"children_may_allow":false,"seeded":true,"grants":{"camera":{"camera":{"state":"installed","denials":0,"when":"2026-11-10","by":"installed","kid":""}},"show-tell":{"camera":{"state":"installed","denials":0,"when":"2026-11-10","by":"installed","kid":""}},"tv-remote":{"tv":{"state":"installed","denials":0,"when":"2026-11-10","by":"installed","kid":""}},"pbs-kids":{"internet":{"state":"installed","denials":0,"when":"2026-11-10","by":"installed","kid":""}},"phonics-friends":{"microphone":{"state":"installed","denials":0,"when":"2026-11-10","by":"installed","kid":""}}}},"privacy":{"camera_off":false,"mic_off":false},"location":{"place":"","shared":false,"network_lookup":false}},"apps":{"_doc":"The home screen. One entry per tile; `path` is relative to the bundle root. Games in tablet/apps/<id>/ are added automatically by build-bundle.py (see tablet/apps/README.md); list one here only to override its tile or to pull a folder from elsewhere with `source_dir`. `needs` lists iframe permissions the app wants.","apps":[{"id":"phonics-friends","title":"Phonics Friends","subtitle":"spell with your friend","icon":"\ud83d\udc30","color":"#3fb950","tier":"pre-reader","group":"read","path":"apps/phonics-friends/index.html","needs":["microphone","autoplay"],"permissions":["audio","mic"],"source":"demo/ via tools/make-offline-bundle.py"},{"id":"camera","title":"Camera","subtitle":"see through the cameras","icon":"\ud83d\udcf7","color":"#5c6bc0","path":"apps/camera/index.html","needs":[],"source":"tablet/apps/camera","tier":"pre-reader","group":"make","version":"1.0.0","permissions":["camera","audio"]},{"id":"count","title":"Count With Me","subtitle":"count, find shapes, add","icon":"\ud83d\udd22","color":"#5c6bc0","path":"apps/count/index.html","needs":["autoplay"],"source":"tablet/apps/count","tier":"pre-reader","group":"play","version":"1.0.0","permissions":["audio"]},{"id":"draw","title":"Draw","subtitle":"finger painting","icon":"\ud83c\udfa8","color":"#c25048","path":"apps/draw/index.html","needs":[],"source":"tablet/apps/draw","tier":"pre-reader","group":"play","version":"1.0.0"},{"id":"example-tap","title":"Tap the Frog","subtitle":"example game","icon":"\ud83d\udc38","color":"#2e7d32","path":"apps/example-tap/index.html","needs":["autoplay"],"source":"tablet/apps/example-tap","tier":"pre-reader","group":"play","version":"1.0.0","permissions":["audio"]},{"id":"letters","title":"Letter Sounds","subtitle":"tap a letter, hear its sound","icon":"\ud83d\udd24","color":"#d98e2b","path":"apps/letters/index.html","needs":["autoplay"],"source":"tablet/apps/letters","tier":"pre-reader","group":"read","version":"1.0.0","permissions":["audio"]},{"id":"maker-bench","title":"Sim & Inventory","subtitle":"3D fit check & shop parts","icon":"\ud83d\udd29","color":"#27ae60","path":"apps/maker-bench/index.html","needs":[],"source":"tablet/apps/maker-bench","tier":"maker","group":"make","version":"1.0.0","permissions":["bench"]},{"id":"maker-cad","title":"3D CAD Studio","subtitle":"design parts for the tablet","icon":"\ud83e\uddf1","color":"#e67e22","path":"apps/maker-cad/index.html","needs":[],"source":"tablet/apps/maker-cad","tier":"maker","group":"make","version":"1.0.0","permissions":["bench"]},{"id":"maker-code","title":"Code & Blocks","subtitle":"lessons & Spark blocks","icon":"\ud83e\udd16","color":"#7c4dff","path":"apps/maker-code/index.html","needs":["autoplay"],"source":"tablet/apps/maker-code","tier":"tinkerer","group":"make","version":"1.0.0","permissions":["i2c","audio"]},{"id":"maker-light","title":"Light Lab","subtitle":"draw with real lights","icon":"\ud83d\udca1","color":"#f2b632","path":"apps/maker-light/index.html","needs":["autoplay"],"source":"tablet/apps/maker-light","tier":"tinkerer","group":"make","version":"1.0.0","permissions":["i2c","audio"]},{"id":"music","title":"Music Pads","subtitle":"xylophone, drums, follow the lights","icon":"\ud83c\udfb5","color":"#ab47bc","path":"apps/music/index.html","needs":["autoplay"],"source":"tablet/apps/music","tier":"pre-reader","group":"play","version":"1.0.0","permissions":["audio"]},{"id":"mystuff","title":"My Stuff","subtitle":"your pictures, words and makes","icon":"\ud83c\udf92","color":"#2e8b7a","path":"apps/mystuff/index.html","needs":[],"source":"tablet/apps/mystuff","tier":"pre-reader","group":"mine","version":"1.0.0","permissions":["bench"]},{"id":"pbs-kids","title":"PBS Kids","subtitle":"shows and games","icon":"\ud83d\udcfa","color":"#2e9e44","path":"apps/pbs-kids/index.html","needs":[],"source":"tablet/apps/pbs-kids","tier":"pre-reader","group":"play","version":"1.0.0","url":"https://pbskids.org","permissions":["audio","internet"]},{"id":"read","title":"Read It","subtitle":"tap the words, read the line","icon":"\ud83d\udcd6","color":"#7e57c2","path":"apps/read/index.html","needs":["autoplay"],"source":"tablet/apps/read","tier":"reader","group":"read","version":"1.0.0","permissions":["audio"]},{"id":"show-tell","title":"Show & Tell","subtitle":"what is it?","icon":"\ud83d\udd0d","color":"#ef8f3c","path":"apps/show-tell/index.html","needs":[],"source":"tablet/apps/show-tell","tier":"pre-reader","group":"make","version":"1.0.0","permissions":["camera","audio","bench"]},{"id":"stories","title":"Stories","subtitle":"read along with your friend","icon":"\ud83d\udcda","color":"#5f87ad","path":"apps/stories/index.html","needs":["autoplay"],"source":"tablet/apps/stories","tier":"pre-reader","group":"read","version":"1.0.0","permissions":["audio"]},{"id":"tv-remote","title":"TV Remote","subtitle":"steer the family TV","icon":"\u23ef\ufe0f","color":"#2b7a78","path":"apps/tv-remote/index.html","needs":[],"source":"tablet/apps/tv-remote","tier":"pre-reader","group":"play","version":"1.0.0","permissions":["audio","tv"]},{"id":"words","title":"Word Builder","subtitle":"tap the letters, make the word","icon":"\ud83e\udde9","color":"#26a69a","path":"apps/words/index.html","needs":["autoplay"],"source":"tablet/apps/words","tier":"reader","group":"read","version":"1.0.0","permissions":["audio"]},{"id":"yoto","title":"Yoto","subtitle":"our Yoto library","icon":"\ud83c\udfa7","color":"#f2572b","path":"apps/yoto/index.html","needs":["autoplay"],"source":"tablet/apps/yoto","tier":"pre-reader","group":"play","version":"1.0.0","permissions":["audio","bench"]}]}};</script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
@@ -594,7 +735,9 @@ const BASE={version:2,child:{name:'',avatar:'frog'},
   budget:{enabled:true,exempt_apps:['yoto'],grace_min:15,reset_hour:5,count_home:false},
   pin:'1234',screen:{brightness:70,rotation:'right',theme:'sky',sleep_after_min:0,tile_size:'medium'},
   sound:{volume:60,max_volume:80,tap_sounds:true,output:'lineout',eq:{enabled:true,bass_db:0,treble_db:0,highpass_hz:170,preamp_db:0}},apps:{allowed:[],order:[]},bedtime:{enabled:false,start:'19:30',end:'07:00'},
-  kiosk:{home_button:'tap',parent_hold_ms:1500,show_clock:true,clock_24h:false,kid_volume:true},bench:{url:'https://bench.tail81b22c.ts.net',updates:'manual'}};
+  kiosk:{home_button:'tap',parent_hold_ms:1500,show_clock:true,clock_24h:false,kid_volume:true},bench:{url:'https://bench.tail81b22c.ts.net',updates:'manual'},
+  permissions:{children_may_allow:false,seeded:true,grants:{camera:{camera:{state:'installed',denials:0,by:'installed'}},'show-tell':{camera:{state:'installed',denials:0,by:'installed'}},'tv-remote':{tv:{state:'installed',denials:0,by:'installed'}},'pbs-kids':{internet:{state:'installed',denials:0,by:'installed'}},'phonics-friends':{microphone:{state:'installed',denials:0,by:'installed'}}}},
+  privacy:{camera_off:false,mic_off:false},location:{place:'',shared:false,network_lookup:false}};
 
 function kidsList(){return Array.isArray(S.kids)&&S.kids.length?S.kids:null;}
 function activeKid(){const ks=kidsList();if(!ks)return null;return ks.find(k=>k.id===kidId)||ks[0];}
@@ -976,7 +1119,6 @@ function checkPin(){
 // ---------- settings panel
 function openSettings(){drawSettings();$('settings').classList.add('on');$('saveState').textContent='';syncOverlayHold();}
 function closeSettings(){$('settings').classList.remove('on');syncOverlayHold();}
-const LETTERS='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 function row(label,sub,ctrl){return '<div class="row"><div class="l">'+label+(sub?'<small>'+sub+'</small>':'')+'</div>'+ctrl+'</div>';}
 function sw(path){return '<button class="sw '+(get(path)?'on':'')+'" data-sw="'+path+'" aria-label="'+path+'"></button>';}
 function range(path,min,max,unit){const v=get(path);return '<input type="range" min="'+min+'" max="'+max+'" value="'+v+'" data-range="'+path+'"><span class="v" id="v-'+path.replace(/\./g,'-')+'">'+v+(unit||'')+'</span>';}
@@ -998,8 +1140,7 @@ function drawSettings(){
      +(ks.length<5?'<button class="btn" id="addKid">+ Add kid</button>':'')
      +(ks.length>1?'<button class="btn warn" id="delKid">Remove</button>':'')
      +'</div>'
-     +row('Name','tap the letters','<div id="nameOut">'+E(ek.name||'')+'</div>')
-     +'<div class="kbd">'+LETTERS.split('').map(l=>'<button data-l="'+l+'">'+l+'</button>').join('')+'<button data-l=" ">␣</button><button data-l="⌫" class="wide">⌫</button></div>'
+     +row('Name','tap to type — up to 14 letters','<input id="nameOut" class="kfield" type="text" maxlength="14" autocapitalize="words" autocomplete="off" spellcheck="false" inputmode="none" enterkeyhint="done" aria-label="Name" placeholder="Name" value="'+E(ek.name||'')+'">')
      +row('Friend','picture on the home bar','<div class="avs">'+Object.keys(AV).map(k=>'<button data-av="'+k+'" class="'+(ek.avatar===k?'on':'')+'">'+AV[k]+'</button>').join('')+'</div>')
      +row('Age','used by games to pick difficulty','<div class="stepper"><button id="ageDn">−</button><span class="v" style="min-width:60px;text-align:center;color:inherit" id="ageVal">'+(ek.age||5)+' yr</span><button id="ageUp">+</button></div>')
      +row('Stage &amp; hand','Auto picks from age; left flips toolbars','<div style="display:flex;flex-wrap:wrap;gap:6px">'
@@ -1014,8 +1155,7 @@ function drawSettings(){
             const on=!Array.isArray(ek.apps_allowed)||ek.apps_allowed.includes(a.id);
             return '<button class="btn'+(on?' go':'')+'" data-kapp="'+E(a.id)+'">'+E(a.icon)+' '+E(a.title)+'</button>';
           }).join('')+'</div>')
-     :row('Name','tap the letters','<div id="nameOut">'+E(S.child.name||'')+'</div>')
-      +'<div class="kbd">'+LETTERS.split('').map(l=>'<button data-l="'+l+'">'+l+'</button>').join('')+'<button data-l=" ">␣</button><button data-l="⌫" class="wide">⌫</button></div>'
+     :row('Name','tap to type — up to 14 letters','<input id="nameOut" class="kfield" type="text" maxlength="14" autocapitalize="words" autocomplete="off" spellcheck="false" inputmode="none" enterkeyhint="done" aria-label="Name" placeholder="Name" value="'+E(S.child.name||'')+'">')
       +row('Friend','the picture in the corner','<div class="avs">'+Object.keys(AV).map(k=>'<button data-av="'+k+'" class="'+(S.child.avatar===k?'on':'')+'">'+AV[k]+'</button>').join('')+'</div>')
    )
    +row('Daily time limits on','shows the time bar and the moon when a child’s minutes are up (Yoto is exempt)',sw('budget.enabled'))
@@ -1065,7 +1205,7 @@ function drawSettings(){
   m.querySelectorAll('[data-ek]').forEach(b=>b.onclick=()=>{editKidIdx=+b.dataset.ek;drawSettings();});
   if($('addKid'))$('addKid').onclick=()=>{const n=ks.length+1,id='kid'+Date.now().toString(36).slice(-4);S.kids.push({id,name:'',age:5,avatar:Object.keys(AV)[n%Object.keys(AV).length],tier:null,hand:'right',apps_allowed:null,budget_min:45});editKidIdx=S.kids.length-1;save();drawSettings();};
   if($('delKid'))$('delKid').onclick=()=>{if(ks.length<=1)return;S.kids.splice(editKidIdx,1);editKidIdx=0;if(kidId&&!S.kids.find(x=>x.id===kidId))kidId=S.kids[0].id;save();drawSettings();};
-  m.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{blip(600);const t=ek||S.child;let n=t.name||'';const l=b.dataset.l;if(l==='⌫')n=n.slice(0,-1);else if(n.length<14)n+=(l===' '?' ':(n.length===0||n.endsWith(' ')?l:l.toLowerCase()));t.name=n;$('nameOut').textContent=n;save();});
+  if($('nameOut'))$('nameOut').oninput=()=>{const t=ek||S.child;t.name=$('nameOut').value.slice(0,14);const chip=ek&&m.querySelector('[data-ek="'+editKidIdx+'"]');if(chip)chip.textContent=(AV[ek.avatar]||'🐸')+' '+kidLabel(ek,editKidIdx);save();};   /* typed with the on-screen keyboard (last block) */
   m.querySelectorAll('[data-av]').forEach(b=>b.onclick=()=>{const t=ek||S.child;t.avatar=b.dataset.av;m.querySelectorAll('[data-av]').forEach(x=>x.classList.toggle('on',x===b));save();});
   if(ek){
     $('ageDn').onclick=()=>{ek.age=Math.max(1,(ek.age||5)-1);$('ageVal').textContent=ek.age+' yr';save();};
@@ -1825,14 +1965,16 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
   // render: tier on <html>; verb tabs for reader+ when the kid has more than eight tiles; every tile gets an aria-label
   const _render=render;
   render=function(){
+    const keep=$('grid').scrollTop;   // a redraw never moves the page
     const t=applyTier();_render();
     const ak=activeKid(),tiles=[...$('grid').querySelectorAll('.tile')],vb=$('verbs');
     tiles.forEach(x=>{if(!x.getAttribute('aria-label')){const n=x.querySelector('.t');if(n)x.setAttribute('aria-label',n.textContent);}});
     $('grid').classList.toggle('few',tiles.length<=4);
+    $('grid').style.setProperty('--rows',String(Math.max(1,Math.ceil(tiles.length/2))));   // pre-reader 2-across: rows share the height (no scroll)
     if(!vb)return;
     const want=(t!=='pre-reader')&&tiles.length>8;
-    const g=$('grid');g.querySelectorAll('.vsec').forEach(x=>x.remove());
-    if(!want){vb.classList.remove('on');vb.innerHTML='';return;}
+    const g=$('grid');g.querySelectorAll('.vsec,.vend').forEach(x=>x.remove());
+    if(!want){vb.classList.remove('on');vb.innerHTML='';g.onscroll=null;g.classList.remove('scrolled');verb=null;g.scrollTop=keep;return;}
     // sections, not filters: tiles are grouped under Play / Read / Make / Mine headings (nothing disappears); the tabs jump to a section
     const byId=id=>APPS.find(a=>a.id===id);
     const gof=x=>groupOf(byId(x.dataset.id)||{id:x.dataset.id});
@@ -1841,17 +1983,28 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
       const sec=document.createElement('div');sec.className='vsec';sec.dataset.verb=v[0];sec.innerHTML='<span class="kt-icon">'+v[1]+'</span>'+v[2];
       g.appendChild(sec);tiles.filter(x=>gof(x)===v[0]).forEach(x=>g.appendChild(x));
     }
-    const key='kt.verb.'+(ak?ak.id:'d');
-    if(!verb){try{verb=localStorage.getItem(key)||null;}catch(e){}}
-    if(!verb||!vs.some(v=>v[0]===verb))verb=vs[0][0];
-    vb.innerHTML=vs.map(v=>'<button data-verb="'+v[0]+'"'+(v[0]===verb?' class="on"':'')+' aria-label="'+v[2]+'"><span class="kt-icon">'+v[1]+'</span><span class="kt-label">'+v[2]+'</span></button>').join('');
+    // Home always opens at the top (homeTop() on unlock and on a kid switch): the section a kid last used is no longer remembered — on
+    // the real panel the home opened wherever the previous child had left it (2026-11-09).
+    vb.innerHTML=vs.map(v=>'<button data-verb="'+v[0]+'" aria-label="'+v[2]+'"><span class="kt-icon">'+v[1]+'</span><span class="kt-label">'+v[2]+'</span></button>').join('');
     vb.classList.add('on');
-    const jump=(v,smooth)=>{const sec=g.querySelector('.vsec[data-verb="'+v+'"]');if(sec)sec.scrollIntoView({block:'start',behavior:smooth?'smooth':'auto'});vb.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.verb===v));};
-    vb.querySelectorAll('button').forEach(b=>{b.onclick=()=>{verb=b.dataset.verb;try{localStorage.setItem(key,verb);}catch(e){}blip(520);jump(verb,true);};holdToHear(b,()=>say('verb-'+b.dataset.verb));});
-    // the highlighted tab follows the scroll
-    g.onscroll=()=>{const top=g.getBoundingClientRect().top+20;let cur=vs[0][0];g.querySelectorAll('.vsec').forEach(sec=>{if(sec.getBoundingClientRect().top<=top)cur=sec.dataset.verb;});vb.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.verb===cur));};
-    if(verb!==vs[0][0])jump(verb,false);
+    // a spacer under the last section, as tall as it takes for that section's heading to reach the top — so the tab that was tapped is the
+    // tab that lights up, also for a one-tile section at the very end (Mine)
+    const end=document.createElement('div');end.className='vend';g.appendChild(end);
+    const secs=[...g.querySelectorAll('.vsec')],last=secs[secs.length-1];
+    const fitEnd=()=>{end.style.height='0px';const pb=parseFloat(getComputedStyle(g).paddingBottom)||0;end.style.height=Math.max(0,Math.ceil(g.clientHeight-(end.offsetTop-last.offsetTop)-pb-8))+'px';};
+    const mark=v=>{verb=v;vb.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.verb===v));};
+    let jumpT=0;   // while a tapped tab's smooth scroll is on its way, the passing sections do not steal the highlight
+    const spy=()=>{g.classList.toggle('scrolled',g.scrollTop>4);if(Date.now()<jumpT)return;const top=g.getBoundingClientRect().top+24;let cur=vs[0][0];secs.forEach(sec=>{if(sec.getBoundingClientRect().top<=top)cur=sec.dataset.verb;});mark(cur);};
+    vb.querySelectorAll('button').forEach(b=>{
+      b.onclick=()=>{blip(520);fitEnd();jumpT=Date.now()+900;mark(b.dataset.verb);const sec=g.querySelector('.vsec[data-verb="'+b.dataset.verb+'"]');if(sec)sec.scrollIntoView({block:'start',behavior:'smooth'});};
+      holdToHear(b,()=>say('verb-'+b.dataset.verb));});
+    fitEnd();g.scrollTop=keep;g.onscroll=spy;spy();
   };
+  // home = the top of the page: after the lock screen and after a kid switch
+  function homeTop(){const g=$('grid');g.scrollTop=0;if(g.onscroll)g.onscroll();}
+  window.homeTop=homeTop;
+  const _pickKid=pickKid;
+  pickKid=async function(id){await _pickKid(id);homeTop();};
   // tiles: a hold (350 ms) says the tile's name for pre-readers and readers and is not an open; pre-readers have no rearrange hold
   let hear=null;
   const _down=tileDown,_up=tileUp,_cancel=tileCancel;
@@ -1915,6 +2068,1690 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
     }catch(_){}
   }
   window.ktTier={tierFor,applyTier,say,sayText,verbs:()=>verb,get last(){return lastSaid;}};
+})();
+
+// ===== Lock-screen passcode (Joe 2026-11-09: "what happened to the passcode lockscreen? I need that back") — Fable, additive.
+// The interim Xfce desktop had a PIN pad at boot and on idle (xfce-interim/pinlock.py); the kiosk shell's lock screen (D-026) only asked
+// "who is playing?". This puts the code back inside the shell, as a setting:
+//   kiosk.lock_code_on  true = after the kid card (or the swipe up) the tablet asks for a 4-digit code before it opens
+//   kiosk.lock_code     that code; "" = the grown-up code (settings `pin`). The grown-up code always opens the tablet too.
+// Five free tries, then a wait that doubles (30 s … 10 min) — on every code pad, not only this one (D-096). The agent stores kiosk.*
+// keys as they come, so this needs no agent change. Wraps unlock, openGate, checkPin, drawSettings by reassignment.
+(function(){
+  const title=$('gateTitle');
+  const codeOn=()=>!!(S.kiosk&&S.kiosk.lock_code_on);
+  const lockCode=()=>{const c=String((S.kiosk&&S.kiosk.lock_code)||'');return /^\d{4}$/.test(c)?c:'';};
+  const grown=()=>String(S.pin||'1234');
+  const FREE=5,BASE_S=30,CAP_S=600;let F={n:0,until:0};
+  try{const j=JSON.parse(localStorage.getItem('kt.codefail')||'{}');F={n:+j.n||0,until:+j.until||0};}catch(e){}
+  const saveF=()=>{try{localStorage.setItem('kt.codefail',JSON.stringify(F));}catch(e){}};
+  const waitS=()=>Math.max(0,Math.ceil((F.until-Date.now())/1000));
+  function miss(){F.n++;if(F.n>=FREE)F.until=Date.now()+Math.min(CAP_S,BASE_S*Math.pow(2,F.n-FREE))*1000;saveF();}
+  function hit(){F={n:0,until:0};saveF();}
+  let waitT=null;
+  function showWait(){
+    clearInterval(waitT);
+    const draw=()=>{const s=waitS(),open=$('gate').classList.contains('on');
+      if(!open||s<=0){clearInterval(waitT);waitT=null;$('pad').classList.remove('wait');if(open)$('gateMsg').textContent='';return;}
+      $('pad').classList.add('wait');$('gateMsg').textContent='Too many tries — wait '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+    draw();if(waitS()>0)waitT=setInterval(draw,500);
+  }
+  const _openGate=openGate;
+  openGate=function(next){
+    _openGate(next);
+    const ak=activeKid();
+    if(next==='unlock')title.innerHTML=(ak?'<span class="av">'+(AV[ak.avatar]||'🐸')+'</span>':'')+'Type the code to play';
+    else title.textContent=next==='newlock'?'New unlock code':'Grown-ups only';
+    $('pad').classList.remove('wait');
+    if(next!=='newpin'&&next!=='newlock'&&waitS()>0)showWait();
+  };
+  const _checkPin=checkPin;
+  checkPin=function(){
+    if(gateNext==='newlock'){if(pin.length===4){set('kiosk.lock_code',pin);save();closeGate();toast('unlock code changed');openSettings();}return;}
+    if(gateNext==='newpin')return _checkPin();
+    if(waitS()>0){pin='';drawPin();blip(180);showWait();return;}
+    const lc=lockCode(),good=pin===grown()||(gateNext==='unlock'&&!!lc&&pin===lc);
+    if(!good){
+      miss();
+      if(gateNext==='unlock'){$('gateMsg').textContent='That is not the code';pin='';drawPin();blip(180);}else _checkPin();
+      if(waitS()>0)showWait();
+      return;
+    }
+    hit();
+    if(gateNext==='unlock'){closeGate();_unlock();if(window.homeTop)homeTop();return;}
+    _checkPin();
+  };
+  const _unlock=unlock;
+  unlock=function(force){
+    if(!locked)return;
+    if(force!==true&&codeOn()){blip(500);openGate('unlock');return;}
+    _unlock();if(window.homeTop)homeTop();
+  };
+  window.unlock=unlock;
+  // nothing opens under a coded lock screen (the nav bar is hidden there already; this is the belt to that pair of braces)
+  const _openApp=openApp,_openRecents=openRecents;
+  openApp=function(id){if(locked&&codeOn())return;return _openApp(id);};
+  openRecents=function(){if(locked&&codeOn())return;return _openRecents();};
+  // an unanswered code pad goes back to the clock after half a minute
+  setInterval(()=>{if(locked&&gateNext==='unlock'&&$('gate').classList.contains('on')&&Date.now()-lastInput>30000)closeGate();},5000);
+  // grown-up settings → Look & lock: the switch and the code
+  const _drawSettings=drawSettings;
+  drawSettings=function(){
+    _drawSettings();
+    const sec=[...$('smain').querySelectorAll('.sec')].find(s=>{const h=s.querySelector('h2');return h&&/^Look/.test(h.textContent);});
+    if(!sec)return;
+    const own=!!lockCode();
+    sec.insertAdjacentHTML('beforeend',
+      row('Passcode on the lock screen','after "who is playing?" the tablet asks for a 4-digit code — when it starts, after Sleep and after the idle lock','<button class="sw '+(codeOn()?'on':'')+'" id="lsCode"></button>')
+     +row('Unlock code',own?'the children have their own code; the grown-up code opens the tablet too':'the same as the grown-up code — set a separate one if the children may open the tablet themselves',
+          '<span style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn" id="lsCodeSet">'+(own?'Change…':'Set…')+'</button>'+(own?'<button class="btn" id="lsCodeClr">Use grown-up code</button>':'')+'</span>'));
+    $('lsCode').onclick=()=>{set('kiosk.lock_code_on',!codeOn());$('lsCode').classList.toggle('on',codeOn());save();};
+    $('lsCodeSet').onclick=()=>{closeSettings();openGate('newlock');$('gateMsg').textContent='Type the NEW unlock code';};
+    const clr=$('lsCodeClr');if(clr)clr.onclick=()=>{set('kiosk.lock_code','');save();drawSettings();};
+  };
+  window.ktLock={codeOn,fails:()=>Object.assign({},F),waitS};
+  // A launcher that has just (re)loaded has no tile open — say so. After a bundle push under an open tile the agent kept reporting that
+  // tile (`/api/status` app) for as long as nobody opened another one, which is what the push rule and the Bench page read.
+  const _loadAll2=loadAll;
+  loadAll=async function(){await _loadAll2();if(agent&&!current)fetch('/api/app',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:null})}).catch(()=>{});};
+})();
+
+// ===== Settings like a phone + the on-screen keyboard (card #269, part 1 of 5 — Joe: "I need Bluetooth to be like a phone's/tablet's
+// setup and management, also for Wi-Fi … camera, location and other resource settings approval-based by app"). Additive, last block.
+// SETTINGS: the chain above (drawSettings + Look & lock + passcode) still draws every row with its ids and handlers. This block files
+// those rows under eight section pages, shows the home list of sections or ONE page, and puts the open page and its scroll back after
+// every redraw (nine handlers call drawSettings()). Only openSettings() starts at the home list — except after a code change, which
+// comes back to the page it left. Wraps drawSettings, openSettings, closeSettings, navBack, checkPin by reassignment.
+//   window.ktSettings = {go(id|null), page, pages, el(id), summary{id:fn}, fill{id:fn->html}, wire{id:fn(el)}, live()} — parts 2-4
+//   replace fill/wire/summary for network, devices, or append .sec blocks to el('apps') from their own drawSettings wrapper.
+// KEYBOARD: one sheet for every text field of the shell (input / textarea — the kiosk has no other way to type). It opens on focus,
+// types into the field (input events, maxlength kept), never takes the focus, keeps the field above itself (scrolls the nearest
+// scroller, else lifts the layer), and a password field gets a show/hide eye.
+//   window.ktKbd = {open(el), hide(), press(key), el, isOpen, layer, shift}. A field may set autocapitalize="words|sentences",
+//   enterkeyhint or data-kb-enter (the label of the enter key), listen for "ktkbd-enter", or opt out with data-kb="off".
+(function(){
+  /* ---------- the keyboard ---------- */
+  const kb=document.createElement('div');kb.id='ktKbd';kb.setAttribute('role','group');kb.setAttribute('aria-label','keyboard');document.body.appendChild(kb);
+  const K={el:null,layer:'abc',shift:0,dirty:false,sc:null,pad:'',lift:null,liftT:''};   /* shift: 0 off · 1 the next letter · 2 caps lock */
+  const ROWS={
+    abc:[['q','w','e','r','t','y','u','i','o','p','{bksp}'],['{gap}','a','s','d','f','g','h','j','k','l','{enter}'],['{shift}','z','x','c','v','b','n','m','-',"'",'.'],['{sym}','{eye}','{space}','{hide}']],
+    sym:[['1','2','3','4','5','6','7','8','9','0','{bksp}'],['{gap}','@','#','$','%','&','*','(',')','"','{enter}'],['{more}',"'",'-','+','/',':',';','!','?',',','.'],['{abc}','{eye}','{space}','{hide}']],
+    more:[['1','2','3','4','5','6','7','8','9','0','{bksp}'],['{gap}','~','`','|','\\','{','}','[',']','^','{enter}'],['{sym}','<','>','=','_','€','£','¥','°','•','¿'],['{abc}','{eye}','{space}','{hide}']]
+  };
+  const SV={
+    shift:f=>'<svg viewBox="0 0 24 24"'+(f?' class="full"':'')+'><path d="M12 3.5 3.5 12.5H8V19h8v-6.5h4.5z"/>'+(f===2?'<path d="M8 22.2h8"/>':'')+'</svg>',
+    eye:off=>'<svg viewBox="0 0 24 24"><path d="M1.8 12S5.6 5.2 12 5.2 22.2 12 22.2 12 18.4 18.8 12 18.8 1.8 12 1.8 12z"/><circle cx="12" cy="12" r="3.1"/>'+(off?'<path d="M4.2 3.2l15.6 17.6"/>':'')+'</svg>',
+    hide:'<svg viewBox="0 0 24 24"><rect x="2.5" y="3.5" width="19" height="11" rx="2.2"/><path d="M6.5 7.5h.01M10.2 7.5h.01M13.8 7.5h.01M17.5 7.5h.01M7.5 11h9M8.5 18.5l3.5 3 3.5-3"/></svg>'
+  };
+  const key=(k,label,cls,grow,aria)=>'<button type="button" tabindex="-1" class="kbk'+(cls?' '+cls:'')+'" data-k="'+E(k)+'"'+(grow?' style="flex-grow:'+grow+'"':'')+(aria?' aria-label="'+aria+'"':'')+'>'+label+'</button>';
+  function draw(){
+    const el=K.el,pw=!!el&&el.dataset.kbPw==='1',shown=pw&&el.type!=='password',up=K.layer==='abc'&&K.shift>0;
+    const ent=el?(el.dataset.kbEnter||({done:'Done',go:'Go',next:'Next',search:'Search',send:'Send'})[el.getAttribute('enterkeyhint')||'']||(el.tagName==='TEXTAREA'?'↵':'Done')):'Done';
+    kb.dataset.layer=K.layer;
+    kb.innerHTML=ROWS[K.layer].map(r=>'<div class="kbr">'+r.map(k=>{
+      if(k==='{gap}')return '<span style="flex:.5 1 0"></span>';
+      if(k==='{bksp}')return key(k,'⌫','fn',1.4,'backspace');
+      if(k==='{enter}')return key(k,E(ent),'go',1.9,'enter');
+      if(k==='{shift}')return key(k,SV.shift(K.shift),'fn'+(K.shift?' on':''),1.5,K.shift===2?'caps lock':'shift');
+      if(k==='{sym}')return key(k,'?123','fn',1.5,'numbers and symbols');
+      if(k==='{more}')return key(k,'=\\&lt;','fn',1.5,'more symbols');
+      if(k==='{abc}')return key(k,'ABC','fn',1.5,'letters');
+      if(k==='{eye}')return pw?key(k,SV.eye(shown),'fn'+(shown?' on':''),1.5,shown?'hide what is typed':'show what is typed'):'';
+      if(k==='{space}')return key(k,'','',7,'space');
+      if(k==='{hide}')return key(k,SV.hide,'fn',1.5,'hide the keyboard');
+      const c=up?k.toUpperCase():k;return key(c,E(c),'',0,'');
+    }).join('')+'</div>').join('');
+  }
+  function caret(el){let s=el.value.length,e=s;try{if(el.selectionStart!=null){s=el.selectionStart;e=el.selectionEnd;}}catch(x){}return [s,e];}
+  function put(t){   /* t = the text to type; null = backspace */
+    const el=K.el,v=el.value;let [s,e]=caret(el);
+    if(t===null){if(s===e){if(!s)return;s--;if(s>0&&/[\uDC00-\uDFFF]/.test(v[s]))s--;}t='';}
+    const nv=v.slice(0,s)+t+v.slice(e);
+    if(el.maxLength>0&&nv.length>el.maxLength){blip(180);return;}
+    el.value=nv;const c=s+t.length;try{el.setSelectionRange(c,c);}catch(x){}
+    K.dirty=true;el.dispatchEvent(new Event('input',{bubbles:true}));
+  }
+  function autoShift(){   /* a name starts with a capital, like on a phone */
+    const el=K.el;if(!el||K.layer!=='abc'||K.shift===2)return;
+    const ac=el.getAttribute('autocapitalize');if(ac!=='words'&&ac!=='sentences')return;
+    const before=el.value.slice(0,caret(el)[0]);
+    K.shift=(!before||(ac==='words'?/\s$/.test(before):/[.!?]\s+$/.test(before)))?1:0;
+  }
+  function press(k){
+    const el=K.el;if(!el)return;
+    if(!el.isConnected){hide();return;}
+    blip(600);
+    if(k==='{shift}'){K.shift=(K.shift+1)%3;draw();return;}
+    if(k==='{sym}'||k==='{more}'||k==='{abc}'){K.layer=k.slice(1,-1);draw();return;}
+    if(k==='{eye}'){const c=caret(el);el.type=el.type==='password'?'text':'password';try{el.setSelectionRange(c[0],c[1]);}catch(x){}draw();return;}
+    if(k==='{hide}'){hide();return;}
+    if(k==='{enter}'&&el.tagName!=='TEXTAREA'){el.dispatchEvent(new CustomEvent('ktkbd-enter',{bubbles:true}));hide();return;}
+    const was=K.shift;
+    put(k==='{bksp}'?null:(k==='{enter}'?'\n':(k==='{space}'?' ':k)));
+    if(K.shift===1&&k.length===1)K.shift=0;
+    autoShift();if(K.shift!==was)draw();
+    reveal();
+  }
+  /* the field is never under the keyboard: give the nearest scroller room and scroll it; if nothing scrolls, lift the layer the field is in */
+  function kbTop(){return window.innerHeight-(parseFloat(getComputedStyle(kb).bottom)||0)-kb.offsetHeight;}
+  function reveal(){
+    const el=K.el;if(!el||!el.isConnected)return;
+    if(!K.sc){let sc=el.parentElement;while(sc&&sc!==document.body&&!/(auto|scroll)/.test(getComputedStyle(sc).overflowY))sc=sc.parentElement;
+      if(sc&&sc!==document.body){K.sc=sc;K.pad=sc.style.paddingBottom;sc.style.paddingBottom=((parseFloat(getComputedStyle(sc).paddingBottom)||0)+kb.offsetHeight)+'px';}}
+    const top=kbTop()-14;let r=el.getBoundingClientRect();
+    if(K.sc){const st=K.sc.getBoundingClientRect().top+8;
+      if(r.bottom>top)K.sc.scrollTop+=r.bottom-top;else if(r.top<st)K.sc.scrollTop-=st-r.top;
+      r=el.getBoundingClientRect();}
+    if(r.bottom>top&&!K.lift){let h=el.parentElement;while(h&&h!==document.body&&getComputedStyle(h).position!=='fixed')h=h.parentElement;
+      if(h&&h!==document.body){K.lift=h;K.liftT=h.style.transform;h.style.transform='translateY('+Math.round(top-r.bottom)+'px)';}}
+  }
+  function isField(t){return !!t&&t.nodeType===1&&(t.tagName==='TEXTAREA'||(t.tagName==='INPUT'&&/^(text|password|search|email|url|tel|number)?$/.test((t.getAttribute('type')||'').toLowerCase())))&&!t.readOnly&&!t.disabled&&t.dataset.kb!=='off';}
+  function release(){   /* let go of the field: its scroller and layer go back, a shown password is hidden again, "change" fires if we typed */
+    const el=K.el;K.el=null;
+    if(K.sc){K.sc.style.paddingBottom=K.pad;K.sc=null;}
+    if(K.lift){K.lift.style.transform=K.liftT;K.lift=null;}
+    if(!el)return null;
+    if(el.dataset.kbPw==='1'&&el.type!=='password'){try{el.type='password';}catch(x){}}
+    if(K.dirty){K.dirty=false;el.dispatchEvent(new Event('change',{bubbles:true}));}
+    return el;
+  }
+  let rep=null;
+  function stopRep(){clearTimeout(rep);clearInterval(rep);rep=null;}
+  function hide(){
+    stopRep();
+    const el=release();
+    kb.classList.remove('on');document.body.classList.remove('kbd');
+    if(el&&document.activeElement===el)el.blur();
+  }
+  function open(el){
+    if(!isField(el))return;
+    if(K.el===el){reveal();return;}
+    if(K.el)release();
+    const ty=(el.getAttribute('type')||'').toLowerCase(),im=el.getAttribute('inputmode')||'';
+    K.el=el;K.dirty=false;K.shift=0;K.layer=(ty==='number'||ty==='tel'||/^(numeric|decimal|tel)$/.test(im))?'sym':'abc';
+    if(ty==='password')el.dataset.kbPw='1';
+    if(!im)el.setAttribute('inputmode','none');   /* never an OS keyboard under ours */
+    try{const n=el.value.length;el.setSelectionRange(n,n);}catch(x){}
+    autoShift();draw();
+    kb.classList.add('on');document.body.classList.add('kbd');
+    document.body.style.setProperty('--kbh',kb.offsetHeight+'px');
+    reveal();
+  }
+  document.addEventListener('focusin',e=>{if(isField(e.target))open(e.target);});
+  document.addEventListener('focusout',e=>{if(e.target===K.el)setTimeout(()=>{if(K.el&&document.activeElement!==K.el)hide();},0);});
+  /* the lockdown at the top of the script cancels every selectstart; inside a text field a tap may place the caret */
+  document.addEventListener('selectstart',e=>{if(isField(e.target))e.stopPropagation();},true);
+  /* a key acts on the way down (fast, and a finger that rolls still types) and never takes the focus from the field */
+  kb.addEventListener('mousedown',e=>e.preventDefault());
+  kb.addEventListener('pointerdown',e=>{
+    e.preventDefault();
+    const b=e.target.closest('.kbk');if(!b)return;
+    const k=b.dataset.k;b.classList.add('dn');setTimeout(()=>b.classList.remove('dn'),150);
+    press(k);
+    if(k==='{bksp}'){stopRep();rep=setTimeout(()=>{rep=setInterval(()=>{if(K.el)press('{bksp}');else stopRep();},75);},450);}
+  });
+  ['pointerup','pointercancel'].forEach(ev=>document.addEventListener(ev,stopRep,true));
+  window.addEventListener('blur',stopRep);
+  window.addEventListener('resize',()=>{if(K.el)reveal();});
+  $('navBack').addEventListener('mousedown',e=>e.preventDefault());   /* ◁ keeps the field focused, so one press only puts the keyboard away */
+  window.ktKbd={open:el=>{try{el.focus();}catch(x){}open(el);},hide,press,isField,get el(){return K.el;},get isOpen(){return kb.classList.contains('on');},get layer(){return K.layer;},get shift(){return K.shift;}};
+
+  /* ---------- Settings: a home list of sections, one page at a time ---------- */
+  const IC={
+    network:'<path d="M2.5 9a15 15 0 0 1 19 0"/><path d="M5.5 12.6a10.5 10.5 0 0 1 13 0"/><path d="M8.6 16.2a6 6 0 0 1 6.8 0"/><path d="M12 19.6h.01"/>',
+    devices:'<path d="M4.5 14v-2a7.5 7.5 0 0 1 15 0v2"/><rect x="3" y="14" width="4.5" height="6.5" rx="1.6"/><rect x="16.5" y="14" width="4.5" height="6.5" rx="1.6"/>',
+    apps:'<rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/>',
+    kids:'<circle cx="9" cy="8" r="3.2"/><path d="M3 19.5a6 6 0 0 1 12 0"/><circle cx="17.5" cy="10" r="2.4"/><path d="M17 15a4.5 4.5 0 0 1 4.5 4.5"/>',
+    display:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5V5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/>',
+    sound:'<path d="M4 9.5v5h3.6L13 19V5L7.6 9.5z"/><path d="M16.5 8.6a5 5 0 0 1 0 6.8"/><path d="M19 6a8.6 8.6 0 0 1 0 12"/>',
+    lock:'<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5"/>',
+    system:'<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M10 15.8h4"/>'
+  };
+  const PAGES=[['network','Network & internet','#1e88e5'],['devices','Connected devices','#00897b'],['apps','Apps & permissions','#7c4dff'],['kids','Kids & screen time','#ff8a3d'],
+               ['display','Display & look','#f0a000'],['sound','Sound','#ec407a'],['lock','Lock screen & security','#3fb950'],['system','System','#5b6b80']].map(p=>({id:p[0],t:p[1],bg:p[2]}));
+  let page=null,lastPage=null,resume=null,homeY=0;
+  const benchWord=()=>({ok:'Reachable',down:'Not reachable',off:'Not set up'})[STATUS.bench]||'Not checked yet';
+  /* one line under each section on the home list, read from the live state */
+  const SUM={
+    network:()=>!agent?(LIVE?'No tablet helper on this page':'Opened as a file'):(STATUS.bench==='ok'?'Online · Bench reachable':'Tablet helper running · Bench '+benchWord().toLowerCase()),
+    devices:()=>{
+      if(!agent)return 'Bluetooth needs the tablet helper';
+      if(!BT)return 'Bluetooth';
+      if(!BT.available)return 'No Bluetooth on this tablet';
+      if(!BT.powered)return 'Bluetooth off';
+      const d=BT.devices||[],con=d.filter(x=>x.connected),pa=d.filter(x=>x.paired);
+      return con.length?'Bluetooth · sound on '+con.map(x=>x.name).join(', '):'Bluetooth on · '+(pa.length?pa.length+' paired':'nothing paired yet');},
+    apps:()=>{const all=APPS.filter(a=>!a.soon),al=S.apps.allowed||[];return all.filter(a=>al.includes(a.id)).length+' of '+all.length+' apps on the home screen';},
+    kids:()=>{
+      const ks=kidsList();if(!ks)return (S.child.name||'').trim()||'One child';
+      const n=ks.length+(ks.length===1?' kid':' kids'),bed=(S.bedtime&&S.bedtime.enabled)?' · bedtime '+fmt12(S.bedtime.start):'';
+      if(!(S.budget&&S.budget.enabled))return n+' · no time limit'+bed;
+      const b=ks.map(k=>+k.budget_min||0),lo=Math.min(...b),hi=Math.max(...b);
+      return n+' · '+(hi===0?'no time limit':(lo===hi?hi:(lo===0?'up to '+hi:lo+'–'+hi))+' min a day')+bed;},
+    display:()=>{const l=tabletLook(),w=(WALLS.find(x=>x[0]===l.wallpaper)||[])[1]||(String(l.wallpaper||'').startsWith('photo:')?'Photo':'Sky');
+      return 'Brightness '+(S.screen.brightness??70)+'% · '+w+' wallpaper'+(l.dark?' · dark':'');},
+    sound:()=>'Volume '+(S.sound.volume||0)+'% · loudest '+(S.sound.max_volume||80)+'% · '+({lineout:'panel speakers',headphones:'headphone jack',earphones:'earphones'}[S.sound.output||'lineout']||'panel speakers'),
+    lock:()=>{const la=+((S.kiosk||{}).lock_after_min||0);return ((S.kiosk||{}).lock_code_on?'Passcode on':'No passcode')+' · '+(la?'locks after '+la+' min':'does not lock by itself');},
+    system:()=>agent?((STATUS.hostname||'This tablet')+' · bundle '+(STATUS.version||'?')):(LIVE?'No tablet helper on this page':'Opened as a file')
+  };
+  /* pages that have no rows of their own yet (parts 2-3 fill them): what the tablet knows today */
+  const val=(t,id)=>t?'<span class="v"'+(id?' id="'+id+'"':'')+'>'+E(t)+'</span>':'';
+  const FILL={
+    network:()=>{const b=STATUS.bench;
+      return '<div class="sec"><h2>Connection</h2>'
+        +row('Wi-Fi','the tablet uses the network it was set up with — choosing a network and typing its password here comes in the next update',val(agent&&b==='ok'?'Online':'','netWifi'))
+        +row('Bench','the family computer the tablet gets its apps and updates from',val(agent?benchWord():'—','netBench'))
+        +row('Tablet helper','the small program on the tablet that sets the brightness, the sound and Bluetooth',val(agent?'Running':(LIVE?'Not on this page':'Opened as a file'),'netHelper'))
+        +row('Tablet name','how this tablet shows up on the home network',val((agent&&STATUS.hostname)||'—','netName'))
+        +'</div>';},
+    devices:()=>{const ok=agent&&BT&&BT.available,d=(BT&&BT.devices)||[],con=d.filter(x=>x.connected),pa=d.filter(x=>x.paired);
+      const st=!agent?'needs the tablet helper':(!BT?'checking…':(!BT.available?'this tablet has no Bluetooth':(!BT.powered?'off':(con.length?'on · sound plays on '+con.map(x=>E(x.name)).join(', '):'on · sound plays on the tablet'))));
+      return '<div class="sec"><h2>Bluetooth</h2>'
+        +row('Bluetooth',st,ok?'<button class="btn go" id="setBtOpen">Bluetooth controls…</button>':'')
+        +(ok&&BT.powered?(pa.map(x=>row((/head/.test(x.icon||'')?'🎧 ':'🔊 ')+E(x.name),x.connected?'connected — sound plays here':'paired, not connected',val(x.connected?'Connected':'Paired'))).join('')
+          ||row('No speaker or headphones yet','open Bluetooth controls, then Pair new… with the speaker in pairing mode','')):'')
+        +'</div><div class="snote">Switching Bluetooth on or off, pairing, connecting and forgetting a device happen in the pull-down menu for now. They move onto this page in a later update.</div>';}
+  };
+  const WIRE={
+    devices:()=>{const b=$('setBtOpen');if(b)b.onclick=()=>{btUnlock=Date.now()+5*60*1000;openQuick(current?'bottom':'top');};}   /* Settings is behind the code already: pairing is unlocked, as after the code pad */
+  };
+  function usesHtml(){   /* Apps & permissions: what each app on the home screen uses today (pack.yaml permissions), read-only until part 4 */
+    const LBL={camera:'📷 Camera',mic:'🎤 Microphone',audio:'🔊 Sound',ble:'🎧 Bluetooth',usb:'🔌 USB',i2c:'🧩 Plug-in parts',bench:'🌐 The Bench'};
+    const on=APPS.filter(a=>!a.soon&&(S.apps.allowed||[]).includes(a.id));
+    const rows=Object.keys(LBL).map(k=>{const l=on.filter(a=>Array.isArray(a.permissions)&&a.permissions.includes(k));return l.length?row(LBL[k],l.map(a=>E(a.title)).join(', '),''):'';}).join('');
+    return '<h2>What the apps can use</h2>'+rows+'<div class="snote">'+(rows?'Only the apps on the home screen are listed. ':'')+'Saying yes or no to the camera, the microphone and the rest, app by app, comes in a later update.</div>';
+  }
+  /* the home list is built once and re-attached after every redraw (drawSettings replaces #smain's content) */
+  const home=document.createElement('div');home.id='setHome';
+  home.innerHTML=PAGES.map(p=>'<button class="shrow" data-page="'+p.id+'"><span class="ic" style="background:'+p.bg+'"><svg viewBox="0 0 24 24">'+IC[p.id]+'</svg></span><span class="tx"><b>'+E(p.t)+'</b><small id="setSum-'+p.id+'"></small></span><svg class="ch" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>').join('');
+  home.onclick=e=>{const b=e.target.closest('.shrow');if(b){blip(520);go(b.dataset.page);}};
+  const hd=$('settings').querySelector('header');hd.querySelector('h1').id='setTitle';
+  hd.insertAdjacentHTML('afterbegin','<button id="setBack" aria-label="back to all settings"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 5l-7 7 7 7"/></svg></button>');
+  $('setBack').onclick=()=>{blip(440);go(null);};
+  const pageEl=id=>$('smain').querySelector('.spage[data-page="'+id+'"]');
+  function file(){   /* move every row the chain drew into the page a phone user would look in; handlers travel with the nodes */
+    const m=$('smain'),P={},olds=[...m.children].filter(x=>x.classList.contains('sec'));
+    m.appendChild(home);
+    PAGES.forEach(p=>{const d=document.createElement('div');d.className='spage';d.dataset.page=p.id;m.appendChild(d);P[p.id]=d;});
+    const byH=re=>olds.find(s=>{const h=s.querySelector('h2');return !!h&&re.test(h.textContent);});
+    const sec=(pg,title)=>{const s=document.createElement('div');s.className='sec';s.innerHTML='<h2>'+E(title)+'</h2>';P[pg].appendChild(s);return s;};
+    const mv=(el,to)=>{if(el&&to)to.appendChild(el);};
+    const rowOf=(root,q)=>{const e=root&&root.querySelector(q);return e?e.closest('.row'):null;};
+    const head=(s,t)=>{const h=s&&s.querySelector('h2');if(h){if(t)h.textContent=t;else h.remove();}};
+    const kids=byH(/^Kids/),look=byH(/^Look/),scr=byH(/^Screen$/),snd=byH(/^Sound$/),apps=byH(/^Apps on/),bed=byH(/^Bedtime$/),grown=byH(/^Grown-up/),tab=byH(/^This tablet$/);
+    /* Kids & screen time: the children, the time limits for everyone, bedtime */
+    mv(kids,P.kids);head(kids,'Children');
+    const lim=sec('kids','Time limits');['[data-sw="budget.enabled"]','[data-step="budget.grace_min"]','[data-step="budget.reset_hour"]','[data-sw="budget.count_home"]'].forEach(q=>mv(rowOf(kids,q),lim));
+    mv(bed,P.kids);
+    /* Display & look: the screen rows + Wallpaper & style */
+    mv(scr,P.display);mv(rowOf(look,'#lsStyle'),sec('display','Wallpaper & style'));
+    /* Sound */
+    mv(snd,P.sound);head(snd,'');
+    /* Lock screen & security: lock at start, idle lock, passcode, unlock code + home button, hold time, change the code */
+    const lk=sec('lock','Lock screen');['#lsStart','#lsDn','#lsCode','#lsCodeSet'].forEach(q=>mv(rowOf(look,q),lk));
+    mv(grown,P.lock);
+    /* Apps & permissions: the home-screen switches + what the apps use */
+    mv(apps,P.apps);sec('apps','').innerHTML=usesHtml();
+    /* System: this tablet (bundle, reload, updates, developer desktop, restart) + power off and the Bug Finder from the pull-down menu */
+    mv(tab,P.system);
+    const bug=$('dbgPill').classList.contains('on'),n=+($('dbgCnt').textContent)||0;
+    sec('system','Power & tools').insertAdjacentHTML('beforeend',
+      row('Power off','turns the tablet off','<button class="btn warn" id="setOff">Power off</button>')
+     +row('Bug Finder','a small "Point Issue" button on every screen, for marking something that does not work'+(n?' · '+n+' saved':''),'<button class="sw'+(bug?' on':'')+'" id="setBug" aria-label="bug finder"></button>'));
+    /* whatever nobody filed stays reachable: a row a later block adds to Look & lock shows under Display, a whole new section under System */
+    if(look){if(look.querySelector('.row'))P.display.appendChild(look);else look.remove();}
+    [...m.children].forEach(x=>{if(x.classList.contains('sec'))P.system.appendChild(x);});
+    m.querySelectorAll('.spage>.sec').forEach(s=>{if(!s.querySelector('.row,.snote'))s.remove();});
+    const off=$('setOff');if(off)off.onclick=()=>{if(!agent){toast('Only on the tablet');return;}if(confirm('Turn the tablet off now?'))powerDo('poweroff');};
+    const sb=$('setBug');if(sb)sb.onclick=()=>{const on=!$('dbgPill').classList.contains('on');if(window.KTDBG){if(on)KTDBG.enable();else KTDBG.disable();}sb.classList.toggle('on',$('dbgPill').classList.contains('on'));};
+  }
+  function show(){
+    const s=$('settings'),p=PAGES.find(x=>x.id===page)||null;
+    s.classList.toggle('sub',!!p);s.dataset.page=p?p.id:'home';
+    $('setTitle').textContent=p?p.t:'Settings';
+    $('smain').querySelectorAll('.spage').forEach(d=>d.classList.toggle('on',!!p&&d.dataset.page===p.id));
+  }
+  function live(){   /* summaries + the generated pages; a page is redrawn only when its text changed, so a finger never loses its button */
+    if(!home.isConnected)return;
+    PAGES.forEach(p=>{const el=$('setSum-'+p.id);let t='';try{t=String(SUM[p.id]());}catch(x){}if(el&&el.textContent!==t)el.textContent=t;});
+    Object.keys(FILL).forEach(id=>{const el=pageEl(id);if(!el)return;let h=null;try{h=FILL[id](el);}catch(x){}
+      if(typeof h==='string'&&el._h!==h){el._h=h;el.innerHTML=h;if(WIRE[id])WIRE[id](el);}});
+  }
+  function go(id){
+    hide();
+    const m=$('smain');if(page===null)homeY=m.scrollTop;
+    page=PAGES.some(p=>p.id===id)?id:null;
+    show();live();
+    m.scrollTop=page?0:homeY;
+    if(page==='devices')pollBt().then(live);
+  }
+  const _draw=drawSettings;
+  drawSettings=function(){
+    const m=$('smain'),y=m.scrollTop;
+    if(K.el&&m.contains(K.el))hide();
+    _draw();file();show();live();
+    m.scrollTop=y;
+  };
+  const _open=openSettings;
+  openSettings=function(){page=resume;resume=null;homeY=0;_open();$('smain').scrollTop=0;pollBt().then(live);};
+  const _close=closeSettings;
+  closeSettings=function(){hide();lastPage=page;_close();};
+  /* after "Change the code" / "Set…" the code pad comes back to the page it was opened from, not to the home list */
+  const _checkPin=checkPin;
+  checkPin=function(){resume=(gateNext==='newpin'||gateNext==='newlock')?lastPage:null;try{return _checkPin();}finally{resume=null;}};
+  /* ◁ : the keyboard goes first, then a page goes up to the home list, then the launcher's own back (which closes Settings) */
+  const _navBack=navBack;
+  navBack=function(){
+    if(K.el){blip(440);hide();return;}
+    if($('settings').classList.contains('on')&&page&&!quickOpen&&!recentsOpen){blip(440);go(null);return;}
+    _navBack();
+  };
+  $('navBack').onclick=navBack;
+  setInterval(()=>{if(!$('settings').classList.contains('on'))return;if(page==='devices'&&agent&&!quickOpen)pollBt().then(live);else live();},5000);
+  window.ktSettings={go,live,pages:PAGES,summary:SUM,fill:FILL,wire:WIRE,el:pageEl,get page(){return page;}};
+})();
+
+/* ===== Settings → Connected devices & Sound output picker (card #271, part 3 of 5) — additive, last block ===== */
+(function(){
+  const TYPE_ICO={headphones:'🎧',speaker:'🔊',gamepad:'🎮',keyboard:'⌨️',mouse:'🖱️',phone:'📱',other:'📶'};
+  const TYPE_LBL={headphones:'Headphones',speaker:'Speaker',gamepad:'Game controller',keyboard:'Keyboard',mouse:'Mouse',phone:'Phone',other:'Other'};
+  const devType=d=>(d&&d.type&&TYPE_ICO[d.type])?d.type:(/head/.test((d&&d.icon)||'')?'headphones':((d&&d.audio)?'speaker':'other'));
+  const devIcon=d=>TYPE_ICO[devType(d)]||'📶';
+  const devTypeLabel=d=>TYPE_LBL[devType(d)]||'Other';
+
+  let btView='main',btGearMac=null,btPairBusy='',btPairError='',qOutOpen=false;
+  let pairPageOpen=false,pairWinT=null;
+
+  /* Visibility (btWindow) only while the Pair-new page is open; openQuick no longer opens the pairing window */
+  const _rawBtWindow=btWindow;
+  btWindow=function(sec){
+    if(sec>0&&!pairPageOpen)return;
+    if(sec===0&&pairPageOpen)return;
+    _rawBtWindow(sec);
+  };
+  function setPairPage(on){
+    if(on){
+      pairPageOpen=true;
+      _rawBtWindow(120);
+      if(agent)btPost('scan',{seconds:60}).then(j=>{BT=j;drawBt();ktSettings.live();}).catch(()=>{});
+      clearInterval(pairWinT);
+      pairWinT=setInterval(()=>{
+        if(pairPageOpen&&$('settings').classList.contains('on')&&ktSettings.page==='devices'&&btView==='pair'){
+          _rawBtWindow(120);
+          pollBt().then(()=>ktSettings.live());
+        }else setPairPage(false);
+      },3000);
+    }else{
+      const was=pairPageOpen;
+      pairPageOpen=false;
+      clearInterval(pairWinT);pairWinT=null;
+      if(was)_rawBtWindow(0);
+    }
+  }
+
+  function conAudioDevs(){
+    return (BT&&BT.powered&&Array.isArray(BT.devices))?BT.devices.filter(d=>d.connected&&d.audio):[];
+  }
+  function activeBtAudioDev(){
+    const ca=conAudioDevs();
+    if(!ca.length)return null;
+    const want=(BT&&BT.bt_output!=null)?BT.bt_output:((S.sound&&S.sound.bt_output)||'');
+    return ca.find(d=>d.mac===want)||null;
+  }
+  function activeOutId(){
+    const btD=activeBtAudioDev();
+    if(btD)return btD.mac;
+    return (BT&&BT.wired_output)||(S.sound&&S.sound.output)||'lineout';
+  }
+  function activeOutLabel(){
+    const btD=activeBtAudioDev();
+    if(btD)return devIcon(btD)+' '+btD.name;
+    const w=(BT&&BT.wired_output)||(S.sound&&S.sound.output)||'lineout';
+    if(w==='headphones')return '🎧 Headphone jack';
+    if(w==='earphones')return '🔈 Earphones';
+    return '🔊 Tablet speaker';
+  }
+
+  /* Sound output picker element inside #quick */
+  const qPicker=document.createElement('div');
+  qPicker.id='qOutPicker';
+  const qBtRow=$('qOut')&&$('qOut').closest('.qrow');
+  if(qBtRow&&qBtRow.parentNode)qBtRow.insertAdjacentElement('afterend',qPicker);
+
+  function drawOutPicker(){
+    const act=activeOutId(),ca=conAudioDevs();
+    if($('qOut'))$('qOut').textContent=activeOutLabel();
+    qPicker.classList.toggle('on',!!qOutOpen);
+    const opts=[
+      ['lineout','🔊 Tablet speaker'],
+      ['headphones','🎧 Headphone jack'],
+      ...ca.map(d=>[d.mac,devIcon(d)+' '+d.name])
+    ];
+    qPicker.innerHTML=opts.map(o=>'<button type="button" class="qout-opt'+(act===o[0]?' on':'')+'" data-pick-out="'+E(o[0])+'">'+E(o[1])+'</button>').join('');
+    qPicker.querySelectorAll('[data-pick-out]').forEach(b=>b.onclick=()=>{blip(520);pickSoundOut(b.dataset.pickOut);});
+  }
+
+  function syncSoundPageOut(){
+    const snd=ktSettings.el('sound');
+    if(!snd)return;
+    const firstOut=snd.querySelector('[data-out]');
+    const host=firstOut?firstOut.closest('.stepper'):null;
+    if(!host)return;
+    const act=activeOutId(),ca=conAudioDevs();
+    const opts=[
+      ['lineout','Panel speakers'],
+      ['headphones','Headphone jack'],
+      ['earphones','Earphones'],
+      ...ca.map(d=>[d.mac,devIcon(d)+' '+d.name])
+    ];
+    host.innerHTML=opts.map(o=>'<button class="btn'+(act===o[0]?' go':'')+'" data-out="'+E(o[0])+'">'+E(o[1])+'</button>').join('');
+    host.querySelectorAll('[data-out]').forEach(b=>b.onclick=()=>{blip(500);pickSoundOut(b.dataset.out);});
+  }
+
+  async function pickSoundOut(target){
+    S.sound=S.sound||{};
+    const isWired=(target==='lineout'||target==='headphones'||target==='earphones');
+    if(isWired){S.sound.output=target;S.sound.bt_output='';}
+    else{S.sound.bt_output=target;}
+    if(BT){
+      BT.output=target;
+      if(isWired){BT.wired_output=target;BT.bt_output='';}
+      else{BT.bt_output=target;}
+    }
+    qOutOpen=false;
+    drawQuick();syncSoundPageOut();ktSettings.live();
+    if(agent){
+      try{
+        BT=await btPost('output',{output:target});
+        drawQuick();syncSoundPageOut();ktSettings.live();
+      }catch(e){toast('Sound: '+e.message);}
+    }else{save();}
+    if(target==='lineout')toast('Sound -> tablet speaker');
+    else if(target==='headphones')toast('Sound -> headphone jack');
+    else if(target==='earphones')toast('Sound -> earphones');
+    else{const d=(BT&&BT.devices||[]).find(x=>x.mac===target);toast('Sound -> '+(d?d.name:target));}
+  }
+
+  if($('qOut'))$('qOut').onclick=e=>{e.stopPropagation();blip(500);qOutOpen=!qOutOpen;drawOutPicker();};
+  const _closeQuick2=closeQuick;
+  closeQuick=function(){qOutOpen=false;qPicker.classList.remove('on');_closeQuick2();};
+
+  /* Quick shade Bluetooth row: paired devices connect/disconnect without code; Pair new opens Settings → Connected devices */
+  drawBt=function(){
+    const el=$('qDevs');
+    drawOutPicker();
+    syncSoundPageOut();
+    if(!agent||!BT||!BT.available){
+      $('qBtState').textContent=agent?'no Bluetooth on this tablet':'needs the tablet helper';
+      $('qBtSw').style.display='none';$('qPair').style.display='none';el.innerHTML='';$('qHint').textContent='';return;
+    }
+    $('qBtSw').style.display='';$('qBtSw').classList.toggle('on',!!BT.powered);
+    $('qPair').style.display=BT.powered?'':'none';
+    $('qPair').textContent=btUnlocked()?'Pair new…':'🔒 Pair new…';
+    const actBt=activeBtAudioDev();
+    const con=(BT.devices||[]).filter(d=>d.connected);
+    const wiredName=((BT&&BT.wired_output)||(S.sound&&S.sound.output))==='headphones'?'headphone jack':'tablet speaker';
+    $('qBtState').textContent=!BT.powered?'off':(actBt?'sound on '+actBt.name:(con.length?con.map(d=>d.name).join(', ')+' · '+wiredName:wiredName));
+    const paired=BT.powered?(BT.devices||[]).filter(d=>d.paired):[];
+    el.innerHTML=paired.map(d=>'<div class="qdev'+(d.connected?' on':'')+'" data-mac="'+E(d.mac)+'"><span>'+devIcon(d)+'</span><span class="n">'+E(d.name)+(d.battery!=null?' <small>· 🔋 '+d.battery+'%</small>':'')+'</span>'
+      +(d.connected?'<button class="qact" data-act="disconnect">Disconnect</button>':'<button class="qact go" data-act="connect">Connect</button>')
+      +'</div>').join('')
+      ||'<div class="qdev" style="color:var(--dim)">'+(BT.powered?'No device paired yet — tap Pair new…':'Bluetooth is off')+'</div>';
+    el.querySelectorAll('button[data-act]').forEach(b=>b.onclick=()=>btAct(b.dataset.act,b.closest('.qdev').dataset.mac,b));
+    const mic=(STATUS.caps||{}).mic;
+    $('qHint').textContent='Microphone: '+(mic?'available':'none — a Bluetooth headset adds one')+'. Tap a paired device to connect or disconnect.';
+  };
+
+  function openBtView(v,mac){
+    if(window.ktKbd&&ktKbd.isOpen)ktKbd.hide();
+    btView=v||'main';
+    btGearMac=mac||null;
+    if(btView==='pair'){
+      btPairError='';
+      setPairPage(true);
+    }else{
+      setPairPage(false);
+      btPairBusy='';
+      btPairError='';
+    }
+    const el=ktSettings.el('devices');
+    if(el)el._h='';
+    ktSettings.live();
+  }
+
+  function openPairFromQuick(){
+    btUnlock=Date.now()+5*60*1000;
+    closeQuick();
+    if(!$('settings').classList.contains('on'))openSettings();
+    ktSettings.go('devices');
+    openBtView('pair',null);
+  }
+
+  if($('qPair'))$('qPair').onclick=()=>{
+    if(!btUnlocked()&&!$('settings').classList.contains('on')){closeQuick();openGate('bt');return;}
+    openPairFromQuick();
+  };
+
+  const _checkPinBt=checkPin;
+  checkPin=function(){
+    if(gateNext==='bt'&&pin===String(S.pin||'1234')){
+      closeGate();
+      openPairFromQuick();
+      return;
+    }
+    return _checkPinBt();
+  };
+
+  /* Summaries for Connected devices and Sound */
+  ktSettings.summary.devices=()=>{
+    if(!agent)return 'Bluetooth needs the tablet helper';
+    if(!BT)return 'Bluetooth';
+    if(!BT.available)return 'No Bluetooth on this tablet';
+    if(!BT.powered)return 'Bluetooth off';
+    const d=BT.devices||[],con=d.filter(x=>x.connected),pa=d.filter(x=>x.paired);
+    if(!con.length)return 'Bluetooth on · '+(pa.length?pa.length+' paired':'nothing paired yet');
+    const act=activeBtAudioDev();
+    if(act)return 'Bluetooth · sound on '+act.name;
+    return 'Bluetooth · '+con.map(x=>x.name).join(', ')+' connected';
+  };
+  ktSettings.summary.sound=()=>{
+    const act=activeBtAudioDev();
+    const w=(BT&&BT.wired_output)||(S.sound&&S.sound.output)||'lineout';
+    const where=act?act.name:({lineout:'panel speakers',headphones:'headphone jack',earphones:'earphones'}[w]||'panel speakers');
+    return 'Volume '+(S.sound.volume||0)+'% · loudest '+(S.sound.max_volume||80)+'% · '+where;
+  };
+
+  /* Settings → Connected devices views: main, pair, gear */
+  ktSettings.fill.devices=el=>{
+    if(btView==='gear'&&el&&((window.ktKbd&&ktKbd.isOpen&&ktKbd.el&&el.contains(ktKbd.el))||(document.activeElement&&el.contains(document.activeElement)&&document.activeElement.tagName==='INPUT'))){
+      return el._h;
+    }
+    const ok=agent&&BT&&BT.available;
+    if(!ok){
+      const msg=!agent?'needs the tablet helper':(!BT?'checking…':'this tablet has no Bluetooth');
+      return '<div class="sec"><h2>Bluetooth</h2>'+row('Bluetooth',msg,'')+'</div>';
+    }
+    const devs=BT.devices||[];
+    const con=devs.filter(d=>d.paired&&d.connected);
+    const prev=devs.filter(d=>d.paired&&!d.connected);
+    const nearby=devs.filter(d=>!d.paired);
+    const actOut=activeOutId();
+
+    if(btView==='pair'&&BT.powered){
+      const hostName=(STATUS&&STATUS.hostname)||'PPQ';
+      const pr=BT.pairing;
+      let banner='';
+      if(btPairBusy){
+        banner='<div class="bt-banner info" id="btPairProgress">⏳ Pairing with <b>'+E(btPairBusy)+'</b>…</div>';
+      }else if(pr&&pr.state==='confirm'){
+        const isType=pr.kind==='type';
+        banner='<div class="bt-banner confirm" id="btConfirmBox" data-mac="'+E(pr.mac)+'" data-kind="'+E(pr.kind)+'">'
+          +'<div class="bt-conf-title">'+(isType?'⌨️ Type this code on <b>'+E(pr.name)+'</b>, then press Enter:':'🔢 Pair with <b>'+E(pr.name)+'</b>? Check that this number matches on both screens:')+'</div>'
+          +'<div class="bt-conf-code" id="btConfirmCode">'+E(pr.passkey||'')+'</div>'
+          +'<div class="bt-conf-acts"><button class="btn go" id="btConfirmAccept">'+(isType?'Code typed · Pair':'Pair')+'</button><button class="btn warn" id="btConfirmCancel">Cancel</button></div>'
+          +'</div>';
+      }else if(btPairError||(pr&&pr.state==='failed')){
+        banner='<div class="bt-banner err" id="btPairError">⚠️ '+E(btPairError||(pr&&pr.error)||'Put the headphones in pairing mode and try again')+'</div>';
+      }
+      return '<div class="sec" id="btPairView"><h2>Pair new device</h2>'
+        +'<div class="row"><button class="btn" id="btPairBack">← Connected devices</button><div class="l" style="margin-left:8px"><b>Looking for nearby devices…</b><small>tap a device below to pair</small></div><button class="btn" id="btRescan">↻ Scan again</button><button class="btn" id="setBtOpen" style="display:none">Bluetooth controls…</button></div>'
+        +'<div id="btVisBanner">📡 Tablet is visible as <b>'+E(hostName)+'</b> while this page is open</div>'
+        +banner
+        +(nearby.map(d=>'<div class="row bt-dev-row bt-nearby-row" data-nearby-mac="'+E(d.mac)+'" data-type="'+E(devType(d))+'">'
+          +'<button type="button" class="bt-dev-main" data-pair-mac="'+E(d.mac)+'">'
+          +'<span class="bt-ic" data-type="'+E(devType(d))+'">'+devIcon(d)+'</span>'
+          +'<span class="l"><b>'+E(d.name)+'</b><small>'+E(devTypeLabel(d))+' · Tap to pair</small></span>'
+          +'</button>'
+          +'<button type="button" class="btn go" data-pair-mac="'+E(d.mac)+'">Pair</button>'
+          +'</div>').join('')||row('Searching nearby…','Put your headphones, speaker, game controller or keyboard in pairing mode',''))
+        +'</div>';
+    }
+
+    if(btView==='gear'&&btGearMac&&BT.powered){
+      const d=devs.find(x=>x.mac===btGearMac);
+      if(d){
+        const isSound=d.audio&&actOut===d.mac;
+        return '<div class="sec" id="btGearView"><h2>Device details</h2>'
+          +'<div class="row"><button class="btn" id="btGearBack">← Connected devices</button><span style="flex:1"></span><button class="btn" id="setBtOpen" style="display:none">Bluetooth controls…</button></div>'
+          +'<div class="row bt-dev-row'+(d.connected?' connected':'')+'">'
+          +'<span class="bt-ic big" data-type="'+E(devType(d))+'">'+devIcon(d)+'</span>'
+          +'<div class="l"><b id="btDetailTitle" style="font-size:21px">'+E(d.name)+'</b><small id="btDetailState">'+(d.connected?'Connected':'Disconnected')+(d.battery!=null?' · 🔋 '+d.battery+'% battery':'')+'</small></div>'
+          +'<button type="button" class="btn'+(d.connected?'':' go')+'" id="btGearToggle">'+(d.connected?'Disconnect':'Connect')+'</button>'
+          +'<button type="button" class="btn warn" id="btGearForget">Forget</button>'
+          +'</div>'
+          +row('Rename','type a new name with the on-screen keyboard','<div style="display:flex;gap:8px;align-items:center"><input id="btRenameIn" class="kfield" type="text" maxlength="40" autocapitalize="words" autocomplete="off" spellcheck="false" inputmode="none" enterkeyhint="done" aria-label="Device name" value="'+E(d.name)+'"><button type="button" class="btn go" id="btRenameSave">Save</button></div>')
+          +(d.audio?row('Use for sound','play tablet audio on this device when connected','<button type="button" class="sw'+(isSound?' on':'')+'" id="btGearUseSound" aria-label="Use for sound"></button>'):'')
+          +row('Device type','category icon and behaviour','<span class="v" id="btGearType">'+E(devTypeLabel(d))+'</span>')
+          +row('Bluetooth address','hardware MAC address','<span class="v" id="btGearAddr">'+E(d.address||d.mac)+'</span>')
+          +(d.battery!=null?row('Battery level','reported by the device','<span class="v" id="btGearBat">'+d.battery+'%</span>'):'')
+          +'</div>';
+      }
+      btView='main';
+    }
+
+    const stText=!BT.powered?'off':(con.length?(activeBtAudioDev()?'on · sound plays on '+E(activeBtAudioDev().name):'on · '+con.map(x=>E(x.name)).join(', ')+' connected'):'on · visible only when pairing a new device');
+    return '<div class="sec"><h2>Bluetooth</h2>'
+      +row('Bluetooth',stText,'<div style="display:flex;gap:10px;align-items:center"><button type="button" class="btn" id="setBtOpen">Bluetooth controls…</button><button type="button" class="sw'+(BT.powered?' on':'')+'" id="btSw" aria-label="Bluetooth on or off"></button></div>')
+      +(BT.powered?row('Pair new device','make this tablet visible and search for headphones, speakers, controllers or keyboards','<button type="button" class="btn go" id="btPairNew">＋ Pair new device</button>'):'')
+      +'</div>'
+      +(BT.powered?'<div class="sec" id="btSecConnected"><h2>Connected now</h2>'
+        +(con.map(d=>'<div class="row bt-dev-row connected" data-dev-mac="'+E(d.mac)+'">'
+          +'<button type="button" class="bt-dev-main" data-bt-toggle="'+E(d.mac)+'" title="Tap to disconnect">'
+          +'<span class="bt-ic" data-type="'+E(devType(d))+'">'+devIcon(d)+'</span>'
+          +'<span class="l"><b>'+E(d.name)+'</b><small>'+E(devTypeLabel(d))+' · Connected'+(actOut===d.mac?' · Active for sound':'')+(d.battery!=null?' · 🔋 '+d.battery+'%':'')+'</small></span>'
+          +'</button>'
+          +(d.battery!=null?'<span class="bt-bat" data-bat="'+d.battery+'">🔋 '+d.battery+'%</span>':'')
+          +'<span class="v">Connected</span>'
+          +'<button type="button" class="btn" data-bt-toggle="'+E(d.mac)+'">Disconnect</button>'
+          +'<button type="button" class="btn bt-gear" data-gear="'+E(d.mac)+'" aria-label="Device settings for '+E(d.name)+'">⚙</button>'
+          +'</div>').join('')||row('No device connected right now',prev.length?'tap a previously connected device below to reconnect':'tap Pair new device above to connect gear',''))
+        +'</div>'
+        +'<div class="sec" id="btSecPrev"><h2>Previously connected devices</h2>'
+        +(prev.map(d=>'<div class="row bt-dev-row prev" data-dev-mac="'+E(d.mac)+'">'
+          +'<button type="button" class="bt-dev-main" data-bt-toggle="'+E(d.mac)+'" title="Tap to connect">'
+          +'<span class="bt-ic" data-type="'+E(devType(d))+'">'+devIcon(d)+'</span>'
+          +'<span class="l"><b>'+E(d.name)+'</b><small>'+E(devTypeLabel(d))+' · Disconnected · tap to connect'+(d.battery!=null?' · 🔋 '+d.battery+'%':'')+'</small></span>'
+          +'</button>'
+          +'<span class="v">Paired</span>'
+          +'<button type="button" class="btn go" data-bt-toggle="'+E(d.mac)+'">Connect</button>'
+          +'<button type="button" class="btn bt-gear" data-gear="'+E(d.mac)+'" aria-label="Device settings for '+E(d.name)+'">⚙</button>'
+          +'</div>').join('')||row('None saved yet','devices you pair stay listed here so you can reconnect with one tap',''))
+        +'</div>':'');
+  };
+
+  async function doBtPair(mac){
+    const d=(BT&&BT.devices||[]).find(x=>x.mac===mac);
+    btPairBusy=d?d.name:mac;
+    btPairError='';
+    ktSettings.live();
+    try{
+      BT=await btPost('pair',{mac});
+      btPairBusy='';
+      drawBt();
+      if(BT.pairing&&BT.pairing.state==='confirm'){
+        ktSettings.live();
+      }else{
+        toast('Paired and connected');
+        openBtView('main',null);
+      }
+    }catch(e){
+      btPairBusy='';
+      btPairError=e.message||'Put the headphones in pairing mode and try again';
+      toast(btPairError);
+      await pollBt();
+      ktSettings.live();
+    }
+  }
+
+  async function doBtConfirm(mac,accept){
+    try{
+      BT=await btPost('confirm',{mac,accept});
+      btPairError='';
+      drawBt();
+      if(accept){
+        toast('Paired and connected');
+        openBtView('main',null);
+      }else{
+        toast('Pairing cancelled');
+        ktSettings.live();
+      }
+    }catch(e){
+      btPairError=e.message||'Pairing did not complete';
+      toast(btPairError);
+      ktSettings.live();
+    }
+  }
+
+  async function saveBtRename(mac){
+    const inp=$('btRenameIn');
+    if(!inp)return;
+    const nm=inp.value.trim();
+    if(!nm){toast('Name cannot be empty');return;}
+    if(window.ktKbd&&ktKbd.isOpen)ktKbd.hide();
+    try{
+      BT=await btPost('rename',{mac,name:nm});
+      drawBt();
+      const el=ktSettings.el('devices');if(el)el._h='';
+      ktSettings.live();
+      toast('Renamed to '+nm);
+    }catch(e){toast('Rename: '+e.message);}
+  }
+
+  ktSettings.wire.devices=el=>{
+    const openBtn=$('setBtOpen');
+    if(openBtn)openBtn.onclick=()=>{btUnlock=Date.now()+5*60*1000;openQuick(current?'bottom':'top');};
+    const sw=$('btSw');
+    if(sw)sw.onclick=async()=>{
+      if(!BT)return;
+      try{BT=await btPost('power',{on:!BT.powered});if(!BT.powered)setPairPage(false);}
+      catch(e){toast('Bluetooth: '+e.message);}
+      drawBt();ktSettings.live();
+    };
+    const pairNew=$('btPairNew');
+    if(pairNew)pairNew.onclick=()=>{blip(520);openBtView('pair',null);};
+    const pairBack=$('btPairBack');
+    if(pairBack)pairBack.onclick=()=>{blip(440);openBtView('main',null);};
+    const rescan=$('btRescan');
+    if(rescan)rescan.onclick=()=>{blip(500);btPairError='';setPairPage(true);};
+    const confYes=$('btConfirmAccept');
+    if(confYes)confYes.onclick=()=>{const box=$('btConfirmBox');if(box)doBtConfirm(box.dataset.mac,true);};
+    const confNo=$('btConfirmCancel');
+    if(confNo)confNo.onclick=()=>{const box=$('btConfirmBox');if(box)doBtConfirm(box.dataset.mac,false);};
+
+    el.querySelectorAll('[data-pair-mac]').forEach(b=>b.onclick=()=>{blip(520);doBtPair(b.dataset.pairMac);});
+    el.querySelectorAll('[data-bt-toggle]').forEach(b=>b.onclick=async()=>{
+      const mac=b.dataset.btToggle;
+      const d=(BT&&BT.devices||[]).find(x=>x.mac===mac);
+      if(!d)return;
+      const act=d.connected?'disconnect':'connect';
+      b.disabled=true;
+      try{BT=await btPost(act,{mac});toast(act==='connect'?'Connected':'Disconnected');}
+      catch(e){toast('Bluetooth: '+e.message);}
+      drawBt();ktSettings.live();
+    });
+    el.querySelectorAll('[data-gear]').forEach(b=>b.onclick=()=>{blip(520);openBtView('gear',b.dataset.gear);});
+
+    const gearBack=$('btGearBack');
+    if(gearBack)gearBack.onclick=()=>{blip(440);openBtView('main',null);};
+    const gearToggle=$('btGearToggle');
+    if(gearToggle&&btGearMac)gearToggle.onclick=async()=>{
+      const d=(BT&&BT.devices||[]).find(x=>x.mac===btGearMac);
+      if(!d)return;
+      const act=d.connected?'disconnect':'connect';
+      gearToggle.disabled=true;
+      try{BT=await btPost(act,{mac:btGearMac});toast(act==='connect'?'Connected':'Disconnected');}
+      catch(e){toast('Bluetooth: '+e.message);}
+      drawBt();ktSettings.live();
+    };
+    const gearForget=$('btGearForget');
+    if(gearForget&&btGearMac)gearForget.onclick=async()=>{
+      const mac=btGearMac;
+      try{BT=await btPost('forget',{mac});toast('Device forgotten');openBtView('main',null);drawBt();}
+      catch(e){toast('Bluetooth: '+e.message);}
+    };
+    const renIn=$('btRenameIn');
+    if(renIn&&btGearMac){
+      const mac=btGearMac;
+      renIn.addEventListener('ktkbd-enter',()=>saveBtRename(mac));
+    }
+    const renSave=$('btRenameSave');
+    if(renSave&&btGearMac){
+      const mac=btGearMac;
+      renSave.onclick=()=>{blip(520);saveBtRename(mac);};
+    }
+    const useSnd=$('btGearUseSound');
+    if(useSnd&&btGearMac){
+      const mac=btGearMac;
+      useSnd.onclick=()=>{
+        const on=activeOutId()===mac;
+        pickSoundOut(on?((BT&&BT.wired_output)||(S.sound&&S.sound.output)||'lineout'):mac);
+      };
+    }
+  };
+
+  /* Sub-view navigation for #setBack, navBack, ktSettings.go, closeSettings, drawSettings */
+  const _goOrig=ktSettings.go;
+  ktSettings.go=function(id){
+    if(id!=='devices'){btView='main';btGearMac=null;setPairPage(false);}
+    return _goOrig(id);
+  };
+  $('setBack').onclick=()=>{
+    if(ktSettings.page==='devices'&&btView!=='main'){blip(440);openBtView('main',null);return;}
+    blip(440);ktSettings.go(null);
+  };
+  const _navBackBt=navBack;
+  navBack=function(){
+    if(window.ktKbd&&ktKbd.isOpen){blip(440);ktKbd.hide();return;}
+    if($('settings').classList.contains('on')&&ktSettings.page==='devices'&&btView!=='main'&&!quickOpen&&!recentsOpen){
+      blip(440);openBtView('main',null);return;
+    }
+    _navBackBt();
+  };
+  $('navBack').onclick=navBack;
+  const _closeSettingsBt=closeSettings;
+  closeSettings=function(){
+    btView='main';btGearMac=null;setPairPage(false);
+    _closeSettingsBt();
+  };
+  const _drawSettingsBt=drawSettings;
+  drawSettings=function(){
+    _drawSettingsBt();
+    syncSoundPageOut();
+  };
+
+  window.ktBt={
+    openView:openBtView,
+    pickOutput:pickSoundOut,
+    activeOutput:activeOutId,
+    get view(){return btView;},
+    get gearMac(){return btGearMac;},
+    get pairVisible(){return pairPageOpen;}
+  };
+})();
+
+/* ===== APP PERMISSIONS FRAMEWORK & "ALLOW?" PROMPTS (card #272, part 4 of 5) =====
+   - Enforces iframe allow="camera ...; microphone ...; geolocation ..." per open based on grants.
+   - Handles {kt:'perm', reqId, resource} from the active tile in #frame, identifying the app strictly from current.id.
+   - Shows the kid-safe #permSheet prompt on first use ("While using the app" · "Only this time" · "Ask a grown-up" · "Don't allow").
+   - Gates Allow behind the grown-up PIN unless S.permissions.children_may_allow is true; two denials lock to "denied".
+   - Shows a green status-bar pill (#sbPerm) while camera/microphone is in use; tapping it names the app.
+   - Fills Settings → Apps & permissions with per-app permission controls while preserving [data-app] and .snote. */
+(function(){
+  const RES_META={
+    camera:{ic:'📷',word:'the camera',short:'camera',pill:'📷 Camera'},
+    microphone:{ic:'🎤',word:'the microphone',short:'microphone',pill:'🎤 Microphone'},
+    location:{ic:'📍',word:'location',short:'location',pill:'📍 Location'},
+    bluetooth:{ic:'🎧',word:'Bluetooth devices',short:'bluetooth',pill:'🎧 Bluetooth'},
+    storage:{ic:'📁',word:'photos & files',short:'files',pill:'📁 Files'},
+    tv:{ic:'📺',word:'the TV',short:'TV',pill:'📺 TV'},
+    internet:{ic:'🌐',word:'the internet',short:'internet',pill:'🌐 Web'}
+  };
+  let openToken='',sessionOnlyThisTime=new Set(),permInUse=new Map(),pendingPerm=null;
+  let appsView='main',selectedApp=null,privacyEvents=[],lastPermUse=new Map(),privacyUnlock=0;
+
+  function normRes(r){
+    const s=String(r||'').trim().toLowerCase();
+    if(s==='mic')return 'microphone';
+    if(s==='cam')return 'camera';
+    if(s==='loc'||s==='geolocation')return 'location';
+    if(s==='ble'||s==='bt')return 'bluetooth';
+    if(s==='files'||s==='photos')return 'storage';
+    return s;
+  }
+  function ensurePermObj(){
+    if(!S.permissions||typeof S.permissions!=='object')S.permissions={children_may_allow:false,seeded:true,grants:{}};
+    if(!S.permissions.grants||typeof S.permissions.grants!=='object')S.permissions.grants={};
+    if(!S.privacy||typeof S.privacy!=='object')S.privacy={camera_off:false,mic_off:false};
+    if(!S.location||typeof S.location!=='object')S.location={place:'',shared:false,network_lookup:false};
+    return S.permissions;
+  }
+  function isCamOff(){return !!(S.privacy&&S.privacy.camera_off);}
+  function isMicOff(){return !!(S.privacy&&S.privacy.mic_off);}
+  function isPrivacyUnlocked(){
+    const inSet=$('settings')&&$('settings').classList.contains('on');
+    return inSet||(Date.now()<privacyUnlock);
+  }
+  function roundPlace(p){
+    if(!p)return '';
+    let s=String(p).trim();
+    s=s.replace(/\b\d{5}(-\d{4})?\b/g,'').replace(/\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b/gi,'');
+    const parts=s.split(',').map(x=>x.trim()).filter(Boolean);
+    if(!parts.length)return s;
+    return parts.slice(0,2).join(', ');
+  }
+  function fmtTimeAgo(ts){
+    if(!ts)return 'Never';
+    const diff=Math.max(0,Date.now()-new Date(ts).getTime());
+    const sec=Math.floor(diff/1000);
+    if(sec<60)return 'Just now';
+    const min=Math.floor(sec/60);
+    if(min<60)return min+'m ago';
+    const hr=Math.floor(min/60);
+    if(hr<24)return hr+'h ago';
+    return Math.floor(hr/24)+'d ago';
+  }
+  function childrenMayAllow(){return !!(ensurePermObj().children_may_allow);}
+  function getLocalGrant(appId,res){
+    res=normRes(res);
+    if(res==='camera'&&isCamOff())return {app:appId,resource:res,state:'denied',persisted_state:'denied',granted:false,denials:0,when:null,by:null,kid:null,prompt:false};
+    if(res==='microphone'&&isMicOff())return {app:appId,resource:res,state:'denied',persisted_state:'denied',granted:false,denials:0,when:null,by:null,kid:null,prompt:false};
+    const p=ensurePermObj(),g=((p.grants||{})[appId]||{})[res]||{};
+    let st=g.state||'ask',denials=Math.max(0,+g.denials||0);
+    if(denials>=2&&st==='ask')st='denied';
+    const temp=sessionOnlyThisTime.has(appId+':'+res);
+    const granted=st==='installed'||st==='while_using'||temp;
+    return {
+      app:appId,
+      resource:res,
+      state:(temp&&st!=='installed'&&st!=='while_using')?'only_this_time':st,
+      persisted_state:st,
+      granted,
+      denials,
+      when:g.when||null,
+      by:g.by||null,
+      kid:g.kid||null,
+      prompt:!granted&&st==='ask'&&denials<2
+    };
+  }
+  function hasPermGrant(appId,res){return !!getLocalGrant(appId,res).granted;}
+  function frameAllowFor(appId){
+    const cam=(!isCamOff()&&hasPermGrant(appId,'camera'))?'camera *':"camera 'none'";
+    const mic=(!isMicOff()&&hasPermGrant(appId,'microphone'))?'microphone *':"microphone 'none'";
+    const geo=hasPermGrant(appId,'location')?'geolocation *':"geolocation 'none'";
+    return cam+'; '+mic+'; '+geo+'; autoplay; fullscreen';
+  }
+  function syncFrameAllow(){
+    const f=$('frame');
+    if(!f)return;
+    f.setAttribute('allow',current?frameAllowFor(current.id):"camera 'none'; microphone 'none'; geolocation 'none'; autoplay; fullscreen");
+  }
+  function setPermUse(appId,res,active){
+    res=normRes(res);
+    if(!appId||!current||current.id!==appId){drawPermIndicator();return;}
+    if(active===false){
+      permInUse.delete(res);
+    }else{
+      permInUse.set(res,{app:appId,title:current.title||appId,resource:res,since:Date.now()});
+      lastPermUse.set(appId+':'+res,new Date().toISOString());
+      privacyEvents.unshift({app:appId,title:current.title||appId,resource:res,ts:new Date().toISOString()});
+    }
+    drawPermIndicator();
+  }
+  function drawPermIndicator(){
+    const btn=$('sbPerm');if(!btn)return;
+    if(!current){permInUse.clear();btn.classList.remove('on');btn.textContent='';return;}
+    const serverUse=Array.isArray(STATUS.permissions_in_use)?STATUS.permissions_in_use:[];
+    serverUse.forEach(u=>{if(u&&u.app===current.id&&u.resource)permInUse.set(normRes(u.resource),{app:u.app,title:u.title||current.title||u.app,resource:normRes(u.resource)});});
+    const list=[...permInUse.values()].filter(u=>u.app===current.id);
+    const show=list.filter(u=>u.resource==='camera'||u.resource==='microphone');
+    const items=show.length?show:list;
+    if(!items.length){btn.classList.remove('on');btn.textContent='';delete btn.dataset.app;delete btn.dataset.resources;return;}
+    const icons=items.map(u=>(RES_META[u.resource]||{}).ic||'🔒').join(' ');
+    const label=items.length===1?((RES_META[items[0].resource]||{}).pill||icons):icons;
+    btn.textContent=label;
+    btn.dataset.app=current.id;
+    btn.dataset.resources=items.map(u=>u.resource).join(',');
+    btn.classList.add('on');
+  }
+  $('sbPerm').onclick=e=>{
+    e.stopPropagation();
+    if(!current)return;
+    const list=[...permInUse.values()].filter(u=>u.app===current.id);
+    if(!list.length)return;
+    const words=list.map(u=>(RES_META[u.resource]||{}).word||u.resource).join(' and ');
+    toast((current.title||current.id)+' is using '+words);
+  };
+
+  async function toggleMaster(res){
+    res=normRes(res);
+    ensurePermObj();
+    if(res==='camera')S.privacy.camera_off=!isCamOff();
+    else if(res==='microphone')S.privacy.mic_off=!isMicOff();
+    const off=res==='camera'?isCamOff():isMicOff();
+    if(agent){
+      try{
+        await fetch('/api/privacy/master',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sensor:res,off})});
+      }catch(x){}
+    }else{
+      save(false);
+    }
+    if(res==='camera'&&isCamOff()){
+      if(agent){fetch('http://127.0.0.1:8095/stop',{method:'POST'}).catch(()=>{});}
+      setPermUse(current?current.id:null,'camera',false);
+    }
+    if(res==='microphone'&&isMicOff()){
+      setPermUse(current?current.id:null,'microphone',false);
+    }
+    syncFrameAllow();
+    if(current){
+      try{
+        const f=$('frame');
+        if(f&&f.contentWindow){
+          f.contentWindow.postMessage({kt:'perm-changed',resource:res,granted:false},'*');
+        }
+      }catch(x){}
+    }
+    drawQuickSensors();
+    wireAppsPage();
+  }
+  function drawQuickSensors(){
+    const qc=$('qMasterCam'),qm=$('qMasterMic');
+    const cOff=isCamOff(),mOff=isMicOff();
+    if(qc){qc.textContent=cOff?'📷 Camera off':'📷 Camera on';qc.classList.toggle('off',cOff);}
+    if(qm){qm.textContent=mOff?'🎤 Mic off':'🎤 Mic on';qm.classList.toggle('off',mOff);}
+  }
+  function handleMasterQuickTap(res){
+    blip(520);
+    if(isPrivacyUnlocked()){
+      toggleMaster(res);
+      return;
+    }
+    closeQuick();
+    openGate('privacy:'+res);
+    $('gateMsg').textContent='Grown-up code to change '+(res==='camera'?'camera':'microphone')+' master switch';
+  }
+  const _qCamBtn=$('qMasterCam'),_qMicBtn=$('qMasterMic');
+  if(_qCamBtn)_qCamBtn.onclick=()=>handleMasterQuickTap('camera');
+  if(_qMicBtn)_qMicBtn.onclick=()=>handleMasterQuickTap('microphone');
+
+  function replyPerm(reqIds,payload){
+    const f=$('frame');
+    if(!f||!f.contentWindow)return;
+    (reqIds||[]).forEach(reqId=>{
+      if(!reqId)return;
+      try{f.contentWindow.postMessage(Object.assign({kt:'perm',reqId},payload),'*');}catch(x){}
+    });
+  }
+  function closePermSheet(){
+    $('permSheet').classList.remove('on');
+  }
+  function showPermSheet(appObj,res){
+    const m=RES_META[res]||{ic:'🔒',word:res};
+    const cma=childrenMayAllow();
+    $('permIcon').textContent=m.ic;
+    $('permTitle').textContent='Allow '+(appObj.title||appObj.id)+' to use '+m.word+'?';
+    $('permSub').textContent=cma?'Choose if this app can use it right now.':'A grown-up enters the code to allow this. You can always tap Don’t allow.';
+    $('permWhile').textContent='While using the app'+(cma?'':' 🔒');
+    $('permOnce').textContent='Only this time'+(cma?'':' 🔒');
+    $('permAskGrown').style.display=cma?'none':'';
+    $('permSheet').classList.add('on');
+    extHold(6000);
+  }
+  async function handlePermAsk(appObj,res,reqId){
+    res=normRes(res);
+    if(!RES_META[res]){replyPerm([reqId],{resource:res,granted:false,state:'denied',token:''});return;}
+    if(res==='camera'&&isCamOff()){replyPerm([reqId],{resource:res,granted:false,state:'denied',token:''});return;}
+    if(res==='microphone'&&isMicOff()){replyPerm([reqId],{resource:res,granted:false,state:'denied',token:''});return;}
+    if(pendingPerm&&pendingPerm.app.id===appObj.id&&pendingPerm.resource===res){
+      if(reqId&&!pendingPerm.reqIds.includes(reqId))pendingPerm.reqIds.push(reqId);
+      return;
+    }
+    let rec=getLocalGrant(appObj.id,res);
+    if(agent){
+      try{
+        const r=await fetch('/api/permissions/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app:appObj.id,resource:res,token:openToken})});
+        const j=await r.json();
+        if(r.ok&&j){
+          rec=j;
+          if(j.token)openToken=j.token;
+          const p=ensurePermObj();
+          if(typeof j.children_may_allow==='boolean')p.children_may_allow=j.children_may_allow;
+        }
+      }catch(x){}
+    }
+    if(rec.granted){
+      if(rec.state==='only_this_time')sessionOnlyThisTime.add(appObj.id+':'+res);
+      syncFrameAllow();
+      setPermUse(appObj.id,res,true);
+      replyPerm([reqId],{resource:res,granted:true,state:rec.state,token:openToken});
+      return;
+    }
+    if(!rec.prompt){
+      replyPerm([reqId],{resource:res,granted:false,state:'denied',token:''});
+      return;
+    }
+    pendingPerm={app:appObj,resource:res,reqIds:reqId?[reqId]:[]};
+    showPermSheet(appObj,res);
+  }
+  async function finishPermDecision(decision,pinCode){
+    if(!pendingPerm)return;
+    const {app,resource,reqIds}=pendingPerm;
+    pendingPerm=null;
+    closePermSheet();
+    const ak=activeKid(),kid=ak?ak.id:'default';
+    let out=null;
+    if(agent){
+      try{
+        const r=await fetch('/api/permissions/answer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app:app.id,resource,decision,pin:pinCode||undefined,kid})});
+        const j=await r.json();
+        if(r.ok&&j){
+          out=j;
+          if(j.token)openToken=j.token;
+          try{S=deepMerge(DEF,await jget('/api/settings'));}catch(x){}
+        }
+      }catch(x){}
+    }
+    if(!out){
+      const p=ensurePermObj();
+      p.grants[app.id]=p.grants[app.id]||{};
+      const prev=p.grants[app.id][resource]||{};
+      const nowIso=new Date().toISOString();
+      if(decision==='while_using'){
+        p.grants[app.id][resource]={state:'while_using',denials:0,when:nowIso,by:pinCode?'parent':'kid',kid};
+        sessionOnlyThisTime.add(app.id+':'+resource);
+      }else if(decision==='only_this_time'){
+        p.grants[app.id][resource]={state:'ask',denials:0,when:nowIso,by:pinCode?'parent':'kid',kid};
+        sessionOnlyThisTime.add(app.id+':'+resource);
+      }else{
+        const dCount=Math.max(0,+prev.denials||0)+1;
+        p.grants[app.id][resource]={state:dCount>=2?'denied':'ask',denials:dCount,when:nowIso,by:'kid',kid};
+        sessionOnlyThisTime.delete(app.id+':'+resource);
+      }
+      save(false);
+      out=getLocalGrant(app.id,resource);
+    }else if(decision==='only_this_time'||decision==='while_using'){
+      sessionOnlyThisTime.add(app.id+':'+resource);
+    }else{
+      sessionOnlyThisTime.delete(app.id+':'+resource);
+    }
+    const granted=!!out.granted;
+    syncFrameAllow();
+    setPermUse(app.id,resource,granted);
+    replyPerm(reqIds,{resource,granted,state:out.state||(granted?decision:'denied'),token:granted?openToken:''});
+    if(granted&&resource==='internet'&&app.url&&current&&current.id===app.id&&agent){
+      fetch('/api/open',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:app.id})}).then(r=>r.json()).then(j=>{if(j.ok)app._extSeen=true;}).catch(()=>{});
+    }
+  }
+  function onPermBtn(decision){
+    if(!pendingPerm)return;
+    blip(520);
+    if(decision==='deny'){
+      finishPermDecision('deny',null);
+      return;
+    }
+    const effDec=decision==='ask_grown'?'while_using':decision;
+    if(decision!=='ask_grown'&&childrenMayAllow()){
+      finishPermDecision(effDec,null);
+      return;
+    }
+    const m=RES_META[pendingPerm.resource]||{word:pendingPerm.resource};
+    openGate('perm:'+effDec);
+    $('gateMsg').textContent='Grown-up code to allow '+(pendingPerm.app.title||pendingPerm.app.id)+' to use '+m.word;
+  }
+  $('permWhile').onclick=()=>onPermBtn('while_using');
+  $('permOnce').onclick=()=>onPermBtn('only_this_time');
+  $('permAskGrown').onclick=()=>onPermBtn('ask_grown');
+  $('permDeny').onclick=()=>onPermBtn('deny');
+
+  const _checkPinPerm=checkPin;
+  checkPin=function(){
+    if(typeof gateNext==='string'&&gateNext.startsWith('privacy:')){
+      if(pin===String(S.pin||'1234')){
+        const target=gateNext.slice(8);
+        closeGate();
+        privacyUnlock=Date.now()+5*60*1000;
+        toggleMaster(target);
+      }else{
+        $('gateMsg').textContent='That is not the code';pin='';drawPin();blip(180);
+      }
+      return;
+    }
+    if(typeof gateNext==='string'&&gateNext.startsWith('perm:')){
+      if(pin===String(S.pin||'1234')){
+        const entered=pin,dec=gateNext.slice(5);
+        closeGate();
+        finishPermDecision(dec,entered);
+      }else{
+        $('gateMsg').textContent='That is not the code';pin='';drawPin();blip(180);
+      }
+      return;
+    }
+    return _checkPinPerm();
+  };
+
+  /* Wrap openApp and goHome to manage per-open tokens, iframe allow, and in-use state */
+  window.openApp=openApp=function(id){
+    if(locked&&window.ktLock&&ktLock.codeOn())return;
+    const a=APPS.find(x=>x.id===id);if(!a)return;
+    if(editing)return;
+    if(a.soon||!a.path){blip(300);toast(a.title+' is coming soon');return;}
+    blip(520);closeQuick();
+    current=a;openToken='';sessionOnlyThisTime.clear();permInUse.clear();pendingPerm=null;closePermSheet();
+    syncFrameAllow();
+    drawPermIndicator();
+    if(agent){
+      fetch('/api/app',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:a.id})}).then(r=>r.json()).then(j=>{
+        if(j&&j.token&&current&&current.id===a.id){openToken=j.token;sendHello();}
+      }).catch(()=>{});
+    }
+    if(a.url){
+      if(agent){
+        if(hasPermGrant(a.id,'internet')){
+          setPermUse(a.id,'internet',true);
+          fetch('/api/open',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:a.id})}).then(r=>r.json()).then(j=>{if(j.ok)a._extSeen=true;else toast('Could not open '+a.title+(j.error?': '+j.error:''));}).catch(()=>{});
+        }
+      }else{
+        toast(a.title+' opens in its own window on the tablet');
+      }
+    }
+    $('frame').src=a.path;
+    $('home').classList.remove('on');$('app').classList.add('on');$('homePill').classList.add('on');
+    showVolPills(true);
+    if(typeof recentsPush==='function')recentsPush(a.id);
+    if(typeof closeRecents==='function')closeRecents();
+  };
+  const _goHomePerm=goHome;
+  window.goHome=goHome=function(){
+    openToken='';sessionOnlyThisTime.clear();permInUse.clear();pendingPerm=null;closePermSheet();
+    _goHomePerm();
+    syncFrameAllow();
+    drawPermIndicator();
+  };
+  const _sendHelloPerm=sendHello;
+  window.sendHello=sendHello=function(){
+    _sendHelloPerm();
+    try{
+      const f=$('frame');if(!f||!f.contentWindow||!openToken)return;
+      f.contentWindow.postMessage({kt:'hello-token',token:openToken},'*');
+    }catch(x){}
+  };
+
+  window.addEventListener('message',e=>{
+    const f=$('frame');if(!f||e.source!==f.contentWindow||!current)return;
+    const d=e.data||{};
+    if(d.kt==='perm'&&d.resource){
+      handlePermAsk(current,d.resource,d.reqId);
+    }else if(d.kt==='perm-use'&&d.resource){
+      const res=normRes(d.resource),act=d.active!==false;
+      if(!act||hasPermGrant(current.id,res)){
+        setPermUse(current.id,res,act);
+        if(agent)fetch('/api/permissions/use',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app:current.id,resource:res,active:act,token:openToken})}).catch(()=>{});
+      }
+    }else if(d.kt==='location'){
+      const granted=hasPermGrant(current.id,'location');
+      const shared=!!(S.location&&S.location.shared);
+      const raw=(S.location&&S.location.place)||'';
+      const place=(granted&&shared&&raw)?roundPlace(raw):null;
+      if(granted&&shared&&place){
+        lastPermUse.set(current.id+':location',new Date().toISOString());
+        privacyEvents.unshift({app:current.id,title:current.title||current.id,resource:'location',ts:new Date().toISOString()});
+      }
+      try{
+        e.source.postMessage({kt:'location',reqId:d.reqId,ok:!!place,granted:!!place,place,coarse:true,shared},'*');
+      }catch(x){}
+      if(granted&&shared&&place&&agent){
+        fetch('/api/location?token='+encodeURIComponent(openToken)+'&app='+encodeURIComponent(current.id)).catch(()=>{});
+      }
+    }
+  });
+
+  const _renderPerm=render;
+  window.render=render=function(){
+    _renderPerm();
+    drawPermIndicator();
+    drawQuickSensors();
+  };
+
+  /* Settings → Apps & permissions (Part 5: Apps list, App detail, Permission manager, Privacy dashboard, Location) */
+  function appPermResources(a){
+    const out=[];
+    (a.permissions||[]).forEach(p=>{const r=normRes(p);if(RES_META[r]&&!out.includes(r))out.push(r);});
+    if(a.url&&String(a.url).startsWith('https://')&&!out.includes('internet'))out.push('internet');
+    const g=((ensurePermObj().grants||{})[a.id])||{};
+    Object.keys(g).forEach(k=>{const r=normRes(k);if(RES_META[r]&&!out.includes(r))out.push(r);});
+    return out;
+  }
+  function stateDesc(rec){
+    if(rec.persisted_state==='installed')return 'Allowed when installed';
+    if(rec.persisted_state==='while_using')return 'Allowed while using'+(rec.by?' · by '+rec.by:'');
+    if(rec.persisted_state==='denied')return 'Not allowed'+(rec.denials>=2?' (denied twice)':'');
+    return 'Ask every time'+(rec.denials===1?' (denied once)':'');
+  }
+
+  async function setGrant(aid,res,st){
+    res=normRes(res);
+    const p=ensurePermObj();
+    p.grants[aid]=p.grants[aid]||{};
+    p.grants[aid][res]={state:st,denials:st==='denied'?2:0,when:new Date().toISOString(),by:'parent'};
+    if(st==='ask'||st==='denied'){
+      sessionOnlyThisTime.delete(aid+':'+res);
+      setPermUse(aid,res,false);
+    }
+    const granted=(st==='installed'||st==='while_using');
+    syncFrameAllow();
+    if(current&&current.id===aid){
+      try{
+        const f=$('frame');
+        if(f&&f.contentWindow)f.contentWindow.postMessage({kt:'perm-changed',resource:res,granted,token:openToken},'*');
+      }catch(x){}
+    }
+    if(agent){
+      try{
+        const r=await fetch('/api/permissions/set',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app:aid,resource:res,state:st,by:'parent'})});
+        const j=await r.json();
+        if(j&&j.permissions)S.permissions=j.permissions;
+      }catch(x){}
+    }else{
+      save(false);
+    }
+    wireAppsPage();
+  }
+
+  function setAppsView(v,aid){
+    appsView=v||'main';
+    if(aid)selectedApp=aid;
+    const t=$('setTitle'),p=$('settings')?$('settings').dataset.page:null;
+    if(t&&p==='apps'){
+      if(appsView==='app-detail'){
+        const a=APPS.find(x=>x.id===selectedApp);
+        t.textContent=a?a.title:'App details';
+      }else if(appsView==='perm-mgr'){
+        t.textContent='Permission manager';
+      }else if(appsView==='privacy-dash'){
+        t.textContent='Privacy dashboard';
+      }else if(appsView==='location'){
+        t.textContent='Location';
+      }else{
+        t.textContent='Apps & permissions';
+      }
+    }
+    wireAppsPage();
+  }
+
+  const _origSetBack=$('setBack').onclick;
+  $('setBack').onclick=()=>{
+    const curP=$('settings')?$('settings').dataset.page:null;
+    if(curP==='apps'&&appsView!=='main'){
+      blip(440);
+      setAppsView('main');
+      return;
+    }
+    if(typeof _origSetBack==='function')_origSetBack();
+  };
+
+  function buildMainAppsSecHtml(){
+    const cma=childrenMayAllow();
+    const cOff=isCamOff(),mOff=isMicOff();
+    const allApps=APPS.filter(a=>!a.soon);
+    const LBL={audio:'🔊 Sound',ble:'🎧 Bluetooth',usb:'🔌 USB',i2c:'🧩 Plug-in parts',bench:'🌐 The Bench'};
+    const on=allApps.filter(a=>(S.apps.allowed||[]).includes(a.id));
+    const otherRows=Object.keys(LBL).map(k=>{const l=on.filter(a=>Array.isArray(a.permissions)&&a.permissions.includes(k));return l.length?row(LBL[k],l.map(a=>E(a.title)).join(', '),''):'';}).join('');
+
+    const masterRows='<h2>Master sensor controls</h2>'
+      +row('Camera off for everything','Blocks camera across all apps immediately','<button class="sw'+(cOff?' on':'')+'" id="setMasterCam" aria-label="camera off for everything"></button>')
+      +row('Microphone off for everything','Blocks microphone across all apps immediately','<button class="sw'+(mOff?' on':'')+'" id="setMasterMic" aria-label="microphone off for everything"></button>');
+
+    const locDesc=(S.location&&S.location.shared&&S.location.place)?roundPlace(S.location.place):'Not shared (default)';
+    const navRows='<h2>Privacy &amp; permissions</h2>'
+      +'<div class="app-nav-row" id="navPrivacyDash"><div class="app-ic">🛡</div><div class="dash-info"><div class="dash-app">Privacy dashboard</div><div class="dash-res">Timeline of camera, microphone, and location use in the last 24 hours</div></div><svg class="ch" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>'
+      +'<div class="app-nav-row" id="navPermMgr"><div class="app-ic">🔐</div><div class="dash-info"><div class="dash-app">Permission manager</div><div class="dash-res">Camera, microphone, location and other permissions by resource</div></div><svg class="ch" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>'
+      +'<div class="app-nav-row" id="navLocation"><div class="app-ic">📍</div><div class="dash-info"><div class="dash-app">Location</div><div class="dash-res">'+E(locDesc)+'</div></div><svg class="ch" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>';
+
+    const appsListHtml='<h2>All apps</h2><div class="apps-list-sub" style="font-size:14px;color:#5b6b80;line-height:1.45;padding:0 0 10px">Tap an app to see its permissions, screen time and switches.</div>'
+      +allApps.map(a=>'<div class="app-nav-row" data-app-nav="'+E(a.id)+'"><div class="app-ic">'+E(a.icon)+'</div><div class="dash-info"><div class="dash-app">'+E(a.title)+'</div><div class="dash-res">'+E(a.subtitle||'')+'</div></div><svg class="ch" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>').join('');
+
+    const appsWithPerms=allApps.filter(a=>appPermResources(a).length>0);
+    const permRows=appsWithPerms.map(a=>appPermResources(a).map(r=>{
+      const rec=getLocalGrant(a.id,r),m=RES_META[r]||{ic:'🔒',short:r};
+      const st=rec.persisted_state;
+      const btns=[
+        ['while_using','While using',st==='installed'||st==='while_using',''],
+        ['ask','Ask',st==='ask',''],
+        ['denied','Don’t allow',st==='denied',' deny']
+      ].map(b=>'<button class="perm-pill'+(b[2]?' on':'')+b[3]+'" data-perm-set="'+E(a.id)+':'+E(r)+':'+b[0]+'">'+b[1]+'</button>').join('');
+      return '<div class="row" data-perm-row="'+E(a.id)+':'+E(r)+'"><div class="l">'+E(a.icon)+' '+E(a.title)+' · '+m.ic+' '+E(m.short)+'<small>'+E(stateDesc(rec))+'</small></div><div class="perm-row-btns">'+btns+'</div></div>';
+    }).join('')).join('');
+
+    const summaryHtml='<h2>What the apps can use</h2>'
+      +row('Children can allow permissions','off = allowing camera, microphone, TV or internet needs the grown-up code','<button class="sw'+(cma?' on':'')+'" id="permChildAllow" aria-label="children can allow permissions"></button>')
+      +permRows
+      +otherRows
+      +'<div class="snote">Bundled apps start allowed when installed; any new app or permission set to Ask prompts on first use. Denying twice turns the prompt off until changed here.</div>';
+
+    return masterRows+navRows+appsListHtml+summaryHtml;
+  }
+
+  function buildAppDetailHtml(appId){
+    const a=APPS.find(x=>x.id===appId)||{id:appId,title:appId,icon:'📦',subtitle:''};
+    const resList=appPermResources(a);
+    const onHome=(S.apps.allowed||[]).includes(a.id);
+    const sec=(STATUS.budget&&STATUS.budget.apps_s&&STATUS.budget.apps_s[a.id])||(S.budget&&S.budget.apps_s&&S.budget.apps_s[a.id])||0;
+    const stText=sec>=60?(Math.round(sec/60)+' min'):(sec>0?(sec+' s'):'0 min');
+
+    const hero='<button class="btn sub-back" id="appDetailBack" style="margin-bottom:12px">← Back to Apps &amp; permissions</button>'
+      +'<div class="app-detail-hero"><div class="app-hero-ic">'+E(a.icon)+'</div><div class="app-detail-info"><div class="app-detail-title">'+E(a.title)+'</div><div class="app-detail-sub">'+E(a.subtitle||a.id)+'</div></div></div>';
+
+    const switches='<h2>App settings</h2>'
+      +row('Screen time today','Time spent in this app today','<span class="v" id="appDetailScreenTime">'+stText+'</span>')
+      +row('On the home screen','Show on the home grid','<button class="sw'+(onHome?' on':'')+'" id="appDetailHomeSw"></button>')
+      +(S.kids||[]).map(k=>row('Allowed for '+E(k.name||'Child'),'Child profile access','<button class="sw'+((!k.apps_allowed||k.apps_allowed.includes(a.id))?' on':'')+'" data-kid-app-sw="'+E(k.id)+'"></button>')).join('');
+
+    const permsHeader='<h2>Permissions</h2>'
+      +(resList.length?'':'<div class="snote">This app does not ask for special permissions.</div>');
+
+    const permRows=resList.map(r=>{
+      const rec=getLocalGrant(a.id,r),m=RES_META[r]||{ic:'🔒',short:r};
+      const st=rec.persisted_state;
+      const lastTs=lastPermUse.get(a.id+':'+r)||(rec.when);
+      const lastStr=lastTs?('Last used: '+fmtTimeAgo(lastTs)):'Never used';
+      const btns=[
+        ['while_using','Allow',st==='installed'||st==='while_using',''],
+        ['ask','Ask every time',st==='ask',''],
+        ['denied','Don’t allow',st==='denied',' deny']
+      ].map(b=>'<button class="perm-pill'+(b[2]?' on':'')+b[3]+'" data-detail-perm="'+E(a.id)+':'+E(r)+':'+b[0]+'">'+b[1]+'</button>').join('');
+      return '<div class="row" data-perm-row="'+E(a.id)+':'+E(r)+'"><div class="l">'+m.ic+' '+E(m.pill||m.short)+'<small>'+E(lastStr)+' · '+E(stateDesc(rec))+'</small></div><div class="perm-row-btns">'+btns+'</div></div>';
+    }).join('');
+
+    return hero+switches+permsHeader+permRows;
+  }
+
+  function buildPermMgrHtml(){
+    const resKeys=['camera','microphone','location','bluetooth','internet','storage','tv'];
+    const resCards=resKeys.map(r=>{
+      const m=RES_META[r]||{ic:'🔒',pill:r,short:r};
+      const matchingApps=APPS.filter(a=>!a.soon&&appPermResources(a).includes(r));
+      const allowed=matchingApps.filter(a=>hasPermGrant(a.id,r));
+      const notAllowed=matchingApps.filter(a=>!hasPermGrant(a.id,r));
+
+      const allowBtns=allowed.length?allowed.map(a=>'<button class="btn go perm-mgr-app-btn" data-perm-mgr-set="'+E(a.id)+':'+E(r)+':denied" title="Tap to change">'+E(a.icon)+' '+E(a.title)+' ✓</button>').join(' '):'<div style="color:#718096;font-size:14px">None</div>';
+      const notAllowBtns=notAllowed.length?notAllowed.map(a=>'<button class="btn perm-mgr-app-btn" data-perm-mgr-set="'+E(a.id)+':'+E(r)+':while_using" title="Tap to allow">'+E(a.icon)+' '+E(a.title)+'</button>').join(' '):'<div style="color:#718096;font-size:14px">None</div>';
+
+      return '<div class="perm-mgr-res">'
+        +'<div class="perm-mgr-res-hdr"><span>'+m.ic+'</span><span>'+E(m.pill||m.short)+'</span><span style="font-size:14px;color:#5f6368;font-weight:400;margin-left:auto">'+allowed.length+' allowed · '+notAllowed.length+' not allowed</span></div>'
+        +'<div style="font-size:13px;font-weight:700;color:#137333;margin:8px 0 4px">Allowed (tap to turn off)</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+allowBtns+'</div>'
+        +'<div style="font-size:13px;font-weight:700;color:#c5221f;margin:12px 0 4px">Not allowed (tap to allow)</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+notAllowBtns+'</div>'
+        +'</div>';
+    }).join('');
+
+    return '<button class="btn sub-back" id="permMgrBack" style="margin-bottom:12px">← Back to Apps &amp; permissions</button>'
+      +'<h2>Permission manager</h2><div class="snote" style="padding-top:0">Manage which apps are allowed to access each resource. Tap an app to change its grant.</div>'
+      +resCards;
+  }
+
+  function buildPrivacyDashHtml(){
+    const cOff=isCamOff(),mOff=isMicOff();
+    const cutoff=Date.now()-24*60*60*1000;
+    const evs=(privacyEvents||[]).filter(ev=>ev&&(!ev.ts||new Date(ev.ts).getTime()>=cutoff));
+
+    const masterSensors='<h2>Master sensor controls</h2>'
+      +row('Camera off for everything','Blocks camera across all apps immediately','<button class="sw'+(cOff?' on':'')+'" id="setDashMasterCam"></button>')
+      +row('Microphone off for everything','Blocks microphone across all apps immediately','<button class="sw'+(mOff?' on':'')+'" id="setDashMasterMic"></button>');
+
+    const timelineHtml=evs.length?'<div class="dash-timeline">'+evs.map(ev=>{
+      const m=RES_META[ev.resource]||{ic:'🔒',word:ev.resource};
+      return '<div class="dash-item"><div class="dash-ic">'+m.ic+'</div><div class="dash-info"><div class="dash-app">'+E(ev.title||ev.app)+'</div><div class="dash-res">Used '+E(m.word||ev.resource)+'</div></div><div class="dash-time">'+fmtTimeAgo(ev.ts)+'</div></div>';
+    }).join('')+'</div>':'<div style="padding:24px;text-align:center;color:#6b7c93;background:#fff;border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)">No camera, microphone, or location use in the last 24 hours</div>';
+
+    return '<button class="btn sub-back" id="privacyDashBack" style="margin-bottom:12px">← Back to Apps &amp; permissions</button>'
+      +'<h2>Privacy dashboard</h2><div class="snote" style="padding-top:0">Timeline of camera, microphone, and location access by apps in the last 24 hours.</div>'
+      +masterSensors
+      +'<h2>24-hour timeline</h2>'
+      +timelineHtml
+      +'<div class="snote">The privacy log is kept on the tablet for 7 days and never leaves the tablet.</div>';
+  }
+
+  function buildLocationHtml(){
+    ensurePermObj();
+    const shared=!!(S.location&&S.location.shared);
+    const curPlace=(S.location&&S.location.place)||'';
+    const netLookup=!!(S.location&&S.location.network_lookup);
+    const cities=['Seattle, WA','Spokane, WA','Portland, OR','San Francisco, CA','Boise, ID','Chicago, IL','New York, NY','London, UK'];
+    const whatGets=shared?(curPlace?JSON.stringify({place:roundPlace(curPlace),coarse:true}):'Location is shared, but no place set yet (apps receive null)'):'Location is not shared (apps receive null)';
+
+    return '<button class="btn sub-back" id="locBack" style="margin-bottom:12px">← Back to Apps &amp; permissions</button>'
+      +'<h2>Location</h2>'
+      +row('Share location','Allow apps with Location permission to receive place','<button class="sw'+(shared?' on':'')+'" id="locSharedSw"></button>')
+      +'<div class="snote" style="padding-top:0">The tablet has no GPS. A grown-up sets the tablet’s place (a city or postcode, picked from a small offline list or typed) or leaves it "not shared" — the default. An app with the Location permission gets that coarse place only (rounded, city level) through the kt.js bridge; nothing is looked up from the network unless the grown-up turns that on.</div>'
+      +'<div style="padding:14px;background:#fff;border-radius:14px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)"><b>What an app receives:</b> <code id="locWhatAppGets" style="color:#1a73e8;display:block;margin-top:6px;font-size:14px">'+E(whatGets)+'</code></div>'
+      +'<div style="font-weight:700;margin-bottom:6px">Choose an offline city:</div>'
+      +'<div class="loc-chips">'+cities.map(c=>'<button class="loc-chip'+(curPlace===c?' on':'')+'" data-loc-chip="'+E(c)+'">'+E(c)+'</button>').join('')+'</div>'
+      +'<div style="font-weight:700;margin-top:12px;margin-bottom:6px">Or type a city or postcode:</div>'
+      +'<div class="loc-input-row"><input type="text" class="kfield loc-inp" id="locPlaceInput" value="'+E(curPlace)+'" placeholder="e.g. Seattle, WA 98101"><button class="btn go" id="locSavePlace">Save</button></div>'
+      +row('Network lookup','Allow looking up coarse place via network (off by default)','<button class="sw'+(netLookup?' on':'')+'" id="locNetLookupSw"></button>');
+  }
+
+  function wireAppsPage(){
+    const pg=window.ktSettings&&ktSettings.el?ktSettings.el('apps'):null;
+    if(!pg)return;
+    const secs=pg.querySelectorAll('.sec');
+    if(!secs.length)return;
+    const firstSec=secs[0];
+    const lastSec=secs[secs.length-1];
+    firstSec.style.display=(appsView==='main')?'':'none';
+
+    if(appsView==='main'){
+      lastSec.innerHTML=buildMainAppsSecHtml();
+    }else if(appsView==='app-detail'){
+      lastSec.innerHTML=buildAppDetailHtml(selectedApp);
+    }else if(appsView==='perm-mgr'){
+      lastSec.innerHTML=buildPermMgrHtml();
+    }else if(appsView==='privacy-dash'){
+      lastSec.innerHTML=buildPrivacyDashHtml();
+    }else if(appsView==='location'){
+      lastSec.innerHTML=buildLocationHtml();
+    }
+
+    /* Event wiring */
+    const subBack=lastSec.querySelector('.sub-back');
+    if(subBack)subBack.onclick=()=>{blip(440);setAppsView('main');};
+
+    const mc=lastSec.querySelector('#setMasterCam'),mm=lastSec.querySelector('#setMasterMic');
+    if(mc)mc.onclick=()=>{blip(520);toggleMaster('camera');};
+    if(mm)mm.onclick=()=>{blip(520);toggleMaster('microphone');};
+
+    const dmc=lastSec.querySelector('#setDashMasterCam'),dmm=lastSec.querySelector('#setDashMasterMic');
+    if(dmc)dmc.onclick=()=>{blip(520);toggleMaster('camera');};
+    if(dmm)dmm.onclick=()=>{blip(520);toggleMaster('microphone');};
+
+    const navP=lastSec.querySelector('#navPrivacyDash');if(navP)navP.onclick=async()=>{blip(520);if(agent){try{const r=await fetch('/api/privacy/log?hours=24');const j=await r.json();if(j&&j.events)privacyEvents=j.events;}catch(x){}}setAppsView('privacy-dash');};
+    const navM=lastSec.querySelector('#navPermMgr');if(navM)navM.onclick=()=>{blip(520);setAppsView('perm-mgr');};
+    const navL=lastSec.querySelector('#navLocation');if(navL)navL.onclick=()=>{blip(520);setAppsView('location');};
+
+    lastSec.querySelectorAll('[data-app-nav]').forEach(b=>b.onclick=()=>{blip(520);setAppsView('app-detail',b.dataset.appNav);});
+
+    const cmaSw=lastSec.querySelector('#permChildAllow');
+    if(cmaSw)cmaSw.onclick=async()=>{
+      const next=!childrenMayAllow();
+      ensurePermObj().children_may_allow=next;
+      if(agent){
+        try{
+          const r=await fetch('/api/permissions/set',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({children_may_allow:next})});
+          const j=await r.json();
+          if(j&&j.permissions)S.permissions=j.permissions;
+        }catch(x){}
+      }else{
+        save(false);
+      }
+      wireAppsPage();
+    };
+
+    lastSec.querySelectorAll('[data-detail-perm]').forEach(b=>b.onclick=()=>{
+      const [aid,res,st]=b.dataset.detailPerm.split(':');
+      blip(520);
+      setGrant(aid,res,st);
+    });
+
+    lastSec.querySelectorAll('[data-perm-set]').forEach(b=>b.onclick=()=>{
+      const [aid,res,st]=b.dataset.permSet.split(':');
+      blip(520);
+      setGrant(aid,res,st);
+    });
+
+    const detailHomeSw=lastSec.querySelector('#appDetailHomeSw');
+    if(detailHomeSw&&selectedApp){
+      detailHomeSw.onclick=()=>{
+        blip(520);
+        const al=new Set(S.apps.allowed||[]);
+        al.has(selectedApp)?al.delete(selectedApp):al.add(selectedApp);
+        S.apps.allowed=[...al];
+        save(false);
+        wireAppsPage();
+      };
+    }
+
+    lastSec.querySelectorAll('[data-kid-app-sw]').forEach(b=>b.onclick=()=>{
+      blip(520);
+      const kidId=b.dataset.kidAppSw,k=(S.kids||[]).find(x=>x.id===kidId);
+      if(!k||!selectedApp)return;
+      const all=(S.apps.allowed||[]).slice();
+      const cur=new Set(Array.isArray(k.apps_allowed)?k.apps_allowed:all);
+      cur.has(selectedApp)?cur.delete(selectedApp):cur.add(selectedApp);
+      k.apps_allowed=(cur.size>=all.length&&all.every(x=>cur.has(x)))?null:[...cur];
+      save(false);
+      wireAppsPage();
+    });
+
+    lastSec.querySelectorAll('[data-perm-mgr-set]').forEach(b=>b.onclick=()=>{
+      blip(520);
+      const [aid,res,st]=b.dataset.permMgrSet.split(':');
+      setGrant(aid,res,st);
+    });
+
+    const locSh=lastSec.querySelector('#locSharedSw');
+    if(locSh)locSh.onclick=async()=>{
+      blip(520);
+      ensurePermObj();
+      S.location.shared=!S.location.shared;
+      if(agent){try{await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S.location)});}catch(x){}}else{save(false);}
+      wireAppsPage();
+    };
+
+    const locNet=lastSec.querySelector('#locNetLookupSw');
+    if(locNet)locNet.onclick=async()=>{
+      blip(520);
+      ensurePermObj();
+      S.location.network_lookup=!S.location.network_lookup;
+      if(agent){try{await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S.location)});}catch(x){}}else{save(false);}
+      wireAppsPage();
+    };
+
+    lastSec.querySelectorAll('[data-loc-chip]').forEach(b=>b.onclick=async()=>{
+      blip(520);
+      ensurePermObj();
+      S.location.place=b.dataset.locChip;
+      if(agent){try{await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S.location)});}catch(x){}}else{save(false);}
+      wireAppsPage();
+    });
+
+    const locSave=lastSec.querySelector('#locSavePlace');
+    if(locSave)locSave.onclick=async()=>{
+      blip(520);
+      ensurePermObj();
+      const inp=lastSec.querySelector('#locPlaceInput');
+      if(inp)S.location.place=inp.value.trim();
+      if(agent){try{await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S.location)});}catch(x){}}else{save(false);}
+      wireAppsPage();
+    };
+  }
+
+  const _openSettingsPerm=openSettings;
+  window.openSettings=openSettings=function(){
+    appsView='main';
+    if(agent){
+      fetch('/api/permissions').then(r=>r.json()).then(j=>{
+        if(j&&j.permissions)S.permissions=j.permissions;
+        if(j&&j.privacy)S.privacy=j.privacy;
+        if(j&&j.location)S.location=j.location;
+        wireAppsPage();
+      }).catch(()=>{});
+      fetch('/api/privacy/log?hours=24').then(r=>r.json()).then(j=>{
+        if(j&&j.events)privacyEvents=j.events;
+      }).catch(()=>{});
+    }
+    drawQuickSensors();
+    return _openSettingsPerm();
+  };
+  const _drawSettingsPerm=drawSettings;
+  drawSettings=function(){
+    _drawSettingsPerm();
+    wireAppsPage();
+    drawQuickSensors();
+  };
+
+  window.ktPerms={
+    ask:handlePermAsk,
+    answer:finishPermDecision,
+    hasGrant:hasPermGrant,
+    getGrant:getLocalGrant,
+    frameAllowFor,
+    openView:setAppsView,
+    toggleMaster,
+    setGrant,
+    setPlace:async(place,shared,netLookup)=>{
+      ensurePermObj();
+      if(typeof place==='string')S.location.place=place;
+      if(typeof shared==='boolean')S.location.shared=shared;
+      if(typeof netLookup==='boolean')S.location.network_lookup=netLookup;
+      if(agent){try{await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S.location)});}catch(x){}}else{save(false);}
+      wireAppsPage();
+    },
+    roundPlace,
+    get view(){return appsView;},
+    get selectedApp(){return selectedApp;},
+    get token(){return openToken;},
+    get pending(){return pendingPerm;},
+    get inUse(){return [...permInUse.values()];}
+  };
 })();
 
 loadAll();

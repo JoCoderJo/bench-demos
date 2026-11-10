@@ -2,7 +2,7 @@ pack: 1
 id: tv-remote
 name: TV Remote
 version: 1.0.0
-icon: 📺
+icon: ⏯️
 color: "#2b7a78"
 description: steer the family TV
 group: play
@@ -10,7 +10,7 @@ tier: pre-reader
 tile:
   start_url: index.html
 needs: []
-permissions: [audio]
+permissions: [audio, tv]
 data: data/tv-remote
 data_version: 1
 service:

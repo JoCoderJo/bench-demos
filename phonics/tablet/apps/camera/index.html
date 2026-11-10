@@ -112,7 +112,15 @@ button{min-height:max(64px,var(--tgt));min-width:max(64px,var(--tgt))}
 #camsw button{min-height:max(56px,var(--tgt))}
 .pick{width:max(84px,var(--tgt));height:max(84px,var(--tgt))}
 #drawer .row button,#colpanel .row button{min-height:max(52px,var(--tgt))!important}
-:root[data-tier=reader] #side{gap:6px;padding:8px 10px}
+/* reader (75 px targets): eight stacked buttons + the shutter were taller than the screen — "Pictures" was cut by the nav bar and "Done"
+   was gone on the real panel (2026-11-09). The panel is a little wider and the small controls sit two across. */
+:root[data-tier=reader] #side{width:190px;gap:6px;padding:8px 10px}
+:root[data-tier=reader] #side .grp:first-child{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+:root[data-tier=reader] #camsw{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%}
+:root[data-tier=reader] #bStick,:root[data-tier=reader] #bCol{grid-column:1/-1}
+:root[data-tier=reader] #side .grp:first-child button{padding-left:4px;padding-right:4px;min-width:0;white-space:nowrap}
+:root[data-tier=reader] #bRot,:root[data-tier=reader] #bMir{font-size:15px}
+#side #shutter{width:max(108px,var(--tgt));flex:none}   /* `#side button{width:100%}` had made the shutter an oval */
 :root[data-tier=reader] #st{min-height:1.3em}
 :root[data-tier=pre-reader] #side{justify-content:flex-start}
 :root[data-tier=pre-reader] #drawer,:root[data-tier=pre-reader] #colpanel{bottom:72px}
@@ -202,7 +210,15 @@ button{min-height:max(64px,var(--tgt));min-width:max(64px,var(--tgt))}
   }, true);
 })();
 
-const HELPER = 'http://127.0.0.1:8095';
+let _camPort = '8095';
+try {
+  const q = new URLSearchParams(location.search).get('cam_port');
+  if (q) _camPort = q;
+  else if (window.parent && window.parent.CAM_PORT) _camPort = String(window.parent.CAM_PORT);
+} catch (e) {}
+const HELPER = 'http://127.0.0.1:' + _camPort;
+let permToken = '', permDenied = false;
+const hUrl = (p, q) => HELPER + p + (q ? '?' + q + (permToken ? '&token=' + encodeURIComponent(permToken) : '') : (permToken ? '?token=' + encodeURIComponent(permToken) : ''));
 const LIVE = location.protocol.startsWith('http');          // served by the launcher: the store exists
 const $ = id => document.getElementById(id);
 const box = $('box'), live = $('live'), stkLayer = $('stk'), veil = $('veil');
@@ -273,7 +289,7 @@ async function tuneLoop() {
   if (helperUp && active && !taking && !switching && !tuning && colFor(active).auto) {
     tuning = true;
     try {
-      const blob = await (await fetch(HELPER + '/snap.jpg?t=' + Date.now(), { cache: 'no-store' })).blob();
+      const blob = await (await fetch(hUrl('/snap.jpg', 't=' + Date.now()), { cache: 'no-store' })).blob();
       const m = measure(await createImageBitmap(blob));
       const a = tune.n === 0 ? 1 : 0.25;                                   // first measurement lands at once, then eased
       tune.wb = tune.wb.map((v, i) => v + (m.wb[i] - v) * a); tune.gain += (m.gain - tune.gain) * a; tune.off += (m.off - tune.off) * a; tune.dark += (m.dark - tune.dark) * a; tune.n++;
@@ -318,6 +334,24 @@ const saveV = () => { try { localStorage.setItem('kt-camera-view', JSON.stringif
 let kid = { id: 'default', name: '' }, caps = { camera: true };
 window.addEventListener('message', e => {
   const d = e.data || {};
+  if (d.kt === 'perm-changed' && d.resource === 'camera') {
+    if (!d.granted) {
+      permDenied = true; helperUp = false; active = null;
+      box.classList.add('off'); veil.textContent = 'Camera permission was turned off.';
+      $('st').textContent = 'permission off';
+      live.removeAttribute('src');
+    } else {
+      permDenied = false;
+      if (d.token) permToken = d.token;
+      box.classList.remove('off');
+      poll();
+    }
+    return;
+  }
+  if (d.kt === 'hello-token' && d.token) {
+    permToken = d.token;
+    return;
+  }
   if (d.kt === 'back') {
     if ($('big').classList.contains('on')) { openGallery(); try { parent.postMessage({ kt: 'back', handled: true }, '*'); } catch (_) {} return; }
     if ($('gal').classList.contains('on')) { show('cam'); try { parent.postMessage({ kt: 'back', handled: true }, '*'); } catch (_) {} return; }
@@ -359,13 +393,13 @@ function syncButtons() {
   $('bRot').textContent = '↻ ' + (active ? (V.rot[active] || 0) : 0) + '°';
   $('bMir').classList.toggle('on', !!(active && V.mir[active]));
 }
-function stream() { live.src = HELPER + '/stream?t=' + Date.now(); }
+function stream() { live.src = hUrl('/stream', 't=' + Date.now()); }
 async function select(key) {
   if (switching || key === active) return;
   switching = true; box.classList.add('busy'); veil.textContent = 'switching camera…';
   document.querySelectorAll('[data-cam]').forEach(b => b.disabled = true);
   try {
-    const r = await fetch(HELPER + '/select/' + key, { method: 'POST' });
+    const r = await fetch(hUrl('/select/' + key), { method: 'POST' });
     if (r.ok) { active = key; tune.n = 0; syncButtons(); setColour(); fit(); live.removeAttribute('src'); setTimeout(stream, 900); }
   } catch (e) {}
   setTimeout(() => { switching = false; box.classList.remove('busy'); document.querySelectorAll('[data-cam]').forEach(b => b.disabled = false); }, 1500);
@@ -377,8 +411,9 @@ window.addEventListener('resize', fit);
 live.onerror = () => { if (helperUp && active) setTimeout(stream, 1500); };
 
 async function poll() {
+  if (permDenied) return;
   try {
-    const j = await (await fetch(HELPER + '/status', { cache: 'no-store' })).json();
+    const j = await (await fetch(hUrl('/status'), { cache: 'no-store' })).json();
     if (!helperUp) { helperUp = true; box.classList.remove('off'); }
     const c = j.camera;
     if (c && c.size) { frameW = c.size[0]; frameH = c.size[1]; }
@@ -543,7 +578,7 @@ async function faceLoop() {
     facing = true;
     try {
       let src = live;
-      if (faceSrc === 'snap') src = await createImageBitmap(await (await fetch(HELPER + '/snap.jpg?t=' + Date.now(), { cache: 'no-store' })).blob());
+      if (faceSrc === 'snap') src = await createImageBitmap(await (await fetch(hUrl('/snap.jpg', 't=' + Date.now()), { cache: 'no-store' })).blob());
       let img;
       try { img = faceFrame(src); }
       catch (e) { if (faceSrc === 'img') { faceSrc = 'snap'; face.err = 'live image is cross-origin, using snapshots'; } throw e; }
@@ -584,7 +619,7 @@ async function takePicture() {
   cnt.textContent = '😀'; await sleep(250); cnt.classList.remove('on');
   let ok = false;
   try {
-    const blob = await (await fetch(HELPER + '/snap.jpg?t=' + Date.now(), { cache: 'no-store' })).blob();
+    const blob = await (await fetch(hUrl('/snap.jpg', 't=' + Date.now()), { cache: 'no-store' })).blob();
     const bmp = await createImageBitmap(blob);
     $('flash').classList.add('on'); shutterSound(); setTimeout(() => $('flash').classList.remove('on'), 60);
     const rot = V.rot[active] || 0, mir = !!V.mir[active], turned = rot % 180 !== 0;
@@ -675,9 +710,22 @@ const home = () => { try { parent.postMessage({ kt: 'home' }, '*'); } catch (e) 
 $('bDone').onclick = home; $('bGalDone').onclick = home;
 
 /* ---------- go ---------- */
-setColour(); syncButtons(); fit(); poll(); refreshCount(); setTimeout(tuneLoop, 600); setTimeout(faceLoop, 1200);
+setColour(); syncButtons(); fit(); refreshCount();
+(async () => {
+  if (window.KT && KT.permission) {
+    const p = await KT.permission('camera');
+    if (!p.granted) {
+      permDenied = true; helperUp = false; active = null; syncButtons();
+      box.classList.add('off'); veil.textContent = 'Camera permission is turned off for Camera. A grown-up can allow it in Settings → Apps & permissions.';
+      $('st').textContent = 'permission off';
+      return;
+    }
+    permToken = p.token || '';
+  }
+  poll(); setTimeout(tuneLoop, 600); setTimeout(faceLoop, 1200);
+})();
 // test hook (tests/camera_dom.py)
-window.KTCAM = { get state() { return { active, helperUp, stickers: stickers.map(s => ({ kind: s.kind, v: s.v, x: +s.x.toFixed(3), y: +s.y.toFixed(3), w: +s.w.toFixed(3), r: Math.round(s.r), anchor: s.anchor })), kid: kid.id, taking, tuned: tune.n }; }, addSticker, takePicture, select, get CM() { return CM; }, get tune() { return tune; }, measure, get face() { return Object.assign({ src: faceSrc }, face); }, get col() { return active ? colFor(active) : null; } };
+window.KTCAM = { get state() { return { active, helperUp, permDenied, permToken, stickers: stickers.map(s => ({ kind: s.kind, v: s.v, x: +s.x.toFixed(3), y: +s.y.toFixed(3), w: +s.w.toFixed(3), r: Math.round(s.r), anchor: s.anchor })), kid: kid.id, taking, tuned: tune.n }; }, addSticker, takePicture, select, get CM() { return CM; }, get tune() { return tune; }, measure, get face() { return Object.assign({ src: faceSrc }, face); }, get col() { return active ? colFor(active) : null; } };
 })();
 </script>
 </body>

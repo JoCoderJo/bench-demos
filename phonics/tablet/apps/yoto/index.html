@@ -63,6 +63,15 @@ body{display:flex;flex-direction:column}
 .tabs .kt-icon{font-size:calc(var(--tgt) * .5)}
 .btn{min-height:var(--tgt);min-width:var(--tgt);justify-content:center}
 #shelf{height:auto}
+/* 2026-11-09 (real panel): the shelf squeezed its rows to fit the screen — auto grid tracks + overflow:hidden cards have a zero minimum —
+   so covers were cut to strips and the titles were gone. Rows are as tall as a card now; five covers across, portrait like the cards. */
+#shelf{grid-template-columns:repeat(5,minmax(0,1fr));grid-auto-rows:max-content;gap:18px}
+.cardb{position:relative}
+.cardb img{aspect-ratio:4/5}
+.cardb .t{font-size:18px;min-height:0;-webkit-line-clamp:2;max-height:none}
+/* pre-readers: the cover is the card; the title is heard on a hold (data-say-text) */
+:root[data-tier=pre-reader] .cardb .t,:root[data-tier=pre-reader] .cardb .s{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;padding:0}
+:root[data-tier=pre-reader] .cardb img{padding:0}
 #player.on{display:grid}
 #ctl button{min-width:max(64px,var(--tgt));min-height:max(64px,var(--tgt))}
 .ch{min-height:var(--tgt)}
@@ -109,7 +118,7 @@ function renderShelf(){
   $('filters').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.f===filter));
   const list=LIB.filter(inGroup);
   {
-    $('shelf').innerHTML=list.map(c=>'<button class="cardb" data-id="'+E(c.id)+'"><img src="'+E(img(c.cover))+'" alt="" loading="lazy"><span class="t">'+E(c.title)+'</span><span class="s">'+E(c.author||(c.duration?fmt(c.duration):''))+'</span></button>').join('')
+    $('shelf').innerHTML=list.map(c=>'<button class="cardb" data-id="'+E(c.id)+'" data-say-text="'+E(c.title)+'" aria-label="'+E(c.title)+'"><img src="'+E(img(c.cover))+'" alt="" loading="lazy"><span class="t">'+E(c.title)+'</span><span class="s">'+E(c.author||(c.duration?fmt(c.duration):''))+'</span></button>').join('')
       ||'<div id="msg">Nothing in this group yet.</div>';
     $('shelf').querySelectorAll('.cardb').forEach(b=>b.onclick=()=>openCard(b.dataset.id));
   }

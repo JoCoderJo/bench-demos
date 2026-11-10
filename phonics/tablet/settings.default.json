@@ -121,6 +121,8 @@
  "kiosk": {
   "home_button": "tap",
   "parent_hold_ms": 1500,
+  "lock_code_on": false,
+  "lock_code": "",
   "show_clock": true,
   "clock_24h": false,
   "kid_volume": true,
@@ -130,5 +132,65 @@
  "bench": {
   "url": "https://bench.tail81b22c.ts.net",
   "updates": "manual"
+ },
+ "permissions": {
+  "children_may_allow": false,
+  "seeded": true,
+  "grants": {
+   "camera": {
+    "camera": {
+     "state": "installed",
+     "denials": 0,
+     "when": "2026-11-10",
+     "by": "installed",
+     "kid": ""
+    }
+   },
+   "show-tell": {
+    "camera": {
+     "state": "installed",
+     "denials": 0,
+     "when": "2026-11-10",
+     "by": "installed",
+     "kid": ""
+    }
+   },
+   "tv-remote": {
+    "tv": {
+     "state": "installed",
+     "denials": 0,
+     "when": "2026-11-10",
+     "by": "installed",
+     "kid": ""
+    }
+   },
+   "pbs-kids": {
+    "internet": {
+     "state": "installed",
+     "denials": 0,
+     "when": "2026-11-10",
+     "by": "installed",
+     "kid": ""
+    }
+   },
+   "phonics-friends": {
+    "microphone": {
+     "state": "installed",
+     "denials": 0,
+     "when": "2026-11-10",
+     "by": "installed",
+     "kid": ""
+    }
+   }
+  }
+ },
+ "privacy": {
+  "camera_off": false,
+  "mic_off": false
+ },
+ "location": {
+  "place": "",
+  "shared": false,
+  "network_lookup": false
  }
 }

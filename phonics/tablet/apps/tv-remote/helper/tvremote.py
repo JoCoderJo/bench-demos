@@ -556,7 +556,7 @@ class TV:
 
 
 # ---------------------------------------------------------------- HTTP
-def serve(tv: TV, port: int):
+def serve(tv: TV, port: int, agent_url: str = ""):
     disc_cache = {"t": 0.0, "list": []}
 
     class H(BaseHTTPRequestHandler):
@@ -571,7 +571,7 @@ def serve(tv: TV, port: int):
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type, X-KT-Token")
             self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
             self.send_header("Cache-Control", "no-store")
             self.end_headers()
@@ -579,6 +579,26 @@ def serve(tv: TV, port: int):
 
         def do_OPTIONS(self):
             self._send(204, {})
+
+        def _check_perm(self, body=None) -> bool:
+            if not agent_url:
+                return True
+            import urllib.error, urllib.parse, urllib.request
+            qs = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
+            tok = (qs.get("token") or [""])[0] or (self.headers.get("X-KT-Token") or "") or ((body or {}).get("token") or "")
+            if not tok:
+                self._send(403, {"ok": False, "error": "permission denied: tv (missing token)"})
+                return False
+            url = f"{agent_url.rstrip('/')}/api/permissions/check?resource=tv&token={urllib.parse.quote(str(tok))}"
+            try:
+                with urllib.request.urlopen(url, timeout=2.0) as r:
+                    data = json.loads(r.read().decode("utf-8") or "{}")
+                    if r.status == 200 and data.get("granted"):
+                        return True
+            except (urllib.error.URLError, OSError, ValueError):
+                pass
+            self._send(403, {"ok": False, "error": "permission denied: tv"})
+            return False
 
         def _body(self):
             n = int(self.headers.get("Content-Length") or 0)
@@ -591,6 +611,9 @@ def serve(tv: TV, port: int):
 
         def do_GET(self):
             p = self.path.split("?")[0]
+            if p in ("/status", "/discover"):
+                if not self._check_perm():
+                    return
             if p == "/status":
                 return self._send(200, tv.status())
             if p == "/discover":
@@ -614,6 +637,8 @@ def serve(tv: TV, port: int):
         def do_POST(self):
             p = self.path.split("?")[0]
             b = self._body()
+            if not self._check_perm(b):
+                return
             try:
                 if p == "/pair/start":
                     host = str(b.get("host", "")).strip()
@@ -671,6 +696,7 @@ def main():
     ap.add_argument("--state", default=os.path.expanduser("~/kids-tablet/state/tv-remote"))
     ap.add_argument("--fake", action="store_true", help="a pretend TV (pairing code 123456), for the laptop and tests")
     ap.add_argument("--discover", action="store_true", help="print the Google TVs on the LAN and exit")
+    ap.add_argument("--agent", default=None, help="tablet agent URL for permission checks (#272)")
     ap.add_argument("-v", action="store_true")
     a = ap.parse_args()
     logging.basicConfig(level=logging.DEBUG if a.v else logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -678,7 +704,8 @@ def main():
         print(json.dumps(mdns_discover(), indent=1))
         return
     tv = TV(Path(a.state).expanduser(), a.fake)
-    serve(tv, a.port)
+    agent_url = a.agent if a.agent is not None else os.environ.get("KT_AGENT_URL", "" if a.fake else "http://127.0.0.1:8090")
+    serve(tv, a.port, agent_url)
 
 
 if __name__ == "__main__":
