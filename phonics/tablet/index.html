@@ -488,6 +488,52 @@ body.kbd #toast{bottom:calc(var(--nb) + var(--kbh,290px) + 16px)}
 .loc-input-row{display:flex;gap:8px;margin-top:8px}
 .loc-inp{flex:1;padding:12px 14px;border-radius:12px;border:1.5px solid #d2dbe5;font-size:16px}
 #qMasterCam.off,#qMasterMic.off{background:#ea4335!important;color:#fff!important}
+/* ---- Settings → Network & internet → Wi-Fi (card #270, part 2 of 5) — drawn by the last block of the script ---- */
+#sysbar #sbWifi{width:30px;height:var(--sb);display:none;place-items:center}
+#sysbar #sbWifi.on{display:grid}
+#sysbar #sbWifi.bad{color:var(--bad)}
+.wf-ic{width:44px;height:44px;border-radius:50%;background:#e3f2fd;color:#1565c0;display:grid;place-items:center;flex:none}
+.wf-ic svg{width:26px;height:26px;display:block}
+.wf-net.cur .wf-ic{background:#dff7e3;color:#1e7e34}
+.wf-net.cur.noinet .wf-ic{background:#fff3e0;color:#b45309}
+.wf-main{flex:1;min-width:0;display:flex;align-items:center;gap:12px;text-align:left;padding:4px 0}
+.wf-main:active{opacity:.7}
+.wf-main .l b{display:block;font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wf-lock{width:22px;height:22px;flex:none;fill:none;stroke:#5b6b80;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wf-gear{min-width:44px;height:44px;display:grid;place-items:center;font-size:20px;padding:0 12px}
+.wf-banner{border-radius:14px;padding:12px 16px;margin:8px 0 10px;font-size:16px;line-height:1.4}
+.wf-banner.setup{background:#fff8e1;border:2px solid #ffb300;color:#1d2a3a}
+.wf-banner.look{background:#e3f2fd;border:1px solid #90caf9;color:#0d47a1}
+#settings.wfonly #setHome,#settings.wfonly .spage:not([data-page="network"]){display:none!important}
+#settings.wfgate{z-index:7!important}   /* the code pad shows over the Wi-Fi page while it asks */
+#wfSheet{position:fixed;inset:var(--sb) 0 var(--nb) 0;z-index:5;background:rgba(12,18,32,.55);display:none;justify-content:center;align-items:flex-start;padding:18px 20px}
+#wfSheet.on{display:flex}
+#wfCard{width:600px;max-width:100%;background:#fff;color:#1d2a3a;border-radius:22px;padding:20px 24px 18px;box-shadow:0 18px 50px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:12px}
+#wfCard h2{font-size:23px;margin:0;display:flex;align-items:center;gap:12px;overflow-wrap:anywhere;flex:1;min-width:0}
+.wf-head{display:flex;align-items:center;gap:12px}
+.wf-head .wf-acts{margin:0;flex:none}
+.wf-secrow{display:flex;align-items:center;gap:14px}
+#wfCard .wf-secrow label{margin:0}
+body.kbd #wfCard p{display:none}   /* while typing, the fields get the room */
+#wfCard p{margin:0;font-size:16px;line-height:1.45;color:#3b4a5e}
+#wfCard label{font-size:14px;font-weight:700;color:#5b6b80;display:block;margin-bottom:4px}
+#wfCard .kfield{width:100%}
+.wf-pwrow{display:flex;gap:8px;align-items:center}
+.wf-pwrow .kfield{flex:1;min-width:0}
+#wfEye{width:52px;height:52px;border-radius:12px;background:#e9edf3;display:grid;place-items:center;flex:none}
+#wfEye svg{width:26px;height:26px;fill:none;stroke:#1d2a3a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#wfEye.on{background:#1d2a3a}#wfEye.on svg{stroke:#fff}
+.wf-secs{display:flex;gap:8px;flex-wrap:wrap}
+#wfStage{font-size:19px;font-weight:700;display:flex;align-items:center;gap:12px;min-height:34px}
+#wfStage.ok{color:#1e7e34}
+.wf-spin{width:24px;height:24px;border-radius:50%;border:3px solid #c9d1dc;border-top-color:#1565c0;animation:wfSpin .8s linear infinite;flex:none}
+@keyframes wfSpin{to{transform:rotate(360deg)}}
+#wfErr{background:#ffebee;border:2px solid #ef5350;color:#b71c1c;font-weight:700;border-radius:12px;padding:10px 14px;font-size:16px;line-height:1.4}
+.wf-acts{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+.wf-acts .btn{min-height:48px;padding:10px 20px;font-size:17px}
+#qWifi{display:inline-flex;align-items:center;gap:10px}
+#qWifi svg{width:22px;height:22px;display:block}
+#qWifi.off{opacity:.75}
 </style></head><body>
 
 <div class="screen on" id="home">
@@ -2153,7 +2199,9 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
   // A launcher that has just (re)loaded has no tile open — say so. After a bundle push under an open tile the agent kept reporting that
   // tile (`/api/status` app) for as long as nobody opened another one, which is what the push rule and the Bench page read.
   const _loadAll2=loadAll;
-  loadAll=async function(){await _loadAll2();if(agent&&!current)fetch('/api/app',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:null})}).catch(()=>{});};
+  // The answer is read to its end on purpose: a fetch whose body nobody reads stays "in flight" for the browser until the garbage
+  // collector gets to it, and a page-load request that never ends keeps the page from ever going network-quiet (diy_pipeline_dom).
+  loadAll=async function(){await _loadAll2();if(agent&&!current)fetch('/api/app',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:null})}).then(r=>r.text()).catch(()=>{});};
 })();
 
 // ===== Settings like a phone + the on-screen keyboard (card #269, part 1 of 5 — Joe: "I need Bluetooth to be like a phone's/tablet's
@@ -3484,7 +3532,7 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
     const switches='<h2>App settings</h2>'
       +row('Screen time today','Time spent in this app today','<span class="v" id="appDetailScreenTime">'+stText+'</span>')
       +row('On the home screen','Show on the home grid','<button class="sw'+(onHome?' on':'')+'" id="appDetailHomeSw"></button>')
-      +(S.kids||[]).map(k=>row('Allowed for '+E(k.name||'Child'),'Child profile access','<button class="sw'+((!k.apps_allowed||k.apps_allowed.includes(a.id))?' on':'')+'" data-kid-app-sw="'+E(k.id)+'"></button>')).join('');
+      +(S.kids||[]).map((k,i)=>row('Allowed for '+E(kidLabel(k,i)||'Child'),'shows on this child’s home screen','<button class="sw'+((!k.apps_allowed||k.apps_allowed.includes(a.id))?' on':'')+'" data-kid-app-sw="'+E(k.id)+'"></button>')).join('');
 
     const permsHeader='<h2>Permissions</h2>'
       +(resList.length?'':'<div class="snote">This app does not ask for special permissions.</div>');
@@ -3499,7 +3547,7 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
         ['ask','Ask every time',st==='ask',''],
         ['denied','Don’t allow',st==='denied',' deny']
       ].map(b=>'<button class="perm-pill'+(b[2]?' on':'')+b[3]+'" data-detail-perm="'+E(a.id)+':'+E(r)+':'+b[0]+'">'+b[1]+'</button>').join('');
-      return '<div class="row" data-perm-row="'+E(a.id)+':'+E(r)+'"><div class="l">'+m.ic+' '+E(m.pill||m.short)+'<small>'+E(lastStr)+' · '+E(stateDesc(rec))+'</small></div><div class="perm-row-btns">'+btns+'</div></div>';
+      return '<div class="row" data-perm-row="'+E(a.id)+':'+E(r)+'"><div class="l">'+E(m.pill||(m.ic+' '+m.short))+'<small>'+E(lastStr)+' · '+E(stateDesc(rec))+'</small></div><div class="perm-row-btns">'+btns+'</div></div>';
     }).join('');
 
     return hero+switches+permsHeader+permRows;
@@ -3517,7 +3565,7 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
       const notAllowBtns=notAllowed.length?notAllowed.map(a=>'<button class="btn perm-mgr-app-btn" data-perm-mgr-set="'+E(a.id)+':'+E(r)+':while_using" title="Tap to allow">'+E(a.icon)+' '+E(a.title)+'</button>').join(' '):'<div style="color:#718096;font-size:14px">None</div>';
 
       return '<div class="perm-mgr-res">'
-        +'<div class="perm-mgr-res-hdr"><span>'+m.ic+'</span><span>'+E(m.pill||m.short)+'</span><span style="font-size:14px;color:#5f6368;font-weight:400;margin-left:auto">'+allowed.length+' allowed · '+notAllowed.length+' not allowed</span></div>'
+        +'<div class="perm-mgr-res-hdr"><span>'+E(m.pill||(m.ic+' '+m.short))+'</span><span style="font-size:14px;color:#5f6368;font-weight:400;margin-left:auto">'+allowed.length+' allowed · '+notAllowed.length+' not allowed</span></div>'
         +'<div style="font-size:13px;font-weight:700;color:#137333;margin:8px 0 4px">Allowed (tap to turn off)</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+allowBtns+'</div>'
         +'<div style="font-size:13px;font-weight:700;color:#c5221f;margin:12px 0 4px">Not allowed (tap to allow)</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+notAllowBtns+'</div>'
         +'</div>';
@@ -3752,6 +3800,374 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
     get pending(){return pendingPerm;},
     get inUse(){return [...permInUse.values()];}
   };
+})();
+
+/* ===== Settings → Network & internet → Wi-Fi (card #270, part 2 of 5 — "the way an Android tablet does it") — additive, last block.
+   The agent owns NetworkManager (GET /api/wifi, POST /api/wifi/{power,scan,connect,forget,autoconnect}); this block draws the page
+   (ktSettings.fill/wire/summary.network), the sheets (password · add network · are-you-sure), the status-bar icon (#sbWifi, the real
+   state; the helper dot #dAgent keeps its id and .dot class and wears a chip now) and the Wi-Fi tile of the pull-down menu (#qWifi).
+   LOOKING needs no code: the tile opens the page as a guest (#settings.wfonly — no way to the rest of Settings). Every CHANGE needs
+   the grown-up code: join, add network, forget, the auto-connect switch, Wi-Fi off. A guest gets the code pad first (gate 'wifi');
+   Settings opened through the code pad has had it already. Switching Wi-Fi back ON asks nothing — it is the way back.
+   NEVER STRAND: the agent goes back to the old network when a join fails; Wi-Fi off, and forget / no-auto-connect for the network in
+   use, first show what happens and how to get back. Wraps openSettings, closeSettings, openGate, closeGate, checkPin, navBack, openQuick. */
+(function(){
+  let WF=null,view='main',sel=null,guest=false,guestAt=0,pend=null,tileOpen=false,joinT=null,tickN=0,sheet=null,wasOn=false,misses=0;
+  const stages=[];
+  const code=()=>String(S.pin||'1234');
+  const settingsOn=()=>$('settings').classList.contains('on');
+  const gateOn=()=>$('gate').classList.contains('on');
+  const onPage=()=>settingsOn()&&ktSettings.page==='network';
+  const kbOpen=()=>!!(window.ktKbd&&ktKbd.isOpen);
+  const benchWord=()=>({ok:'reachable',down:'not reachable',off:'not set up'})[STATUS.bench]||'not checked yet';
+  const cap=s=>{s=String(s||'');return s.charAt(0).toUpperCase()+s.slice(1);};
+  const WORD=['Not in range','Weak','Fair','Good','Excellent'];
+  const SETUP='The tablet helper is not allowed to change Wi-Fi on this tablet yet. The person who set the tablet up has to allow it once; until then the networks can be looked at, not changed.';
+  const LOCK='<svg class="wf-lock" viewBox="0 0 24 24" role="img" aria-label="needs a password"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5"/></svg>';
+  const EYE=shown=>'<svg viewBox="0 0 24 24"><path d="M1.8 12S5.6 5.2 12 5.2 22.2 12 22.2 12 18.4 18.8 12 18.8 1.8 12 1.8 12z"/><circle cx="12" cy="12" r="3.1"/>'+(shown?'<path d="M4.2 3.2l15.6 17.6"/>':'')+'</svg>';
+  /* the fan: dot + three arcs = 1-4 bars; off = struck through; down = all faint; noinet = bars with a "!" */
+  function glyph(st,bars){
+    const o=i=>((st==='on'||st==='noinet')&&bars>=i)?1:.26;
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" data-wf="'+st+'" data-bars="'+bars+'">'
+      +'<path d="M2.5 9a15 15 0 0 1 19 0" opacity="'+o(4)+'"/><path d="M5.5 12.5a10.5 10.5 0 0 1 13 0" opacity="'+o(3)+'"/><path d="M8.5 16a6 6 0 0 1 7 0" opacity="'+o(2)+'"/>'
+      +'<circle cx="12" cy="19.3" r="1.4" fill="currentColor" stroke="none" opacity="'+o(1)+'"/>'
+      +(st==='off'?'<path d="M4 3.5l16 17.5" stroke-width="2.4"/>':'')
+      +(st==='noinet'?'<path d="M21 13.2v4.6M21 21h.01" stroke-width="2.6"/>':'')+'</svg>';
+  }
+  function state(){   /* none = no helper or no Wi-Fi · off · down = on, not connected · noinet · on */
+    if(!agent||!WF||!WF.available)return {st:'none',bars:0,text:!agent?'needs the tablet helper':(WF?'no Wi-Fi on this tablet':'checking…')};
+    if(!WF.power)return {st:'off',bars:0,text:'Off'};
+    const c=WF.current;
+    if(!c)return {st:'down',bars:0,text:'On · not connected'};
+    return c.internet===false?{st:'noinet',bars:c.bars||1,text:c.ssid+' · no internet'}:{st:'on',bars:c.bars||1,text:c.ssid};
+  }
+
+  /* ---------- status bar + the tile in the pull-down menu ---------- */
+  $('dots').insertAdjacentHTML('beforebegin','<span id="sbWifi" role="img" aria-label="Wi-Fi"></span>');
+  $('dAgent').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3.5V7M14 3.5V7M10 17v3.5M14 17v3.5M3.5 10H7M3.5 14H7M17 10h3.5M17 14h3.5"/></svg>';
+  $('dots').title='cloud = Bench reachable · chip = tablet helper running';
+  const qrow=document.createElement('div');qrow.className='qrow';qrow.id='qWifiRow';
+  qrow.innerHTML='<div class="ql">📶 Wi-Fi</div><button class="qact" id="qWifi" aria-label="Wi-Fi: open the Wi-Fi page"><span id="qWifiIc"></span><span id="qWifiState"></span></button>';
+  (function(){const bt=$('qBtSw').closest('.qrow');bt.parentNode.insertBefore(qrow,bt);})();
+  $('qWifi').onclick=()=>{blip(520);openWifiPage();};
+  function drawBar(){
+    const s=state(),el=$('sbWifi'),g=glyph(s.st,s.bars);
+    el.className=s.st==='none'?'':'on';el.dataset.state=s.st;el.dataset.bars=s.bars;
+    el.setAttribute('aria-label','Wi-Fi: '+s.text);el.title='Wi-Fi: '+s.text;
+    if(el._h!==g){el._h=g;el.innerHTML=g;$('qWifiIc').innerHTML=g;}
+    $('qWifiState').textContent=s.text;$('qWifi').classList.toggle('off',s.st==='off'||s.st==='none');
+  }
+  function drawAll(){drawBar();if(settingsOn())ktSettings.live();}
+  function redraw(){const el=ktSettings.el('network');if(el)el._h='';drawAll();}
+
+  /* ---------- the agent ---------- */
+  async function wfPost(act,body){
+    const r=await fetch('/api/wifi/'+act,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok){const e=new Error(j.error||r.status);e.j=j;throw e;}
+    return j;
+  }
+  async function poll(brief){
+    if(!agent){WF=null;drawAll();return;}
+    try{const j=await jget('/api/wifi'+(brief?'?brief=1':''));if(brief)j.brief=true;if(!(brief&&onPage()))WF=j;misses=0;}catch(e){misses++;}
+    drawAll();
+  }
+  function scan(){if(agent&&WF&&WF.power)wfPost('scan',{}).catch(()=>{});}
+  setInterval(()=>{
+    tickN++;
+    if(!agent){if(WF){WF=null;drawAll();}return;}
+    const on=onPage();
+    if(on&&!wasOn){poll(false);scan();}
+    if(!on&&wasOn){view='main';sel=null;}
+    wasOn=on;
+    if(joinT)return;
+    if(on){if(tickN%3===0)poll(false);if(tickN%10===5)scan();}   /* the list refreshes while the page is open */
+    else if(tickN%30===0||(!WF&&tickN%4===2&&misses<5))poll(true);
+  },1000);
+
+  /* ---------- the grown-up code in front of every change ---------- */
+  function setGuest(v){guest=!!v;if(guest)guestAt=Date.now();$('settings').classList.toggle('wfonly',guest);}
+  function grown(fn){if(!guest){fn();return;}pend=fn;blip(500);openGate('wifi');}
+  const _og=openGate;
+  openGate=function(next){
+    if(settingsOn()&&guest){if(next==='wifi')$('settings').classList.add('wfgate');else closeSettings();}
+    return _og(next);
+  };
+  const _cg=closeGate;
+  closeGate=function(){$('settings').classList.remove('wfgate');return _cg();};
+  /* other blocks read "Settings is open" as "the code was typed" (the pull-down menu's Pair new…, the camera / microphone
+     master switches). A guest has typed nothing, so the guest view goes away when the pull-down menu comes out … */
+  const _oq=openQuick;
+  openQuick=function(where){if(guest&&settingsOn())closeSettings();return _oq(where);};
+  /* … and it is not a place to park: a minute without a touch, or three minutes in all, and it closes (the day's play
+     time and the idle lock both stand still while Settings is up) */
+  setInterval(()=>{if(guest&&settingsOn()&&!gateOn()&&(Date.now()-lastInput>60000||Date.now()-guestAt>180000))closeSettings();},5000);
+  const _cp=checkPin;
+  checkPin=function(){
+    if(gateNext!=='wifi')return _cp();
+    const good=pin===code(),fn=pend;
+    _cp();   /* the chain counts the tries (five, then a wait) and closes the pad on the right code */
+    if(good&&!gateOn()){pend=null;setGuest(false);redraw();if(fn)fn();}
+  };
+  function setupInfo(){openSheet({kind:'info',title:'One-time setup needed',text:E(SETUP)});}
+  function fail(e){if(e&&e.j&&e.j.setup_needed)setupInfo();else toast('Wi-Fi: '+((e&&e.message)||'that did not work'));}
+
+  /* ---------- sheets: password · add network · are you sure · progress ---------- */
+  const sh=document.createElement('div');sh.id='wfSheet';sh.innerHTML='<div id="wfCard" role="dialog" aria-labelledby="wfTitle"></div>';$('settings').appendChild(sh);
+  function openSheet(o,go){
+    sheet=Object.assign({mode:'form',err:'',stage:'',pw:'',name:''},o);
+    drawSheet();sh.classList.add('on');
+    if(go)runJoin(o.body);
+    else{const f=$('wfName')||$('wfPw');if(f&&window.ktKbd)setTimeout(()=>{if(sheet&&f.isConnected)ktKbd.open(f);},80);}
+  }
+  function closeSheet(){
+    if(kbOpen())ktKbd.hide();
+    clearInterval(joinT);joinT=null;sheet=null;sh.classList.remove('on');$('wfCard').innerHTML='';
+  }
+  function drawSheet(){
+    const o=sheet,c=$('wfCard');if(!o)return;
+    const net=o.kind==='join'||o.kind==='add';
+    const pwField=o.mode==='form'&&((o.kind==='join'&&o.form)||(o.kind==='add'&&o.sec!=='open'));
+    const acts=o.mode!=='form'?'':'<div class="wf-acts"><button type="button" class="btn" id="wfCancel">'+(o.kind==='info'?'OK':(net&&o.err&&!o.form?'Close':'Cancel'))+'</button>'
+      +(o.kind==='confirm'?'<button type="button" class="btn warn" id="wfYes">'+E(o.yes)+'</button>':'')
+      +(net?'<button type="button" class="btn go" id="wfGo">'+(o.err&&!o.form?'Try again':'Connect')+'</button>':'')+'</div>';
+    const top=pwField||(o.mode==='form'&&o.kind==='add');   /* a sheet with a field: Cancel / Connect sit in the title row, never under the keyboard */
+    let h='<div class="wf-head"><h2 id="wfTitle">'+(net?'<span class="wf-ic">'+glyph('on',4)+'</span>':'')+E(o.title)+'</h2>'+(top?acts:'')+'</div>';
+    if(o.text)h+='<p id="wfText">'+o.text+'</p>';
+    if(o.mode==='busy'||o.mode==='done')h+='<div id="wfStage"'+(o.mode==='done'?' class="ok"':'')+'>'+(o.mode==='busy'?'<span class="wf-spin"></span>':'✓ ')+'<span>'+E(o.stage)+'</span></div>';
+    if(o.err)h+='<div id="wfErr">'+E(o.err)+'</div>';
+    if(o.mode==='form'&&o.kind==='add')h+='<div><label for="wfName">Network name</label><input id="wfName" class="kfield" type="text" maxlength="32" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" value="'+E(o.name)+'"></div>'
+      +'<div class="wf-secrow"><label>Security</label><div class="wf-secs">'+[['open','None'],['wpa','WPA2 (most home networks)'],['wpa3','WPA3']].map(x=>'<button type="button" class="btn'+(o.sec===x[0]?' go':'')+'" data-wf-sec="'+x[0]+'">'+x[1]+'</button>').join('')+'</div></div>';
+    if(pwField)h+='<div><label for="wfPw">Password</label><div class="wf-pwrow"><input id="wfPw" class="kfield" type="password" maxlength="64" autocomplete="off" autocapitalize="off" spellcheck="false" data-kb-enter="Connect" value="'+E(o.pw)+'"><button type="button" id="wfEye" aria-label="show the password">'+EYE(false)+'</button></div></div>';
+    if(!top)h+=acts;
+    c.dataset.kind=o.kind;c.dataset.mode=o.mode;c.innerHTML=h;
+    const pw=$('wfPw'),eye=$('wfEye'),nm=$('wfName'),cancel=$('wfCancel'),go=$('wfGo'),yes=$('wfYes');
+    if(nm)nm.oninput=()=>{o.name=nm.value;};
+    if(pw){
+      pw.oninput=()=>{o.pw=pw.value;};
+      pw.addEventListener('ktkbd-enter',()=>submit());
+      const sync=()=>{const shown=pw.type!=='password';eye.classList.toggle('on',shown);eye.innerHTML=EYE(shown);eye.setAttribute('aria-label',shown?'hide the password':'show the password');};
+      new MutationObserver(sync).observe(pw,{attributes:true,attributeFilter:['type']});
+      eye.addEventListener('mousedown',e=>e.preventDefault());   /* the field keeps the focus, so the keyboard stays */
+      eye.onclick=()=>{if(kbOpen()&&ktKbd.el===pw)ktKbd.press('{eye}');else{blip(520);pw.dataset.kbPw='1';pw.type=pw.type==='password'?'text':'password';}};
+    }
+    c.querySelectorAll('[data-wf-sec]').forEach(b=>b.onclick=()=>{blip(500);if(kbOpen())ktKbd.hide();o.sec=b.dataset.wfSec;o.err='';drawSheet();});
+    if(cancel)cancel.onclick=()=>{blip(440);closeSheet();redraw();};
+    if(go)go.onclick=()=>{blip(520);submit();};
+    if(yes)yes.onclick=()=>{blip(520);const f=o.yesFn;closeSheet();if(f)f();};
+  }
+  function submit(){
+    const o=sheet;if(!o||o.mode!=='form')return;
+    let body=o.body;
+    if(o.kind==='join'&&o.form){
+      const pw=($('wfPw')||{}).value||'';
+      if(!pw){o.err='Type the password first';drawSheet();return;}
+      body={ssid:o.ssid,password:pw};
+    }else if(o.kind==='add'){
+      const name=($('wfName')||{}).value||'',pw=($('wfPw')||{}).value||'';
+      if(!name.trim()){o.err='Type the name of the network first';drawSheet();return;}
+      if(o.sec!=='open'&&!pw){o.err='Type the password first';drawSheet();return;}
+      body={ssid:name,security:o.sec,hidden:true};if(o.sec!=='open')body.password=pw;
+    }
+    if(body)runJoin(body);
+  }
+  async function runJoin(body){
+    const o=sheet;if(!o)return;
+    if(kbOpen())ktKbd.hide();
+    const was=(WF&&WF.current&&WF.current.ssid)||'';
+    o.body=body;o.err='';o.mode='busy';o.stage='Connecting…';stages.length=0;stages.push(o.stage);drawSheet();
+    let j;
+    try{j=await wfPost('connect',Object.assign({},body,{pin:code()}));}
+    catch(e){if(sheet!==o)return;o.mode='form';o.err=(e.j&&e.j.setup_needed)?'One-time setup needed. '+SETUP:cap(e.message);stages.push(o.err);drawSheet();return;}
+    WF=j;drawAll();
+    const id=j.join&&j.join.id;
+    clearInterval(joinT);
+    joinT=setInterval(async()=>{
+      let w;try{w=await jget('/api/wifi');}catch(e){return;}
+      if(sheet!==o){clearInterval(joinT);joinT=null;return;}
+      WF=w;const jn=w.join;
+      if(!jn||jn.id!==id)return;
+      if(jn.state==='connecting'||jn.state==='getting_address'){
+        const t=jn.state==='connecting'?'Connecting…':'Getting an address…';
+        if(o.stage!==t){o.stage=t;stages.push(t);drawSheet();}
+        drawAll();return;
+      }
+      clearInterval(joinT);joinT=null;
+      if(jn.state==='connected'){
+        o.mode='done';o.stage=jn.message||'Connected';stages.push(o.stage);drawSheet();redraw();
+        setTimeout(()=>{if(sheet===o){closeSheet();redraw();if(onPage())$('smain').scrollTop=0;}},1500);   /* the joined network is the top row */
+      }else{
+        o.mode='form';o.pw='';stages.push(jn.message||'Could not connect');
+        o.err=(jn.message||'Could not connect')+'. '+(jn.went_back?'The tablet went back to '+jn.went_back+'.':(was?'The tablet is not back on '+was+' yet — it keeps trying by itself.':''));
+        drawSheet();redraw();
+      }
+    },300);
+  }
+
+  /* ---------- what a tap does ---------- */
+  const savedBy=uuid=>((WF&&WF.saved)||[]).find(s=>s.uuid===uuid);
+  function joinTap(ssid){
+    const W=WF||{},n=(W.nearby||[]).find(x=>x.ssid===ssid),s=(W.saved||[]).find(x=>x.ssid===ssid&&x.uuid);
+    if(W.current&&W.current.ssid===ssid){view='details';sel=ssid;redraw();return;}
+    if(n&&!n.supported&&!s){toast('This kind of network ('+n.security+') cannot be joined from the tablet');return;}
+    grown(()=>{
+      if(WF&&WF.setup_needed){setupInfo();return;}
+      if(s)openSheet({kind:'join',ssid,title:ssid,form:false,body:{uuid:s.uuid}},true);            /* saved: its own password is used */
+      else if(n&&!n.secured)openSheet({kind:'join',ssid,title:ssid,form:false,body:{ssid}},true);   /* open: nothing to type */
+      else openSheet({kind:'join',ssid,title:ssid,form:true});
+    });
+  }
+  function addTap(){
+    grown(()=>{
+      if(WF&&WF.setup_needed){setupInfo();return;}
+      openSheet({kind:'add',title:'Add network',text:'For a network that hides its name. Type the name exactly as it is written, capital letters included.',sec:'wpa',form:true});
+    });
+  }
+  async function powerTap(){
+    if(!WF)return;
+    if(!WF.power){try{WF=await wfPost('power',{on:true});toast('Wi-Fi is on');}catch(e){fail(e);}redraw();setTimeout(()=>poll(false),1500);return;}
+    grown(()=>{
+      if(WF&&WF.setup_needed){setupInfo();return;}
+      openSheet({kind:'confirm',title:'Turn Wi-Fi off?',yes:'Turn Wi-Fi off',
+        text:'The tablet gets its apps, its updates and help from the Bench over Wi-Fi. With Wi-Fi off, nobody can reach it from outside. <b>To get back:</b> on this tablet, pull down the menu at the top, tap Wi-Fi and switch it on again — that needs no code.',
+        yesFn:async()=>{try{WF=await wfPost('power',{on:false,pin:code(),confirm:true});toast('Wi-Fi is off');}catch(e){fail(e);}redraw();}});
+    });
+  }
+  function forgetTap(uuid){
+    const s=savedBy(uuid);if(!s)return;
+    grown(()=>{
+      if(WF&&WF.setup_needed){setupInfo();return;}
+      const run=async()=>{
+        try{WF=await wfPost('forget',{uuid,pin:code(),confirm:true});toast('Forgotten: '+s.ssid);if(view==='details'&&sel===s.ssid){view='main';sel=null;}}
+        catch(e){fail(e);}
+        redraw();};
+      if(!s.active){run();return;}
+      const other=((WF&&WF.saved)||[]).find(x=>x.uuid!==uuid&&x.in_range&&x.autoconnect);
+      openSheet({kind:'confirm',title:'Forget '+s.ssid+'?',yes:'Forget',yesFn:run,
+        text:'<b>This is the network the tablet is on.</b> It leaves the network right away'+(other?' and tries '+E(other.ssid)+' instead':' and the Bench cannot reach it any more')+'. <b>To get back:</b> tap '+E(s.ssid)+' on this page and type its password again.'});
+    });
+  }
+  function autoTap(uuid){
+    const s=savedBy(uuid);if(!s)return;
+    const on=!s.autoconnect;
+    grown(()=>{
+      if(WF&&WF.setup_needed){setupInfo();return;}
+      const run=async()=>{try{WF=await wfPost('autoconnect',{uuid,on,pin:code(),confirm:true});}catch(e){fail(e);}redraw();};
+      if(!s.active||on){run();return;}
+      openSheet({kind:'confirm',title:'Stop joining '+s.ssid+' by itself?',yes:'Switch off',yesFn:run,
+        text:'<b>This is the network the tablet is on.</b> It stays connected for now, but after a restart it will not join by itself, and then the Bench cannot reach it. <b>To get back:</b> tap '+E(s.ssid)+' on this page — it stays saved, no password needed — or switch this back on.'});
+    });
+  }
+
+  /* ---------- the page ---------- */
+  const _sumNet=ktSettings.summary.network;
+  ktSettings.summary.network=()=>{
+    if(!agent||!WF||!WF.available)return _sumNet();
+    const s=state();
+    return (s.st==='off'?'Wi-Fi off':(s.st==='down'?'Wi-Fi on · not connected':s.text))+' · Bench '+benchWord();
+  };
+  const val=(t,id)=>t?'<span class="v" id="'+id+'">'+E(t)+'</span>':'';
+  ktSettings.fill.network=()=>{
+    const tablet='<div class="sec"><h2>This tablet</h2>'
+      +row('Bench','the family computer the tablet gets its apps and updates from',val(agent?cap(benchWord()):'—','netBench'))
+      +row('Tablet helper','the small program on the tablet that sets the brightness, the sound, Bluetooth and Wi-Fi',val(agent?'Running':(LIVE?'Not on this page':'Opened as a file'),'netHelper'))
+      +row('Tablet name','how this tablet shows up on the home network',val((agent&&STATUS.hostname)||'—','netName'))
+      +'</div>';
+    const head='<div class="sec" id="wfSec"><h2>Wi-Fi</h2>';
+    if(!agent||!WF||!WF.available)return head+row('Wi-Fi',!agent?(LIVE?'needs the tablet helper':'set on the tablet itself — this page is opened as a file'):(WF?'this tablet has no Wi-Fi':'checking…'),'')+'</div>'+tablet;
+    const W=WF,c=W.current,st=state(),saved=W.brief?[]:(W.saved||[]);
+    const note=(W.setup_needed?'<div class="wf-banner setup" id="wfSetup"><b>One-time setup needed.</b> '+E(SETUP)+'</div>':'')
+      +(guest?'<div class="wf-banner look" id="wfLook">Looking is fine. Joining a network, forgetting one or switching Wi-Fi off needs the grown-up code.</div>':'');
+    if(view==='details'&&sel){
+      const n=(W.nearby||[]).find(x=>x.ssid===sel),s=saved.find(x=>x.ssid===sel),cur=!!c&&c.ssid===sel;
+      if(n||s||cur){
+        const bars=cur?c.bars:(n?n.bars:0),sec=cur?c.security:((s||n).security);
+        return '<div class="sec" id="wfDetails"><h2>Network details</h2>'+note
+          +'<div class="row"><button type="button" class="btn" id="wfBack">← Wi-Fi</button><span style="flex:1"></span></div>'
+          +'<div class="row wf-net'+(cur?' cur'+(c.internet===false?' noinet':''):'')+'"><span class="wf-ic">'+glyph(cur?st.st:(bars?'on':'down'),bars)+'</span>'
+          +'<div class="l"><b id="wfDName" style="font-size:21px">'+E(sel)+'</b><small id="wfDState">'+(cur?(c.internet===false?'Connected, no internet':'Connected'):(n?'In range':'Not in range'))+'</small></div>'
+          +(!cur&&n&&W.power?'<button type="button" class="btn go" id="wfDConnect">Connect</button>':'')
+          +(s?'<button type="button" class="btn warn" id="wfDForget" data-wf-forget="'+E(s.uuid)+'">Forget</button>':'')+'</div>'
+          +row('Signal','how strong the network is where the tablet is now','<span class="v" id="wfDSignal">'+E(WORD[bars]+(bars?' · '+bars+' of 4 bars':''))+'</span>')
+          +row('Security','what protects the network','<span class="v" id="wfDSec">'+E(sec==='None'?'None (open network)':sec)+'</span>')
+          +(cur?row('IP address','the tablet\'s address on this network','<span class="v" id="wfDIp">'+E(c.ip||'—')+'</span>'):'')
+          +row('MAC address','the hardware address of the tablet\'s Wi-Fi','<span class="v" id="wfDMac">'+E(W.mac||'—')+'</span>')
+          +(s?row('Connect automatically','join this network by itself when it is in range','<button type="button" class="sw'+(s.autoconnect?' on':'')+'" id="wfDAuto" data-wf-auto="'+E(s.uuid)+'" aria-label="connect automatically"></button>'):'')
+          +'</div>';
+      }
+      view='main';sel=null;
+    }
+    const near=(W.nearby||[]).filter(n=>!n.active).slice().sort((a,b)=>b.bars-a.bars||a.ssid.localeCompare(b.ssid));   /* strongest first; by bars, so the list does not jump with every reading */
+    return head+note
+      +row('Wi-Fi',!W.power?'off — nobody can reach the tablet from outside':(c?'on':'on · not connected to a network'),'<button type="button" class="sw'+(W.power?' on':'')+'" id="wfSw" aria-label="Wi-Fi on or off"></button>')
+      +(W.power&&c?'<div class="row wf-net cur'+(c.internet===false?' noinet':'')+'" id="wfCur" data-ssid="'+E(c.ssid)+'" data-bars="'+c.bars+'"><button type="button" class="wf-main" data-wf-gear="'+E(c.ssid)+'"><span class="wf-ic">'+glyph(st.st,c.bars)+'</span>'
+        +'<span class="l"><b>'+E(c.ssid)+'</b><small id="wfCurState">'+(c.internet===false?'Connected, no internet':'Connected')+'</small></span></button>'+(c.secured?LOCK:'')
+        +'<button type="button" class="btn wf-gear" data-wf-gear="'+E(c.ssid)+'" aria-label="details of '+E(c.ssid)+'">⚙</button></div>':'')
+      +'</div>'
+      +(W.power?'<div class="sec" id="wfNear"><h2>Networks in range</h2>'
+        +(near.map(n=>'<div class="row wf-net" data-ssid="'+E(n.ssid)+'" data-bars="'+n.bars+'" data-secured="'+(n.secured?1:0)+'"><button type="button" class="wf-main" data-wf-join="'+E(n.ssid)+'"><span class="wf-ic">'+glyph('on',n.bars)+'</span>'
+          +'<span class="l"><b>'+E(n.ssid)+'</b><small>'+(n.saved?'Saved':(!n.supported?E(n.security)+' — cannot be joined from the tablet':(n.secured?'Needs a password':'Open network')))+'</small></span></button>'+(n.secured?LOCK:'')
+          +'<button type="button" class="btn wf-gear" data-wf-gear="'+E(n.ssid)+'" aria-label="details of '+E(n.ssid)+'">⚙</button></div>').join('')
+          ||row('Looking for networks…','networks in range show up here by themselves',''))
+        +row('Add network','for a network that hides its name','<button type="button" class="btn" id="wfAdd">＋ Add network</button>')
+        +'</div>':'<div class="snote" id="wfOffNote">Wi-Fi is off. Switch it on to see the networks in range and to let the Bench reach the tablet again.</div>')
+      +'<div class="sec" id="wfSaved"><h2>Saved networks</h2>'
+        +(saved.map(s=>'<div class="row wf-saved" data-uuid="'+E(s.uuid)+'" data-ssid="'+E(s.ssid)+'"><button type="button" class="wf-main" data-wf-gear="'+E(s.ssid)+'"><span class="l"><b>'+E(s.ssid)+'</b>'
+          +'<small>'+(s.active?'Connected':(!W.power?'Wi-Fi is off':(s.in_range?'In range':'Not in range')))+'</small></span></button>'
+          +'<span class="v" style="font-size:14px">Connect automatically</span><button type="button" class="sw'+(s.autoconnect?' on':'')+'" data-wf-auto="'+E(s.uuid)+'" aria-label="connect to '+E(s.ssid)+' automatically"></button>'
+          +'<button type="button" class="btn warn" data-wf-forget="'+E(s.uuid)+'">Forget</button></div>').join('')
+          ||row(W.brief?'Checking…':'No saved network yet','a network the tablet has joined stays here, so it joins again by itself',''))
+        +'</div>'+tablet;
+  };
+  ktSettings.wire.network=el=>{
+    const on=(q,fn)=>el.querySelectorAll(q).forEach(b=>b.onclick=()=>{blip(520);fn(b);});
+    on('#wfSw',()=>powerTap());
+    on('[data-wf-join]',b=>joinTap(b.dataset.wfJoin));
+    on('[data-wf-gear]',b=>{view='details';sel=b.dataset.wfGear;redraw();$('smain').scrollTop=0;});
+    on('#wfAdd',()=>addTap());
+    on('[data-wf-auto]',b=>autoTap(b.dataset.wfAuto));
+    on('[data-wf-forget]',b=>forgetTap(b.dataset.wfForget));
+    on('#wfBack',()=>{view='main';sel=null;redraw();});
+    on('#wfDConnect',()=>joinTap(sel));
+  };
+
+  /* ---------- getting here and away ---------- */
+  function openWifiPage(){   /* the tile: looking needs no code, so the page opens as a guest with no way to the rest of Settings */
+    closeQuick();
+    if(!settingsOn()){tileOpen=true;setGuest(true);try{openSettings();}finally{tileOpen=false;}}
+    view='main';sel=null;ktSettings.go('network');
+  }
+  const _os=openSettings;
+  window.openSettings=openSettings=function(){if(!tileOpen)setGuest(false);const r=_os();if(agent)poll(false);return r;};
+  const _cs=closeSettings;
+  closeSettings=function(){if(sheet)closeSheet();view='main';sel=null;pend=null;const r=_cs();setGuest(false);$('settings').classList.remove('wfgate');return r;};
+  const _go=ktSettings.go;
+  ktSettings.go=function(id){
+    if(guest&&id!=='network'){closeSettings();return;}
+    if(id!=='network'&&sheet)closeSheet();
+    return _go(id);
+  };
+  const _sb=$('setBack').onclick;
+  $('setBack').onclick=()=>{
+    if(ktSettings.page==='network'&&view!=='main'){blip(440);view='main';sel=null;redraw();return;}
+    if(guest){blip(440);closeSettings();return;}
+    _sb();
+  };
+  const _nb=navBack;
+  navBack=function(){
+    if(settingsOn()&&!quickOpen&&!recentsOpen&&!gateOn()){
+      if(sheet){if(kbOpen()){blip(440);ktKbd.hide();}else if(sheet.mode!=='busy'){blip(440);closeSheet();redraw();}return;}
+      if(ktSettings.page==='network'&&!kbOpen()){
+        if(view!=='main'){blip(440);view='main';sel=null;redraw();return;}
+        if(guest){blip(440);closeSettings();return;}
+      }
+    }
+    _nb();
+  };
+  $('navBack').onclick=navBack;
+  window.ktWifi={open:openWifiPage,poll:()=>poll(false),icon:state,stages,get state(){return WF;},get view(){return view;},get guest(){return guest;},
+    get sheet(){return sheet?{kind:sheet.kind,mode:sheet.mode,stage:sheet.stage,err:sheet.err}:null;}};
+  drawBar();
 })();
 
 loadAll();
