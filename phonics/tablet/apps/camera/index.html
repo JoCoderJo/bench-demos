@@ -414,11 +414,17 @@ async function poll() {
   if (permDenied) return;
   try {
     const j = await (await fetch(hUrl('/status'), { cache: 'no-store' })).json();
+    if (j.paused) {            // "Camera off for everything" (the grown-up's switch): the helper is up, the sensor is not
+      helperUp = false; active = null; syncButtons(); live.removeAttribute('src');
+      box.classList.add('off'); veil.textContent = 'The camera is switched off. A grown-up can switch it on again in the pull-down menu.';
+      $('st').textContent = 'camera off';
+      setTimeout(poll, 2000); return;
+    }
     if (!helperUp) { helperUp = true; box.classList.remove('off'); }
     const c = j.camera;
     if (c && c.size) { frameW = c.size[0]; frameH = c.size[1]; }
     if (j.active && j.active !== active && !switching) { active = j.active; tune.n = 0; syncButtons(); setColour(); fit(); stream(); }
-    $('st').textContent = c ? (c.alive ? `${c.size[0]}×${c.size[1]} · ${c.read_fps} fps` + (face.on ? ' · 😀 face' : '') : 'starting camera…') : 'no camera selected';
+    $('st').textContent = c ? (c.alive ? `${c.size[0]}×${c.size[1]} · ${c.read_fps} fps` + (face.on ? ' · 😀 face' : '') : 'starting camera…') : (j.idle ? 'starting camera…' : 'no camera selected');
     if (c && !c.alive && !switching) { box.classList.add('busy'); veil.textContent = c.last_error ? 'camera trouble: ' + c.last_error : 'starting camera…'; }
     else if (!switching) box.classList.remove('busy');
   } catch (e) {

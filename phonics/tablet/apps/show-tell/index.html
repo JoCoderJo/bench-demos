@@ -258,7 +258,7 @@ try { parent.postMessage({ kt: 'who' }, '*'); } catch (e) {}
 /* ---------- live view ---------- */
 let V; try { V = JSON.parse(localStorage.getItem('kt-camera-view') || 'null'); } catch (e) { V = null; }
 if (!V || !V.rot) V = { rot: { front: 180, rear: 180 }, mir: { front: true, rear: false } };     // shared with the Camera tile
-let active = 'front', helperUp = false, brainUp = false, busy = false, frameW = 640, frameH = 480;
+let active = 'front', helperUp = false, camOff = false, brainUp = false, busy = false, frameW = 640, frameH = 480;
 const rot = () => V.rot[active] || 0, mir = () => !!V.mir[active];
 function fit() {
   const stage = $('stage'), W = stage.clientWidth - 20, H = stage.clientHeight - 20, turned = rot() % 180 !== 0, ar = frameW / frameH;
@@ -276,6 +276,7 @@ live.onerror = () => { if (helperUp) setTimeout(stream, 1500); };
 function setStatus() {
   const go = $('go');
   if (permDenied) { box.classList.add('off'); veil.textContent = 'Camera permission is turned off for Show & Tell. A grown-up can allow it in Settings → Apps & permissions.'; go.disabled = true; $('st').textContent = 'permission off'; return; }
+  if (camOff) { box.classList.add('off'); veil.textContent = 'The camera is switched off. A grown-up can switch it on again in the pull-down menu.'; go.disabled = true; $('st').textContent = 'camera off'; return; }
   if (!helperUp) { box.classList.add('off'); veil.textContent = 'The camera helper is not running on this tablet.'; go.disabled = true; $('st').textContent = 'camera offline'; return; }
   box.classList.remove('off');
   if (!brainUp) { go.disabled = true; $('st').textContent = 'the naming helper is not running (Arduino app show-tell)'; return; }
@@ -284,10 +285,10 @@ function setStatus() {
 async function poll() {
   if (permDenied) return;
   try { const j = await (await fetch(hUrl('/status'), { cache: 'no-store' })).json();
-    const was = helperUp; helperUp = !!(j.camera && j.camera.alive);
+    const was = helperUp; helperUp = !!(j.camera && j.camera.alive); camOff = !!j.paused;
     if (j.active) active = j.active; if (j.camera && j.camera.size) { frameW = j.camera.size[0]; frameH = j.camera.size[1]; }
     if (helperUp && !was) { fit(); stream(); }
-  } catch (e) { helperUp = false; }
+  } catch (e) { helperUp = false; camOff = false; }
   try { const r = await fetch(BRAIN + '/status', { cache: 'no-store' }); brainUp = r.ok; } catch (e) { brainUp = false; }
   setStatus();
   setTimeout(poll, 2000);

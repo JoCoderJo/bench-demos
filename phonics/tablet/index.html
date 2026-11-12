@@ -1088,6 +1088,10 @@ $('quickClose').onclick=closeQuick;
 document.addEventListener('pointerdown',e=>{if(quickOpen&&!e.target.closest('#quick,#volBtn,#quickPill,#sysbar,#navbar'))closeQuick();},true);
 $('quickPill').onclick=()=>{extHold(4000);quickOpen?closeQuick():openQuick('bottom');};
 function btUnlocked(){return Date.now()<btUnlock;}
+/* "Pair new…" opens Settings, and an open Settings counts as "the code was typed" for everything in it. So it asks for
+   the code every time, unless a grown-up's Settings is already up. (Fix 2026-11-10: it trusted the 5-minute Bluetooth
+   unlock, so for five minutes after a grown-up had paired something a child could walk into all of Settings.) */
+function btPairNeedsCode(){return !$('settings').classList.contains('on')||!!(window.ktWifi&&ktWifi.guest);}
 async function pollBt(){if(!agent){BT=null;drawBt();return;}try{BT=await jget('/api/bt');}catch(e){BT=null;}drawBt();}
 async function btPost(path,body){const r=await fetch('/api/bt/'+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||r.status);return j;}
 function drawBt(){
@@ -2195,7 +2199,7 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
     $('lsCodeSet').onclick=()=>{closeSettings();openGate('newlock');$('gateMsg').textContent='Type the NEW unlock code';};
     const clr=$('lsCodeClr');if(clr)clr.onclick=()=>{set('kiosk.lock_code','');save();drawSettings();};
   };
-  window.ktLock={codeOn,fails:()=>Object.assign({},F),waitS};
+  window.ktLock={codeOn,fails:()=>Object.assign({},F),waitS,hit};
   // A launcher that has just (re)loaded has no tile open — say so. After a bundle push under an open tile the agent kept reporting that
   // tile (`/api/status` app) for as long as nobody opened another one, which is what the push rule and the Bench page read.
   const _loadAll2=loadAll;
@@ -2635,7 +2639,7 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
     }
     $('qBtSw').style.display='';$('qBtSw').classList.toggle('on',!!BT.powered);
     $('qPair').style.display=BT.powered?'':'none';
-    $('qPair').textContent=btUnlocked()?'Pair new…':'🔒 Pair new…';
+    $('qPair').textContent=btPairNeedsCode()?'🔒 Pair new…':'Pair new…';
     const actBt=activeBtAudioDev();
     const con=(BT.devices||[]).filter(d=>d.connected);
     const wiredName=((BT&&BT.wired_output)||(S.sound&&S.sound.output))==='headphones'?'headphone jack':'tablet speaker';
@@ -2676,13 +2680,15 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
   }
 
   if($('qPair'))$('qPair').onclick=()=>{
-    if(!btUnlocked()&&!$('settings').classList.contains('on')){closeQuick();openGate('bt');return;}
+    if(btPairNeedsCode()){closeQuick();openGate('bt');return;}
     openPairFromQuick();
   };
 
   const _checkPinBt=checkPin;
   checkPin=function(){
-    if(gateNext==='bt'&&pin===String(S.pin||'1234')){
+    /* ours only with the right code and not during "too many tries — wait"; anything else goes down the chain, which counts it */
+    if(gateNext==='bt'&&pin===String(S.pin||'1234')&&!(window.ktLock&&ktLock.waitS()>0)){
+      if(window.ktLock&&ktLock.hit)ktLock.hit();
       closeGate();
       openPairFromQuick();
       return;
@@ -2996,6 +3002,30 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
   };
   let openToken='',sessionOnlyThisTime=new Set(),permInUse=new Map(),pendingPerm=null;
   let appsView='main',selectedApp=null,privacyEvents=[],lastPermUse=new Map(),privacyUnlock=0;
+  /* What the tablet helper answers (fix 2026-11-10 — this block used to read `j.permissions` and `j.events`, which no
+     route ever sent, so grants and the privacy timeline only showed what THIS page session had seen):
+       GET /api/permissions, POST /api/permissions/set -> {children_may_allow, grants, apps:[{id, resources:{<res>:{last_used}}}], privacy, location}
+       GET /api/privacy/log -> {log, recent_24h:[{app, title, resource, time, iso, kid}]}  (oldest first, one line per use) */
+  function takePerms(j){
+    if(!j||j.ok===false)return;
+    ensurePermObj();
+    if(j.grants&&typeof j.grants==='object')S.permissions.grants=j.grants;
+    if(typeof j.children_may_allow==='boolean')S.permissions.children_may_allow=j.children_may_allow;
+    if(j.privacy&&typeof j.privacy==='object')S.privacy=j.privacy;
+    if(j.location&&typeof j.location==='object')S.location=j.location;
+    (j.apps||[]).forEach(a=>{
+      Object.keys((a&&a.resources)||{}).forEach(r=>{
+        const t=+((a.resources[r]||{}).last_used)||0;
+        if(t>0)lastPermUse.set(a.id+':'+r,new Date(t*1000).toISOString());
+      });
+    });
+  }
+  function takePrivacyLog(j){
+    const list=j&&(j.recent_24h||j.log);
+    if(!Array.isArray(list))return;
+    privacyEvents=list.filter(e=>e&&e.app&&e.resource).map(e=>({app:e.app,title:e.title||e.app,resource:normRes(e.resource),kid:e.kid||null,
+      ts:e.iso||(e.time?new Date(e.time*1000).toISOString():null)})).reverse();
+  }
 
   function normRes(r){
     const s=String(r||'').trim().toLowerCase();
@@ -3079,9 +3109,10 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
     if(active===false){
       permInUse.delete(res);
     }else{
-      permInUse.set(res,{app:appId,title:current.title||appId,resource:res,since:Date.now()});
+      const before=permInUse.get(res),fresh=!before||before.app!==appId;
+      permInUse.set(res,{app:appId,title:current.title||appId,resource:res,since:fresh?Date.now():(before.since||Date.now())});
       lastPermUse.set(appId+':'+res,new Date().toISOString());
-      privacyEvents.unshift({app:appId,title:current.title||appId,resource:res,ts:new Date().toISOString()});
+      if(fresh&&!agent)privacyEvents.unshift({app:appId,title:current.title||appId,resource:res,ts:new Date().toISOString()});
     }
     drawPermIndicator();
   }
@@ -3112,30 +3143,40 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
 
   async function toggleMaster(res){
     res=normRes(res);
+    if(res!=='camera'&&res!=='microphone')return;
     ensurePermObj();
-    if(res==='camera')S.privacy.camera_off=!isCamOff();
-    else if(res==='microphone')S.privacy.mic_off=!isMicOff();
-    const off=res==='camera'?isCamOff():isMicOff();
+    const key=res==='camera'?'camera_off':'mic_off',off=!S.privacy[key];
     if(agent){
+      /* The tablet helper saves the switch and tells the camera helper itself (pause / resume, the helper stays up).
+         This page never talks to :8095: its own POST /stop used to END that helper, and nothing started it again
+         before a reboot (fix 2026-11-10). The switch on screen moves only when the helper says it is saved. */
+      let saved=false;
       try{
-        await fetch('/api/privacy/master',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sensor:res,off})});
+        const r=await fetch('/api/privacy/master',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sensor:res,off})});
+        const j=await r.json();
+        if(r.ok&&j&&j.privacy){S.privacy=j.privacy;saved=true;}
       }catch(x){}
+      if(!saved){
+        toast('The '+(res==='camera'?'camera':'microphone')+' switch did not change — try again');
+        drawQuickSensors();wireAppsPage();
+        return;
+      }
     }else{
+      S.privacy[key]=off;
       save(false);
     }
-    if(res==='camera'&&isCamOff()){
-      if(agent){fetch('http://127.0.0.1:8095/stop',{method:'POST'}).catch(()=>{});}
-      setPermUse(current?current.id:null,'camera',false);
-    }
-    if(res==='microphone'&&isMicOff()){
-      setPermUse(current?current.id:null,'microphone',false);
+    const nowOff=res==='camera'?isCamOff():isMicOff();
+    if(nowOff){
+      [...sessionOnlyThisTime].forEach(k=>{if(k.endsWith(':'+res))sessionOnlyThisTime.delete(k);});
+      setPermUse(current?current.id:null,res,false);
     }
     syncFrameAllow();
     if(current){
       try{
         const f=$('frame');
         if(f&&f.contentWindow){
-          f.contentWindow.postMessage({kt:'perm-changed',resource:res,granted:false},'*');
+          const granted=!nowOff&&hasPermGrant(current.id,res);      /* back ON: the open tile gets its picture back */
+          f.contentWindow.postMessage({kt:'perm-changed',resource:res,granted,token:granted?openToken:''},'*');
         }
       }catch(x){}
     }
@@ -3218,6 +3259,13 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
       replyPerm([reqId],{resource:res,granted:false,state:'denied',token:''});
       return;
     }
+    const notNow=()=>replyPerm([reqId],{resource:res,granted:false,state:'ask',token:''});
+    if(pendingPerm){      /* (the helper was asked in between: look again) one question at a time — the one on screen stays */
+      if(pendingPerm.app.id===appObj.id&&pendingPerm.resource===res){if(reqId&&!pendingPerm.reqIds.includes(reqId))pendingPerm.reqIds.push(reqId);}
+      else notNow();
+      return;
+    }
+    if(!current||current.id!==appObj.id){notNow();return;}   /* the tile went away while the helper was asked (Home, another tile, the moon): no prompt over what is there now, no "Don't allow" counted against a closed app */
     pendingPerm={app:appObj,resource:res,reqIds:reqId?[reqId]:[]};
     showPermSheet(appObj,res);
   }
@@ -3227,7 +3275,7 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
     pendingPerm=null;
     closePermSheet();
     const ak=activeKid(),kid=ak?ak.id:'default';
-    let out=null;
+    let out=null,refused=null;
     if(agent){
       try{
         const r=await fetch('/api/permissions/answer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app:app.id,resource,decision,pin:pinCode||undefined,kid})});
@@ -3236,8 +3284,22 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
           out=j;
           if(j.token)openToken=j.token;
           try{S=deepMerge(DEF,await jget('/api/settings'));}catch(x){}
-        }
-      }catch(x){}
+        }else refused=j||{};
+      }catch(x){refused={};}
+    }
+    if(agent&&!out){
+      /* The tablet helper did not take the answer (it wants the grown-up code after all, or it did not answer): NOTHING
+         is granted. Fix 2026-11-10: this fell into the no-helper path below, which told the tile "granted" and opened the
+         frame's allow while the helper went on refusing. */
+      if(refused&&refused.need_pin&&decision!=='deny'&&current&&current.id===app.id){
+        ensurePermObj().children_may_allow=false;        /* this page's copy was old */
+        pendingPerm={app,resource,reqIds};
+        showPermSheet(app,resource);                     /* the same question, with the locks on the buttons now */
+        return;
+      }
+      replyPerm(reqIds,{resource,granted:false,state:'ask',token:''});
+      toast('That did not work — try again');
+      return;
     }
     if(!out){
       const p=ensurePermObj();
@@ -3293,28 +3355,22 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
 
   const _checkPinPerm=checkPin;
   checkPin=function(){
-    if(typeof gateNext==='string'&&gateNext.startsWith('privacy:')){
-      if(pin===String(S.pin||'1234')){
-        const target=gateNext.slice(8);
-        closeGate();
-        privacyUnlock=Date.now()+5*60*1000;
-        toggleMaster(target);
-      }else{
-        $('gateMsg').textContent='That is not the code';pin='';drawPin();blip(180);
-      }
-      return;
+    const mine=typeof gateNext==='string'&&(gateNext.startsWith('privacy:')||gateNext.startsWith('perm:'));
+    /* Ours only with the right code, and not during "too many tries — wait". A wrong code goes down the chain like on
+       every other pad, where it is counted (five tries, then a wait that doubles). Fix 2026-11-10: these two pads — a
+       child reaches both, from "Ask a grown-up" and from the Camera / Mic switches — allowed unlimited guesses. */
+    if(!mine||pin!==String(S.pin||'1234')||(window.ktLock&&ktLock.waitS()>0))return _checkPinPerm();
+    if(window.ktLock&&ktLock.hit)ktLock.hit();
+    if(gateNext.startsWith('privacy:')){
+      const target=gateNext.slice(8);
+      closeGate();
+      privacyUnlock=Date.now()+5*60*1000;
+      toggleMaster(target);
+    }else{
+      const entered=pin,dec=gateNext.slice(5);
+      closeGate();
+      finishPermDecision(dec,entered);
     }
-    if(typeof gateNext==='string'&&gateNext.startsWith('perm:')){
-      if(pin===String(S.pin||'1234')){
-        const entered=pin,dec=gateNext.slice(5);
-        closeGate();
-        finishPermDecision(dec,entered);
-      }else{
-        $('gateMsg').textContent='That is not the code';pin='';drawPin();blip(180);
-      }
-      return;
-    }
-    return _checkPinPerm();
   };
 
   /* Wrap openApp and goHome to manage per-open tokens, iframe allow, and in-use state */
@@ -3324,7 +3380,7 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
     if(editing)return;
     if(a.soon||!a.path){blip(300);toast(a.title+' is coming soon');return;}
     blip(520);closeQuick();
-    current=a;openToken='';sessionOnlyThisTime.clear();permInUse.clear();pendingPerm=null;closePermSheet();
+    current=a;openToken='';sessionOnlyThisTime.clear();permInUse.clear();if(STATUS)STATUS.permissions_in_use=[];pendingPerm=null;closePermSheet();
     syncFrameAllow();
     drawPermIndicator();
     if(agent){
@@ -3350,7 +3406,7 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
   };
   const _goHomePerm=goHome;
   window.goHome=goHome=function(){
-    openToken='';sessionOnlyThisTime.clear();permInUse.clear();pendingPerm=null;closePermSheet();
+    openToken='';sessionOnlyThisTime.clear();permInUse.clear();if(STATUS)STATUS.permissions_in_use=[];pendingPerm=null;closePermSheet();
     _goHomePerm();
     syncFrameAllow();
     drawPermIndicator();
@@ -3382,7 +3438,7 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
       const place=(granted&&shared&&raw)?roundPlace(raw):null;
       if(granted&&shared&&place){
         lastPermUse.set(current.id+':location',new Date().toISOString());
-        privacyEvents.unshift({app:current.id,title:current.title||current.id,resource:'location',ts:new Date().toISOString()});
+        if(!agent)privacyEvents.unshift({app:current.id,title:current.title||current.id,resource:'location',ts:new Date().toISOString()});
       }
       try{
         e.source.postMessage({kt:'location',reqId:d.reqId,ok:!!place,granted:!!place,place,coarse:true,shared},'*');
@@ -3437,7 +3493,7 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
       try{
         const r=await fetch('/api/permissions/set',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app:aid,resource:res,state:st,by:'parent'})});
         const j=await r.json();
-        if(j&&j.permissions)S.permissions=j.permissions;
+        takePerms(j);
       }catch(x){}
     }else{
       save(false);
@@ -3651,7 +3707,7 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
     if(dmc)dmc.onclick=()=>{blip(520);toggleMaster('camera');};
     if(dmm)dmm.onclick=()=>{blip(520);toggleMaster('microphone');};
 
-    const navP=lastSec.querySelector('#navPrivacyDash');if(navP)navP.onclick=async()=>{blip(520);if(agent){try{const r=await fetch('/api/privacy/log?hours=24');const j=await r.json();if(j&&j.events)privacyEvents=j.events;}catch(x){}}setAppsView('privacy-dash');};
+    const navP=lastSec.querySelector('#navPrivacyDash');if(navP)navP.onclick=async()=>{blip(520);if(agent){try{const r=await fetch('/api/privacy/log?hours=24');takePrivacyLog(await r.json());}catch(x){}}setAppsView('privacy-dash');};
     const navM=lastSec.querySelector('#navPermMgr');if(navM)navM.onclick=()=>{blip(520);setAppsView('perm-mgr');};
     const navL=lastSec.querySelector('#navLocation');if(navL)navL.onclick=()=>{blip(520);setAppsView('location');};
 
@@ -3665,7 +3721,7 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
         try{
           const r=await fetch('/api/permissions/set',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({children_may_allow:next})});
           const j=await r.json();
-          if(j&&j.permissions)S.permissions=j.permissions;
+          takePerms(j);
         }catch(x){}
       }else{
         save(false);
@@ -3757,13 +3813,12 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
     appsView='main';
     if(agent){
       fetch('/api/permissions').then(r=>r.json()).then(j=>{
-        if(j&&j.permissions)S.permissions=j.permissions;
-        if(j&&j.privacy)S.privacy=j.privacy;
-        if(j&&j.location)S.location=j.location;
+        takePerms(j);
+        drawQuickSensors();
         wireAppsPage();
       }).catch(()=>{});
       fetch('/api/privacy/log?hours=24').then(r=>r.json()).then(j=>{
-        if(j&&j.events)privacyEvents=j.events;
+        takePrivacyLog(j);
       }).catch(()=>{});
     }
     drawQuickSensors();
@@ -3980,13 +4035,21 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
     try{j=await wfPost('connect',Object.assign({},body,{pin:code()}));}
     catch(e){if(sheet!==o)return;o.mode='form';o.err=(e.j&&e.j.setup_needed)?'One-time setup needed. '+SETUP:cap(e.message);stages.push(o.err);drawSheet();return;}
     WF=j;drawAll();
-    const id=j.join&&j.join.id;
+    const id=j.join&&j.join.id,joinAt=Date.now();
     clearInterval(joinT);
     joinT=setInterval(async()=>{
-      let w;try{w=await jget('/api/wifi');}catch(e){return;}
+      let w=null;try{w=await jget('/api/wifi');}catch(e){}
       if(sheet!==o){clearInterval(joinT);joinT=null;return;}
-      WF=w;const jn=w.join;
-      if(!jn||jn.id!==id)return;
+      if(w)WF=w;
+      const jn=w&&w.join;
+      /* Never stuck on "Connecting…" (a busy sheet has no Cancel): the helper answers but no longer knows this join (it was
+         restarted, e.g. by a push), or nothing has come for 150 s — longer than its own longest join + way back (45 + 40 s). */
+      if((w&&(!jn||jn.id!==id))||Date.now()-joinAt>150000){
+        clearInterval(joinT);joinT=null;
+        o.mode='form';o.pw='';o.err='The tablet lost track of that try. Look at the list to see where it is now, then try again.';stages.push(o.err);
+        drawSheet();redraw();return;
+      }
+      if(!w)return;
       if(jn.state==='connecting'||jn.state==='getting_address'){
         const t=jn.state==='connecting'?'Connecting…':'Getting an address…';
         if(o.stage!==t){o.stage=t;stages.push(t);drawSheet();}
@@ -4168,6 +4231,186 @@ const _loadAll=loadAll;loadAll=async function(){await _loadAll();if((S.kiosk||{}
   window.ktWifi={open:openWifiPage,poll:()=>poll(false),icon:state,stages,get state(){return WF;},get view(){return view;},get guest(){return guest;},
     get sheet(){return sheet?{kind:sheet.kind,mode:sheet.mode,stage:sheet.stage,err:sheet.err}:null;}};
   drawBar();
+})();
+
+/* ===== Pull-down menu, second layout + Tablet monitor (2026-11-10, Joe: "redesign the pull down… it needs to be better at
+   displaying it all" and "a way to monitor system resources… in the pull down menu") — additive, LAST block before loadAll().
+   The old menu was one column of full-width rows: the notices on top pushed the controls down and Sleep / Power / Settings sat
+   below the fold. This block MOVES the existing controls (same ids, same handlers — nothing is re-created) into a dashboard that
+   fits 1280 × 800 without scrolling:
+     left   #q2Tiles    big toggle tiles: Wi-Fi · Bluetooth · where the sound goes · Pair new… · Camera · Mic · Sleep · Settings ·
+                        Restart · Power off · Bug Finder (a tile that is ON wears the accent colour)
+            #q2Sliders  Volume · Brightness · Tone (the three old rows, as they were)
+     right  #qNotifs    the notices (time left today first)
+            #q2Mon      Tablet: CPU · Heat · Memory · Graphics · Storage · Camera · what is busiest   (GET /api/sysmon)
+            #q2BtCard   paired Bluetooth devices (#qDevs, #qHint)
+   The emptied rows stay in the page, hidden (.q2gone); every rule hangs on #quick[data-q2].
+   The monitor asks the tablet helper every 2 s ONLY while the menu is open (docs/CHIPS.md rule 1: nothing runs that nobody is
+   looking at); reading it needs no code — it changes nothing. window.ktShade = {mon, pull, open}. */
+(function(){
+  const q=$('quick');
+  if(!q||!$('qHead')||!$('qFoot')||!$('qVolBar'))return;
+  const css=document.createElement('style');
+  css.textContent=`
+#quick[data-q2]{gap:10px;padding-left:20px;padding-right:20px}
+#quick[data-q2] .q2gone{display:none!important}
+#q2Body{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px;align-items:start;flex:none}
+#q2Left,#q2Right{display:flex;flex-direction:column;gap:10px;min-width:0}
+#q2Tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+#quick[data-q2] #q2Tiles>.qact,#q2Tiles>.q2tile{min-height:76px;border-radius:22px;padding:8px 14px;font-size:16px;font-weight:700;line-height:1.2;text-align:left;white-space:normal;display:flex;align-items:center;gap:9px;background:var(--shade2);color:#fff;overflow:hidden;min-width:0;transition:background .15s,color .15s}
+#quick[data-q2] #q2Tiles>.qact:active,#q2Tiles>.q2tile:active{transform:scale(.97)}
+#quick[data-q2] #qWifi:has(svg[data-wf="on"]),#q2Bt:has(#qBtSw.on),#quick[data-q2] #qMasterCam:not(.off),#quick[data-q2] #qMasterMic:not(.off){background:var(--accent);color:#1c1b1f}
+#quick[data-q2] #qMasterCam.off,#quick[data-q2] #qMasterMic.off{background:#4b2a30;color:#ffd7d3}
+#quick[data-q2] #qWifi{justify-content:flex-start}
+#quick[data-q2] #qWifi svg{width:26px;height:26px;flex:none}
+#quick[data-q2] #qWifiState{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#q2Bt{justify-content:space-between;cursor:pointer;grid-column:span 2}
+#q2Bt .q2c{display:flex;flex-direction:column;gap:2px;min-width:0}
+#quick[data-q2] #q2Bt #qBtState{font-size:12px;font-weight:600;color:inherit;opacity:.82;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#quick[data-q2] #q2Bt .sw{flex:none}
+#quick[data-q2] #q2Bt:has(#qBtSw.on) .sw{background:rgba(0,0,0,.28)}
+#quick[data-q2] #qOutPicker{margin:0}
+#q2SysNote:has(#qSysNote:empty),#q2BtCard:has(#qDevs:empty):has(#qHint:empty){display:none}
+#quick[data-q2] #qSysNote{flex:none;font-size:13px;padding:0 6px}
+.q2card{background:var(--shade2);border-radius:22px;padding:8px 14px;min-width:0}
+#quick[data-q2] #q2Sliders .qrow{background:none;padding:0;border-radius:0;min-height:60px;gap:9px;flex-wrap:nowrap}
+#quick[data-q2] #q2Sliders .ql{width:132px;font-size:16px;flex:none}
+#quick[data-q2] #q2Sliders .qbtn{width:48px;height:48px;font-size:26px}
+#quick[data-q2] #q2Sliders .qbar{height:34px;min-width:90px}
+#quick[data-q2] #q2Sliders .qv{min-width:44px;font-size:15px}
+#quick[data-q2] #qToneNote{font-size:12px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.q2h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-weight:700;font-size:16px;padding:4px 0 6px}
+.q2h small{font-size:13px;font-weight:600;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#q2Meters{display:flex;flex-direction:column;gap:2px}
+.sm-m{display:grid;grid-template-columns:86px minmax(0,1fr) 138px;align-items:center;gap:10px;min-height:27px;font-size:14px}
+.sm-l{font-weight:700;color:rgba(255,255,255,.86);white-space:nowrap}
+.sm-bar{height:12px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden}
+.sm-bar i{display:block;width:100%;height:100%;border-radius:6px;background:#7bd88f;transform:translateX(-100%);transition:transform .5s ease-out;will-change:transform}
+.sm-bar.warm i{background:#ffc857}.sm-bar.hot i{background:#ff6b5e}.sm-bar.calm i{background:#8ab4f8}
+.sm-v{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right;overflow:hidden;text-overflow:ellipsis}
+.sm-cores{display:inline-flex;gap:2px;align-items:flex-end;height:13px;margin-left:7px;vertical-align:-1px}
+.sm-cores i{display:block;width:5px;min-height:2px;background:currentColor;opacity:.75;border-radius:1px}
+#q2MonFoot{font-size:13px;color:rgba(255,255,255,.72);line-height:1.5;padding:5px 0 3px}
+#q2MonFoot div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#q2MonFoot b{color:#fff;font-weight:700}
+#quick[data-q2] #qNotifs{gap:8px}
+#quick[data-q2] #qDevs{gap:6px}
+#quick[data-q2] #q2BtCard #qHint{font-size:13px;padding:4px 0 2px}
+@media (max-width:900px){#q2Body{grid-template-columns:minmax(0,1fr)}#q2Tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+`;
+  document.head.appendChild(css);
+  const mk=(tag,id,cls)=>{const e=document.createElement(tag);if(id)e.id=id;if(cls)e.className=cls;return e;};
+  const rowOf=id=>{const e=$(id);return e?e.closest('.qrow'):null;};
+  const oldRows=[...q.querySelectorAll(':scope > .qrow')];
+  const body=mk('div','q2Body'),left=mk('div','q2Left'),right=mk('div','q2Right'),tiles=mk('div','q2Tiles');
+  const sliders=mk('div','q2Sliders','q2card'),mon=mk('div','q2Mon','q2card'),btCard=mk('div','q2BtCard','q2card');
+
+  /* the Bluetooth tile: name + where it stands + the switch (the old row had them side by side) */
+  const bt=mk('div','q2Bt','q2tile');
+  bt.innerHTML='<span class="q2c"><span>🎧 Bluetooth</span></span>';
+  if($('qBtState'))bt.firstChild.appendChild($('qBtState'));
+  if($('qBtSw'))bt.appendChild($('qBtSw'));
+  bt.addEventListener('click',e=>{const sw=$('qBtSw');if(sw&&e.target!==sw&&sw.style.display!=='none')sw.click();});
+
+  ['qWifi',bt,'qOut','qMasterCam','qMasterMic','qPair','qSleep','qSettings','qReboot','qOff','qBugBtn'].forEach(x=>{
+    const e=typeof x==='string'?$(x):x;if(e)tiles.appendChild(e);
+  });
+  [rowOf('qVolBar'),rowOf('qBrBar'),rowOf('qBassDown')].forEach(r=>{if(r)sliders.appendChild(r);});
+  left.appendChild(tiles);
+  if($('qOutPicker'))left.appendChild($('qOutPicker'));
+  if($('qSysNote')){const n=mk('div','q2SysNote');n.appendChild($('qSysNote'));left.appendChild(n);}
+  left.appendChild(sliders);
+
+  mon.innerHTML='<div class="q2h"><span>📊 Tablet</span><small id="q2MonSum"></small></div><div id="q2Meters"></div><div id="q2MonFoot"></div>';
+  if($('qNotifs'))right.appendChild($('qNotifs'));
+  right.appendChild(mon);
+  btCard.innerHTML='<div class="q2h"><span>🎧 Bluetooth devices</span></div>';
+  if($('qDevs'))btCard.appendChild($('qDevs'));
+  if($('qHint'))btCard.appendChild($('qHint'));
+  right.appendChild(btCard);
+
+  body.appendChild(left);body.appendChild(right);
+  q.insertBefore(body,$('qFoot'));
+  oldRows.forEach(r=>{if(r.parentNode===q)r.classList.add('q2gone');});      /* the rows that gave their controls away */
+  q.dataset.q2='1';      /* not a class: openQuick / closeQuick assign #quick's className wholesale */
+
+  /* ---------- Tablet monitor ---------- */
+  let M=null,T=null,asking=false,asked=0;
+  const clamp=v=>Math.max(0,Math.min(100,Math.round(+v||0)));
+  const tone=p=>p>=85?'hot':(p>=60?'warm':'');
+  const gb=mb=>(mb/1024).toFixed(1);
+  function meter(key,label,p,val,cls){return {key,label,p:clamp(p),val,cls:cls!=null?cls:tone(p)};}
+  // The rows are built once and then only their bar and their words change, so a bar glides to its new length (every poll
+  // used to rebuild the whole list: the bars snapped every 2 s). The glide is a TRANSFORM — the fill is as long as its
+  // track and slides in from the left — because the compositor draws that alone; a width transition lays out and repaints
+  // on every frame, which on PPQ cost ~10 % graphics and ~15 % processor: the monitor was loading what it measures.
+  const slide=p=>'translateX('+(p-100)+'%)';
+  function paint(box,rows){
+    if([...box.children].map(e=>e.dataset.m).join()!==rows.map(r=>r.key).join())
+      box.innerHTML=rows.map(r=>'<div class="sm-m" data-m="'+r.key+'"><div class="sm-l">'+r.label+'</div><div class="sm-bar '+r.cls+'"><i style="transform:'+slide(r.p)+'"></i></div><div class="sm-v"></div></div>').join('');
+    rows.forEach((r,i)=>{
+      const e=box.children[i],bar=e.children[1];
+      if(bar.className!=='sm-bar '+r.cls)bar.className='sm-bar '+r.cls;
+      if(e._p!==r.p){e._p=r.p;bar.firstElementChild.style.transform=slide(r.p);}
+      if(e._val!==r.val){e._val=r.val;e.children[2].innerHTML=r.val;}
+    });
+  }
+  function upFor(s){
+    if(s==null)return '';
+    const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);
+    return d?d+' d '+h+' h':(h?h+' h '+m+' min':m+' min');
+  }
+  function draw(){
+    const box=$('q2Meters'),sum=$('q2MonSum'),foot=$('q2MonFoot');
+    if(!box)return;
+    if(!agent){sum.textContent='needs the tablet helper';box.innerHTML='';foot.textContent='';return;}
+    if(!M||!M.ok){sum.textContent=asked?'no answer from the tablet helper':'reading…';return;}
+    const c=M.cpu||{},t=M.temp||{},m=M.mem||{},g=M.gpu,d=M.disk,cam=M.camera||{};
+    const rows=[];
+    if(c.pct!=null){
+      const cores=(c.cores||[]).map(v=>'<i style="height:'+Math.max(12,clamp(v))+'%"></i>').join('');
+      rows.push(meter('cpu','Processor',c.pct,Math.round(c.pct)+'%'+(c.mhz?' · '+(c.mhz/1000).toFixed(1)+' GHz':'')+(cores?'<span class="sm-cores" title="the four cores">'+cores+'</span>':'')));
+    }
+    if(t.max_c!=null){
+      const lim=t.limit_c||80,p=100*(t.max_c-30)/(lim-30);
+      rows.push(meter('heat','Heat',p,t.max_c+' °C · '+(t.max_c>=lim?'too hot':(t.max_c>=lim-12?'warm':'cool'))));
+    }
+    if(m.total_mb){
+      const used=m.total_mb-(m.avail_mb||0);
+      rows.push(meter('mem','Memory',100*used/m.total_mb,gb(used)+' of '+gb(m.total_mb)+' GB'));
+    }
+    // Graphics = real load (share of the chip's full power since the last poll). Never its clock: that has four steps and
+    // flips between the slowest and the fastest on every small burst, so a clock bar jumped between "resting" and "full
+    // speed" on a still screen. An agent that cannot tell the load (g.pct missing) gets no Graphics row.
+    if(g&&g.pct!=null){
+      rows.push(meter('gpu','Graphics',g.pct,Math.round(g.pct)+'% · '+(g.pct<5?'resting':(g.pct>=85?'flat out':'drawing'))));
+    }
+    if(d&&d.total_gb){
+      rows.push(meter('disk','Storage',100*d.used_gb/d.total_gb,d.free_gb+' GB free'+(d.wear_pct_max!=null?(d.wear_pct_max<=20?' · healthy':' · '+d.wear_pct_max+'% worn'):'')));
+    }
+    paint(box,rows);
+    const sumT=(c.pct!=null?Math.round(c.pct)+'% busy':'')+(t.max_c!=null?' · '+t.max_c+'°':'')+(m.avail_mb!=null?' · '+gb(m.avail_mb)+' GB free':'');
+    if(sum.textContent!==sumT)sum.textContent=sumT;
+    const camWord={resting:'resting — it starts when a tile asks',on:'ON'+(cam.app?' — '+E(cam.app):''),off:'switched off for everything',unknown:'its helper is not answering'}[cam.state]||'';
+    // always three lines, each on one line (a long "Busiest" used to wrap, and the whole menu grew and shrank by a line every poll)
+    const top=(M.top||[]).slice(0,3).map(p=>E(p.name)+' '+Math.round(p.pct)+'%').join(' · ');
+    const footH='<div>📷 Camera: <b>'+camWord+'</b></div><div>Busiest: '+(top||'—')+'</div><div>On for '+upFor(M.uptime_s)+(M.load?' · load '+M.load[0]:'')+'</div>';
+    if(foot._h!==footH){foot._h=footH;foot.innerHTML=footH;}
+  }
+  async function pull(){
+    if(asking||!agent)return draw();
+    asking=true;asked++;
+    try{M=await jget('/api/sysmon');}catch(e){M=null;}
+    asking=false;draw();
+  }
+  function stop(){clearInterval(T);T=null;}
+  function start(){stop();pull();T=setInterval(()=>{if(quickOpen)pull();else stop();},2000);}
+  const _oq2=openQuick;
+  openQuick=function(where){const r=_oq2(where);start();return r;};
+  const _cq2=closeQuick;
+  closeQuick=function(){stop();return _cq2();};
+  window.ktShade={get mon(){return M;},get asked(){return asked;},get polling(){return !!T;},pull};
+  draw();
 })();
 
 loadAll();
