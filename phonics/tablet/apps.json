@@ -224,7 +224,8 @@
    "permissions": [
     "audio",
     "internet"
-   ]
+   ],
+   "idle": "watch"
   },
   {
    "id": "read",
@@ -273,6 +274,24 @@
     "autoplay"
    ],
    "source": "tablet/apps/stories",
+   "tier": "pre-reader",
+   "group": "read",
+   "version": "1.0.0",
+   "permissions": [
+    "audio"
+   ]
+  },
+  {
+   "id": "trace",
+   "title": "Trace It",
+   "subtitle": "trace the letters with your finger",
+   "icon": "✏️",
+   "color": "#d6336c",
+   "path": "apps/trace/index.html",
+   "needs": [
+    "autoplay"
+   ],
+   "source": "tablet/apps/trace",
    "tier": "pre-reader",
    "group": "read",
    "version": "1.0.0",
@@ -332,7 +351,8 @@
    "permissions": [
     "audio",
     "bench"
-   ]
+   ],
+   "idle": "listen"
   }
  ]
 }

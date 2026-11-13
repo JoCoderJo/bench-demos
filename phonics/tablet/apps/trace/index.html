@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Trace It</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
+<script src="letters.js"></script>
+<!-- tablet/apps/trace — Trace It: finger-trace the lowercase letters with stroke order (PLAN §12 C8 / D-030, 2026-11-09).
+       Letters   the 26 letters as big tiles in the phonics order of Letter Sounds (tools/sounds.json, via build.py → data.json);
+                 a traced letter carries a star. Tap = open, hold = hear the letter's sound.
+       Trace     the letter drawn large from OUR OWN stroke data (letters.js — no font outline) on handwriting lines. A numbered
+                 dot sits where the stroke starts and little arrows show the way; the child drags the dot along the grey
+                 stroke and the part behind it fills with colour. Strokes go in order and in direction (a finger going
+                 against the stroke moves nothing). Nothing punishes: off the path the dot simply waits where it is, a
+                 resting palm or a second finger does nothing, a cut corner or a skipped little push-up is forgiven.
+                 👀 plays the strokes in order (by itself the first time a kid meets a letter; a touch stops it).
+                 Last stroke done = success earcon + pulse + a star, then ➡️ next letter, 🔁 again, 🔡 back to the letters.
+                 The start dot's ring and the arrows pulse for 20 s after the last touch, then stand still until the next
+                 one (docs/CHIPS.md rule 1: a tile left open on a letter must not keep the graphics chip drawing frames).
+     Sound: kt.js earcons; the letter's SOUND is a vouched-for recording copied by build.py (D-010: an isolated letter sound
+     is never synthesised — no clip = silent, and the 🔊 button hides). No text needs reading; every button has an aria-label.
+     Progress per kid: /api/store/trace/<kid>/progress.json {stars, traced:{letter:n}} via the launcher's hello (D-008),
+     localStorage on a laptop. ◁ (kt:'back') on the trace screen goes back to the letters.
+     ?sheet=1 draws all 26 letters with stroke numbers and direction arrows — the review sheet for letters.js.
+     window.TR exposes read-only state and the stroke points for tablet/tests/trace_dom.py. -->
+<style>
+:root{--ink:var(--kt-ink,#1d2a3a);--dim:var(--kt-dim,#5b6b80);--card:var(--kt-surface,#fff);--ok:var(--kt-ok,#009e73);--pen:#d6336c;--todo:#c9d1dc;--line:#8db4dc;--line2:#4a86c5;
+  --r:var(--kt-radius-card,22px);--shadow:0 8px 24px var(--kt-shadow,rgba(20,40,80,.16));--tgt:var(--kt-target-min,75px);--gap:var(--kt-target-gap,10px);--dead:var(--kt-target-dead-bottom,0px);
+  --big:max(var(--tgt),88px);--t:calc(var(--kt-motion-base,160ms) * var(--motion-scale,1))}
+@supports (color:color-mix(in srgb,red,blue)){:root{--todo:color-mix(in srgb,var(--ink) 22%,var(--card))}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(160deg,var(--kt-bg-2,#dfe3ff),var(--kt-bg,#f6f7ff));color:var(--ink);font:var(--kt-type-body,20px)/1.3 var(--kt-font-ui,system-ui,sans-serif);touch-action:manipulation}
+body{display:flex;flex-direction:column}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+.screen{display:none;flex:1;min-height:0}
+.screen.on{display:flex}
+/* ---- the letters */
+#pick{flex-direction:column}
+#bar{display:flex;align-items:center;gap:12px;padding:6px 24px;min-height:56px;flex:none}
+#bar h1{font-size:var(--kt-type-title,30px);margin:0;line-height:1.1}
+#who{margin-left:auto;color:var(--dim);font-size:var(--kt-type-label,18px);font-weight:700}
+#stars{font-size:var(--kt-type-label,20px);font-weight:700;min-width:80px;text-align:right}
+#grid{flex:1;min-height:0;overflow-y:auto;touch-action:pan-y;display:grid;grid-template-columns:repeat(auto-fill,minmax(max(var(--tgt),110px),1fr));grid-auto-rows:minmax(var(--tgt),1fr);
+  gap:var(--gap);padding:4px 24px max(16px,var(--dead));scrollbar-width:none}
+#grid::-webkit-scrollbar{display:none}
+.lt{position:relative;min-width:var(--tgt);min-height:var(--tgt);border-radius:var(--r);background:var(--card);box-shadow:var(--shadow);overflow:hidden;transition:transform var(--t)}
+.lt:active,.lt.kt-press{transform:scale(.95)}
+.lt svg{position:absolute;left:6px;top:6px;width:calc(100% - 12px);height:calc(100% - 12px);pointer-events:none}
+.lt .ml{stroke:var(--line);stroke-width:1.6;fill:none}
+.lt .ml.d{stroke-dasharray:6 6}
+.lt .ms{fill:none;stroke:var(--ink);stroke-width:11;stroke-linecap:round;stroke-linejoin:round}
+.lt .mk{fill:var(--ink)}
+.lt.got .ms{stroke:var(--pen)}
+.lt.got .mk{fill:var(--pen)}
+.lt .st{position:absolute;top:4px;right:6px;font-size:26px;line-height:1;pointer-events:none}
+/* ---- one letter */
+#trace{flex-direction:row;gap:var(--gap);padding:12px 24px}
+:root[data-hand=left] #trace{flex-direction:row-reverse}
+.col{display:flex;flex-direction:column;gap:var(--gap);width:var(--big);flex:none;padding-bottom:var(--dead)}
+.rb{width:var(--big);height:var(--big);border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;font-size:calc(var(--big) * .5);line-height:1;flex:none;transition:transform var(--t)}
+.rb:active,.rb.kt-press{transform:scale(.94)}
+.rb.go{background:var(--pen)}
+#colR{visibility:hidden}
+#trace.done #colR{visibility:visible}
+#trace.done #bNext{animation:nudge 1.1s ease-in-out 3}
+#stage{flex:1;min-width:0;position:relative;border-radius:var(--r);background:var(--card);box-shadow:var(--shadow);touch-action:none;overflow:hidden}
+#svg{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+#svg .guide line{stroke:var(--line);stroke-width:2.5;stroke-linecap:round}
+#svg .guide .gm{stroke-dasharray:14 12}
+#svg .guide .gb{stroke:var(--line2);stroke-width:4}
+#svg .guide .gd{stroke-dasharray:3 10}
+#svg polyline{fill:none;stroke-linecap:round;stroke-linejoin:round}
+#svg .base polyline{stroke:var(--todo)}
+#svg .base circle{fill:var(--todo)}
+#svg .ink polyline{stroke:var(--pen)}
+#svg .ink circle{fill:var(--pen)}
+#trace.won #svg .ink polyline{stroke:var(--ok)}
+#trace.won #svg .ink circle{fill:var(--ok)}
+#trace.demo #svg .ink,#trace.demo #svg .marks{visibility:hidden}
+#svg .demo polyline{stroke:var(--ink)}
+#svg .demo .dd{fill:var(--ink)}
+#svg .demo .hand{fill:var(--kt-accent,#e69f00);stroke:#fff}
+#svg text{font-family:var(--kt-font-ui,system-ui,sans-serif);font-weight:700;pointer-events:none}
+#svg .bead circle{fill:var(--pen);stroke:#fff}
+#svg .bead text,#svg .dnum text{fill:#fff}
+#svg .bead .ring{fill:none;stroke:var(--pen);transform-box:fill-box;transform-origin:center;animation:ring 1.5s ease-out infinite}
+#stage.touch #svg .bead .ring,#stage.rest #svg .bead .ring{animation:none;opacity:0}
+#stage.rest #svg .chev{animation:none}
+#svg .dnum circle{fill:var(--ink);stroke:#fff}
+#svg .later circle{fill:var(--card);stroke:var(--dim);stroke-width:2.5}
+#svg .later text{fill:var(--dim)}
+#svg .chev{stroke:#fff;animation:chev 1.2s ease-in-out infinite}
+#svg .chev.c1{animation-delay:.18s}
+#svg .chev.c2{animation-delay:.36s}
+#pips{position:absolute;left:16px;top:14px;display:flex;gap:10px;pointer-events:none}
+#pips i{width:20px;height:20px;border-radius:50%;border:3px solid var(--dim);background:transparent}
+#pips i.on{background:var(--pen);border-color:var(--pen)}
+#tstar{position:absolute;right:14px;top:8px;font-size:64px;line-height:1;pointer-events:none;display:none}
+#tstar.on{display:block}
+#trace.won #tstar{display:block;animation:star calc(900ms * var(--motion-scale,1)) var(--kt-easing-pop,ease-out) both}
+@keyframes ring{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.9);opacity:0}}
+@keyframes chev{0%,100%{opacity:.3}40%{opacity:1}}
+@keyframes star{0%{right:calc(50% - 32px);top:calc(50% - 32px);transform:scale(.2);opacity:0}40%{right:calc(50% - 32px);top:calc(50% - 32px);transform:scale(4.2);opacity:1}70%{right:calc(50% - 32px);top:calc(50% - 32px);transform:scale(3.6);opacity:1}100%{right:14px;top:8px;transform:none;opacity:1}}
+@keyframes nudge{50%{transform:scale(1.1)}}
+@media (prefers-reduced-motion:reduce){#svg .bead .ring,#svg .chev,#trace.done #bNext{animation:none}}
+:root[data-motion=off] #svg .bead .ring,:root[data-motion=off] #svg .chev,:root[data-motion=off] #trace.done #bNext{animation:none}
+/* ---- ?sheet=1 : every letter with its stroke numbers, for checking letters.js by eye */
+body.sheet{display:block;overflow:auto;height:auto;background:#fff}
+#sheet{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;padding:14px}
+#sheet figure{margin:0;border:1px solid #d5dbe5;border-radius:12px;background:#fff}
+#sheet svg{display:block;width:100%;height:auto}
+#sheet figcaption{font:700 15px system-ui,sans-serif;color:#36475c;text-align:center;padding:0 0 6px}
+</style></head><body>
+<div class="screen on" id="pick">
+  <div id="bar"><h1>Trace It</h1><div id="who"></div><div id="stars"></div></div>
+  <div id="grid"></div>
+</div>
+<div class="screen" id="trace">
+  <div class="col" id="colL">
+    <button class="rb" id="bBack" data-kt-up aria-label="Back to the letters">⬅️</button>
+    <button class="rb" id="bWatch" aria-label="Watch how it goes">👀</button>
+    <button class="rb" id="bHear" aria-label="Hear the sound">🔊</button>
+  </div>
+  <div id="stage"><svg id="svg" aria-hidden="true"></svg><div id="pips"></div><div id="tstar">⭐</div></div>
+  <div class="col" id="colR">
+    <button class="rb go" id="bNext" aria-label="Next letter">➡️</button>
+    <button class="rb" id="bAgain" aria-label="Trace it again">🔁</button>
+    <button class="rb" id="bAll" data-kt-up aria-label="All the letters">🔡</button>
+  </div>
+</div>
+<script>
+'use strict';
+// The forgiving touch-tap helper lives in design/kt.js; this fallback covers the page opened without it.
+if(!window.KT)(function(){
+  let pt=null,lastClick=0;
+  document.addEventListener('click',()=>{lastClick=Date.now();},true);
+  document.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;const b=e.target.closest('button');if(!b)return;pt={b,x:e.clientX,y:e.clientY,t:Date.now(),id:e.pointerId};},true);
+  document.addEventListener('pointerup',e=>{if(!pt||e.pointerId!==pt.id)return;const p=pt;pt=null;if(Date.now()-p.t>750||Math.hypot(e.clientX-p.x,e.clientY-p.y)>36)return;
+    setTimeout(()=>{if(Date.now()-lastClick>80&&!p.b.disabled)p.b.click();},35);},true);
+  document.addEventListener('pointercancel',()=>{pt=null;},true);
+})();
+const $=id=>document.getElementById(id);
+const T=window.TRACE;                                  // letters.js: the stroke data and its sampler
+const NS='http://www.w3.org/2000/svg';
+const LIVE=location.protocol.startsWith('http');
+const SW=11;                                           // drawn stroke width, in letter units (a small letter is 50 tall)
+const PADT=17,PADB=15;                                 // room above the top line and under the bottom line
+const TOL={'pre-reader':16,reader:13,tinkerer:11,maker:10};   // how far from the stroke a finger still counts (units; ≈ 60 px for a pre-reader)
+const AHEAD=40;                                        // how far ahead of the dot a MOVING finger may pull it (cuts a corner, skips a short push-up)
+const LAND=20;                                         // … and how far ahead a finger that just touched down may land
+const TURN=4;                                          // a finger's direction is where it went over its last 4 units …
+const ALONG=.3;                                        // … and it must point within about 70° of the stroke's own direction
+const BUMP=1.5;                                        // a point past a turn must be this much closer to win (keeps a retraced stem honest)
+const ENDSLACK=8;                                      // the last bit of a stroke finishes by itself (the dot is 7.5 wide: it is "there")
+const GRAB=8;                                          // the finger has to be at the dot to move it: within the tolerance + this
+const REST=+new URLSearchParams(location.search).get('rest')||20000;   // ms without a touch before the ring and the arrows stand still (?rest= is for the test)
+// the phonics order of Letter Sounds (tools/sounds.json "order", single letters); build.py writes the live one into data.json
+let ORDER='smfnlrvzaeiouhwybdgptckjqx'.split('');
+let SOUNDS={};                                         // letter → vouched-for clip of its sound (data.json); none = silent
+let kid={id:'default',name:''},prog={stars:0,traced:{}},progLoaded=false;
+let cur=null;                                          // the letter on the trace screen: {ch,g,si,i,done}
+let W=0,H=0,k=1,ox=0,oy=0,L=null;                      // stage size, px per unit, origin, the svg layers
+const demo={on:false,raf:0,timer:0};
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const post=m=>{try{parent.postMessage(m,'*');}catch(e){}};
+const snd=(n,el)=>{if(window.KT){KT.sound(n,el);return true;}return false;};
+const still=()=>document.documentElement.dataset.motion==='off'||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+const tol=()=>TOL[document.documentElement.dataset.tier]||TOL.reader;
+let restT=0;
+function wake(){               // somebody is here: the cues pulse again, for REST ms
+  const s=$('stage');s.classList.remove('rest');clearTimeout(restT);
+  restT=setTimeout(()=>s.classList.add('rest'),REST);
+}
+
+// ---------- geometry: each stroke as points one unit apart, with the length walked so far
+const GEO={};
+function geo(ch){
+  if(GEO[ch])return GEO[ch];
+  let minX=1e9,maxX=-1e9;
+  const strokes=T.LETTERS[ch].map(segs=>{
+    const pts=T.sample(segs,1),cum=[0];
+    for(let j=1;j<pts.length;j++)cum.push(cum[j-1]+Math.hypot(pts[j][0]-pts[j-1][0],pts[j][1]-pts[j-1][1]));
+    for(const p of pts){if(p[0]<minX)minX=p[0];if(p[0]>maxX)maxX=p[0];}
+    return {dot:segs[0][0]==='D',pts,cum,len:cum[cum.length-1]};
+  });
+  return GEO[ch]={strokes,minX,maxX};
+}
+const X=p=>ox+p[0]*k,Y=p=>oy+p[1]*k;
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const a in attrs)e.setAttribute(a,attrs[a]);if(parent)parent.appendChild(e);return e;}
+function ptsAttr(pts,n){let s='';for(let j=0;j<n;j++)s+=X(pts[j]).toFixed(1)+','+Y(pts[j]).toFixed(1)+' ';return s;}
+function dirAt(st,j){              // unit direction of travel at point j
+  const n=st.pts.length,a=st.pts[Math.min(j,n-2)],b=st.pts[Math.min(j,n-2)+1],l=Math.hypot(b[0]-a[0],b[1]-a[1])||1;
+  return [(b[0]-a[0])/l,(b[1]-a[1])/l];
+}
+
+// ---------- who is playing (D-008); progress follows the kid
+let helloResolve;const hello=new Promise(r=>helloResolve=r);
+window.addEventListener('message',e=>{const d=e.data||{};
+  if(d.kt==='hello'){
+    const prev=kid.id;
+    if(d.kid&&d.kid.id)kid={id:String(d.kid.id),name:d.kid.name||''};else if(d.child&&d.child.name)kid.name=d.child.name;
+    helloResolve();
+    if(progLoaded&&kid.id!==prev){prog={stars:0,traced:{}};loadProg().then(toPick);}else drawBar();
+  }else if(d.kt==='back'&&cur){toPick();post({kt:'back',handled:true});}
+});
+const progKey=()=>'trace.progress.'+kid.id;
+const progUrl=()=>'/api/store/trace/'+encodeURIComponent(kid.id)+'/progress.json';
+async function loadProg(){
+  let p=null;
+  if(LIVE){try{const r=await fetch(progUrl(),{cache:'no-store'});if(r.ok)p=await r.json();}catch(e){}}
+  if(!p){try{p=JSON.parse(localStorage.getItem(progKey())||'null');}catch(e){}}
+  if(p&&typeof p==='object'){
+    const tr={};
+    for(const c of T.ABC){const n=Math.max(+((p.traced||{})[c])||0,+prog.traced[c]||0);if(n>0)tr[c]=n;}   // a letter finished while this was loading is kept
+    prog={stars:Math.max(+p.stars||0,prog.stars),traced:tr};
+  }
+}
+function saveProg(){           // at once, not debounced: a star is rare and the kid may leave right after it
+  const body=JSON.stringify(prog);
+  try{localStorage.setItem(progKey(),body);}catch(e){}
+  if(LIVE){try{fetch(progUrl(),{method:'PUT',headers:{'Content-Type':'application/json'},body,keepalive:true}).catch(()=>{});}catch(e){}}
+}
+
+// ---------- sound: the letter's own sound (a recording), one at a time
+let audio=null;
+function stopAudio(){if(audio){try{audio.pause();}catch(e){}audio=null;}}
+function vol(){const K=window.KT;if(!K)return 1;const g=(K.TIERS&&K.TIERS._gain&&K.TIERS._gain.voice)||1;return Math.max(0,Math.min(1,g*(K.ceiling==null?1:K.ceiling)));}
+function sayLetter(){
+  const src=cur&&SOUNDS[cur.ch];if(!src)return false;
+  stopAudio();
+  const a=new Audio(src);try{a.volume=vol();}catch(e){}
+  audio=a;const p=a.play();if(p&&p.catch)p.catch(()=>{});
+  const b=$('bHear');b.classList.remove('kt-pulse-say');void b.offsetWidth;b.classList.add('kt-pulse-say');setTimeout(()=>b.classList.remove('kt-pulse-say'),1000);   // the sound's visual twin
+  return true;
+}
+
+// ---------- the letters
+function mini(ch){             // a letter as a small picture, from the same stroke data
+  const g=geo(ch),x0=(g.minX+g.maxX)/2-46;
+  let s='<svg viewBox="'+x0+' -16 92 182" aria-hidden="true"><path class="ml d" d="M'+x0+' 50h92"/><path class="ml" d="M'+x0+' 100h92"/>';
+  for(const st of g.strokes){
+    if(st.dot)s+='<circle class="mk" cx="'+st.pts[0][0]+'" cy="'+st.pts[0][1]+'" r="'+(SW*.62)+'"/>';
+    else s+='<polyline class="ms" points="'+st.pts.filter((p,j)=>j%2===0||j===st.pts.length-1).map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'"/>';
+  }
+  return s+'</svg>';
+}
+function drawBar(){
+  const n=Object.keys(prog.traced).length;
+  $('stars').textContent=n?'⭐ '+n:'';$('who').textContent=kid.name||'';
+}
+function drawGrid(){
+  $('grid').innerHTML=ORDER.map(ch=>{const n=prog.traced[ch]||0,clip=SOUNDS[ch];
+    return '<button class="lt'+(n?' got':'')+'" data-ch="'+ch+'" data-kt-up aria-label="letter '+ch+'"'+(clip?' data-say="'+clip+'"':'')+'>'+mini(ch)+'<span class="st" aria-hidden="true">'+(n?'⭐':'')+'</span></button>';}).join('');
+  drawBar();
+}
+$('grid').addEventListener('click',e=>{const b=e.target.closest('.lt');if(b)openLetter(b.dataset.ch);});
+function show(name){$('pick').classList.toggle('on',name==='pick');$('trace').classList.toggle('on',name==='trace');}
+function toPick(){stopDemo();stopAudio();clearTimeout(restT);cur=null;$('trace').classList.remove('done','won');drawGrid();show('pick');}
+
+// ---------- one letter: draw
+function openLetter(ch,quiet){
+  if(!T.LETTERS[ch])return;
+  stopDemo();
+  cur={ch,g:geo(ch),si:0,i:0,done:false};
+  $('trace').classList.remove('done','won');
+  $('tstar').classList.toggle('on',!!prog.traced[ch]);
+  $('bHear').style.display=SOUNDS[ch]?'':'none';
+  show('trace');draw();wake();
+  if(!quiet)sayLetter();
+  if(!prog.traced[ch])startDemo(700);       // the first time a kid meets a letter: show how it goes, once (a touch stops it)
+}
+function shape(st,parent,n){
+  if(st.dot){const c=el('circle',{cx:X(st.pts[0]),cy:Y(st.pts[0]),r:SW*.62*k},parent);if(!n)c.style.display='none';return c;}
+  return el('polyline',{points:ptsAttr(st.pts,n),'stroke-width':SW*k},parent);
+}
+function draw(){
+  if(!cur)return;
+  const r=$('stage').getBoundingClientRect();
+  if(r.width<20||r.height<20)return;
+  if(demo.on&&L&&(r.width!==W||r.height!==H))stopDemo();
+  W=r.width;H=r.height;
+  const g=cur.g,svg=$('svg');
+  k=Math.min(H/(150+PADT+PADB),W/(g.maxX-g.minX+70));
+  oy=(H-(150+PADT+PADB)*k)/2+PADT*k;ox=W/2-(g.minX+g.maxX)/2*k;
+  const keep=demo.on&&L?L.demo:null;
+  svg.textContent='';
+  const guide=el('g',{class:'guide'},svg);
+  [[0,'gt'],[50,'gm'],[100,'gb'],[150,'gd']].forEach(a=>el('line',{x1:14,x2:W-14,y1:oy+a[0]*k,y2:oy+a[0]*k,class:a[1]},guide));
+  const base=el('g',{class:'base'},svg),ink=el('g',{class:'ink'},svg);
+  L={ink:[]};
+  g.strokes.forEach((st,si)=>{
+    shape(st,base,st.pts.length);
+    L.ink.push(shape(st,ink,cur.done||si<cur.si?st.pts.length:(si===cur.si&&!st.dot?cur.i+1:0)));
+  });
+  L.demo=keep?svg.appendChild(keep):el('g',{class:'demo'},svg);
+  L.marks=el('g',{class:'marks'},svg);
+  marks();
+  $('pips').innerHTML=g.strokes.length>1?g.strokes.map((_,si)=>'<i'+(cur.done||si<cur.si?' class="on"':'')+'></i>').join(''):'';
+}
+function num(parent,p,n,cls,r){       // a numbered dot
+  const g=el('g',{class:cls,transform:'translate('+X(p).toFixed(1)+','+Y(p).toFixed(1)+')'},parent);
+  if(cls==='bead')el('circle',{class:'ring',r:r*k,'stroke-width':1.2*k},g);
+  el('circle',{r:r*k,'stroke-width':cls==='later'?2.5:.8*k},g);
+  el('text',{'text-anchor':'middle','dominant-baseline':'central','font-size':Math.max(12,r*1.2*k).toFixed(1)},g).textContent=n;
+  return g;
+}
+function marks(){               // the numbered dot of the stroke to trace (it rides along), arrows ahead of it, the later starts
+  const m=L.marks;m.textContent='';
+  if(!cur||cur.done)return;
+  const g=cur.g;
+  for(let si=g.strokes.length-1;si>cur.si;si--)num(m,g.strokes[si].pts[0],si+1,'later',4.8);
+  const st=g.strokes[cur.si];
+  if(!st.dot)[13,23,33].forEach((d,n)=>{
+    const s=st.cum[cur.i]+d;if(s>st.len-1)return;
+    let j=cur.i;while(st.cum[j]<s)j++;
+    const a=st.pts[j],t=dirAt(st,j),P=(u,v)=>(ox+(a[0]+t[0]*u-t[1]*v)*k).toFixed(1)+','+(oy+(a[1]+t[1]*u+t[0]*v)*k).toFixed(1);
+    el('polyline',{class:'chev c'+n,points:P(-1.4,-3.3)+' '+P(2,0)+' '+P(-1.4,3.3),'stroke-width':1.7*k},m);
+  });
+  num(m,st.pts[cur.i],cur.si+1,'bead',7.5);
+}
+let painting=false;
+function paint(){               // progress moved: at most once a frame
+  if(painting)return;painting=true;
+  requestAnimationFrame(()=>{painting=false;if(!cur||!L||cur.done)return;
+    const st=cur.g.strokes[cur.si];
+    if(!st.dot)L.ink[cur.si].setAttribute('points',ptsAttr(st.pts,cur.i+1));
+    marks();});
+}
+
+// ---------- one letter: trace. The finger never draws by itself — it moves the dot along the stroke.
+function feed(ux,uy,dx,dy){     // a finger at (ux,uy) in letter units, going (dx,dy) — 0,0 while it has not moved yet
+  if(!cur||cur.done||demo.on)return;
+  const st=cur.g.strokes[cur.si],reach=tol();
+  if(st.dot){if(Math.hypot(ux-st.pts[0][0],uy-st.pts[0][1])<=reach+3)strokeDone();return;}
+  const pts=st.pts,cum=st.cum,i=cur.i,moving=dx!==0||dy!==0,lim=cum[i]+(moving?AHEAD:LAND);
+  let best=i,bd=Math.hypot(ux-pts[i][0],uy-pts[i][1]),risen=false;
+  if(bd>reach+GRAB)return;                                // not at the dot: it waits (a finger further along the letter cannot fetch it)
+  for(let j=i+1;j<pts.length&&cum[j]<=lim;j++){          // only forward, only a little way: the stroke order comes from this
+    const d=Math.hypot(ux-pts[j][0],uy-pts[j][1]);
+    if(d<bd-(risen?BUMP:0)){best=j;bd=d;risen=false;}
+    else if(d>bd+.5)risen=true;
+  }
+  if(best===i||bd>reach)return;                           // off the stroke or behind the dot: nothing happens, the dot waits
+  if(moving){                                             // a finger going across or against the way the stroke runs there: nothing either
+    const a=pts[best-1],b=pts[best],l=Math.hypot(b[0]-a[0],b[1]-a[1])||1;      // (a circle traced backwards, a stem drawn upwards, the bar of t drawn before its stem)
+    if((dx*(b[0]-a[0])+dy*(b[1]-a[1]))/l<ALONG)return;
+  }
+  cur.i=best;
+  if(cum[best]>=st.len-ENDSLACK)strokeDone();else paint();
+}
+function strokeDone(){
+  const n=cur.g.strokes.length;
+  cur.si++;cur.i=0;wake();
+  if(cur.si>=n){finish();return;}
+  draw();
+  snd('navigate',$('pips').children[cur.si-1]);
+}
+function finish(){
+  const ch=cur.ch;
+  cur.done=true;
+  prog.traced[ch]=(prog.traced[ch]||0)+1;prog.stars=(prog.stars||0)+1;saveProg();
+  draw();
+  $('tstar').classList.remove('on');
+  $('trace').classList.add('won');
+  snd('success',$('stage'));
+  setTimeout(()=>{if(cur&&cur.done&&cur.ch===ch)sayLetter();},500);
+  setTimeout(()=>{if(cur&&cur.done&&cur.ch===ch)$('trace').classList.add('done');},750);   // the buttons come a moment later, not under a finger still moving
+}
+(function(){
+  const st=$('stage'),down=new Map();     // pointerId → where that finger was TURN units ago and the way it has gone since
+  const feedEv=(e,id)=>{
+    const r=st.getBoundingClientRect(),ux=(e.clientX-r.left-ox)/k,uy=(e.clientY-r.top-oy)/k,f=down.get(id);
+    const mx=ux-f.ax,my=uy-f.ay,m=Math.hypot(mx,my);
+    if(m>=TURN){f.dx=mx/m;f.dy=my/m;f.ax=ux;f.ay=uy;}
+    feed(ux,uy,f.dx,f.dy);
+  };
+  st.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+    e.preventDefault();
+    try{st.setPointerCapture(e.pointerId);}catch(x){}
+    const r=st.getBoundingClientRect();
+    down.set(e.pointerId,{ax:(e.clientX-r.left-ox)/k,ay:(e.clientY-r.top-oy)/k,dx:0,dy:0});st.classList.add('touch');wake();
+    if(demo.on)stopDemo();
+    feedEv(e,e.pointerId);
+  });
+  st.addEventListener('pointermove',e=>{
+    if(!down.has(e.pointerId))return;       // every finger that is down is listened to: a resting palm is far from the dot and does nothing
+    const list=e.getCoalescedEvents?e.getCoalescedEvents():[];
+    if(list.length)list.forEach(c=>feedEv(c,e.pointerId));else feedEv(e,e.pointerId);
+  });
+  const up=e=>{down.delete(e.pointerId);if(!down.size){st.classList.remove('touch');wake();}};
+  st.addEventListener('pointerup',up);st.addEventListener('pointercancel',up);
+  st.addEventListener('contextmenu',e=>e.preventDefault());
+  st.addEventListener('dragstart',e=>e.preventDefault());
+})();
+
+// ---------- 👀 watch: the strokes draw themselves in order, with their numbers
+function startDemo(delay){
+  stopDemo();
+  if(!cur||!L)return;
+  const g=cur.g,quiet=still(),SPEED=95;        // units a second
+  let si=0,s=0,last=0,line=null,hand=null;
+  demo.on=true;$('trace').classList.add('demo');
+  const begin=()=>{
+    if(!demo.on)return;
+    if(hand){hand.remove();hand=null;}
+    if(si>=g.strokes.length){demo.timer=setTimeout(stopDemo,800);return;}
+    const st=g.strokes[si];
+    if(st.dot){el('circle',{class:'dd',cx:X(st.pts[0]),cy:Y(st.pts[0]),r:SW*.62*k},L.demo);num(L.demo,st.pts[0],si+1,'dnum',5.6);si++;demo.timer=setTimeout(begin,500);return;}
+    line=el('polyline',{'stroke-width':SW*k},L.demo);
+    num(L.demo,st.pts[0],si+1,'dnum',5.6);
+    if(quiet){line.setAttribute('points',ptsAttr(st.pts,st.pts.length));si++;demo.timer=setTimeout(begin,700);return;}
+    hand=el('circle',{class:'hand',r:6*k,'stroke-width':.9*k},L.demo);
+    s=0;last=0;demo.raf=requestAnimationFrame(step);
+  };
+  const step=t=>{
+    if(!demo.on)return;
+    const st=g.strokes[si];
+    if(last)s+=Math.min(60,t-last)/1000*SPEED;
+    last=t;
+    let j=0;while(j<st.pts.length-1&&st.cum[j]<s)j++;
+    line.setAttribute('points',ptsAttr(st.pts,j+1));
+    hand.setAttribute('cx',X(st.pts[j]));hand.setAttribute('cy',Y(st.pts[j]));
+    if(j>=st.pts.length-1){si++;demo.timer=setTimeout(begin,300);}else demo.raf=requestAnimationFrame(step);
+  };
+  demo.timer=setTimeout(begin,delay||0);
+}
+function stopDemo(){
+  if(!demo.on)return;
+  demo.on=false;cancelAnimationFrame(demo.raf);clearTimeout(demo.timer);
+  if(L&&L.demo)L.demo.textContent='';
+  $('trace').classList.remove('demo');
+}
+
+// ---------- buttons
+$('bBack').onclick=toPick;$('bAll').onclick=toPick;
+$('bWatch').onclick=()=>{if(cur){wake();startDemo(0);}};
+$('bHear').onclick=()=>{sayLetter();};
+$('bAgain').onclick=()=>{if(cur)openLetter(cur.ch,true);};
+$('bNext').onclick=()=>{if(cur)openLetter(ORDER[(ORDER.indexOf(cur.ch)+1)%ORDER.length]);};
+window.addEventListener('resize',()=>{if(cur)draw();});
+
+// ---------- for tests/trace_dom.py (read-only)
+window.TR={
+  get state(){const st=cur&&!cur.done?cur.g.strokes[cur.si]:null;
+    return {screen:cur?'trace':'pick',ch:cur?cur.ch:null,strokes:cur?cur.g.strokes.length:0,stroke:cur?cur.si:0,frac:st&&st.len?st.cum[cur.i]/st.len:0,
+      done:!!(cur&&cur.done),demo:demo.on,rest:$('stage').classList.contains('rest'),stars:prog.stars,traced:Object.assign({},prog.traced),kid:kid.id,order:ORDER.slice(),sounds:Object.keys(SOUNDS).filter(c=>SOUNDS[c]).length,tol:tol(),k};},
+  path(si,step){             // client px along stroke si of the letter on screen, about `step` units apart
+    const r=$('stage').getBoundingClientRect(),st=cur.g.strokes[si],out=[];let next=0;
+    st.pts.forEach((p,j)=>{if(st.cum[j]>=next||j===st.pts.length-1){out.push([r.left+X(p),r.top+Y(p)]);next=st.cum[j]+(step||4);}});
+    return out;}
+};
+
+// ---------- ?sheet=1
+function sheet(){
+  const COL=['#d6336c','#0072b2','#009e73'];
+  document.body.className='sheet';
+  document.body.innerHTML='<div id="sheet">'+T.ABC.map(ch=>{
+    const g=geo(ch),x0=(g.minX+g.maxX)/2-58;
+    let s='<figure><svg viewBox="'+x0+' -24 116 198">';
+    [[0,''],[50,'8 7'],[100,''],[150,'2 6']].forEach(a=>{s+='<path d="M'+x0+' '+a[0]+'h116" fill="none" stroke="'+(a[0]===100?'#4a86c5':'#8db4dc')+'" stroke-width="'+(a[0]===100?1.6:1)+'"'+(a[1]?' stroke-dasharray="'+a[1]+'"':'')+'/>';});
+    g.strokes.forEach((st,si)=>{
+      const c=COL[si%3];
+      if(st.dot)s+='<circle cx="'+st.pts[0][0]+'" cy="'+st.pts[0][1]+'" r="'+(SW*.62)+'" fill="'+c+'" opacity=".45"/>';
+      else{
+        s+='<polyline points="'+st.pts.map(p=>p[0].toFixed(2)+','+p[1].toFixed(2)).join(' ')+'" fill="none" stroke="'+c+'" stroke-opacity=".38" stroke-width="'+SW+'" stroke-linecap="round" stroke-linejoin="round"/>';
+        // arrowheads every 16 units, pushed to the left of travel so the two directions of a retraced stem do not hide each other
+        for(let d=9;d<st.len-3;d+=16){let j=0;while(st.cum[j]<d)j++;const a=st.pts[j],t=dirAt(st,j),P=(u,v)=>(a[0]+t[0]*u-t[1]*v+t[1]*2.6).toFixed(2)+','+(a[1]+t[1]*u+t[0]*v-t[0]*2.6).toFixed(2);
+          s+='<polygon points="'+P(-2.2,-2)+' '+P(2.4,0)+' '+P(-2.2,2)+'" fill="#1d2a3a"/>';}
+        const e=st.pts[st.pts.length-1];s+='<rect x="'+(e[0]-2)+'" y="'+(e[1]-2)+'" width="4" height="4" fill="#1d2a3a"/>';
+      }
+      const p=st.pts[0],off=st.dot?[11,0]:[0,0];
+      s+='<circle cx="'+(p[0]+off[0])+'" cy="'+p[1]+'" r="5.4" fill="'+c+'" stroke="#fff" stroke-width=".8"/><text x="'+(p[0]+off[0])+'" y="'+p[1]+'" text-anchor="middle" dominant-baseline="central" font-family="system-ui,sans-serif" font-weight="700" font-size="7.5" fill="#fff">'+(si+1)+'</text>';
+    });
+    return s+'</svg><figcaption>'+ch+' · '+g.strokes.length+'</figcaption></figure>';
+  }).join('')+'</div>';
+}
+
+async function init(){
+  if(new URLSearchParams(location.search).get('sheet')){sheet();return;}
+  drawGrid();
+  try{const r=await fetch('data.json',{cache:'no-store'});
+    if(r.ok){const d=await r.json();
+      if(d&&d.sounds&&typeof d.sounds==='object')SOUNDS=d.sounds;
+      if(d&&Array.isArray(d.order)&&d.order.length===26&&new Set(d.order).size===26&&d.order.every(c=>T.LETTERS[c]))ORDER=d.order;
+      if(!cur)drawGrid();}
+  }catch(e){}
+  await Promise.race([hello,wait(700)]);   // the launcher's hello names the kid; alone on a laptop we are "default"
+  await loadProg();progLoaded=true;
+  if(cur)$('tstar').classList.toggle('on',!!prog.traced[cur.ch]&&!cur.done);else drawGrid();
+}
+init();
+</script></body></html>

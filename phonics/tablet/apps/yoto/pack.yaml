@@ -6,6 +6,7 @@ icon: 🎧
 color: "#f2572b"
 description: our Yoto library
 group: play
+idle: listen
 tier: pre-reader
 tile:
   start_url: index.html

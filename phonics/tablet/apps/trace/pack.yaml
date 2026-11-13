@@ -1,0 +1,16 @@
+pack: 1
+id: trace
+name: Trace It
+version: 1.0.0
+icon: ✏️
+color: "#d6336c"
+description: trace the letters with your finger
+group: read
+tier: pre-reader
+tile:
+  start_url: index.html
+needs: [autoplay]
+permissions: [audio]
+data: data/trace
+data_version: 1
+owner: Claude
