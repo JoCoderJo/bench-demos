@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Sound Picker</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
+<!-- tablet/apps/soundpick — a grown-up's tool (PLAN §16, D-104): hear every candidate clip for every sound in the Sound
+     Book and say which one is right. Per sound: Hear it · In a word · Don't like (next one plays) · Try another · Lock in.
+     The choices are kept on the tablet (PUT /api/store/soundpick/picks.json, shared by all kids; localStorage on a
+     plain web host) and pulled to the laptop by tools/sound-picks.py, which saves the locked clips as THE sounds.
+     data.json comes from build.py (demo/audio/candidates/manifest.json = tools/make-sound-candidates.py). -->
+<style>
+:root{--ink:#1c2733;--dim:#5a6878;--bg:#f3f1ec;--card:#fff;--line:#d9d4c8;--accent:#1f6f8b;--ok:var(--kt-ok,#1a7f37);--bad:var(--kt-bad,#b3261e);--warn:var(--kt-warn,#9a6700);
+  --tgt:var(--kt-target-min,56px);--r:16px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font:18px var(--kt-font-ui,system-ui,sans-serif);touch-action:manipulation}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+body{display:flex;flex-direction:column}
+#top{flex:none;display:flex;align-items:center;gap:10px;padding:8px 14px;flex-wrap:wrap}
+#tabs{display:flex;gap:6px;flex-wrap:wrap}
+#tabs button{min-height:var(--tgt);min-width:var(--tgt);padding:0 14px;border-radius:999px;background:#e6e1d6;font-weight:700;font-size:16px;display:flex;align-items:center;gap:8px}
+#tabs button.on{background:var(--accent);color:#fff}
+#tabs button .n{font-size:13px;font-weight:700;opacity:.85}
+#sum{margin-left:auto;font-size:15px;color:var(--dim);text-align:right;line-height:1.25}
+#sum b{color:var(--ink);font-size:18px}
+#main{flex:1;min-height:0;display:flex;gap:12px;padding:0 14px 12px}
+#grid{flex:1 1 46%;min-width:0;overflow-y:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-content:start;padding:2px;touch-action:pan-y;scrollbar-width:none}
+#grid::-webkit-scrollbar{display:none}
+.snd{min-height:max(var(--tgt),86px);border-radius:var(--r);background:var(--card);border:3px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;padding:6px 4px}
+.snd .l{font-size:30px;font-weight:800;line-height:1}
+.snd .w{font-size:13px;color:var(--dim)}
+.snd .b{position:absolute;top:4px;right:7px;font-size:13px;font-weight:800}
+.snd.sel{border-color:var(--accent);box-shadow:0 0 0 3px rgba(31,111,139,.25)}
+.snd.locked{border-color:var(--ok);background:#e9f6ec}
+.snd.locked .b{color:var(--ok)}
+.snd.rej .b{color:var(--bad)}
+.snd.none{border-style:dashed;background:#f7f5f0}
+.snd.none .l{color:var(--dim)}
+#panel{flex:1 1 54%;min-width:0;background:var(--card);border-radius:22px;border:1px solid var(--line);padding:14px 18px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;scrollbar-width:none}
+#panel::-webkit-scrollbar{display:none}
+#head{display:flex;align-items:center;gap:16px}
+#bigL{font-size:72px;font-weight:800;line-height:1;min-width:110px;text-align:center}
+#what{min-width:0}
+#say{font-size:24px;font-weight:800}
+#words{font-size:17px;color:var(--dim)}
+#tip{font-size:15px;color:var(--dim);margin-top:2px}
+#chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{min-width:var(--tgt);min-height:var(--tgt);padding:4px 10px;border-radius:14px;border:3px solid var(--line);background:#faf8f3;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:20px;line-height:1.05}
+.chip small{font-size:12px;font-weight:700;color:var(--dim)}
+.chip.cur{border-color:var(--accent);background:#e3f0f5}
+.chip.locked{border-color:var(--ok);background:#e9f6ec}
+.chip.rejected{opacity:.6;text-decoration:line-through}
+#cand{font-size:17px;min-height:46px}
+#cand b{font-size:19px}
+#cand .tag{display:inline-block;font-size:13px;font-weight:800;border-radius:8px;padding:1px 8px;margin-left:6px;background:#ece7db}
+#cand .note{display:block;font-size:14px;color:var(--dim)}
+#acts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:auto}
+.act{min-height:max(var(--tgt),64px);border-radius:16px;font-weight:800;font-size:19px;background:#e6e1d6;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 8px}
+.act[disabled]{opacity:.35}
+.act.hear{background:var(--accent);color:#fff}
+.act.no{background:#f6dcd9;color:var(--bad)}
+.act.yes{background:var(--ok);color:#fff}
+.act.yes.is{background:#d8ecd9;color:var(--ok)}
+.act:active{transform:scale(.97)}
+#status{font-size:15px;color:var(--dim);min-height:22px}
+#gate{position:fixed;inset:0;background:var(--bg);z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:30px}
+#gate h1{margin:0;font-size:34px}
+#gate p{margin:0;font-size:19px;color:var(--dim);max-width:640px}
+#hold{width:220px;min-height:max(var(--tgt),90px);border-radius:22px;background:var(--accent);color:#fff;font-size:22px;font-weight:800;position:relative;overflow:hidden}
+#hold i{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,255,255,.3)}
+#hold.go i{width:100%;transition:width 1.2s linear}
+#hold span{position:relative}
+@media (prefers-reduced-motion:reduce){.act:active{transform:none}#hold.go i{transition:none}}
+</style></head><body>
+<div id="gate"><h1>Sound Picker</h1>
+  <p>For grown-ups. Listen to each sound, lock in the one that is right, and say which ones are wrong.</p>
+  <button id="hold" aria-label="Hold to open"><i></i><span>🔒 Hold to open</span></button></div>
+<div id="top"><div id="tabs"></div><div id="sum"></div></div>
+<div id="main">
+  <div id="grid"></div>
+  <div id="panel">
+    <div id="head"><div id="bigL"></div><div id="what"><div id="say"></div><div id="words"></div><div id="tip"></div></div></div>
+    <div id="chips"></div>
+    <div id="cand"></div>
+    <div id="status"></div>
+    <div id="acts">
+      <button class="act hear" id="bHear">▶ Hear it</button>
+      <button class="act" id="bWord">💬 In a word</button>
+      <button class="act" id="bSet">🎧 Hear my picks</button>
+      <button class="act no" id="bNo">👎 Don't like</button>
+      <button class="act" id="bNext">🔄 Try another</button>
+      <button class="act yes" id="bLock">🔒 Lock in</button>
+    </div>
+  </div>
+</div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const STORE='/api/store/soundpick/picks.json',LS='kt.soundpick.picks';
+let DATA=null,group=null,curKey=null,curId=null,picks={v:1,updated:'',sounds:{},log:[]},seq=0,audio=null,saveT=0,saved='';
+const byKey={};
+
+// ---- sound: one player; a new action cancels what is playing
+function stopAudio(){seq++;if(audio){try{audio.pause();}catch(e){}audio=null;}}
+function play(src){return new Promise(res=>{if(!src){res(false);return;}const a=new Audio(src);audio=a;a.onended=()=>res(true);a.onerror=()=>res(false);const p=a.play();if(p&&p.catch)p.catch(()=>res(false));});}
+async function playList(list,gap){const my=++seq;for(let i=0;i<list.length;i++){if(my!==seq)return false;await play(list[i]);if(my!==seq)return false;if(gap&&i<list.length-1)await new Promise(r=>setTimeout(r,gap));}return true;}
+
+// ---- the choices: on the tablet's helper, mirrored in this browser
+const st=k=>picks.sounds[k]||(picks.sounds[k]={locked:null,rejected:[],heard:[]});
+function note(key,id,act){picks.log.push({t:new Date().toISOString(),key,id,act});if(picks.log.length>600)picks.log=picks.log.slice(-600);}
+let saveN=0;
+function put(keepalive){clearTimeout(saveT);saveT=0;const my=++saveN,body=JSON.stringify(picks);
+  return fetch(STORE,{method:'PUT',headers:{'Content-Type':'application/json'},body,keepalive:!!keepalive})
+    .then(r=>{if(my===saveN){saved=r.ok?'tablet':'browser';drawSum();}}).catch(()=>{if(my===saveN){saved='browser';drawSum();}});}
+function save(){picks.updated=new Date().toISOString();try{localStorage.setItem(LS,JSON.stringify(picks));}catch(e){}
+  saved='saving';drawSum();clearTimeout(saveT);saveT=setTimeout(()=>put(false),250);}
+window.addEventListener('pagehide',()=>{if(saveT)put(true);});     // the tile is being closed with a tap not yet sent
+async function loadPicks(){
+  let doc=null,loc=null;
+  try{const r=await fetch(STORE,{cache:'no-store'});if(r.ok){doc=await r.json();saved='tablet';}}catch(e){}
+  try{loc=JSON.parse(localStorage.getItem(LS)||'null');}catch(e){loc=null;}
+  // the newer of the two wins: a tap made just before the tile closed may only have reached this browser's copy
+  if(loc&&loc.sounds&&(!doc||!doc.sounds||String(loc.updated||'')>String(doc.updated||''))){doc=loc;saved=saved?'stale':'browser';}
+  if(doc&&doc.sounds){picks={v:1,updated:doc.updated||'',sounds:doc.sounds,log:Array.isArray(doc.log)?doc.log:[]};}
+  // a clip that was rebuilt since it was chosen is no longer the clip that was heard: forget that choice, keep the note
+  Object.keys(picks.sounds).forEach(k=>{const s=picks.sounds[k],snd=byKey[k];if(!s||typeof s!=='object'){delete picks.sounds[k];return;}
+    s.rejected=Array.isArray(s.rejected)?s.rejected:[];s.heard=Array.isArray(s.heard)?s.heard:[];
+    if(s.locked&&snd){const c=snd.candidates.find(c=>c.id===s.locked.id);if(!c||c.sha!==s.locked.sha){note(k,s.locked.id,'changed');s.locked=null;}}});
+  if(saved==='stale')save();                                        // put the newer browser copy back on the tablet
+}
+
+// ---- drawing
+const cands=k=>byKey[k].candidates;
+const cur=()=>curKey?cands(curKey).find(c=>c.id===curId)||null:null;
+function firstFor(k){const s=st(k),cs=cands(k);if(!cs.length)return null;
+  if(s.locked&&cs.some(c=>c.id===s.locked.id))return s.locked.id;
+  const open=cs.find(c=>!s.rejected.includes(c.id));return (open||cs[0]).id;}
+function inGroup(){return DATA.sounds.filter(s=>s.group===group);}
+function drawTabs(){$('tabs').innerHTML=DATA.groups.map(g=>{const all=DATA.sounds.filter(s=>s.group===g.id),n=all.filter(s=>st(s.key).locked).length;
+  return '<button data-g="'+E(g.id)+'" class="'+(g.id===group?'on':'')+'">'+E(g.name)+' <span class="n">'+n+'/'+all.length+'</span></button>';}).join('');
+  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{group=b.dataset.g;stopAudio();const f=inGroup()[0];select(f?f.key:null,false);});}
+function drawGrid(){$('grid').innerHTML=inGroup().map(s=>{const p=st(s.key),n=s.candidates.length;
+  const cls=(s.key===curKey?' sel':'')+(p.locked?' locked':'')+(!p.locked&&p.rejected.length?' rej':'')+(n?'':' none');
+  const badge=p.locked?'🔒':(!n?'—':(p.rejected.length?'✕'+p.rejected.length:''));
+  return '<button class="snd'+cls+'" data-k="'+E(s.key)+'" aria-label="'+E(s.say)+'"><span class="b">'+badge+'</span><span class="l">'+E(s.label)+'</span><span class="w">'+E(s.words[0]||'')+'</span></button>';}).join('');
+  $('grid').querySelectorAll('.snd').forEach(b=>b.onclick=()=>select(b.dataset.k,true));}
+function drawSum(){const all=DATA.sounds,l=all.filter(s=>st(s.key).locked).length,more=all.filter(s=>needsMore(s.key)).length;
+  $('sum').innerHTML='<b>'+l+' of '+all.length+'</b> locked in'+(more?' · '+more+' need more options':'')+'<br>'+(saved==='tablet'?'saved on this tablet ✓':saved==='browser'?'saved in this browser':saved?'saving…':'');}
+function needsMore(k){const s=st(k),cs=cands(k);return !s.locked&&(!cs.length||cs.every(c=>s.rejected.includes(c.id)));}
+function drawPanel(){
+  const snd=curKey?byKey[curKey]:null;
+  if(!snd){$('bigL').textContent='';$('say').textContent='';$('words').textContent='';$('tip').textContent='';$('chips').innerHTML='';$('cand').innerHTML='';return;}
+  const p=st(curKey),c=cur();
+  $('bigL').textContent=snd.label;$('say').textContent=snd.say;
+  $('words').textContent='as in '+snd.words.join(', ')+(snd.spellings.length>1?'  ·  spelled '+snd.spellings.join(', '):'');
+  $('tip').textContent=snd.tip;
+  $('chips').innerHTML=snd.candidates.map((x,i)=>{const lk=p.locked&&p.locked.id===x.id,rj=p.rejected.includes(x.id);
+    return '<button class="chip'+(x.id===curId?' cur':'')+(lk?' locked':'')+(rj?' rejected':'')+'" data-c="'+E(x.id)+'" aria-label="Option '+(i+1)+', '+E(x.label)+'">'+(i+1)+'<small>'+(lk?'🔒 locked':rj?'✕ no':p.heard.includes(x.id)?'heard':'new')+'</small></button>';}).join('');
+  $('chips').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{curId=b.dataset.c;drawPanel();hear();});
+  if(!c){$('cand').innerHTML='<b>No recording to offer for this sound yet.</b><span class="note">It is on the list: more options are being collected.</span>';}
+  else{const i=snd.candidates.indexOf(c)+1;
+    $('cand').innerHTML='Option '+i+' of '+snd.candidates.length+': <b>'+E(c.label)+'</b>'+(c.voice==='computer'?'<span class="tag">computer voice</span>':c.voice==='unverified'?'<span class="tag">may be a computer voice</span>':'')+(c.backup?'<span class="tag">backup</span>':'')
+      +'<span class="note">'+(c.ok?'✓ measures as a clean sound · ':'')+(c.ms/1000).toFixed(2)+' s long</span>';}
+  const lk=!!(c&&p.locked&&p.locked.id===c.id);
+  $('bHear').disabled=!c;$('bNo').disabled=!c;$('bNext').disabled=!c||snd.candidates.length<2;$('bLock').disabled=!c;
+  $('bWord').disabled=!c||!snd.wordClips.length;
+  $('bLock').textContent=lk?'🔓 Unlock':'🔒 Lock in';$('bLock').classList.toggle('is',lk);
+  $('bSet').disabled=!inGroup().some(s=>st(s.key).locked);
+}
+function draw(){drawTabs();drawGrid();drawPanel();drawSum();}
+function say(t){$('status').textContent=t||'';}
+
+// ---- actions
+function select(k,andPlay){curKey=k;curId=k?firstFor(k):null;say('');draw();if(andPlay)hear();}
+function clipOf(c){return 'audio/c/'+c.file;}
+function hear(){const c=cur();if(!c)return;stopAudio();const p=st(curKey);if(!p.heard.includes(c.id)){p.heard.push(c.id);save();drawPanel();}play(clipOf(c));}
+function inWord(){const c=cur(),snd=byKey[curKey];if(!c||!snd.wordClips.length)return;stopAudio();const w=snd.wordClips[0];say('The sound, then the word: '+w.word);playList([clipOf(c),w.clip],350);}
+function nextId(skipRejected){const cs=cands(curKey),p=st(curKey),i=cs.findIndex(c=>c.id===curId);
+  for(let n=1;n<=cs.length;n++){const c=cs[(i+n)%cs.length];if(!skipRejected||!p.rejected.includes(c.id))return c.id;}return null;}
+function tryAnother(){if(!cur())return;const id=nextId(true)||nextId(false);if(id&&id!==curId){curId=id;say('');drawPanel();hear();}else say('That is the only one left for this sound.');}
+function dontLike(){const c=cur();if(!c)return;const p=st(curKey);
+  if(!p.rejected.includes(c.id))p.rejected.push(c.id);
+  if(p.locked&&p.locked.id===c.id)p.locked=null;
+  note(curKey,c.id,'reject');save();
+  const id=nextId(true);
+  if(id&&id!==c.id&&!p.rejected.includes(id)){curId=id;say('Noted. Here is another one.');draw();hear();}
+  else{stopAudio();say('Noted. No more options for this sound yet — it is marked as needing more.');draw();}}
+function lockIn(){const c=cur();if(!c)return;const p=st(curKey);
+  if(p.locked&&p.locked.id===c.id){p.locked=null;note(curKey,c.id,'unlock');save();say('Unlocked.');draw();return;}
+  p.locked={id:c.id,sha:c.sha,label:c.label};p.rejected=p.rejected.filter(x=>x!==c.id);note(curKey,c.id,'lock');save();
+  if(window.KT)KT.sound('success',$('bLock'));
+  const g=inGroup(),i=g.findIndex(s=>s.key===curKey);let nxt=null;
+  for(let n=1;n<g.length;n++){const s=g[(i+n)%g.length];if(!st(s.key).locked&&s.candidates.length){nxt=s;break;}}
+  if(nxt){const was=byKey[curKey].say;stopAudio();select(nxt.key,true);say('Locked '+was+'. Next: '+nxt.say+'.');}
+  else{say('Locked. Every sound on this page that has an option is locked in.');draw();}}
+async function hearSet(){const g=inGroup().filter(s=>st(s.key).locked);if(!g.length)return;say('Your picks on this page, one after another.');
+  const my=++seq;if(audio){try{audio.pause();}catch(e){}}
+  for(const s of g){if(my!==seq)return;const c=s.candidates.find(c=>c.id===st(s.key).locked.id);if(!c)continue;curKey=s.key;curId=c.id;drawGrid();drawPanel();await play(clipOf(c));if(my!==seq)return;await new Promise(r=>setTimeout(r,450));}
+  if(my===seq)say('Those were your picks.');}
+$('bHear').onclick=hear;$('bWord').onclick=inWord;$('bNext').onclick=tryAnother;$('bNo').onclick=dontLike;$('bLock').onclick=lockIn;$('bSet').onclick=hearSet;
+
+// ---- the grown-up gate: a held press, so a child's tap does not land in here
+(function(){const h=$('hold');let t=0;const off=()=>{clearTimeout(t);t=0;h.classList.remove('go');};
+  h.addEventListener('pointerdown',e=>{e.preventDefault();off();h.classList.add('go');t=setTimeout(()=>{off();$('gate').style.display='none';},1200);});
+  ['pointerup','pointerleave','pointercancel'].forEach(n=>h.addEventListener(n,off));})();
+window.addEventListener('message',e=>{const d=e.data||{};if(d.kt==='back'){stopAudio();}});
+
+async function init(){
+  DATA=await (await fetch('data.json',{cache:'no-store'})).json();
+  DATA.sounds.forEach(s=>byKey[s.key]=s);
+  await loadPicks();
+  group=DATA.groups[0].id;const f=inGroup()[0];select(f?f.key:null,false);
+  window.SP={data:DATA,picks:()=>picks,state:()=>({group,key:curKey,id:curId,saved}),select,ready:true};
+}
+init();
+</script></body></html>

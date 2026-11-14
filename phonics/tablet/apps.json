@@ -264,6 +264,24 @@
    ]
   },
   {
+   "id": "soundpick",
+   "title": "Sound Picker",
+   "subtitle": "grown-ups pick the right clip for every sound",
+   "icon": "👂",
+   "color": "#1f6f8b",
+   "path": "apps/soundpick/index.html",
+   "needs": [
+    "autoplay"
+   ],
+   "source": "tablet/apps/soundpick",
+   "tier": "maker",
+   "group": "read",
+   "version": "1.0.0",
+   "permissions": [
+    "audio"
+   ]
+  },
+  {
    "id": "stories",
    "title": "Stories",
    "subtitle": "read along with your friend",

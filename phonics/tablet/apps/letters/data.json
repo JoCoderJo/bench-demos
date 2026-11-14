@@ -7,8 +7,8 @@
    "kind": "continuous",
    "tip": "Hiss it like a snake. You can hold it as long as you like.",
    "ipa": "s",
-   "clip": "audio/sounds/s.mp3",
-   "source": "showandtell",
+   "clip": null,
+   "source": null,
    "wordClip": "audio/words/sun.mp3"
   },
   {
@@ -18,8 +18,8 @@
    "kind": "continuous",
    "tip": "Lips together, hum. Stretch it out — mmmmm.",
    "ipa": "m",
-   "clip": "audio/sounds/m.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/m-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/moon.mp3"
   },
   {
@@ -29,8 +29,8 @@
    "kind": "continuous",
    "tip": "Top teeth on bottom lip, blow. No voice, just air.",
    "ipa": "f",
-   "clip": "audio/sounds/f.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/f-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/fish.mp3"
   },
   {
@@ -40,8 +40,8 @@
    "kind": "continuous",
    "tip": "Hum through your nose. Stretch it — nnnnn.",
    "ipa": "n",
-   "clip": "audio/sounds/n.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/n-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/nest.mp3"
   },
   {
@@ -51,8 +51,8 @@
    "kind": "continuous",
    "tip": "Tongue behind your top teeth, sing it — llll.",
    "ipa": "l",
-   "clip": "audio/sounds/l.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/l-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/leaf.mp3"
   },
   {
@@ -62,8 +62,8 @@
    "kind": "continuous",
    "tip": "A growl, not 'ar'. Keep the lips rounded.",
    "ipa": "r",
-   "clip": "audio/sounds/r.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/r-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/rain.mp3"
   },
   {
@@ -73,8 +73,8 @@
    "kind": "continuous",
    "tip": "Like /f/ but with your voice switched on.",
    "ipa": "v",
-   "clip": "audio/sounds/v.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/v-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/van.mp3"
   },
   {
@@ -84,8 +84,8 @@
    "kind": "continuous",
    "tip": "A buzzing bee. Like /s/ with voice.",
    "ipa": "z",
-   "clip": "audio/sounds/z.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/z-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/zip.mp3"
   },
   {
@@ -95,8 +95,8 @@
    "kind": "vowel",
    "tip": "Short and open — a, as in apple. Not the letter name.",
    "ipa": "æ",
-   "clip": "audio/sounds/a.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/a-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/apple.mp3"
   },
   {
@@ -106,8 +106,8 @@
    "kind": "vowel",
    "tip": "Short eh, as in egg.",
    "ipa": "ɛ",
-   "clip": "audio/sounds/e.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/e-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/egg.mp3"
   },
   {
@@ -117,8 +117,8 @@
    "kind": "vowel",
    "tip": "Short ih, as in insect.",
    "ipa": "ɪ",
-   "clip": "audio/sounds/i.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/i-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/insect.mp3"
   },
   {
@@ -128,8 +128,8 @@
    "kind": "vowel",
    "tip": "Short o, as in octopus. Mouth open and round.",
    "ipa": "ɒ",
-   "clip": "audio/sounds/o.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/o-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/octopus.mp3"
   },
   {
@@ -139,8 +139,8 @@
    "kind": "vowel",
    "tip": "Short uh, as in umbrella.",
    "ipa": "ʌ",
-   "clip": "audio/sounds/u.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/u-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/umbrella.mp3"
   },
   {
@@ -150,8 +150,8 @@
    "kind": "breath",
    "tip": "Just a puff of air. No voice, no 'uh'.",
    "ipa": "h",
-   "clip": "audio/sounds/h.mp3",
-   "source": "showandtell",
+   "clip": null,
+   "source": null,
    "wordClip": "audio/words/hat.mp3"
   },
   {
@@ -161,8 +161,8 @@
    "kind": "glide",
    "tip": "Round your lips — w. Keep it short, not 'wuh'.",
    "ipa": "w",
-   "clip": "audio/sounds/w.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/w-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/web.mp3"
   },
   {
@@ -172,8 +172,8 @@
    "kind": "glide",
    "tip": "The start of yes. Short, not 'yuh'.",
    "ipa": "j",
-   "clip": "audio/sounds/y.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/y-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/yes.mp3"
   },
   {
@@ -183,8 +183,8 @@
    "kind": "stop",
    "tip": "Lips pop apart. Cut it dead — no 'uh' escaping.",
    "ipa": "b",
-   "clip": "audio/sounds/b.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/b-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/ball.mp3"
   },
   {
@@ -194,8 +194,8 @@
    "kind": "stop",
    "tip": "Tongue taps and stops. Say it as briefly as you can.",
    "ipa": "d",
-   "clip": "audio/sounds/d.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/d-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/dog.mp3"
   },
   {
@@ -205,8 +205,8 @@
    "kind": "stop",
    "tip": "HARD g, as in goat — not the letter name 'gee'.",
    "ipa": "ɡ",
-   "clip": "audio/sounds/g.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/g-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/goat.mp3"
   },
   {
@@ -217,7 +217,7 @@
    "tip": "A tiny puff of air. Whisper it if that helps clip it.",
    "ipa": "p",
    "clip": "audio/sounds/p.mp3",
-   "source": "showandtell",
+   "source": "approved",
    "wordClip": "audio/words/pig.mp3"
   },
   {
@@ -227,8 +227,8 @@
    "kind": "stop",
    "tip": "A single tick. Nothing after it.",
    "ipa": "t",
-   "clip": "audio/sounds/t.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/t-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/tap.mp3"
   },
   {
@@ -238,8 +238,8 @@
    "kind": "stop",
    "tip": "Back of the tongue, a click — same sound as /k/.",
    "ipa": "k",
-   "clip": "audio/sounds/c.mp3",
-   "source": "showandtell",
+   "clip": null,
+   "source": null,
    "wordClip": "audio/words/cat.mp3"
   },
   {
@@ -249,8 +249,8 @@
    "kind": "stop",
    "tip": "Same as /c/. A click, not 'kuh' and not 'kay'.",
    "ipa": "k",
-   "clip": "audio/sounds/k.mp3",
-   "source": "showandtell",
+   "clip": null,
+   "source": null,
    "wordClip": "audio/words/kite.mp3"
   },
   {
@@ -260,8 +260,8 @@
    "kind": "stop",
    "tip": "The start of jam. Short — not 'jay'.",
    "ipa": "dʒ",
-   "clip": "audio/sounds/j.mp3",
-   "source": "showandtell",
+   "clip": "audio/sounds/j-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/jam.mp3"
   },
   {
@@ -271,8 +271,8 @@
    "kind": "stop",
    "tip": "Same click as /k/, at the end of a word.",
    "ipa": "k",
-   "clip": "audio/sounds/k.mp3",
-   "source": "showandtell (same sound as k)",
+   "clip": null,
+   "source": null,
    "wordClip": "audio/words/duck.mp3"
   },
   {
@@ -282,8 +282,8 @@
    "kind": "cluster",
    "tip": "Two sounds run together — k plus w.",
    "ipa": "kw",
-   "clip": "audio/sounds/q.mp3",
-   "source": "showandtell",
+   "clip": null,
+   "source": null,
    "wordClip": "audio/words/queen.mp3"
   },
   {
@@ -293,8 +293,8 @@
    "kind": "cluster",
    "tip": "Two sounds — k plus s, as at the end of fox.",
    "ipa": "ks",
-   "clip": "audio/sounds/x.mp3",
-   "source": "showandtell",
+   "clip": null,
+   "source": null,
    "wordClip": "audio/words/fox.mp3"
   }
  ],
@@ -328,8 +328,8 @@
    "kind": "vowel",
    "tip": "A long smiley eeee.",
    "ipa": "iː",
-   "clip": null,
-   "source": null,
+   "clip": "audio/sounds/long_e-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/tree.mp3"
   },
   {
@@ -339,8 +339,8 @@
    "kind": "vowel",
    "tip": "Round lips, long oooo.",
    "ipa": "uː",
-   "clip": null,
-   "source": null,
+   "clip": "audio/sounds/oo-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/moon.mp3"
   },
   {
@@ -361,8 +361,8 @@
    "kind": "cluster",
    "tip": "Two sounds quickly, k then w… kw.",
    "ipa": "kw",
-   "clip": "audio/sounds/q.mp3",
-   "source": "showandtell (same sound as q)",
+   "clip": null,
+   "source": null,
    "wordClip": "audio/words/queen.mp3"
   },
   {
@@ -383,8 +383,8 @@
    "kind": "glide",
    "tip": "Same as w: round your lips and let it go… wh.",
    "ipa": "w",
-   "clip": "audio/sounds/w.mp3",
-   "source": "showandtell (same sound as w)",
+   "clip": "audio/sounds/w-commons.mp3",
+   "source": "approved",
    "wordClip": null
   },
   {
@@ -394,8 +394,8 @@
    "kind": "continuous",
    "tip": "Same as f: top teeth on bottom lip, blow… ffff.",
    "ipa": "f",
-   "clip": "audio/sounds/f.mp3",
-   "source": "showandtell (same sound as f)",
+   "clip": "audio/sounds/f-commons.mp3",
+   "source": "approved",
    "wordClip": null
   },
   {
@@ -405,7 +405,7 @@
    "kind": "vowel",
    "tip": "Say the letter name A… ai.",
    "ipa": "eɪ",
-   "clip": "audio/sounds/ai.wav",
+   "clip": "audio/sounds/long_a-kristin.mp3",
    "source": "syllable (Piper)",
    "wordClip": "audio/words/rain.mp3"
   },
@@ -416,7 +416,7 @@
    "kind": "vowel",
    "tip": "Same sound as ai, at the end of a word… ay.",
    "ipa": "eɪ",
-   "clip": "audio/sounds/ay.wav",
+   "clip": "audio/sounds/long_a-kristin.mp3",
    "source": "syllable (Piper)",
    "wordClip": null
   },
@@ -427,8 +427,8 @@
    "kind": "vowel",
    "tip": "Same as ee, smile and say… eee.",
    "ipa": "iː",
-   "clip": null,
-   "source": null,
+   "clip": "audio/sounds/long_e-commons.mp3",
+   "source": "approved",
    "wordClip": "audio/words/leaf.mp3"
   },
   {
@@ -438,7 +438,7 @@
    "kind": "vowel",
    "tip": "Say the letter name O… oa.",
    "ipa": "oʊ",
-   "clip": "audio/sounds/oa.wav",
+   "clip": "audio/sounds/long_o-kristin.mp3",
    "source": "syllable (Piper)",
    "wordClip": "audio/words/goat.mp3"
   },
@@ -449,7 +449,7 @@
    "kind": "vowel",
    "tip": "Like ouch!… ow.",
    "ipa": "aʊ",
-   "clip": "audio/sounds/ow.wav",
+   "clip": "audio/sounds/ow-kristin.mp3",
    "source": "syllable (Piper)",
    "wordClip": null
   },
@@ -460,7 +460,7 @@
    "kind": "vowel",
    "tip": "Same as ow… ou.",
    "ipa": "aʊ",
-   "clip": "audio/sounds/ou.wav",
+   "clip": "audio/sounds/ow-kristin.mp3",
    "source": "syllable (Piper)",
    "wordClip": null
   },
@@ -471,7 +471,7 @@
    "kind": "vowel",
    "tip": "oi! Round lips then smile… oi.",
    "ipa": "ɔɪ",
-   "clip": "audio/sounds/oi.wav",
+   "clip": "audio/sounds/oi-kristin.mp3",
    "source": "syllable (Piper)",
    "wordClip": null
   },
@@ -482,7 +482,7 @@
    "kind": "vowel",
    "tip": "Same as oi, at the end of a word… oy.",
    "ipa": "ɔɪ",
-   "clip": "audio/sounds/oy.wav",
+   "clip": "audio/sounds/oi-kristin.mp3",
    "source": "syllable (Piper)",
    "wordClip": null
   },
@@ -493,7 +493,7 @@
    "kind": "vowel",
    "tip": "Say the letter name I… igh.",
    "ipa": "aɪ",
-   "clip": "audio/sounds/igh.wav",
+   "clip": "audio/sounds/long_i-kristin.mp3",
    "source": "syllable (Piper)",
    "wordClip": null
   },
@@ -504,7 +504,7 @@
    "kind": "vowel",
    "tip": "Open wide like at the doctor… ar.",
    "ipa": "ɑːr",
-   "clip": "audio/sounds/ar.wav",
+   "clip": "audio/sounds/ar-kristin.mp3",
    "source": "syllable (Piper)",
    "wordClip": null
   },
@@ -515,7 +515,7 @@
    "kind": "vowel",
    "tip": "Round lips… or.",
    "ipa": "ɔːr",
-   "clip": "audio/sounds/or.wav",
+   "clip": "audio/sounds/or-kristin.mp3",
    "source": "syllable (Piper)",
    "wordClip": null
   },
@@ -526,7 +526,7 @@
    "kind": "vowel",
    "tip": "A lazy sound in the middle of your mouth… er.",
    "ipa": "ɜːr",
-   "clip": "audio/sounds/er.wav",
+   "clip": "audio/sounds/er-kristin.mp3",
    "source": "syllable (Piper)",
    "wordClip": null
   },
@@ -537,7 +537,7 @@
    "kind": "vowel",
    "tip": "Same as er… ur.",
    "ipa": "ɜːr",
-   "clip": "audio/sounds/ur.wav",
+   "clip": "audio/sounds/er-kristin.mp3",
    "source": "syllable (Piper)",
    "wordClip": null
   },
@@ -548,7 +548,7 @@
    "kind": "vowel",
    "tip": "Same as er… ir.",
    "ipa": "ɜːr",
-   "clip": "audio/sounds/ir.wav",
+   "clip": "audio/sounds/er-kristin.mp3",
    "source": "syllable (Piper)",
    "wordClip": null
   },
@@ -559,8 +559,8 @@
    "kind": "vowel",
    "tip": "Same as oo… ue.",
    "ipa": "uː",
-   "clip": null,
-   "source": null,
+   "clip": "audio/sounds/oo-commons.mp3",
+   "source": "approved",
    "wordClip": null
   },
   {
@@ -570,8 +570,8 @@
    "kind": "vowel",
    "tip": "Same as oo… ew.",
    "ipa": "uː",
-   "clip": null,
-   "source": null,
+   "clip": "audio/sounds/oo-commons.mp3",
+   "source": "approved",
    "wordClip": null
   },
   {
@@ -581,9 +581,211 @@
    "kind": "vowel",
    "tip": "Open and round… aw.",
    "ipa": "ɔː",
-   "clip": "audio/sounds/aw.wav",
+   "clip": "audio/sounds/aw-kristin.mp3",
    "source": "syllable (Piper)",
    "wordClip": null
+  }
+ ],
+ "vowels": [
+  {
+   "k": "a",
+   "kind": "vowelpair",
+   "short": {
+    "sound": "a",
+    "mark": "a",
+    "word": "apple",
+    "emoji": "🍎",
+    "clip": "audio/sounds/a-commons.mp3",
+    "wordClip": "audio/words/apple.mp3"
+   },
+   "long": {
+    "sound": "long_a",
+    "mark": "ā",
+    "word": "cake",
+    "emoji": "🎂",
+    "clip": "audio/sounds/long_a-kristin.mp3",
+    "wordClip": "audio/words/cake.mp3"
+   },
+   "pairs": [
+    {
+     "short": "cap",
+     "long": "cape",
+     "shortClip": "audio/words/cap.mp3",
+     "longClip": "audio/words/cape.mp3"
+    },
+    {
+     "short": "tap",
+     "long": "tape",
+     "shortClip": "audio/words/tap.mp3",
+     "longClip": "audio/words/tape.mp3"
+    },
+    {
+     "short": "can",
+     "long": "cane",
+     "shortClip": "audio/words/can.mp3",
+     "longClip": "audio/words/cane.mp3"
+    }
+   ]
+  },
+  {
+   "k": "e",
+   "kind": "vowelpair",
+   "short": {
+    "sound": "e",
+    "mark": "e",
+    "word": "egg",
+    "emoji": "🥚",
+    "clip": "audio/sounds/e-commons.mp3",
+    "wordClip": "audio/words/egg.mp3"
+   },
+   "long": {
+    "sound": "long_e",
+    "mark": "ē",
+    "word": "tree",
+    "emoji": "🌳",
+    "clip": "audio/sounds/long_e-commons.mp3",
+    "wordClip": "audio/words/tree.mp3"
+   },
+   "pairs": [
+    {
+     "short": "met",
+     "long": "meet",
+     "shortClip": "audio/words/met.mp3",
+     "longClip": "audio/words/meet.mp3"
+    },
+    {
+     "short": "fed",
+     "long": "feed",
+     "shortClip": "audio/words/fed.mp3",
+     "longClip": "audio/words/feed.mp3"
+    },
+    {
+     "short": "ten",
+     "long": "teen",
+     "shortClip": "audio/words/ten.mp3",
+     "longClip": "audio/words/teen.mp3"
+    }
+   ]
+  },
+  {
+   "k": "i",
+   "kind": "vowelpair",
+   "short": {
+    "sound": "i",
+    "mark": "i",
+    "word": "insect",
+    "emoji": "🐞",
+    "clip": "audio/sounds/i-commons.mp3",
+    "wordClip": "audio/words/insect.mp3"
+   },
+   "long": {
+    "sound": "long_i",
+    "mark": "ī",
+    "word": "kite",
+    "emoji": "🪁",
+    "clip": "audio/sounds/long_i-kristin.mp3",
+    "wordClip": "audio/words/kite.mp3"
+   },
+   "pairs": [
+    {
+     "short": "kit",
+     "long": "kite",
+     "shortClip": "audio/words/kit.mp3",
+     "longClip": "audio/words/kite.mp3"
+    },
+    {
+     "short": "bit",
+     "long": "bite",
+     "shortClip": "audio/words/bit.mp3",
+     "longClip": "audio/words/bite.mp3"
+    },
+    {
+     "short": "rid",
+     "long": "ride",
+     "shortClip": "audio/words/rid.mp3",
+     "longClip": "audio/words/ride.mp3"
+    }
+   ]
+  },
+  {
+   "k": "o",
+   "kind": "vowelpair",
+   "short": {
+    "sound": "o",
+    "mark": "o",
+    "word": "octopus",
+    "emoji": "🐙",
+    "clip": "audio/sounds/o-commons.mp3",
+    "wordClip": "audio/words/octopus.mp3"
+   },
+   "long": {
+    "sound": "long_o",
+    "mark": "ō",
+    "word": "bone",
+    "emoji": "🦴",
+    "clip": "audio/sounds/long_o-kristin.mp3",
+    "wordClip": "audio/words/bone.mp3"
+   },
+   "pairs": [
+    {
+     "short": "hop",
+     "long": "hope",
+     "shortClip": "audio/words/hop.mp3",
+     "longClip": "audio/words/hope.mp3"
+    },
+    {
+     "short": "not",
+     "long": "note",
+     "shortClip": "audio/words/not.mp3",
+     "longClip": "audio/words/note.mp3"
+    },
+    {
+     "short": "rob",
+     "long": "robe",
+     "shortClip": "audio/words/rob.mp3",
+     "longClip": "audio/words/robe.mp3"
+    }
+   ]
+  },
+  {
+   "k": "u",
+   "kind": "vowelpair",
+   "short": {
+    "sound": "u",
+    "mark": "u",
+    "word": "umbrella",
+    "emoji": "☂️",
+    "clip": "audio/sounds/u-commons.mp3",
+    "wordClip": "audio/words/umbrella.mp3"
+   },
+   "long": {
+    "sound": "long_u",
+    "mark": "ū",
+    "word": "cube",
+    "emoji": "🧊",
+    "clip": "audio/sounds/long_u-kristin.mp3",
+    "wordClip": "audio/words/cube.mp3"
+   },
+   "pairs": [
+    {
+     "short": "cub",
+     "long": "cube",
+     "shortClip": "audio/words/cub.mp3",
+     "longClip": "audio/words/cube.mp3"
+    },
+    {
+     "short": "cut",
+     "long": "cute",
+     "shortClip": "audio/words/cut.mp3",
+     "longClip": "audio/words/cute.mp3"
+    },
+    {
+     "short": "us",
+     "long": "use",
+     "shortClip": "audio/words/us.mp3",
+     "longClip": "audio/words/use.mp3"
+    }
+   ]
   }
  ],
  "blends": [
@@ -625,7 +827,7 @@
    "emoji": "⏰",
    "kind": "blend",
    "clip": null,
-   "playable": true,
+   "playable": false,
    "wordClip": null,
    "tip": "Two sounds, one after the other, then slide them together: c-l… cl."
   },
@@ -639,7 +841,7 @@
    "emoji": "🦀",
    "kind": "blend",
    "clip": null,
-   "playable": true,
+   "playable": false,
    "wordClip": null,
    "tip": "Two sounds, one after the other, then slide them together: c-r… cr."
   },
@@ -751,7 +953,7 @@
    "emoji": "🧣",
    "kind": "blend",
    "clip": null,
-   "playable": true,
+   "playable": false,
    "wordClip": null,
    "tip": "Two sounds, one after the other, then slide them together: s-c… sc."
   },
@@ -765,7 +967,7 @@
    "emoji": "⛸️",
    "kind": "blend",
    "clip": null,
-   "playable": true,
+   "playable": false,
    "wordClip": null,
    "tip": "Two sounds, one after the other, then slide them together: s-k… sk."
   },
@@ -779,7 +981,7 @@
    "emoji": "🛝",
    "kind": "blend",
    "clip": null,
-   "playable": true,
+   "playable": false,
    "wordClip": null,
    "tip": "Two sounds, one after the other, then slide them together: s-l… sl."
   },
@@ -793,7 +995,7 @@
    "emoji": "😊",
    "kind": "blend",
    "clip": null,
-   "playable": true,
+   "playable": false,
    "wordClip": null,
    "tip": "Two sounds, one after the other, then slide them together: s-m… sm."
   },
@@ -807,7 +1009,7 @@
    "emoji": "🐍",
    "kind": "blend",
    "clip": null,
-   "playable": true,
+   "playable": false,
    "wordClip": null,
    "tip": "Two sounds, one after the other, then slide them together: s-n… sn."
   },
@@ -821,7 +1023,7 @@
    "emoji": "🥄",
    "kind": "blend",
    "clip": null,
-   "playable": true,
+   "playable": false,
    "wordClip": null,
    "tip": "Two sounds, one after the other, then slide them together: s-p… sp."
   },
@@ -835,7 +1037,7 @@
    "emoji": "⭐",
    "kind": "blend",
    "clip": null,
-   "playable": true,
+   "playable": false,
    "wordClip": null,
    "tip": "Two sounds, one after the other, then slide them together: s-t… st."
   },
@@ -849,7 +1051,7 @@
    "emoji": "🏊",
    "kind": "blend",
    "clip": null,
-   "playable": true,
+   "playable": false,
    "wordClip": null,
    "tip": "Two sounds, one after the other, then slide them together: s-w… sw."
   },

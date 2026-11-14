@@ -1,0 +1,16 @@
+pack: 1
+id: soundpick
+name: Sound Picker
+version: 1.0.0
+icon: 👂
+color: "#1f6f8b"
+description: grown-ups pick the right clip for every sound
+group: read
+tier: maker
+tile:
+  start_url: index.html
+needs: [autoplay]
+permissions: [audio]
+data: data/soundpick
+data_version: 1
+owner: Claude

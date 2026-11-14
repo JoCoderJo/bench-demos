@@ -1,0 +1,1694 @@
+{
+ "made": "2026-11-13",
+ "public": true,
+ "groups": [
+  {
+   "id": "short",
+   "name": "Short vowels",
+   "note": "The quick vowel sounds: a in apple."
+  },
+  {
+   "id": "long",
+   "name": "Long vowels",
+   "note": "The vowel says its own name: a in cake."
+  },
+  {
+   "id": "consonants",
+   "name": "Consonants",
+   "note": "Said purely: p, not puh."
+  },
+  {
+   "id": "digraphs",
+   "name": "Two letters, one sound",
+   "note": "sh, ch, th, ng."
+  },
+  {
+   "id": "vowels2",
+   "name": "Other vowel sounds",
+   "note": "oo, ow, oi, aw."
+  },
+  {
+   "id": "rvowels",
+   "name": "R vowels",
+   "note": "The r changes the vowel: ar, or, er."
+  }
+ ],
+ "sounds": [
+  {
+   "key": "a",
+   "group": "short",
+   "label": "a",
+   "say": "short a",
+   "ipa": "æ",
+   "kind": "vowel",
+   "spellings": [
+    "a"
+   ],
+   "words": [
+    "apple",
+    "cat",
+    "map"
+   ],
+   "tip": "Short and open, as in apple. Not the letter name.",
+   "wordClips": [
+    {
+     "word": "apple",
+     "clip": "audio/w/apple.mp3"
+    },
+    {
+     "word": "cat",
+     "clip": "audio/w/cat.mp3"
+    },
+    {
+     "word": "map",
+     "clip": "audio/w/map.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean",
+     "file": "a/commons-clean.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": false,
+     "why": [
+      "mostly not voiced"
+     ],
+     "ms": 746,
+     "sha": "459ec629e6"
+    }
+   ]
+  },
+  {
+   "key": "e",
+   "group": "short",
+   "label": "e",
+   "say": "short e",
+   "ipa": "ɛ",
+   "kind": "vowel",
+   "spellings": [
+    "e",
+    "ea"
+   ],
+   "words": [
+    "egg",
+    "bed",
+    "pen"
+   ],
+   "tip": "Short eh, as in egg.",
+   "wordClips": [
+    {
+     "word": "egg",
+     "clip": "audio/w/egg.mp3"
+    },
+    {
+     "word": "bed",
+     "clip": "audio/w/bed.mp3"
+    },
+    {
+     "word": "pen",
+     "clip": "audio/w/pen.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean",
+     "file": "e/commons-clean.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 678,
+     "sha": "99ef61c43d"
+    }
+   ]
+  },
+  {
+   "key": "i",
+   "group": "short",
+   "label": "i",
+   "say": "short i",
+   "ipa": "ɪ",
+   "kind": "vowel",
+   "spellings": [
+    "i"
+   ],
+   "words": [
+    "insect",
+    "pig",
+    "sit"
+   ],
+   "tip": "Short ih, as in insect.",
+   "wordClips": [
+    {
+     "word": "insect",
+     "clip": "audio/w/insect.mp3"
+    },
+    {
+     "word": "pig",
+     "clip": "audio/w/pig.mp3"
+    },
+    {
+     "word": "sit",
+     "clip": "audio/w/sit.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean",
+     "file": "i/commons-clean.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 548,
+     "sha": "9939251c7b"
+    }
+   ]
+  },
+  {
+   "key": "o",
+   "group": "short",
+   "label": "o",
+   "say": "short o",
+   "ipa": "ɑ",
+   "kind": "vowel",
+   "spellings": [
+    "o"
+   ],
+   "words": [
+    "octopus",
+    "dog",
+    "hot"
+   ],
+   "tip": "Short o, as in octopus. Mouth open.",
+   "wordClips": [
+    {
+     "word": "octopus",
+     "clip": "audio/w/octopus.mp3"
+    },
+    {
+     "word": "dog",
+     "clip": "audio/w/dog.mp3"
+    },
+    {
+     "word": "hot",
+     "clip": "audio/w/hot.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean",
+     "file": "o/commons-clean.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 708,
+     "sha": "d522a70071"
+    }
+   ]
+  },
+  {
+   "key": "u",
+   "group": "short",
+   "label": "u",
+   "say": "short u",
+   "ipa": "ʌ",
+   "kind": "vowel",
+   "spellings": [
+    "u"
+   ],
+   "words": [
+    "umbrella",
+    "cup",
+    "sun"
+   ],
+   "tip": "Short uh, as in umbrella.",
+   "wordClips": [
+    {
+     "word": "umbrella",
+     "clip": "audio/w/umbrella.mp3"
+    },
+    {
+     "word": "cup",
+     "clip": "audio/w/cup.mp3"
+    },
+    {
+     "word": "sun",
+     "clip": "audio/w/sun.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean",
+     "file": "u/commons-clean.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 657,
+     "sha": "5b576cd836"
+    }
+   ]
+  },
+  {
+   "key": "long_a",
+   "group": "long",
+   "label": "ā",
+   "say": "long a",
+   "ipa": "eɪ",
+   "kind": "vowel",
+   "spellings": [
+    "a_e",
+    "ai",
+    "ay"
+   ],
+   "words": [
+    "cake",
+    "rain",
+    "day"
+   ],
+   "tip": "The letter name A, as in cake.",
+   "wordClips": [
+    {
+     "word": "cake",
+     "clip": "audio/w/cake.mp3"
+    },
+    {
+     "word": "rain",
+     "clip": "audio/w/rain.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "kristin-clean",
+     "file": "long_a/kristin-clean.mp3",
+     "label": "Computer voice",
+     "voice": "computer",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 378,
+     "sha": "19c6b4d891"
+    }
+   ]
+  },
+  {
+   "key": "long_e",
+   "group": "long",
+   "label": "ē",
+   "say": "long e",
+   "ipa": "iː",
+   "kind": "vowel",
+   "spellings": [
+    "ee",
+    "ea",
+    "e_e",
+    "e",
+    "y"
+   ],
+   "words": [
+    "tree",
+    "leaf",
+    "me"
+   ],
+   "tip": "The letter name E, a long smiley eee.",
+   "wordClips": [
+    {
+     "word": "tree",
+     "clip": "audio/w/tree.mp3"
+    },
+    {
+     "word": "leaf",
+     "clip": "audio/w/leaf.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean",
+     "file": "long_e/commons-clean.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 588,
+     "sha": "09f7cdda54"
+    }
+   ]
+  },
+  {
+   "key": "long_i",
+   "group": "long",
+   "label": "ī",
+   "say": "long i",
+   "ipa": "aɪ",
+   "kind": "vowel",
+   "spellings": [
+    "i_e",
+    "igh",
+    "ie",
+    "y",
+    "i"
+   ],
+   "words": [
+    "kite",
+    "light",
+    "fly"
+   ],
+   "tip": "The letter name I, as in kite.",
+   "wordClips": [
+    {
+     "word": "kite",
+     "clip": "audio/w/kite.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "kristin-clean",
+     "file": "long_i/kristin-clean.mp3",
+     "label": "Computer voice",
+     "voice": "computer",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 558,
+     "sha": "75ddbb3ecb"
+    }
+   ]
+  },
+  {
+   "key": "long_o",
+   "group": "long",
+   "label": "ō",
+   "say": "long o",
+   "ipa": "oʊ",
+   "kind": "vowel",
+   "spellings": [
+    "o_e",
+    "oa",
+    "ow",
+    "o"
+   ],
+   "words": [
+    "bone",
+    "goat",
+    "snow"
+   ],
+   "tip": "The letter name O, as in bone.",
+   "wordClips": [
+    {
+     "word": "bone",
+     "clip": "audio/w/bone.mp3"
+    },
+    {
+     "word": "goat",
+     "clip": "audio/w/goat.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "kristin-clean",
+     "file": "long_o/kristin-clean.mp3",
+     "label": "Computer voice",
+     "voice": "computer",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 428,
+     "sha": "61841a951a"
+    }
+   ]
+  },
+  {
+   "key": "long_u",
+   "group": "long",
+   "label": "ū",
+   "say": "long u",
+   "ipa": "juː",
+   "kind": "vowel",
+   "spellings": [
+    "u_e",
+    "ue",
+    "ew"
+   ],
+   "words": [
+    "cube",
+    "few",
+    "use"
+   ],
+   "tip": "The letter name U (you), as in cube.",
+   "wordClips": [
+    {
+     "word": "cube",
+     "clip": "audio/w/cube.mp3"
+    },
+    {
+     "word": "use",
+     "clip": "audio/w/use.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "kristin-clean",
+     "file": "long_u/kristin-clean.mp3",
+     "label": "Computer voice",
+     "voice": "computer",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 538,
+     "sha": "d8d4f95409"
+    }
+   ]
+  },
+  {
+   "key": "b",
+   "group": "consonants",
+   "label": "b",
+   "say": "b",
+   "ipa": "b",
+   "kind": "stop",
+   "spellings": [
+    "b",
+    "bb"
+   ],
+   "words": [
+    "ball",
+    "bat",
+    "big"
+   ],
+   "tip": "Lips pop apart. Cut it short, no uh after it.",
+   "wordClips": [
+    {
+     "word": "ball",
+     "clip": "audio/w/ball.mp3"
+    },
+    {
+     "word": "bat",
+     "clip": "audio/w/bat.mp3"
+    },
+    {
+     "word": "big",
+     "clip": "audio/w/big.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean",
+     "file": "b/commons-clean.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": false,
+     "why": [
+      "578 ms: a vowel is riding on it"
+     ],
+     "ms": 578,
+     "sha": "7152db3079"
+    },
+    {
+     "id": "commons-short",
+     "file": "b/commons-short.mp3",
+     "label": "Wikimedia · short",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 110,
+     "sha": "1ac36b7f60"
+    }
+   ]
+  },
+  {
+   "key": "k",
+   "group": "consonants",
+   "label": "c k",
+   "say": "k",
+   "ipa": "k",
+   "kind": "stop",
+   "spellings": [
+    "c",
+    "k",
+    "ck"
+   ],
+   "words": [
+    "cat",
+    "kite",
+    "duck"
+   ],
+   "tip": "A click at the back of the mouth. c, k and ck all make it.",
+   "wordClips": [
+    {
+     "word": "cat",
+     "clip": "audio/w/cat.mp3"
+    },
+    {
+     "word": "kite",
+     "clip": "audio/w/kite.mp3"
+    },
+    {
+     "word": "duck",
+     "clip": "audio/w/duck.mp3"
+    }
+   ],
+   "candidates": []
+  },
+  {
+   "key": "d",
+   "group": "consonants",
+   "label": "d",
+   "say": "d",
+   "ipa": "d",
+   "kind": "stop",
+   "spellings": [
+    "d",
+    "dd"
+   ],
+   "words": [
+    "dog",
+    "dig",
+    "bed"
+   ],
+   "tip": "Tongue taps and stops. As brief as you can.",
+   "wordClips": [
+    {
+     "word": "dog",
+     "clip": "audio/w/dog.mp3"
+    },
+    {
+     "word": "dig",
+     "clip": "audio/w/dig.mp3"
+    },
+    {
+     "word": "bed",
+     "clip": "audio/w/bed.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean",
+     "file": "d/commons-clean.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": false,
+     "why": [
+      "488 ms: a vowel is riding on it"
+     ],
+     "ms": 488,
+     "sha": "2987f0c985"
+    },
+    {
+     "id": "commons-short",
+     "file": "d/commons-short.mp3",
+     "label": "Wikimedia · short",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 110,
+     "sha": "7d6f743fde"
+    }
+   ]
+  },
+  {
+   "key": "f",
+   "group": "consonants",
+   "label": "f",
+   "say": "f",
+   "ipa": "f",
+   "kind": "hiss",
+   "spellings": [
+    "f",
+    "ff",
+    "ph"
+   ],
+   "words": [
+    "fish",
+    "fan",
+    "fun"
+   ],
+   "tip": "Top teeth on bottom lip, blow. No voice, just air.",
+   "wordClips": [
+    {
+     "word": "fish",
+     "clip": "audio/w/fish.mp3"
+    },
+    {
+     "word": "fun",
+     "clip": "audio/w/fun.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean",
+     "file": "f/commons-clean.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": false,
+     "why": [
+      "260 ms of voice in a sound that has none"
+     ],
+     "ms": 708,
+     "sha": "e9f0ade6d3"
+    },
+    {
+     "id": "commons-tight",
+     "file": "f/commons-tight.mp3",
+     "label": "Wikimedia · trimmed",
+     "voice": "human",
+     "backup": false,
+     "ok": false,
+     "why": [
+      "135 ms of voice in a sound that has none"
+     ],
+     "ms": 505,
+     "sha": "5f766ffbd4"
+    }
+   ]
+  },
+  {
+   "key": "g",
+   "group": "consonants",
+   "label": "g",
+   "say": "g",
+   "ipa": "ɡ",
+   "kind": "stop",
+   "spellings": [
+    "g",
+    "gg"
+   ],
+   "words": [
+    "goat",
+    "pig",
+    "bug"
+   ],
+   "tip": "Hard g, as in goat. Not the letter name.",
+   "wordClips": [
+    {
+     "word": "goat",
+     "clip": "audio/w/goat.mp3"
+    },
+    {
+     "word": "pig",
+     "clip": "audio/w/pig.mp3"
+    },
+    {
+     "word": "bug",
+     "clip": "audio/w/bug.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-short-p1",
+     "file": "g/commons-short-p1.mp3",
+     "label": "Wikimedia · short",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 110,
+     "sha": "039b7211b5"
+    }
+   ]
+  },
+  {
+   "key": "h",
+   "group": "consonants",
+   "label": "h",
+   "say": "h",
+   "ipa": "h",
+   "kind": "hiss",
+   "spellings": [
+    "h"
+   ],
+   "words": [
+    "hat",
+    "hen",
+    "hot"
+   ],
+   "tip": "Just a puff of air. No voice.",
+   "wordClips": [
+    {
+     "word": "hat",
+     "clip": "audio/w/hat.mp3"
+    },
+    {
+     "word": "hen",
+     "clip": "audio/w/hen.mp3"
+    },
+    {
+     "word": "hot",
+     "clip": "audio/w/hot.mp3"
+    }
+   ],
+   "candidates": []
+  },
+  {
+   "key": "j",
+   "group": "consonants",
+   "label": "j",
+   "say": "j",
+   "ipa": "dʒ",
+   "kind": "stop",
+   "spellings": [
+    "j",
+    "g",
+    "dge"
+   ],
+   "words": [
+    "jam",
+    "jet",
+    "jug"
+   ],
+   "tip": "The start of jam. Short, not jay.",
+   "wordClips": [
+    {
+     "word": "jam",
+     "clip": "audio/w/jam.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean",
+     "file": "j/commons-clean.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": false,
+     "why": [
+      "900 ms: a vowel is riding on it"
+     ],
+     "ms": 900,
+     "sha": "4d109fe954"
+    },
+    {
+     "id": "commons-short",
+     "file": "j/commons-short.mp3",
+     "label": "Wikimedia · short",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 110,
+     "sha": "598ed21d78"
+    }
+   ]
+  },
+  {
+   "key": "l",
+   "group": "consonants",
+   "label": "l",
+   "say": "l",
+   "ipa": "l",
+   "kind": "hum",
+   "spellings": [
+    "l",
+    "ll",
+    "le"
+   ],
+   "words": [
+    "leaf",
+    "log",
+    "bell"
+   ],
+   "tip": "Tongue behind the top teeth, sing it: llll.",
+   "wordClips": [
+    {
+     "word": "leaf",
+     "clip": "audio/w/leaf.mp3"
+    },
+    {
+     "word": "log",
+     "clip": "audio/w/log.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean-p2",
+     "file": "l/commons-clean-p2.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 900,
+     "sha": "e26dc89d26"
+    }
+   ]
+  },
+  {
+   "key": "m",
+   "group": "consonants",
+   "label": "m",
+   "say": "m",
+   "ipa": "m",
+   "kind": "hum",
+   "spellings": [
+    "m",
+    "mm",
+    "mb"
+   ],
+   "words": [
+    "moon",
+    "man",
+    "map"
+   ],
+   "tip": "Lips together, hum: mmmm.",
+   "wordClips": [
+    {
+     "word": "moon",
+     "clip": "audio/w/moon.mp3"
+    },
+    {
+     "word": "man",
+     "clip": "audio/w/man.mp3"
+    },
+    {
+     "word": "map",
+     "clip": "audio/w/map.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean-p2",
+     "file": "m/commons-clean-p2.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 878,
+     "sha": "d003ca27b6"
+    }
+   ]
+  },
+  {
+   "key": "n",
+   "group": "consonants",
+   "label": "n",
+   "say": "n",
+   "ipa": "n",
+   "kind": "hum",
+   "spellings": [
+    "n",
+    "nn",
+    "kn"
+   ],
+   "words": [
+    "nest",
+    "net",
+    "sun"
+   ],
+   "tip": "Hum through your nose: nnnn.",
+   "wordClips": [
+    {
+     "word": "nest",
+     "clip": "audio/w/nest.mp3"
+    },
+    {
+     "word": "net",
+     "clip": "audio/w/net.mp3"
+    },
+    {
+     "word": "sun",
+     "clip": "audio/w/sun.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean-p2",
+     "file": "n/commons-clean-p2.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 900,
+     "sha": "b23dd8f146"
+    }
+   ]
+  },
+  {
+   "key": "p",
+   "group": "consonants",
+   "label": "p",
+   "say": "p",
+   "ipa": "p",
+   "kind": "stop",
+   "spellings": [
+    "p",
+    "pp"
+   ],
+   "words": [
+    "pig",
+    "pan",
+    "cup"
+   ],
+   "tip": "A tiny puff of air. No voice at all.",
+   "wordClips": [
+    {
+     "word": "pig",
+     "clip": "audio/w/pig.mp3"
+    },
+    {
+     "word": "pan",
+     "clip": "audio/w/pan.mp3"
+    },
+    {
+     "word": "cup",
+     "clip": "audio/w/cup.mp3"
+    }
+   ],
+   "candidates": []
+  },
+  {
+   "key": "r",
+   "group": "consonants",
+   "label": "r",
+   "say": "r",
+   "ipa": "ɹ",
+   "kind": "hum",
+   "spellings": [
+    "r",
+    "rr",
+    "wr"
+   ],
+   "words": [
+    "rain",
+    "red",
+    "run"
+   ],
+   "tip": "A growl, not ar. Lips rounded: rrrr.",
+   "wordClips": [
+    {
+     "word": "rain",
+     "clip": "audio/w/rain.mp3"
+    },
+    {
+     "word": "red",
+     "clip": "audio/w/red.mp3"
+    },
+    {
+     "word": "run",
+     "clip": "audio/w/run.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean",
+     "file": "r/commons-clean.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 900,
+     "sha": "911b098b97"
+    }
+   ]
+  },
+  {
+   "key": "s",
+   "group": "consonants",
+   "label": "s",
+   "say": "s",
+   "ipa": "s",
+   "kind": "hiss",
+   "spellings": [
+    "s",
+    "ss",
+    "c"
+   ],
+   "words": [
+    "sun",
+    "sit",
+    "bus"
+   ],
+   "tip": "Hiss like a snake: ssss.",
+   "wordClips": [
+    {
+     "word": "sun",
+     "clip": "audio/w/sun.mp3"
+    },
+    {
+     "word": "sit",
+     "clip": "audio/w/sit.mp3"
+    }
+   ],
+   "candidates": []
+  },
+  {
+   "key": "t",
+   "group": "consonants",
+   "label": "t",
+   "say": "t",
+   "ipa": "t",
+   "kind": "stop",
+   "spellings": [
+    "t",
+    "tt"
+   ],
+   "words": [
+    "tap",
+    "ten",
+    "cat"
+   ],
+   "tip": "A single tick. Nothing after it.",
+   "wordClips": [
+    {
+     "word": "tap",
+     "clip": "audio/w/tap.mp3"
+    },
+    {
+     "word": "ten",
+     "clip": "audio/w/ten.mp3"
+    },
+    {
+     "word": "cat",
+     "clip": "audio/w/cat.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean",
+     "file": "t/commons-clean.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": false,
+     "why": [
+      "265 ms of voice after it (an added vowel)",
+      "518 ms is long for a stop"
+     ],
+     "ms": 518,
+     "sha": "875135278f"
+    },
+    {
+     "id": "commons-tight",
+     "file": "t/commons-tight.mp3",
+     "label": "Wikimedia · trimmed",
+     "voice": "human",
+     "backup": false,
+     "ok": false,
+     "why": [
+      "115 ms of voice after it (an added vowel)"
+     ],
+     "ms": 290,
+     "sha": "90c019ae23"
+    }
+   ]
+  },
+  {
+   "key": "v",
+   "group": "consonants",
+   "label": "v",
+   "say": "v",
+   "ipa": "v",
+   "kind": "hum",
+   "spellings": [
+    "v",
+    "ve"
+   ],
+   "words": [
+    "van",
+    "vet",
+    "five"
+   ],
+   "tip": "Like f with your voice on: vvvv.",
+   "wordClips": [
+    {
+     "word": "van",
+     "clip": "audio/w/van.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean",
+     "file": "v/commons-clean.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 688,
+     "sha": "c1cea28d8a"
+    }
+   ]
+  },
+  {
+   "key": "w",
+   "group": "consonants",
+   "label": "w",
+   "say": "w",
+   "ipa": "w",
+   "kind": "glide",
+   "spellings": [
+    "w",
+    "wh"
+   ],
+   "words": [
+    "web",
+    "wig",
+    "win"
+   ],
+   "tip": "Round your lips. Short, not wuh.",
+   "wordClips": [
+    {
+     "word": "web",
+     "clip": "audio/w/web.mp3"
+    },
+    {
+     "word": "wig",
+     "clip": "audio/w/wig.mp3"
+    },
+    {
+     "word": "win",
+     "clip": "audio/w/win.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-shorter-p1",
+     "file": "w/commons-shorter-p1.mp3",
+     "label": "Wikimedia · shorter",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 250,
+     "sha": "adf5a9a7be"
+    }
+   ]
+  },
+  {
+   "key": "y",
+   "group": "consonants",
+   "label": "y",
+   "say": "y",
+   "ipa": "j",
+   "kind": "glide",
+   "spellings": [
+    "y"
+   ],
+   "words": [
+    "yes",
+    "yet",
+    "yum"
+   ],
+   "tip": "The start of yes. Short, not yuh.",
+   "wordClips": [
+    {
+     "word": "yes",
+     "clip": "audio/w/yes.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-shorter-p1",
+     "file": "y/commons-shorter-p1.mp3",
+     "label": "Wikimedia · shorter",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 250,
+     "sha": "bc5ff7251e"
+    }
+   ]
+  },
+  {
+   "key": "z",
+   "group": "consonants",
+   "label": "z",
+   "say": "z",
+   "ipa": "z",
+   "kind": "hum",
+   "spellings": [
+    "z",
+    "zz",
+    "s"
+   ],
+   "words": [
+    "zip",
+    "zap",
+    "buzz"
+   ],
+   "tip": "A buzzing bee: zzzz.",
+   "wordClips": [
+    {
+     "word": "zip",
+     "clip": "audio/w/zip.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean-p2",
+     "file": "z/commons-clean-p2.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 900,
+     "sha": "808d46a0fb"
+    }
+   ]
+  },
+  {
+   "key": "kw",
+   "group": "consonants",
+   "label": "qu",
+   "say": "qu",
+   "ipa": "kw",
+   "kind": "cluster",
+   "spellings": [
+    "qu"
+   ],
+   "words": [
+    "queen",
+    "quit",
+    "quick"
+   ],
+   "tip": "Two sounds run together: k then w.",
+   "wordClips": [
+    {
+     "word": "queen",
+     "clip": "audio/w/queen.mp3"
+    }
+   ],
+   "candidates": []
+  },
+  {
+   "key": "ks",
+   "group": "consonants",
+   "label": "x",
+   "say": "x",
+   "ipa": "ks",
+   "kind": "cluster",
+   "spellings": [
+    "x"
+   ],
+   "words": [
+    "fox",
+    "box",
+    "six"
+   ],
+   "tip": "Two sounds: k then s, as at the end of fox.",
+   "wordClips": [
+    {
+     "word": "fox",
+     "clip": "audio/w/fox.mp3"
+    }
+   ],
+   "candidates": []
+  },
+  {
+   "key": "sh",
+   "group": "digraphs",
+   "label": "sh",
+   "say": "sh",
+   "ipa": "ʃ",
+   "kind": "hiss",
+   "spellings": [
+    "sh"
+   ],
+   "words": [
+    "ship",
+    "shop",
+    "fish"
+   ],
+   "tip": "The quiet sound: shhh.",
+   "wordClips": [
+    {
+     "word": "ship",
+     "clip": "audio/w/ship.mp3"
+    },
+    {
+     "word": "fish",
+     "clip": "audio/w/fish.mp3"
+    }
+   ],
+   "candidates": []
+  },
+  {
+   "key": "ch",
+   "group": "digraphs",
+   "label": "ch",
+   "say": "ch",
+   "ipa": "tʃ",
+   "kind": "stop",
+   "spellings": [
+    "ch",
+    "tch"
+   ],
+   "words": [
+    "chip",
+    "chin",
+    "much"
+   ],
+   "tip": "A sneeze sound: ch. Keep it clipped, no voice.",
+   "wordClips": [
+    {
+     "word": "chip",
+     "clip": "audio/w/chip.mp3"
+    }
+   ],
+   "candidates": []
+  },
+  {
+   "key": "th",
+   "group": "digraphs",
+   "label": "th",
+   "say": "th as in thumb",
+   "ipa": "θ",
+   "kind": "hiss",
+   "spellings": [
+    "th"
+   ],
+   "words": [
+    "thumb",
+    "thin",
+    "bath"
+   ],
+   "tip": "Tongue between your teeth, blow gently. No voice.",
+   "wordClips": [
+    {
+     "word": "thumb",
+     "clip": "audio/w/thumb.mp3"
+    }
+   ],
+   "candidates": []
+  },
+  {
+   "key": "dh",
+   "group": "digraphs",
+   "label": "th",
+   "say": "th as in this",
+   "ipa": "ð",
+   "kind": "hum",
+   "spellings": [
+    "th"
+   ],
+   "words": [
+    "this",
+    "that",
+    "then"
+   ],
+   "tip": "Tongue between your teeth with your voice on.",
+   "wordClips": [],
+   "candidates": []
+  },
+  {
+   "key": "ng",
+   "group": "digraphs",
+   "label": "ng",
+   "say": "ng",
+   "ipa": "ŋ",
+   "kind": "hum",
+   "spellings": [
+    "ng",
+    "n"
+   ],
+   "words": [
+    "ring",
+    "sing",
+    "king"
+   ],
+   "tip": "The end of ring. Hum it at the back of your mouth.",
+   "wordClips": [],
+   "candidates": []
+  },
+  {
+   "key": "oo",
+   "group": "vowels2",
+   "label": "oo",
+   "say": "oo as in moon",
+   "ipa": "uː",
+   "kind": "vowel",
+   "spellings": [
+    "oo",
+    "ue",
+    "ew",
+    "u_e"
+   ],
+   "words": [
+    "moon",
+    "blue",
+    "new"
+   ],
+   "tip": "Round lips, long ooo, as in moon.",
+   "wordClips": [
+    {
+     "word": "moon",
+     "clip": "audio/w/moon.mp3"
+    }
+   ],
+   "candidates": [
+    {
+     "id": "commons-clean",
+     "file": "oo/commons-clean.mp3",
+     "label": "Wikimedia",
+     "voice": "human",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 658,
+     "sha": "5771a1e033"
+    }
+   ]
+  },
+  {
+   "key": "oo_book",
+   "group": "vowels2",
+   "label": "oo",
+   "say": "oo as in book",
+   "ipa": "ʊ",
+   "kind": "vowel",
+   "spellings": [
+    "oo",
+    "u"
+   ],
+   "words": [
+    "book",
+    "look",
+    "foot"
+   ],
+   "tip": "A short oo, as in book.",
+   "wordClips": [],
+   "candidates": [
+    {
+     "id": "kristin-clean",
+     "file": "oo_book/kristin-clean.mp3",
+     "label": "Computer voice",
+     "voice": "computer",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 358,
+     "sha": "907c4abd18"
+    }
+   ]
+  },
+  {
+   "key": "ow",
+   "group": "vowels2",
+   "label": "ow",
+   "say": "ow as in cow",
+   "ipa": "aʊ",
+   "kind": "vowel",
+   "spellings": [
+    "ow",
+    "ou"
+   ],
+   "words": [
+    "cow",
+    "now",
+    "cloud"
+   ],
+   "tip": "Like ouch: ow.",
+   "wordClips": [],
+   "candidates": [
+    {
+     "id": "kristin-clean",
+     "file": "ow/kristin-clean.mp3",
+     "label": "Computer voice",
+     "voice": "computer",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 428,
+     "sha": "d11d306ff7"
+    }
+   ]
+  },
+  {
+   "key": "oi",
+   "group": "vowels2",
+   "label": "oi",
+   "say": "oi as in coin",
+   "ipa": "ɔɪ",
+   "kind": "vowel",
+   "spellings": [
+    "oi",
+    "oy"
+   ],
+   "words": [
+    "coin",
+    "boil",
+    "toy"
+   ],
+   "tip": "Round lips, then smile: oi.",
+   "wordClips": [],
+   "candidates": [
+    {
+     "id": "kristin-clean",
+     "file": "oi/kristin-clean.mp3",
+     "label": "Computer voice",
+     "voice": "computer",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 508,
+     "sha": "46b368cf2e"
+    }
+   ]
+  },
+  {
+   "key": "aw",
+   "group": "vowels2",
+   "label": "aw",
+   "say": "aw as in saw",
+   "ipa": "ɔː",
+   "kind": "vowel",
+   "spellings": [
+    "aw",
+    "au"
+   ],
+   "words": [
+    "saw",
+    "paw",
+    "draw"
+   ],
+   "tip": "Open and round: aw.",
+   "wordClips": [],
+   "candidates": [
+    {
+     "id": "kristin-clean",
+     "file": "aw/kristin-clean.mp3",
+     "label": "Computer voice",
+     "voice": "computer",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 518,
+     "sha": "7929fbea6b"
+    }
+   ]
+  },
+  {
+   "key": "ar",
+   "group": "rvowels",
+   "label": "ar",
+   "say": "ar as in car",
+   "ipa": "ɑːɹ",
+   "kind": "vowel",
+   "spellings": [
+    "ar"
+   ],
+   "words": [
+    "car",
+    "star",
+    "farm"
+   ],
+   "tip": "Open wide, then the r: ar.",
+   "wordClips": [],
+   "candidates": [
+    {
+     "id": "kristin-clean",
+     "file": "ar/kristin-clean.mp3",
+     "label": "Computer voice",
+     "voice": "computer",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 488,
+     "sha": "3a791a5b59"
+    }
+   ]
+  },
+  {
+   "key": "or",
+   "group": "rvowels",
+   "label": "or",
+   "say": "or as in fork",
+   "ipa": "ɔːɹ",
+   "kind": "vowel",
+   "spellings": [
+    "or",
+    "ore"
+   ],
+   "words": [
+    "fork",
+    "corn",
+    "more"
+   ],
+   "tip": "Round lips, then the r: or.",
+   "wordClips": [],
+   "candidates": [
+    {
+     "id": "kristin-clean",
+     "file": "or/kristin-clean.mp3",
+     "label": "Computer voice",
+     "voice": "computer",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 548,
+     "sha": "7835b48067"
+    }
+   ]
+  },
+  {
+   "key": "er",
+   "group": "rvowels",
+   "label": "er",
+   "say": "er as in fern",
+   "ipa": "ɝ",
+   "kind": "vowel",
+   "spellings": [
+    "er",
+    "ir",
+    "ur"
+   ],
+   "words": [
+    "fern",
+    "bird",
+    "fur"
+   ],
+   "tip": "One sound, three spellings: er, ir, ur.",
+   "wordClips": [],
+   "candidates": [
+    {
+     "id": "kristin-clean",
+     "file": "er/kristin-clean.mp3",
+     "label": "Computer voice",
+     "voice": "computer",
+     "backup": false,
+     "ok": true,
+     "why": [],
+     "ms": 358,
+     "sha": "48b263ec2e"
+    }
+   ]
+  }
+ ]
+}

@@ -25,6 +25,10 @@
   "find": {
    "file": "label_find.mp3",
    "text": "Find it"
+  },
+  "shortlong": {
+   "file": "label_shortlong.mp3",
+   "text": "Short and long"
   }
  }
 }

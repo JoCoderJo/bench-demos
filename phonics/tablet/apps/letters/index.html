@@ -3,8 +3,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Letter Sounds</title>
 <link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
-<!-- tablet/apps/letters — four dimensions of phonics on one screen:
-       Letters · Two letters (digraphs, vowel teams) · Blends (two letter sounds slid together) · Word families.
+<!-- tablet/apps/letters — five dimensions of phonics on one screen:
+       Letters · Short & long (each vowel's two sounds side by side, word pairs like cap / cape; Find it = "Short or long?")
+       · Two letters (digraphs, vowel teams) · Blends (two letter sounds slid together) · Word families.
      Explore: tap a card, hear it, hear its word. Find it: hear one, tap the right card (words in a family for
      the families tab). Only vouched-for recordings make a sound (see build.py); a card without one plays its word
      and shows a little microphone until it is recorded with tools/record-sounds.py. -->
@@ -84,9 +85,34 @@ body{display:flex;flex-direction:column}
 .btn,#bigParts button,#bigWords button{min-height:var(--tgt)}
 .card.good{background:var(--kt-ok-soft,#dff7e3)}
 @media (prefers-reduced-motion:reduce){.card.good,.card.nope{animation:none}}
+/* ---- short against long (PLAN §16 D-107, Fable 2026-11-13 at Joe's ask): a vowel card has two sides ---- */
+#grid:not(.on){display:none}   /* #grid's own display:grid outranked .screen{display:none}: in Find it the grid stayed up and pushed the answers off the bottom */
+#grid.vow{grid-template-columns:repeat(5,1fr)}
+.card.vowelpair{border-bottom:6px solid #e0564f;aspect-ratio:1/1.05}
+.card.vowelpair .l{font-size:64px}.card.vowelpair .l small{font-size:44px;color:#b23a34;margin-left:12px}
+.card.vowelpair .e{font-size:34px;letter-spacing:10px}
+#vbig{position:fixed;inset:0;background:rgba(20,30,50,.55);display:none;align-items:center;justify-content:center;z-index:5;padding-bottom:var(--kt-target-dead-bottom,0px)}
+#vbig.on{display:flex}
+#vCard{background:var(--card);border-radius:36px;box-shadow:0 20px 60px rgba(0,0,0,.35);width:900px;max-width:96vw;max-height:96%;padding:18px 24px;display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;align-items:stretch}
+.vside{border-radius:26px;background:#fff6ec;border-bottom:6px solid var(--accent);display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;align-items:center;justify-content:center;gap:0 18px;padding:10px 14px;min-height:var(--tgt)}
+.vside.long{background:#fdeeee;border-bottom-color:#e0564f}
+.vside.now{outline:6px solid var(--accent)}
+.vside .vt{grid-column:1/3;font-size:22px;font-weight:800;color:var(--dim);text-align:center}
+.vside .vl{font-size:110px;font-weight:800;line-height:1}
+.vside .vw{font-size:30px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:2px}
+.vside .vw i{font-style:normal;font-size:64px;line-height:1}
+#vPairs{grid-column:1/3;display:flex;flex-wrap:wrap;justify-content:center;gap:10px 26px}
+.vpair{display:flex;align-items:center;gap:8px;font-size:30px;font-weight:800}
+.vpair button{min-width:var(--tgt);min-height:var(--tgt);padding:6px 18px;border-radius:18px;background:#fff1e4;border-bottom:5px solid var(--accent);font-size:32px;font-weight:800}
+.vpair button.lg{background:#fdeeee;border-bottom-color:#e0564f}
+.vpair button.now{background:var(--accent);color:#fff}
+.vpair u,.card u{text-decoration:none;color:#c2362f}
+#vTip{grid-column:1/3;font-size:16px;color:var(--dim);text-align:center}
+#vBtns{grid-column:1/3;display:flex;gap:14px;justify-content:center}
+#choices .card.wordcard .l{font-size:64px}
 </style></head><body>
 <div id="bar"><h1>Sounds</h1>
-  <div class="tabs" id="tabs"><button data-tab="letters" class="on" data-say="voice/label_letters.mp3" data-say-text="Letters"><span class="kt-icon">🔤</span><span class="kt-label">Letters</span></button><button data-tab="digraphs" data-say="voice/label_digraphs.mp3" data-say-text="Two letters"><span class="kt-icon">🔡</span><span class="kt-label">Two letters</span></button><button data-tab="blends" data-say="voice/label_blends.mp3" data-say-text="Blends"><span class="kt-icon">🧩</span><span class="kt-label">Blends</span></button><button data-tab="families" data-say="voice/label_families.mp3" data-say-text="Word families"><span class="kt-icon">🏠</span><span class="kt-label">Word families</span></button></div>
+  <div class="tabs" id="tabs"><button data-tab="letters" class="on" data-say="voice/label_letters.mp3" data-say-text="Letters"><span class="kt-icon">🔤</span><span class="kt-label">Letters</span></button><button data-tab="vowels" data-say="voice/label_shortlong.mp3" data-say-text="Short and long"><span class="kt-icon">📏</span><span class="kt-label">Short &amp; long</span></button><button data-tab="digraphs" data-say="voice/label_digraphs.mp3" data-say-text="Two letters"><span class="kt-icon">🔡</span><span class="kt-label">Two letters</span></button><button data-tab="blends" data-say="voice/label_blends.mp3" data-say-text="Blends"><span class="kt-icon">🧩</span><span class="kt-label">Blends</span></button><button data-tab="families" data-say="voice/label_families.mp3" data-say-text="Word families"><span class="kt-icon">🏠</span><span class="kt-label">Word families</span></button></div>
   <div class="tabs" id="modes"><button data-mode="explore" class="on" data-say="voice/label_explore.mp3" data-say-text="Explore"><span class="kt-icon">🔍</span><span class="kt-label">Explore</span></button><button data-mode="find" data-say="voice/label_find.mp3" data-say-text="Find it"><span class="kt-icon">🎯</span><span class="kt-label">Find it</span></button></div>
   <div id="stars"></div></div>
 <div id="grid" class="screen on"></div>
@@ -102,12 +128,20 @@ body{display:flex;flex-direction:column}
   <div id="bigTip"></div>
   <div id="bigBtns"><button class="btn go" id="bSound">🔊 Sound</button><button class="btn" id="bWord">💬 Word</button><button class="btn" id="bClose">✕ Close</button></div>
 </div></div>
+<div id="vbig"><div id="vCard">
+  <button class="vside" id="vShort"><span class="vt">short</span><span class="vl" id="vSL"></span><span class="vw"><i id="vSE"></i><span id="vSW"></span></span></button>
+  <button class="vside long" id="vLong"><span class="vt">long</span><span class="vl" id="vLL"></span><span class="vw"><i id="vLE"></i><span id="vLW"></span></span></button>
+  <div id="vPairs"></div>
+  <div id="vTip"></div>
+  <div id="vBtns"><button class="btn go" id="vBoth">🔊 Short, then long</button><button class="btn" id="vClose">✕ Close</button></div>
+</div></div>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
 const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let DATA=null,tab='letters',mode='explore',cur=null,stars=0,quiz=null,child='',seq=0;
-window.addEventListener('message',e=>{const d=e.data||{};if(d.kt==='hello'&&d.child&&d.child.name)child=d.child.name;else if(d.kt==='back'&&$('big').classList.contains('on')){$('bClose').onclick();kt({kt:'back',handled:true});}});
+window.addEventListener('message',e=>{const d=e.data||{};if(d.kt==='hello'&&d.child&&d.child.name)child=d.child.name;else if(d.kt==='back'&&$('big').classList.contains('on')){$('bClose').onclick();kt({kt:'back',handled:true});}
+  else if(d.kt==='back'&&$('vbig').classList.contains('on')){$('vClose').onclick();kt({kt:'back',handled:true});}});
 const kt=m=>{if(m&&m.kt==='blip'&&window.KT)return;try{parent.postMessage(m,'*');}catch(e){}};   // blips are kt.js's job when it is loaded (one click per tap)
 const snd=(n,el)=>{if(window.KT){KT.sound(n,el);return true;}return false;};
 const byKey={};
@@ -120,6 +154,7 @@ async function playList(list,gap,onEach){const my=++seq;for(let i=0;i<list.lengt
 // what a card "says": its sound (or its parts in a row for a blend); null if it has no good recording
 function soundSrcs(item){
   if(item.kind==='blend')return item.playable?item.parts.map(p=>byKey[p].clip):null;
+  if(item.kind==='vowelpair')return item.short.clip&&item.long.clip?[item.short.clip,item.long.clip]:null;
   return item.clip?[item.clip]:null;
 }
 
@@ -131,6 +166,7 @@ async function init(){
 function items(){return DATA[tab]||[];}
 function label(it){return it.kind==='family'||it.rime!==undefined?'-'+it.rime:it.k;}
 function cardHtml(it,extra){
+  if(it.kind==='vowelpair')return '<button class="card vowelpair'+(soundSrcs(it)?'':' nosound')+'" data-k="'+E(it.k)+'" aria-label="'+E(it.k)+', short and long"><span class="l">'+E(it.short.mark)+'<small>'+E(it.long.mark)+'</small></span><span class="e">'+E(it.short.emoji)+E(it.long.emoji)+'</span></button>';
   const fam=it.rime!==undefined;
   const srcs=fam?null:soundSrcs(it);
   const cls=fam?'family':(it.kind+(srcs?'':' nosound'));
@@ -139,7 +175,7 @@ function cardHtml(it,extra){
   return '<button class="card '+E(cls)+'" data-k="'+E(fam?it.rime:it.k)+'" '+(extra||'')+'><span class="l'+(l.length>2?' long':'')+'">'+E(l)+'</span><span class="e">'+E(e)+'</span></button>';
 }
 function render(){
-  const g=$('grid');g.classList.toggle('fam',tab==='families');
+  const g=$('grid');g.classList.toggle('fam',tab==='families');g.classList.toggle('vow',tab==='vowels');
   g.innerHTML=items().map(it=>cardHtml(it)).join('');
   g.querySelectorAll('.card').forEach(c=>c.onclick=()=>open(c.dataset.k));
 }
@@ -147,7 +183,7 @@ function findItem(k){return items().find(it=>(it.rime!==undefined?it.rime:it.k)=
 
 // ---- big card
 async function open(k){
-  const it=findItem(k);if(!it)return;cur=it;stopAudio();
+  const it=findItem(k);if(!it)return;if(it.kind==='vowelpair'){openVowel(it);return;}cur=it;stopAudio();
   const fam=it.rime!==undefined;
   $('bigL').textContent=fam?'-'+it.rime:it.k;$('bigL').classList.toggle('long',(fam?it.rime.length+1:it.k.length)>2);
   $('bigE').textContent=fam?it.words[0].emoji:it.emoji;
@@ -190,6 +226,58 @@ $('bWord').onclick=()=>{if(!cur)return;stopAudio();play(cur.wordClip||(soundSrcs
 $('bClose').onclick=()=>{$('big').classList.remove('on');cur=null;stopAudio();};
 $('big').onclick=e=>{if(e.target===$('big'))$('bClose').onclick();};
 
+// ---- short against long: one vowel, two sounds side by side; then word pairs that differ only in the vowel
+const eMark=w=>E(w).replace(/e$/,'<u>e</u>');                       // the magic e stands out: cap / cap(e)
+function openVowel(it){
+  cur=it;stopAudio();
+  $('vSL').textContent=it.short.mark;$('vSE').textContent=it.short.emoji;$('vSW').textContent=it.short.word;
+  $('vLL').textContent=it.long.mark;$('vLE').textContent=it.long.emoji;$('vLW').textContent=it.long.word;
+  $('vPairs').innerHTML=it.pairs.map((p,i)=>'<span class="vpair"><button data-i="'+i+'" data-s="short">'+E(p.short)+'</button>→<button class="lg" data-i="'+i+'" data-s="long">'+eMark(p.long)+'</button></span>').join('');
+  $('vPairs').querySelectorAll('button').forEach(b=>b.onclick=()=>{stopAudio();const p=it.pairs[+b.dataset.i];flash(b);play(b.dataset.s==='long'?p.longClip:p.shortClip);});
+  $('vTip').textContent='Short '+it.k+' is quick, as in '+it.short.word+'. Long '+it.k+' says its name, as in '+it.long.word+'.'+(it.pairs.length?' Tap the words: one letter changes the sound.':'');
+  $('vShort').disabled=!it.short.clip;$('vLong').disabled=!it.long.clip;$('vBoth').disabled=!soundSrcs(it);
+  $('vbig').classList.add('on');
+  vBoth();
+}
+async function vSide(which){
+  const it=cur;if(!it||it.kind!=='vowelpair')return;const s=it[which],el=$(which==='short'?'vShort':'vLong');if(!s.clip)return;
+  const my=++seq;if(audio){try{audio.pause();}catch(e){}}
+  $('vShort').classList.remove('now');$('vLong').classList.remove('now');el.classList.add('now');
+  await play(s.clip);if(my!==seq)return;
+  if(s.wordClip){await new Promise(r=>setTimeout(r,300));if(my!==seq)return;await play(s.wordClip);}
+  if(my===seq)el.classList.remove('now');
+}
+async function vBoth(){
+  const it=cur;if(!it||!soundSrcs(it))return;const my=++seq;if(audio){try{audio.pause();}catch(e){}}
+  for(const w of ['short','long']){const el=$(w==='short'?'vShort':'vLong');$('vShort').classList.remove('now');$('vLong').classList.remove('now');el.classList.add('now');
+    await play(it[w].clip);if(my!==seq)return;await new Promise(r=>setTimeout(r,450));if(my!==seq)return;}
+  $('vShort').classList.remove('now');$('vLong').classList.remove('now');
+}
+$('vShort').onclick=()=>vSide('short');$('vLong').onclick=()=>vSide('long');$('vBoth').onclick=vBoth;
+$('vClose').onclick=()=>{$('vbig').classList.remove('on');$('vShort').classList.remove('now');$('vLong').classList.remove('now');cur=null;stopAudio();};
+$('vbig').onclick=e=>{if(e.target===$('vbig'))$('vClose').onclick();};
+// Find it on this tab = "Short or long?": hear one of a vowel's two sounds, tap the side it belongs to. From five stars
+// on, every other round is a word pair: hear cap or cape, tap the word.
+function vowelQuiz(){
+  const vs=items().filter(v=>soundSrcs(v));
+  if(!vs.length){$('choices').innerHTML='';$('msg').textContent='The short and long sounds are not saved yet.';quiz=null;return;}
+  const withPairs=vs.filter(v=>v.pairs.length);
+  if(stars>=5&&withPairs.length&&Math.random()<.5){
+    const v=withPairs[Math.floor(Math.random()*withPairs.length)],p=v.pairs[Math.floor(Math.random()*v.pairs.length)],long=Math.random()<.5;
+    const ws=[{w:p.short,c:p.shortClip},{w:p.long,c:p.longClip}],ans=ws[long?1:0];
+    $('askText').textContent='Which word did you hear?';
+    $('choices').innerHTML=(Math.random()<.5?ws:ws.slice().reverse()).map(x=>'<button class="card family wordcard" data-k="'+E(x.w)+'"><span class="l">'+eMark(x.w)+'</span></button>').join('');
+    quiz={key:ans.w,tries:0,playIt:()=>play(ans.c),word:null};
+  }else{
+    const v=vs[Math.floor(Math.random()*vs.length)],which=Math.random()<.5?'short':'long';
+    $('askText').textContent='Short or long?';
+    $('choices').innerHTML=['short','long'].map(w=>'<button class="card vowel" data-k="'+E(v.k+':'+w)+'" aria-label="'+w+' '+E(v.k)+', as in '+E(v[w].word)+'"><span class="l">'+E(v[w].mark)+'</span><span class="e">'+E(v[w].emoji)+'</span></button>').join('');
+    quiz={key:v.k+':'+which,tries:0,playIt:()=>play(v[which].clip),word:v[which].wordClip};
+  }
+  $('choices').querySelectorAll('.card').forEach(c=>c.onclick=()=>answer(c));
+  setTimeout(()=>quiz&&quiz.playIt(),300);
+}
+
 // ---- tabs + modes
 $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;$('tabs').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));stopAudio();kt({kt:'blip',f:520});if(mode==='find')nextQuiz();else render();});
 $('modes').querySelectorAll('button').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;$('modes').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
@@ -200,6 +288,7 @@ function drawStars(){$('stars').textContent=stars?('⭐'.repeat(Math.min(stars,5
 function nextQuiz(){
   stopAudio();$('msg').textContent='';
   let pool,ans,opts,playIt,html;
+  if(tab==='vowels'){vowelQuiz();return;}
   if(tab==='families'){
     const fams=items().filter(f=>f.words.length>=3);
     const f=fams[Math.floor(Math.random()*fams.length)];
