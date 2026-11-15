@@ -1052,12 +1052,6 @@
    "pic": true
   },
   {
-   "w": "tube",
-   "emoji": "⭐",
-   "clip": "audio/words/tube.mp3",
-   "pic": false
-  },
-  {
    "w": "us",
    "emoji": "⭐",
    "clip": "audio/words/us.mp3",

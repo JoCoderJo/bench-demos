@@ -1,6 +1,6 @@
 {
- "version": "7488fe7",
- "sha": "bdfad8dca85dd8cdc2b57a9cfcc55c160546f5693edd3d5f2bdebef4209f30ef",
+ "version": "b4c78d7",
+ "sha": "f860a405925f4f9b4cf788b83c85907fa09b68b979c93aa1060d52bf45e9bdb0",
  "apps": [
   "phonics-friends",
   "camera",
@@ -19,12 +19,13 @@
   "show-tell",
   "soundpick",
   "stories",
+  "touchtest",
   "trace",
   "tv-remote",
   "words",
   "yoto"
  ],
- "files": 1346,
- "bytes": 14192448,
+ "files": 1433,
+ "bytes": 16188014,
  "public": true
 }

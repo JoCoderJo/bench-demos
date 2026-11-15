@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Touch Test</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
+<!-- tablet/apps/touchtest — a grown-up's tool (Joe 2026-11-14: "touch screen has 10 touch points … do we need to adjust
+     and calibrate? can we set up a touch calibrator?").
+       Fingers    every finger on the glass gets a numbered ring: how many the screen follows at once (it should be 10) and
+                  whether the page gets them as real touches (not as a mouse).
+       Accuracy   18 taps on targets at known places (a 3 x 3 grid, twice). The tablet's helper works out whether the misses
+                  are a steady error (a stretch or a shift — something a calibration fixes) or just finger wobble, and only
+                  then offers a correction: POST /api/touch/fit, /apply (goes back by itself unless "Keep" is tapped in time),
+                  /keep, /reset (the factory setting). On a plain web host there is no helper: the misses are shown, nothing
+                  can be changed.
+     Positions are compared in SCREEN pixels (event.screenX/Y), so the frame this tile sits in does not matter. -->
+<style>
+:root{--ink:#1c2733;--dim:#5a6878;--bg:#f3f1ec;--card:#fff;--line:#d9d4c8;--accent:#1f6f8b;--ok:var(--kt-ok,#1a7f37);--bad:var(--kt-bad,#b3261e);
+  --tgt:var(--kt-target-min,56px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font:18px var(--kt-font-ui,system-ui,sans-serif)}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+body{display:flex;flex-direction:column}
+#top{flex:none;display:flex;align-items:center;gap:10px;padding:8px 14px}
+#top h1{font-size:22px;margin:0 8px 0 0}
+#tabs{display:flex;gap:6px}
+#tabs button{min-height:var(--tgt);min-width:var(--tgt);padding:0 18px;border-radius:999px;background:#e6e1d6;font-weight:700}
+#tabs button.on{background:var(--accent);color:#fff}
+#stat{margin-left:auto;text-align:right;font-size:16px;color:var(--dim);line-height:1.3}
+#stat b{color:var(--ink);font-size:19px}
+#pad{flex:1;min-height:0;position:relative;margin:0 14px 12px;border-radius:20px;background:var(--card);border:3px solid var(--line);overflow:hidden;touch-action:none}
+#hint{position:absolute;left:0;right:0;top:38%;text-align:center;color:var(--dim);font-size:22px;padding:0 30px;pointer-events:none}
+.ring{position:absolute;left:0;top:0;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:6px solid var(--c);display:grid;place-items:center;
+  font-size:34px;font-weight:800;color:var(--c);pointer-events:none;background:rgba(255,255,255,.6)}
+.ring small{position:absolute;top:100%;margin-top:4px;font-size:13px;font-weight:700;color:var(--dim);white-space:nowrap}
+#target{position:absolute;left:0;top:0;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;border:4px solid var(--accent);pointer-events:none;display:none}
+#target::before,#target::after{content:'';position:absolute;background:var(--accent)}
+#target::before{left:50%;top:-14px;bottom:-14px;width:2px;margin-left:-1px}
+#target::after{top:50%;left:-14px;right:-14px;height:2px;margin-top:-1px}
+.hit{position:absolute;left:0;top:0;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--bad);pointer-events:none;opacity:.75}
+.was{position:absolute;left:0;top:0;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;border:2px solid var(--accent);pointer-events:none}
+#res{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px 60px;text-align:center;background:rgba(255,255,255,.93)}
+#res.on{display:flex}
+#res h2{margin:0;font-size:28px}
+#res p{margin:0;font-size:19px;line-height:1.4;color:var(--dim);max-width:900px}
+#res p b{color:var(--ink)}
+#res .row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.act{min-height:max(var(--tgt),68px);min-width:var(--tgt);padding:0 26px;border-radius:20px;background:#e6e1d6;font-weight:800;font-size:20px}
+.act.go{background:var(--accent);color:#fff}
+.act.keep{background:var(--ok);color:#fff;font-size:26px;min-height:110px;padding:0 60px}
+#gate{position:fixed;inset:0;z-index:9;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:30px}
+#gate p{margin:0;color:var(--dim);font-size:20px;max-width:760px;line-height:1.4}
+#hold{width:260px;min-height:max(var(--tgt),96px);border-radius:22px;background:var(--accent);color:#fff;font-size:22px;font-weight:800;position:relative;overflow:hidden}
+#hold i{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,255,255,.3)}
+#hold.go i{width:100%;transition:width 1.2s linear}
+#hold span{position:relative}
+</style></head>
+<body>
+<div id="gate"><div style="font-size:64px">✋</div><h1 style="margin:0">Touch Test</h1>
+  <p>A grown-up's tool: see how many fingers the screen follows, measure how exactly it lands, and correct it if it is off.</p>
+  <button id="hold" aria-label="Hold to open"><i></i><span>🔒 Hold to open</span></button></div>
+<div id="top"><h1>✋ Touch Test</h1>
+  <div id="tabs"><button data-v="fingers" class="on">Fingers</button><button data-v="aim">Accuracy</button></div>
+  <div id="stat"></div></div>
+<div id="pad"><div id="hint"></div><div id="target"></div>
+  <div id="res"><h2 id="resH"></h2><p id="resP"></p><p id="resQ"></p><div class="row" id="resB"></div></div></div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id), pad=$('pad'), hint=$('hint'), stat=$('stat'), tgt=$('target');
+const COL=['#1f6f8b','#b3261e','#1a7f37','#9a6700','#7b3fb0','#c2410c','#0e7490','#be185d','#4d7c0f','#334155'];
+const MM=216.96/1280;                       /* the 10.1" panel: 1280 px across 217 mm */
+const ROUNDS=2, GRID=[[.08,.12],[.5,.12],[.92,.12],[.08,.5],[.5,.5],[.92,.5],[.08,.88],[.5,.88],[.92,.88]];
+let view='fingers', most=0, kind='', down=new Map(), seq=[], at=0, pairs=[], info=null, pend=null, pendT=0;
+const api=(p,body)=>fetch(p,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json());
+const mm=px=>(px*MM).toFixed(1);
+
+/* ---------- fingers ---------- */
+function fingerStat(){
+  const real=kind==='touch';
+  stat.innerHTML='Fingers now: <b>'+down.size+'</b> · most at once: <b>'+most+'</b> of '+(navigator.maxTouchPoints||'?')
+    +(kind?'<br>'+(real?'✔ arriving as real touches':'⚠ arriving as a '+kind+' — one point only'):'');
+}
+function ring(e){
+  let r=down.get(e.pointerId);
+  if(!r){const n=[...Array(10).keys()].find(i=>![...down.values()].some(x=>x.n===i));
+    r={n:n===undefined?down.size:n,el:document.createElement('div')};r.el.className='ring';r.el.style.setProperty('--c',COL[r.n%10]);
+    r.el.innerHTML=(r.n+1)+'<small></small>';pad.appendChild(r.el);down.set(e.pointerId,r);}
+  const b=pad.getBoundingClientRect(),x=e.clientX-b.left-pad.clientLeft,y=e.clientY-b.top-pad.clientTop;
+  r.el.style.transform='translate('+x+'px,'+y+'px)';
+  r.el.lastChild.textContent=Math.round(e.screenX)+', '+Math.round(e.screenY);
+}
+function lift(e){const r=down.get(e.pointerId);if(r){r.el.remove();down.delete(e.pointerId);}if(view==='fingers')fingerStat();}
+
+/* ---------- accuracy ---------- */
+function shuffled(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function place(){const g=seq[at];tgt.style.display='block';
+  tgt.style.transform='translate('+Math.round(g[0]*pad.clientWidth)+'px,'+Math.round(g[1]*pad.clientHeight)+'px)';
+  stat.innerHTML='Tap the centre of the target: <b>'+(at+1)+'</b> of '+seq.length;}
+function startAim(){pairs=[];at=0;seq=[];for(let r=0;r<ROUNDS;r++)seq=seq.concat(shuffled(GRID));
+  pad.querySelectorAll('.hit,.was').forEach(n=>n.remove());$('res').classList.remove('on');
+  hint.textContent='Use the tip of one finger — or a stylus, if you have one.';place();}
+function aimTap(e){
+  if($('res').classList.contains('on')||!seq.length||at>=seq.length)return;
+  const b=pad.getBoundingClientRect(),g=seq[at];
+  const cx=b.left+pad.clientLeft+Math.round(g[0]*pad.clientWidth),cy=b.top+pad.clientTop+Math.round(g[1]*pad.clientHeight);
+  if(Math.hypot(e.clientX-cx,e.clientY-cy)>170){hint.textContent='Tap the target — the ring with the cross.';return;}
+  const ox=e.screenX-e.clientX,oy=e.screenY-e.clientY;                 /* where this frame sits on the screen */
+  pairs.push([cx+ox,cy+oy,e.screenX,e.screenY]);
+  const dot=(cls,x,y)=>{const d=document.createElement('div');d.className=cls;d.style.transform='translate('+(x-b.left-pad.clientLeft)+'px,'+(y-b.top-pad.clientTop)+'px)';pad.appendChild(d);};
+  dot('was',cx,cy);dot('hit',e.clientX,e.clientY);
+  at++;if(at<seq.length){place();return;}
+  tgt.style.display='none';hint.textContent='';finish();
+}
+function btn(label,cls,fn){const b=document.createElement('button');b.className='act'+(cls?' '+cls:'');b.textContent=label;b.onclick=fn;$('resB').appendChild(b);return b;}
+function show(h,p,q){$('resH').textContent=h;$('resP').innerHTML=p||'';$('resQ').innerHTML=q||'';$('resB').innerHTML='';$('res').classList.add('on');}
+function again(){btn('Test again','',startAim);if(info&&info.saved)btn('Factory setting','',factory);}
+async function finish(){
+  const miss=pairs.map(p=>Math.hypot(p[0]-p[2],p[1]-p[3])),mean=miss.reduce((a,b)=>a+b,0)/miss.length,worst=Math.max(...miss);
+  const line='Average miss: <b>'+mean.toFixed(1)+' px</b> (about '+mm(mean)+' mm) · worst '+worst.toFixed(0)+' px, over '+pairs.length+' taps.';
+  stat.innerHTML='Done: <b>'+pairs.length+'</b> taps';
+  let f=null;try{f=await api('/api/touch/fit',{screen:[screen.width,screen.height],pairs});}catch(x){}
+  if(!f||!f.ok){show('Measured',line,'This page has no tablet helper to ask, so nothing can be changed from here.');btn('Test again','',startAim);return;}
+  if(!f.worth){
+    const why={fine:'✔ The touch screen is accurate',scattered:'The taps were too scattered to measure','no gain':'✔ No steady error to correct'}[f.why]||'Measured';
+    const say={fine:'A fingertip is not more exact than this. Nothing to calibrate.',
+      scattered:'They disagree with each other by more than a calibration could explain (finger wobble). Try again with a fingertip or a stylus.',
+      'no gain':'The misses go in every direction — that is the finger, not the screen. A calibration would not remove them.'}[f.why]||'';
+    show(why,line,say);again();return;
+  }
+  show('A steady error was found',line,'Shift <b>'+f.shift_px[0]+', '+f.shift_px[1]+' px</b> · stretch <b>'+f.scale_pct[0]+' %, '+f.scale_pct[1]
+    +' %</b> (across, down). Corrected, the average miss would be about <b>'+f.after.mean_px+' px</b>.');
+  btn('Apply the correction','go',()=>apply(f.matrix));again();
+}
+async function apply(m){
+  let r=null;try{r=await api('/api/touch/apply',{matrix:m});}catch(x){}
+  if(!r||!r.ok){show('Could not apply it',(r&&r.error)||'The tablet helper did not answer.','');again();return;}
+  pend=Date.now()+r.keep_within_s*1000;
+  const tick=()=>{const s=Math.max(0,Math.ceil((pend-Date.now())/1000));
+    $('resQ').innerHTML='If you cannot hit the button, do nothing: the old setting comes back in <b>'+s+' s</b>.';
+    if(s<=0){clearInterval(pendT);pend=null;refresh().then(()=>{show('Went back to the old setting','Nobody tapped Keep in time.','');again();});}};
+  show('Applied — keep it?','Tap the green button to keep the new calibration.','');
+  btn('✔ Keep','keep',async()=>{clearInterval(pendT);pend=null;let k=null;try{k=await api('/api/touch/keep',{});}catch(x){}
+    await refresh();show(k&&k.ok?'Saved':'Not saved',k&&k.ok?'The new calibration stays, also after a restart. Test again to see the difference.':'It had already gone back to the old setting.','');again();});
+  clearInterval(pendT);pendT=setInterval(tick,500);tick();
+}
+async function factory(){let r=null;try{r=await api('/api/touch/reset',{});}catch(x){}await refresh();
+  show(r&&r.ok?'Back to the factory setting':'Could not reset','','');again();}
+async function refresh(){try{info=await api('/api/touch');}catch(x){info=null;}return info;}
+
+/* ---------- input ---------- */
+pad.addEventListener('pointerdown',e=>{if(e.target.closest('#res'))return;e.preventDefault();kind=e.pointerType||'mouse';
+  if(view==='fingers'){try{pad.setPointerCapture(e.pointerId);}catch(x){}ring(e);most=Math.max(most,down.size);hint.textContent='';fingerStat();}
+  else aimTap(e);});
+pad.addEventListener('pointermove',e=>{if(view==='fingers'&&down.has(e.pointerId))ring(e);});
+['pointerup','pointercancel'].forEach(t=>pad.addEventListener(t,lift));
+function go(v){view=v;document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  down.forEach(r=>r.el.remove());down.clear();pad.querySelectorAll('.hit,.was').forEach(n=>n.remove());$('res').classList.remove('on');tgt.style.display='none';
+  if(v==='fingers'){seq=[];hint.textContent='Put as many fingers on the screen as you can — all ten.';fingerStat();}
+  else startAim();}
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>go(b.dataset.v));
+(function(){const h=$('hold');let t=0;const off=()=>{clearTimeout(t);t=0;h.classList.remove('go');};
+  h.addEventListener('pointerdown',e=>{e.preventDefault();h.classList.add('go');t=setTimeout(()=>{$('gate').style.display='none';off();},1200);});
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>h.addEventListener(ev,off));})();
+if(/[?&]open=1/.test(location.search))$('gate').style.display='none';
+refresh();go('fingers');
+</script></body></html>

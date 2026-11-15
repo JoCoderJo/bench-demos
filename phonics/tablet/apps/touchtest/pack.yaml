@@ -1,0 +1,13 @@
+pack: 1
+id: touchtest
+name: Touch Test
+version: 1.0.0
+icon: ✋
+color: "#1f6f8b"
+description: grown-ups check the touch screen
+group: make
+tier: maker
+tile:
+  start_url: index.html
+permissions: []
+owner: Claude

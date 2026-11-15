@@ -100,6 +100,19 @@ if(/\/apps\/phonics-friends\//.test(location.pathname)){document.write('<link re
       font-size:24px;min-height:56px;padding:0;border-radius:12px}
  #keys button:active{background:var(--lily)}
 
+ /* "Pick a word": the whole game with NO microphone — tap a picture word, or let the friend choose (🎲). It opens
+    wherever the page used to need a spoken word and had no ears: mic off, mic unplugged, a tablet with no speech
+    service. With a working mic it is one tap away ("No microphone?") and one tap back ("Say a word"). */
+ #wpick{background:var(--card);border:1px solid var(--edge);border-radius:14px;padding:12px;margin:8px 0}
+ .wchips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+ .wchips button{background:var(--bg);border:2px solid var(--edge);border-radius:12px;padding:6px 2px;
+      font-family:inherit;font-size:20px;color:var(--ink);min-height:56px}
+ .wchips button .pe{display:block;font-size:30px;line-height:1.2}
+ .wchips button:active{background:var(--lily)}
+ .wrow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+ .wrow .big{font-size:16px;padding:10px 16px}
+ .walt{background:var(--bg);border:2px solid var(--edge);color:var(--ink);font-size:15px;padding:10px 14px}
+
  /* helpers panel — the ELI5 of the real hardware, live */
  details{margin-top:14px;background:var(--card);border:1px solid var(--edge);
          border-radius:12px;padding:10px 14px;font-size:14px}
@@ -157,6 +170,17 @@ if(/\/apps\/phonics-friends\//.test(location.pathname)){document.write('<link re
  :root[data-tier] .wrap:has(#keys[style*="grid"])>#mic{grid-column:3;grid-row:3}
  :root[data-tier] .wrap:has(#keys[style*="grid"])>#keys{grid-row:4}
  :root[data-tier] .wrap:has(#keys[style*="grid"]) #go{min-width:200px;font-size:26px;padding:12px 20px}
+ /* the word picker: beside the friend, nine picture words at the tier's touch size; the prompt line above it is the heading */
+ :root[data-tier] #wpick{padding:14px;border-radius:24px;margin:4px 0}
+ :root[data-tier] .wchips{gap:12px}
+ :root[data-tier] .wchips button{min-height:max(var(--tgt),116px);min-width:var(--tgt);font-size:26px;border-width:3px;border-radius:20px;padding:4px}
+ :root[data-tier] .wchips button .pe{font-size:48px;line-height:1.15}
+ :root[data-tier] .wrow{gap:12px;margin-top:12px}
+ :root[data-tier] .wrow button{min-height:max(var(--tgt),76px);min-width:var(--tgt);font-size:24px;border-radius:20px;padding:8px 22px}
+ :root[data-tier] .wrap:has(#wpick:not([style*="none"]))>h1,:root[data-tier] .wrap:has(#wpick:not([style*="none"]))>#word,
+ :root[data-tier] .wrap:has(#wpick:not([style*="none"]))>#heard,:root[data-tier] .wrap:has(#wpick:not([style*="none"]))>.row,
+ :root[data-tier] .wrap:has(#wpick:not([style*="none"]))>#mic{display:none}
+ :root[data-tier] .wrap:has(#wpick:not([style*="none"]))>#say{min-height:0;margin-bottom:6px}
  /* the friend picker takes the screen while it is open */
  :root[data-tier] #pick{grid-column:1/-1;padding:22px;border-radius:24px;margin:6px 0}
  :root[data-tier] .wrap:has(#pick:not([style*="none"]))>:not(#pick):not(h1){display:none}
@@ -210,10 +234,20 @@ if(/\/apps\/phonics-friends\//.test(location.pathname)){document.write('<link re
   <div id="say">Tap the button, then tell me a word to spell!<small>&nbsp;</small></div>
   <div id="heard" aria-live="polite"></div>
 
-  <div class="row">
+  <div id="wpick" style="display:none">
+    <div class="wchips" id="wchips"></div>
+    <div class="wrow">
+      <button class="big" id="wsurprise">🎲 Surprise me</button>
+      <button class="walt" id="wmore">🔄 More words</button>
+      <button class="walt" id="wmic" style="display:none">🎤 Say a word</button>
+    </div>
+  </div>
+
+  <div class="row" id="gorow">
     <button class="big" id="go">▶ Start</button>
   </div>
   <div id="mic" style="display:none"></div>
+  <div class="row" id="nomicrow" style="display:none"><button class="mini" id="nomic">No microphone? Tap here to pick a word</button></div>
   <div id="keys" style="display:none"></div>
   <div class="row"><button class="mini" id="switch">🐾 Change friend</button></div>
 
@@ -241,6 +275,18 @@ var WORDS=[
  {w:"GREEN", cues:["/g/ like a gulp… g-g-g","/r/ like a race car… rrr","/e/ long E, like eee!","this one is a twin — another E, eee!","/n/ hum in your nose… nnn"]},
  {w:"FRIEND",cues:["/f/ soft hiss… ffff","/r/ race car… rrr","/i/ here it is spelled with an I","/e/ and its buddy E","/n/ hum… nnn","/d/ drum… d-d-d"]}
 ];
+/* which SOUND each slot of a hand-written word plays, where a letter does not say its own first sound: the two E's of
+   GREEN are one long e (they used to play short e, "eh", under a cue that said "long E"), and the IE of FRIEND says
+   short e. Kept beside WORDS, not inside it: tools/make-voice.py reads the WORDS rows with a pattern. */
+var WKEYS={GREEN:["g","r","ee","ee","n"],FRIEND:["f","r","e","e","n","d"]};
+/* the picture words of the word picker (all from BANK, all sounded out one letter at a time except GREEN): what a
+   child can choose by tapping when there is no microphone. tools/make-voice.py reads this list and pre-renders the
+   friend's "Let's spell cat!" and the cheer for every word in it, so a tapped word never falls to the browser's voice. */
+var PIC={cat:"🐱",dog:"🐶",pig:"🐷",hen:"🐔",rat:"🐀",bug:"🐛",bat:"🦇",frog:"🐸",hog:"🐗",pup:"🐕",
+ sun:"🌞",hat:"🎩",cap:"🧢",cup:"☕",bed:"🛏️",jet:"✈️",van:"🚐",map:"🗺️",pen:"🖊️",pan:"🍳",
+ pot:"🍲",net:"🥅",pin:"📌",mop:"🧹",bin:"🗑️",can:"🥫",tap:"🚰",ten:"🔟",red:"🔴",hot:"🔥",
+ wet:"💧",run:"🏃",hop:"🐇",nap:"😴",hug:"🤗",dig:"⛏️",win:"🏆",fun:"🎉",pop:"🎈",man:"👨",
+ big:"🐘",jump:"🤸",pond:"🦆",green:"💚"};
 /* cues for any word the child asks for: one per letter, same style as the
    hand-written words above */
 var LCUE={a:"/a/ like in apple… a-a-a",b:"/b/ like a bouncing ball… b-b-b",
@@ -461,9 +507,9 @@ function buildPets(){var h='';PETKEYS.forEach(function(k){var a=ANIMALS[k];
 function openPick(){micStop();
  if(goState==='listen')setGo('word','▶ Start');
  petname.value=pet.name===ANIMALS[pet.animal].label||pet.name==='Phonics Friends'?'':pet.name;
- markSel();pick.style.display='block'}
+ markSel();pick.style.display='block';syncAlt()}
 function commitPet(){pet.name=cleanName(petname.value)||ANIMALS[pet.animal].label;
- applyPet();savePet();pick.style.display='none'}
+ applyPet();savePet();pick.style.display='none';syncAlt()}
 
 /* ---------- helper 2: the muscles ---------- */
 function led(cls,ms){leds.forEach(function(l){l.className='led '+cls});
@@ -526,10 +572,26 @@ var VOICECLIPS={
  "goodtrylistenoncemore":"audio/v0d66d899.mp3",
  "hereitisspelledwithani":"audio/v13a15d5d.mp3",
  "hiimbunnytapthebigbuttonandtellmeawordtospell":"audio/vbc07a00d.mp3",
+ "hiimbunnytapthebigbuttonandwewillspellaword":"audio/vca05385c.mp3",
  "hiimcattapthebigbuttonandtellmeawordtospell":"audio/vbe562fb1.mp3",
+ "hiimcattapthebigbuttonandwewillspellaword":"audio/v80abe651.mp3",
  "hiimfrogtapthebigbuttonandtellmeawordtospell":"audio/va1a15b62.mp3",
+ "hiimfrogtapthebigbuttonandwewillspellaword":"audio/vef8f0453.mp3",
  "hiimowltapthebigbuttonandtellmeawordtospell":"audio/vda860149.mp3",
+ "hiimowltapthebigbuttonandwewillspellaword":"audio/v7b5c7049.mp3",
  "hitapthebigbuttonandtellmeawordtospell":"audio/vc048aa38.mp3",
+ "hitapthebigbuttonandwewillspellaword":"audio/vf43b1206.mp3",
+ "hooraybnowaitbatbatyoudidithighfive":"audio/v55f4c6e9.mp3",
+ "hooraybnowaitbedbedyoudidithighfive":"audio/v907b6b77.mp3",
+ "hooraybnowaitbigbigyoudidithighfive":"audio/v4882d44a.mp3",
+ "hooraybnowaitbinbinyoudidithighfive":"audio/vcf197613.mp3",
+ "hooraybnowaitbugbugyoudidithighfive":"audio/ve8b8b814.mp3",
+ "hooraycnowaitcancanyoudidithighfive":"audio/vd4dded20.mp3",
+ "hooraycnowaitcapcapyoudidithighfive":"audio/v15191e06.mp3",
+ "hooraycnowaitcatcatyoudidithighfive":"audio/v10b58f90.mp3",
+ "hooraycnowaitcupcupyoudidithighfive":"audio/v59dd5afa.mp3",
+ "hooraydnowaitdigdigyoudidithighfive":"audio/v9279da55.mp3",
+ "hooraydnowaitdogdogyoudidithighfive":"audio/v7b98a810.mp3",
  "hoorayfnowaitfriendfriendyoudidithighfive":"audio/vb6844c83.mp3",
  "hoorayfnowaitfriendfriendyoudidithighfivefrombunny":"audio/v13c81867.mp3",
  "hoorayfnowaitfriendfriendyoudidithighfivefromcat":"audio/v4439264d.mp3",
@@ -540,30 +602,99 @@ var VOICECLIPS={
  "hoorayfnowaitfrogfrogyoudidithighfivefromcat":"audio/vcdbd1a44.mp3",
  "hoorayfnowaitfrogfrogyoudidithighfivefromfrog":"audio/vd25be338.mp3",
  "hoorayfnowaitfrogfrogyoudidithighfivefromowl":"audio/v01a6e019.mp3",
+ "hoorayfnowaitfunfunyoudidithighfive":"audio/v131dca35.mp3",
  "hooraygnowaitgreengreenyoudidithighfive":"audio/ve6ef784b.mp3",
  "hooraygnowaitgreengreenyoudidithighfivefrombunny":"audio/va46660a8.mp3",
  "hooraygnowaitgreengreenyoudidithighfivefromcat":"audio/v4da7bb08.mp3",
  "hooraygnowaitgreengreenyoudidithighfivefromfrog":"audio/vfd4222cc.mp3",
  "hooraygnowaitgreengreenyoudidithighfivefromowl":"audio/v3731014e.mp3",
+ "hoorayhnowaithathatyoudidithighfive":"audio/va6b36e8b.mp3",
+ "hoorayhnowaithenhenyoudidithighfive":"audio/v7e4278df.mp3",
+ "hoorayhnowaithoghogyoudidithighfive":"audio/vd70211b9.mp3",
+ "hoorayhnowaithophopyoudidithighfive":"audio/vfc69a2dd.mp3",
+ "hoorayhnowaithothotyoudidithighfive":"audio/v9efd9ce9.mp3",
+ "hoorayhnowaithughugyoudidithighfive":"audio/v04160f1f.mp3",
+ "hoorayjnowaitjetjetyoudidithighfive":"audio/v453155f9.mp3",
  "hoorayjnowaitjumpjumpyoudidithighfive":"audio/vcb433a52.mp3",
  "hoorayjnowaitjumpjumpyoudidithighfivefrombunny":"audio/vbc9f34ff.mp3",
  "hoorayjnowaitjumpjumpyoudidithighfivefromcat":"audio/v599a0470.mp3",
  "hoorayjnowaitjumpjumpyoudidithighfivefromfrog":"audio/v6ce2c995.mp3",
  "hoorayjnowaitjumpjumpyoudidithighfivefromowl":"audio/v53dab191.mp3",
+ "hooraymnowaitmanmanyoudidithighfive":"audio/vaf4773ef.mp3",
+ "hooraymnowaitmapmapyoudidithighfive":"audio/vab44744e.mp3",
+ "hooraymnowaitmopmopyoudidithighfive":"audio/v91fc1e6a.mp3",
+ "hooraynnowaitnapnapyoudidithighfive":"audio/v087b1774.mp3",
+ "hooraynnowaitnetnetyoudidithighfive":"audio/vdac098b6.mp3",
+ "hooraypnowaitpanpanyoudidithighfive":"audio/v1962b23e.mp3",
+ "hooraypnowaitpenpenyoudidithighfive":"audio/v768cfaf2.mp3",
+ "hooraypnowaitpigpigyoudidithighfive":"audio/v1fa04cb7.mp3",
+ "hooraypnowaitpinpinyoudidithighfive":"audio/vdd93f810.mp3",
  "hooraypnowaitpondpondyoudidithighfive":"audio/v07316e37.mp3",
  "hooraypnowaitpondpondyoudidithighfivefrombunny":"audio/vacabfaba.mp3",
  "hooraypnowaitpondpondyoudidithighfivefromcat":"audio/vf7a9f014.mp3",
  "hooraypnowaitpondpondyoudidithighfivefromfrog":"audio/v71962612.mp3",
  "hooraypnowaitpondpondyoudidithighfivefromowl":"audio/v2df6551d.mp3",
+ "hooraypnowaitpoppopyoudidithighfive":"audio/vbadc01af.mp3",
+ "hooraypnowaitpotpotyoudidithighfive":"audio/v074afe86.mp3",
+ "hooraypnowaitpuppupyoudidithighfive":"audio/v569cd31b.mp3",
+ "hoorayrnowaitratratyoudidithighfive":"audio/v98b458c7.mp3",
+ "hoorayrnowaitredredyoudidithighfive":"audio/vb1c96f1e.mp3",
+ "hoorayrnowaitrunrunyoudidithighfive":"audio/v1e43868d.mp3",
+ "hooraysnowaitsunsunyoudidithighfive":"audio/v6e571310.mp3",
+ "hooraytnowaittaptapyoudidithighfive":"audio/v110b8137.mp3",
+ "hooraytnowaittentenyoudidithighfive":"audio/v895a35b5.mp3",
+ "hoorayvnowaitvanvanyoudidithighfive":"audio/v2d74fea8.mp3",
+ "hooraywnowaitwetwetyoudidithighfive":"audio/v8784285a.mp3",
+ "hooraywnowaitwinwinyoudidithighfive":"audio/v775bc81e.mp3",
  "huminyournosennn":"audio/v751d0420.mp3",
  "humnnn":"audio/v02763fff.mp3",
  "ididntcatchthatsayspellthenyourwordlikespellfrog":"audio/v700fb3aa.mp3",
  "ididnthearyousaytheletter":"audio/v0f6899d3.mp3",
+ "letsspellbat":"audio/vb9bff2b2.mp3",
+ "letsspellbed":"audio/vd10119e3.mp3",
+ "letsspellbig":"audio/v3e77ef87.mp3",
+ "letsspellbin":"audio/vc3ace8c2.mp3",
+ "letsspellbug":"audio/v5a815760.mp3",
+ "letsspellcan":"audio/v593715a2.mp3",
+ "letsspellcap":"audio/vd309f1fd.mp3",
+ "letsspellcat":"audio/v56a5e1a9.mp3",
+ "letsspellcup":"audio/v60b9ab19.mp3",
+ "letsspelldig":"audio/vc6825315.mp3",
+ "letsspelldog":"audio/v44839997.mp3",
  "letsspellfriend":"audio/vf24c87d1.mp3",
  "letsspellfrog":"audio/v10666db3.mp3",
+ "letsspellfun":"audio/va354e4b6.mp3",
  "letsspellgreen":"audio/v476aa73c.mp3",
+ "letsspellhat":"audio/va0ff4700.mp3",
+ "letsspellhen":"audio/vfb06584a.mp3",
+ "letsspellhog":"audio/v961cc374.mp3",
+ "letsspellhop":"audio/v0702eed7.mp3",
+ "letsspellhot":"audio/v040833cc.mp3",
+ "letsspellhug":"audio/vf0575fff.mp3",
+ "letsspelljet":"audio/vc7d16c2e.mp3",
  "letsspelljump":"audio/v7dd5e646.mp3",
+ "letsspellman":"audio/v474feb19.mp3",
+ "letsspellmap":"audio/vec651ce0.mp3",
+ "letsspellmop":"audio/v52fca92f.mp3",
+ "letsspellnap":"audio/v05f0fc85.mp3",
+ "letsspellnet":"audio/v5e4d10fd.mp3",
+ "letsspellpan":"audio/v40f09fe3.mp3",
+ "letsspellpen":"audio/v5c62e0fb.mp3",
+ "letsspellpig":"audio/v2885211b.mp3",
+ "letsspellpin":"audio/vc20fb6a4.mp3",
  "letsspellpond":"audio/vf2e8a6c8.mp3",
+ "letsspellpop":"audio/v5a468239.mp3",
+ "letsspellpot":"audio/vc552b08d.mp3",
+ "letsspellpup":"audio/va7d6c9aa.mp3",
+ "letsspellrat":"audio/v978412fc.mp3",
+ "letsspellred":"audio/v2df129fb.mp3",
+ "letsspellrun":"audio/vc810a7d5.mp3",
+ "letsspellsun":"audio/v257be17e.mp3",
+ "letsspelltap":"audio/v27bd0973.mp3",
+ "letsspellten":"audio/v46f23df0.mp3",
+ "letsspellvan":"audio/v175ebd45.mp3",
+ "letsspellwet":"audio/vf0ea1ffa.mp3",
+ "letsspellwin":"audio/v1b6c8da7.mp3",
  "likeabouncingballbbb":"audio/v088481e5.mp3",
  "likeabuzzingbeezzz":"audio/vcd89a443.mp3",
  "likeabuzzymotorvvv":"audio/vd4f58a13.mp3",
@@ -590,6 +721,7 @@ var VOICECLIPS={
  "longelikeeee":"audio/v2a3d1b81.mp3",
  "noworriestapthelettersinstead":"audio/vb4fbd356.mp3",
  "noworrieswecanplaybytappingletmepickaword":"audio/v831abe08.mp3",
+ "pickawordtospell":"audio/va30714db.mp3",
  "racecarrrr":"audio/vd035543a.mp3",
  "saysaaah":"audio/v0352d760.mp3",
  "saysaaahlikethedoctor":"audio/v6011edb8.mp3",
@@ -741,12 +873,28 @@ var SR=ON_TABLET?null:(window.SpeechRecognition||window.webkitSpeechRecognition)
     misses=0,        /* wrong letters in a row */
     goState='idle',  /* idle | word | listen | letter */
     talking=false, talkEnd=0;  /* kept by mouthOpen(): the friend's voice is on / just ended */
+/* "play without the microphone", chosen by a tap and remembered: unlike micBlocked (the browser said no) it can be
+   turned back with one tap on "Say a word" in the word picker */
+var noMic=false;try{noMic=localStorage.getItem('phonicsFriendNoMic')==='1'}catch(e){}
+function setNoMic(v){noMic=!!v;try{localStorage.setItem('phonicsFriendNoMic',noMic?'1':'0')}catch(e){}}
+function earsOff(){return micBlocked||noMic}
+var wpick=document.getElementById('wpick'), wchips=document.getElementById('wchips'),
+    gorow=document.getElementById('gorow'), nomicrow=document.getElementById('nomicrow'),
+    wmic=document.getElementById('wmic');
+function wordsOpen(){return wpick.style.display!=='none'}
+/* which of the alternatives are on screen: the big button gives way to the open picker; "No microphone?" shows
+   only where a microphone could be in use; "Say a word" only where one could be turned back on */
+function syncAlt(){var open=wordsOpen(),can=!!SR&&!micBlocked;
+ gorow.style.display=open?'none':'';
+ nomicrow.style.display=(can&&!noMic&&!open&&goState!=='letter'&&pick.style.display==='none')?'':'none';
+ wmic.style.display=can?'':'none'}
 function setGo(state,label){goState=state;go.textContent=label;
- if(state==='listen')go.classList.add('live');else go.classList.remove('live')}
+ if(state==='listen')go.classList.add('live');else go.classList.remove('live');
+ syncAlt()}
 function goLetter(){setGo('letter','🔊 Hear it again')}
 function openKeys(){keys.style.display='grid'}
-function showMic(){if(!micEl)return;
- if(micBlocked||(!cur&&!micOn)){micEl.style.display='none';return}
+function showMic(){if(!micEl)return;syncAlt();
+ if(earsOff()||(!cur&&!micOn)){micEl.style.display='none';return}
  micEl.style.display='';micEl.className=micOn?'on':'';
  micEl.textContent=micOn?'I’m listening…':'🎤 Mic is off — tap the letters'}
 /* a result is the child's only when the friend is quiet — and has been for a moment,
@@ -794,7 +942,7 @@ function micStop(){micOn=false;mode=null;clearTimeout(nudge);
  if(rec&&running){try{rec.abort()}catch(e){}}showMic()}
 /* point the open mic at a question; opens it if it is not already */
 function listen(kind){mode=kind;retried=false;clearTimeout(nudge);
- if(micBlocked)return;micOn=true;
+ if(earsOff())return;micOn=true;
  if(kind==='word')setGo('listen','🎤 Listening…');
  if(running)showMic();else micStart();
  nudge=setTimeout(function(){quiet(kind)},kind==='word'?9000:10000)}
@@ -819,9 +967,7 @@ function oops(kind,code){clearTimeout(nudge);
   if(kind==='letter'){goLetter();openKeys();
    say.innerHTML='Tap the letter that makes the sound!<small>or tap the big button to hear it again</small>';
    speak("Tap the letter that makes the sound!")}
-  else{setGo('word','🎤 Say a word');
-   say.innerHTML='Tap the button when you’re ready!<small>then say a word to spell</small>';
-   speak("Tap the button when you're ready to play!")}
+  else{openWords()}   /* nothing heard (no mic plugged in? a quiet child?): the picture words, with "Say a word" beside them */
   return}
  micBlocked=true;showMic();
  if(kind==='letter'){goLetter();openKeys();
@@ -850,7 +996,7 @@ var pt=null,      /* the beat before the next sound */
 function prompt(){slots();retried=false;heard([]);mode=null;clearTimeout(nudge);clearTimeout(pt);
  /* the on-screen cue keeps its /f/ marker; spoken, the words alone match the rendered clip */
  var c=(cur.cues[idx]||'the letter that makes the next sound').replace(/^\/[^\/]{1,4}\/\s*/,'');
- var k=(cur.keys&&cur.keys[idx])||cur.w[idx].toLowerCase();
+ var ks=cur.keys||WKEYS[cur.w],k=(ks&&ks[idx])||cur.w[idx].toLowerCase();
  say.innerHTML='Listen for the sound…<small>say the letter, or tap it below</small>';
  note('0'+(idx+1),'PROMPT_'+cur.w[idx]);
  var after=function(){listen('letter')};
@@ -869,21 +1015,47 @@ function celebrate(){slots();note('30','SEQ_COMPLETE');led('on-g',2600);anim('ch
  say.innerHTML='🎉 You spelled <b>'+cur.w+'</b>!<small>'+esc(pet.name)+
   ' is so proud — the real toy wiggles all four motors here</small>';
  keys.style.display='none';
- setGo('word',micBlocked?'▶ Another word':'🎤 Say a word');
+ setGo('word',earsOff()?'▶ Another word':'🎤 Say a word');
  var cheer="Hooray! "+cur.w.charAt(0)+"… no wait — "+cur.w.split('').join(', ')+" — "+cur.w+
   "! You did it! High five";
  speak(named(cheer+" from "+pet.name+"!",cheer+"!"),
-  function(){busy=false;if(!micBlocked)askWord()})}
+  function(){busy=false;if(!earsOff())askWord()})}
 
 /* the lead-up is one line — "Let's spell frog!" — then straight into the first sound */
 function startWord(entry){cur=entry;idx=0;busy=false;retried=false;misses=0;asked=false;mode=null;
+ wpick.style.display='none';
  goLetter();openKeys();buildKeys();showMic();
  note('00','INIT_SPELLING');
  speak("Let's spell "+cur.w.toLowerCase()+"!",prompt)}
 function begin(){startWord(WORDS[wi%WORDS.length]);wi++}
-/* voice picks the word; with no voice we fall back to the built-in list */
+/* ---------- the word picker: choose the word by tapping (no microphone needed) ----------
+   Nine picture words at a time from PIC, reshuffled when the pile runs out; 🎲 takes any of them except the word
+   just spelled. A hand-written word (FROG, GREEN…) keeps its own row from WORDS. */
+var wpile=[], wat=0, lastW='';
+function shuffled(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function entryFor(W){for(var i=0;i<WORDS.length;i++)if(WORDS[i].w===W)return WORDS[i];return makeWord(W)}
+function chooseWord(w){lastW=w;startWord(entryFor(w.toUpperCase()))}
+function fillWords(){if(wat+9>wpile.length){wpile=shuffled(Object.keys(PIC));wat=0}
+ var h='';wpile.slice(wat,wat+9).forEach(function(w){
+  h+='<button data-w="'+w+'"><span class="pe">'+PIC[w]+'</span>'+w+'</button>'});
+ wat+=9;wchips.innerHTML=h;
+ wchips.querySelectorAll('button').forEach(function(b){b.onclick=function(){chooseWord(b.dataset.w)}})}
+function openWords(){cur=null;busy=false;retried=false;heard([]);clearTimeout(pt);
+ if(micOn)micStop();else{mode=null;clearTimeout(nudge)}
+ document.getElementById('word').innerHTML='';keys.style.display='none';
+ fillWords();wpick.style.display='block';setGo('word','▶ Start');showMic();
+ say.innerHTML='Pick a word to spell!<small>tap a picture — or the dice for a surprise</small>';
+ speak("Pick a word to spell!")}
+document.getElementById('wsurprise').onclick=function(){var all=Object.keys(PIC).filter(function(w){return w!==lastW});
+ chooseWord(all[Math.floor(Math.random()*all.length)])};
+document.getElementById('wmore').onclick=fillWords;
+/* back to the microphone: forget "no microphone" and ask for a spoken word */
+wmic.onclick=function(){setNoMic(false);wpick.style.display='none';askWord()};
+document.getElementById('nomic').onclick=function(){setNoMic(true);openWords()};
+/* voice picks the word; with no voice (blocked, switched off, or none plugged in) the child picks it by tapping */
 function askWord(){cur=null;retried=false;heard([]);mode=null;clearTimeout(nudge);
- if(micBlocked){begin();return}
+ if(earsOff()){openWords();return}
+ wpick.style.display='none';
  setGo('word','🎤 Say a word');
  say.innerHTML='Say <b>spell</b>, then your word!<small>like “spell frog”</small>';
  speak("What shall we spell? Say spell, then your word — like, spell frog!",
@@ -922,6 +1094,7 @@ buildPets();
 var havePet=loadPet();
 applyPet();
 if(!havePet)openPick();
+syncAlt();
 /* voices load async in Chrome/Safari — pick now and again when they arrive */
 if(window.speechSynthesis){pickVoice();
  if(speechSynthesis.addEventListener)speechSynthesis.addEventListener('voiceschanged',pickVoice);
@@ -930,7 +1103,7 @@ if(window.speechSynthesis){pickVoice();
    and whether it has ears at all. BUILD is the request that last changed this page; the
    release id (VERSION+git hash) is stamped in by the publish script. A wrapped word row
    under a build number that cannot wrap means the phone is holding an old copy. */
-var BUILD='118';
+var BUILD='119';
 (function(){var el=document.getElementById('build'),m=document.querySelector('meta[name="bench-release"]');
  var ua=navigator.userAgent||'',v=function(re){var x=ua.match(re);return x?' '+x[1]:''};
  var eng=/iPhone|iPad|iPod/.test(ua)?'iOS '+(/CriOS/.test(ua)?'Chrome':/FxiOS/.test(ua)?'Firefox':'Safari')+v(/OS (\d+)_/)

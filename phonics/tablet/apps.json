@@ -300,6 +300,19 @@
    ]
   },
   {
+   "id": "touchtest",
+   "title": "Touch Test",
+   "subtitle": "grown-ups check the touch screen",
+   "icon": "✋",
+   "color": "#1f6f8b",
+   "path": "apps/touchtest/index.html",
+   "needs": [],
+   "source": "tablet/apps/touchtest",
+   "tier": "maker",
+   "group": "make",
+   "version": "1.0.0"
+  },
+  {
    "id": "trace",
    "title": "Trace It",
    "subtitle": "trace the letters with your finger",
