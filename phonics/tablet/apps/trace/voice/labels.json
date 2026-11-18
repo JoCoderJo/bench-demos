@@ -1,0 +1,26 @@
+{
+ "voice": "en_US-kristin-medium",
+ "length_scale": 1.05,
+ "labels": {
+  "small": {
+   "file": "label_small.mp3",
+   "text": "Small letters"
+  },
+  "caps": {
+   "file": "label_caps.mp3",
+   "text": "Capital letters"
+  },
+  "words": {
+   "file": "label_words.mp3",
+   "text": "Words"
+  },
+  "names": {
+   "file": "label_names.mp3",
+   "text": "Names"
+  },
+  "places": {
+   "file": "label_places.mp3",
+   "text": "Places"
+  }
+ }
+}

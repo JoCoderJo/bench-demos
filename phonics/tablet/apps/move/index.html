@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Move to Learn</title>
+<link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
+<script src="words.js"></script>
+<!-- tablet/apps/move — Move to Learn: Spelling Pop and Math Pop, played by MOVING in front of the tablet's front camera.
+     A port of the TV game "Move to Learn" (a separate project: USB folder "Leaning Move Game for TV", game/index.html, Bench
+     requests #150 Spelling Pop, #158 Math Pop). The game is the same — bubbles drift under a picture (or a sum), the child
+     reaches into the right bubble to pop it, 5 words or sums a round, 1 to 3 stars each, 1 or 2 players side by side, grades
+     K / 1st / 2nd, and a tap on a bubble ALWAYS works. What changed for the tablet (2026-11-16):
+
+     Camera    getUserMedia does not exist on the tablet (kiosk policy, and the CSI cameras are not browser devices). Frames
+               come from the camera helper livecam.py on 127.0.0.1:8095, as in apps/camera: KT.permission('camera') → token,
+               POST /select/front, <img> on /stream (MJPEG). EVERY picture request carries profile=motion (640x480 from the
+               binned sensor mode: about half the cost of the photo profile, short exposures); one request without it would
+               make the helper restart the camera. getUserMedia is kept only as the fallback where no helper answers (the
+               public demo page on a laptop).
+     Cheap     (docs/CHIPS.md; measured on the TV page: 6 ms of main thread per camera frame, 40 ms at 4x CPU throttling)
+               · the picture behind the game is the <img> itself, mirrored with CSS — the compositor draws it; no canvas
+                 ever gets the full frame
+               · motion: a second reader of the same stream hands each NEW picture (at most 12 a second) to WebCodecs
+                 ImageDecoder at 1/4 size (160x120, the JPEG's own DCT scaling, off the main thread); its luma is compared
+                 with the last one. Nothing is analysed at animation-frame rate, nothing is read back from the GPU
+               · bubbles are DOM elements moved with transform (each rasterised once, then only composited) by ONE loop
+                 (a 33 ms timer = 30 a second, ?fps= to try another) that writes whole pixels and skips a bubble that did
+                 not move a pixel; the TV page repainted a full-screen canvas (gradients + text) 60 times a second
+               · effects are one-shot transitions; no repeating animation anywhere (the TV page's pulsing slot, wobble,
+                 particles and per-frame sparkles are gone; "the game sees you" is a 160x120 dot overlay updated per
+                 camera frame)
+               · the start screen and the score screen run NOTHING: no loop, no stream (the <img> src is dropped so the
+                 helper rests the sensor 20 s later), and a hidden page stops both too
+     Voice     speechSynthesis is silent on the tablet: every word, letter NAME and number is a Piper clip made once by
+               make-voice.py (D-010), a sum is said as a sequence of clips (three · plus · five)
+     Gone      Cast to TV, the Pi kiosk switch, fullscreen, the wake lock, the arrow-key menu, the camera / lens /
+               sensitivity rows (?sens=low|med|high and ?lens=rear remain for a grown-up at a laptop)
+     Sleep     the tablet sleeps a tile nobody touches (PLAN D-102). A child who pops a bubble by moving is playing with
+               the hands off the screen, so each such pop posts {kt:'active'} to the launcher (at most every 10 s), which
+               counts it like a touch. The start screen, the score screen and a round nobody plays send nothing and sleep.
+     ◁ (kt:'back') during a round or on the score screen goes back to the start screen. Choices and the star total are kept
+     per kid in /api/store/move/<kid>/settings.json (localStorage on a laptop). ?debug=1 shows game fps, analysis ms per
+     camera frame and camera frames per second. window.MV is the read-only hook of tablet/tests/move_dom.py. -->
+<style>
+:root{--p1:#ffb340;--p2:#5ee0a0;--sky1:#0e1b33;--sky2:#1d3f7a;--sky3:#2f77c9;--tgt:var(--kt-target-min,75px);--gap:var(--kt-target-gap,10px);--dead:var(--kt-target-dead-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--sky1);color:#fff;font:var(--kt-type-body,22px)/1.25 var(--kt-font-ui,system-ui,sans-serif);touch-action:none}
+button{font:inherit;color:inherit;border:0;padding:0;background:none;cursor:pointer}
+#sky{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 110%,var(--sky3) 0%,var(--sky2) 45%,var(--sky1) 100%)}
+body.camon #sky{display:none}
+/* the camera picture IS this element: mirrored (and turned, the sensors sit upside down) with a transform, drawn by the compositor */
+.cam{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;display:none;background:#000}
+.cam.on{display:block}
+#glow{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;display:none;opacity:.8}
+body.camon #glow{display:block}
+/* ---- a round: one lane per player */
+#lanes{position:absolute;inset:0;display:flex}
+.lane{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}
+.lane+.lane{border-left:3px dashed rgba(255,255,255,.3)}
+.head{display:grid;grid-template-columns:var(--tgt) minmax(0,1fr) var(--tgt);align-items:center;gap:12px;padding:8px 14px 10px}
+.two .head{grid-template-columns:var(--tgt) minmax(0,1fr)}
+body.camon .head{background:rgba(6,14,32,.66)}       /* camera on: one flat dark band keeps the picture and the boxes readable */
+.mid{min-width:0;text-align:center}
+.who{display:inline-block;font-weight:700;font-size:16px;letter-spacing:.12em;padding:1px 12px;border-radius:999px;background:var(--c);color:#222}
+.pic{font-size:80px;line-height:1.08;transition:transform .25s}
+.pic.bump{transform:scale(1.16) rotate(-6deg)}
+.pic.sum{font-size:54px;font-weight:700;letter-spacing:.04em;white-space:nowrap;line-height:1.25}
+.pic.sum.bump{transform:scale(1.1)}
+.count{font-size:30px;line-height:1.15;letter-spacing:.04em}
+.count:empty{display:none}
+.count .gone{opacity:.28;filter:grayscale(1)}
+.count .op{font-weight:700;margin:0 .2em}
+.slots{display:flex;justify-content:center;gap:8px;margin:6px 0 2px}
+.slot{width:50px;height:60px;border-radius:12px;background:rgba(255,255,255,.14);border:3px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;
+  font-size:38px;font-weight:700;text-transform:uppercase;line-height:1}
+.slot.wide{width:86px}
+.slot.done{background:var(--c);border-color:#fff;color:#222}
+.slot.next{border-color:#fff;background:rgba(255,255,255,.34)}
+.stars{font-size:22px;letter-spacing:.1em;min-height:1.3em}
+.stars .no{opacity:.35}
+.say{width:var(--tgt);height:var(--tgt);border-radius:50%;background:rgba(255,255,255,.18);border:3px solid rgba(255,255,255,.55);font-size:calc(var(--tgt) * .42);line-height:1;display:grid;place-items:center}
+.say:active,.say.kt-press{transform:scale(.94)}
+.zone{flex:1;min-height:0}
+/* ---- bubbles: one element each, moved by transform only (its own layer, rasterised once) */
+#field{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.bub{position:absolute;left:0;top:0;will-change:transform}
+.bub .in{width:100%;height:100%;border-radius:50%;display:grid;place-items:center;font-weight:700;line-height:1;color:#1b2a44;border:3px solid rgba(255,255,255,.8);
+  text-transform:uppercase;transform:scale(.01);transition:transform .3s cubic-bezier(.3,1.5,.5,1),opacity .22s}
+.bub.live .in{transform:scale(1)}
+.bub.hit .in{outline:6px solid #fff}                          /* the camera sees movement in this bubble */
+.bub.hint .in{outline:9px solid #fff;outline-offset:5px}       /* stuck for a while: this is the one */
+.bub.wrong .in{background:radial-gradient(circle at 32% 30%,#ffb0a0 8%,#e5534b 70%,#a02020 100%)!important;animation:mv-shake .4s}
+.bub.pop .in{transform:scale(1.7);opacity:0;transition:transform .22s ease-out,opacity .22s}
+@keyframes mv-shake{20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.fly{position:absolute;left:0;top:0;border-radius:50%;display:grid;place-items:center;font-weight:700;line-height:1;color:#1b2a44;text-transform:uppercase;
+  transition:transform .42s cubic-bezier(.2,.7,.3,1);will-change:transform}
+.conf{position:absolute;left:0;top:0;width:12px;height:7px;border-radius:2px;transition:transform 1.3s cubic-bezier(.3,0,.8,.6),opacity 1.3s ease-in;will-change:transform}
+#toast{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%) scale(.6);z-index:6;pointer-events:none;font-weight:700;font-size:110px;color:#fff;
+  text-shadow:0 6px 0 rgba(0,0,0,.3);opacity:0;transition:opacity .25s,transform .25s}
+#toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#camMsg{position:absolute;left:50%;bottom:calc(var(--dead) + 14px);transform:translateX(-50%);z-index:4;width:max-content;max-width:min(92vw,760px);background:rgba(6,14,32,.9);
+  border:2px solid #ffd37a;border-radius:16px;padding:10px 18px;font-weight:700;font-size:var(--kt-type-label,20px);text-align:center;pointer-events:none;display:none}
+#camMsg.show{display:block}
+#dbg{position:absolute;left:6px;bottom:6px;z-index:8;font:13px/1.35 ui-monospace,monospace;background:rgba(0,0,0,.62);padding:5px 9px;border-radius:6px;display:none;white-space:pre;pointer-events:none}
+#stop{position:absolute;top:8px;right:8px;z-index:4;width:var(--tgt);height:var(--tgt);border-radius:50%;background:rgba(0,0,0,.4);border:3px solid rgba(255,255,255,.45);font-size:calc(var(--tgt) * .4);font-weight:700}
+#stop[hidden]{display:none}
+/* ---- start screen and score screen (nothing runs behind them) */
+.screen{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px 32px max(14px,var(--dead));z-index:5}
+.screen[hidden]{display:none}
+.panel{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 36px;align-items:center;width:min(100%,1080px)}
+h1{font-size:calc(var(--kt-type-title,34px) * 1.5);margin:0;line-height:1;font-weight:700;color:#ffe9b0;text-shadow:0 4px 0 rgba(0,0,0,.35)}
+.top{grid-column:1/-1;display:flex;align-items:baseline;gap:18px}
+.tag{font-size:var(--kt-type-label,20px);opacity:.92;flex:1;min-width:0}
+#total{font-size:var(--kt-type-title,34px);font-weight:700;white-space:nowrap}
+.rows{display:flex;flex-direction:column;gap:var(--gap)}
+.seg{display:flex;gap:var(--gap)}
+.seg button{flex:1;min-width:var(--tgt);min-height:var(--tgt);border-radius:var(--kt-radius-card,16px);background:rgba(255,255,255,.14);border:4px solid rgba(255,255,255,.3);
+  display:flex;align-items:center;justify-content:center;gap:12px;font-weight:700;font-size:var(--kt-type-title,34px);line-height:1;padding:0 12px}
+.seg button .kt-icon{font-size:calc(var(--tgt) * .5)}
+.seg button.on{background:#fff;color:#123;border-color:#ffb340}
+.seg button.p1.on{background:var(--p1)}.seg button.p2.on{background:var(--p2)}
+.seg button:active,.seg button.kt-press{transform:scale(.96)}
+.go{width:max(210px,calc(var(--tgt) * 1.9));height:max(210px,calc(var(--tgt) * 1.9));border-radius:50%;color:#123;background:linear-gradient(180deg,#ffe08a,#ffb340);
+  box-shadow:0 10px 0 #b97612,0 16px 26px rgba(0,0,0,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-weight:700;font-size:var(--kt-type-title,34px)}
+.go .kt-icon{font-size:96px}
+.go:active,.go.kt-press{transform:translateY(5px);box-shadow:0 5px 0 #b97612}
+.note{grid-column:1/-1;font-size:var(--kt-type-label,20px);opacity:.8}
+#end .panel{grid-template-columns:1fr;justify-items:center;text-align:center;gap:12px}
+.score{display:flex;justify-content:center;gap:20px;flex-wrap:wrap}
+.sc{background:rgba(255,255,255,.12);border-radius:18px;padding:12px 26px;min-width:200px}
+.sc .n{font-size:60px;font-weight:700;line-height:1.1}
+.sc .s{font-size:var(--kt-type-label,20px);opacity:.9}
+.acts{display:flex;gap:var(--kt-target-gap,24px);align-items:center;justify-content:center}
+#end .go{width:max(150px,calc(var(--tgt) * 1.35));height:max(150px,calc(var(--tgt) * 1.35))}
+#end .go .kt-icon{font-size:70px}
+.ghost{min-width:var(--tgt);min-height:var(--tgt);padding:0 22px;border-radius:var(--kt-radius-card,16px);background:rgba(255,255,255,.14);border:4px solid rgba(255,255,255,.35);
+  display:flex;align-items:center;justify-content:center;gap:10px;font-weight:700;font-size:var(--kt-type-label,20px)}
+.ghost .kt-icon{font-size:calc(var(--tgt) * .5)}
+</style></head>
+<body>
+<div id="sky"></div>
+<img id="cam" class="cam" alt="">
+<video id="vid" class="cam" autoplay playsinline muted></video>
+<canvas id="glow" width="2" height="2"></canvas>
+<div id="lanes"></div>
+<div id="field"></div>
+<button id="stop" hidden aria-label="Stop">✕</button>
+<div id="toast"></div>
+<div id="camMsg"></div>
+<div id="dbg"></div>
+
+<div id="menu" class="screen">
+ <div class="panel">
+  <div class="top"><h1>Move to Learn</h1><div class="tag" id="tagline"></div><div id="total"></div></div>
+  <div class="rows">
+   <div class="seg" id="oGame">
+    <button data-v="spell" data-say="voice/say_spell.mp3" aria-label="Spelling"><span class="kt-icon">🔤</span><span class="kt-label">Spelling</span></button>
+    <button data-v="math" data-say="voice/say_math.mp3" aria-label="Math"><span class="kt-icon">🔢</span><span class="kt-label">Math</span></button></div>
+   <div class="seg" id="oPlayers">
+    <button class="p1" data-v="1" data-say="voice/say_p1.mp3" aria-label="One player"><span class="kt-icon">🧒</span><span class="kt-label">1 player</span></button>
+    <button class="p2" data-v="2" data-say="voice/say_p2.mp3" aria-label="Two players"><span class="kt-icon">🧒🧒</span><span class="kt-label">2 players</span></button></div>
+   <div class="seg" id="oGrade">
+    <button data-v="K" data-say="voice/say_gk.mp3" aria-label="Kindergarten">K</button>
+    <button data-v="1" data-say="voice/say_g1.mp3" aria-label="First grade">1st</button>
+    <button data-v="2" data-say="voice/say_g2.mp3" aria-label="Second grade">2nd</button></div>
+  </div>
+  <button class="go" id="start" aria-label="Start"><span class="kt-icon">▶</span><span class="kt-label">START</span></button>
+  <div class="note">📷 Stand back and wave a hand into a bubble to pop it. A tap on a bubble works too.</div>
+ </div>
+</div>
+
+<div id="end" class="screen" hidden>
+ <div class="panel">
+  <h1>🏆 Great job!</h1>
+  <div class="tag" id="endTag"></div>
+  <div class="score" id="score"></div>
+  <div class="acts">
+   <button class="go" id="again" aria-label="Play again"><span class="kt-icon">🔁</span><span class="kt-label">Again</span></button>
+   <button class="ghost" id="toMenu" data-say="voice/say_menu.mp3" aria-label="Menu"><span class="kt-icon">🎮</span><span class="kt-label">Menu</span></button>
+  </div>
+ </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const Q = new URLSearchParams(location.search);
+const LIVE = location.protocol.startsWith('http');               // served by the launcher: the per-kid store exists
+const post = m => { try { if (parent !== window) parent.postMessage(m, '*'); } catch (e) {} };
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const still = () => document.documentElement.dataset.motion === 'off';
+let DEBUG = Q.get('debug') === '1';
+
+/* ---------------- what a round is made of ---------------- */
+const WORDS = window.MOVE_WORDS;                                  // words.js: one list per grade, a picture each
+const DISTRACT = {K: 2, 1: 3, 2: 4};                              // extra wrong letters (or wrong numbers) floating with the right ones
+const PER_ROUND = 5;                                              // words, or sums, per round
+const MATH_MAX = {K: 5, 1: 10, 2: 20};                            // K adds and takes away within 5, 1st within 10, 2nd within 20
+const COUNTERS = ['🍎', '🍓', '⭐', '🐟', '🎈', '🍪', '🐸', '🚗'];
+const GAMES = {spell: {tag: 'Reach up and pop the letters to spell the word!', intro: 'intro_spell'},
+               math:  {tag: 'Reach up and pop the right answer!', intro: 'intro_math'}};
+const COLORS = ['#ffb340', '#5ee0a0'];
+const SENS_ALL = {low: {diff: 48, frac: .42}, med: {diff: 32, frac: .30}, high: {diff: 20, frac: .22}};
+const SENS = SENS_ALL[Q.get('sens')] || SENS_ALL.med;             // how much a cell must change, and how much of a bubble must move
+const HIT_FRAMES = 2;                                             // camera frames in a row a bubble must be moving in before it pops
+const LENS = Q.get('lens') === 'rear' ? 'rear' : 'front';         // front = the 120° lens that faces the child
+const FPS = Math.max(5, Math.min(60, +Q.get('fps') || 30)), STEP_MS = 1000 / FPS - 2;
+const rnd = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function makeSum(grade, seen) {
+  const max = MATH_MAX[grade]; let a, b, add, ans;
+  for (let t = 0; t < 40; t++) {
+    add = Math.random() < (grade === 'K' ? .6 : .5);
+    if (add) { a = rnd(1, max - 1); b = rnd(1, max - a); ans = a + b; } else { a = rnd(2, max); b = rnd(1, a); ans = a - b; }
+    const key = a + (add ? '+' : '-') + b; if (!seen[key]) { seen[key] = 1; break; }
+  }
+  const op = add ? '+' : '−', word = add ? 'plus' : (grade === 'K' ? 'takeaway' : 'minus');      // K says "take away", 1st and 2nd "minus"
+  const emo = COUNTERS[rnd(0, COUNTERS.length - 1)];
+  const rep = (n, cls) => { let s = ''; for (let i = 0; i < n; i++) s += cls ? '<span class="' + cls + '">' + emo + '</span>' : emo; return s; };
+  const count = grade !== 'K' ? '' : add ? rep(a) + '<span class="op">+</span>' + rep(b) : rep(a - b) + rep(b, 'gone');   // things to count
+  return {parts: [String(ans)], label: a + ' ' + op + ' ' + b + ' = ' + ans, pic: a + ' ' + op + ' ' + b + ' = ?', picDone: a + ' ' + op + ' ' + b + ' = ' + ans,
+          sum: true, count, ans, max, sayQ: ['n' + a, word, 'n' + b], sayDone: ['n' + ans, 'n' + a, word, 'n' + b, 'is', 'n' + ans]};
+}
+function numberDistractors(item, n) {                               // numbers near the answer, never the answer, all different, inside 0..max
+  const out = []; let tries = 0, span = Math.max(3, n);
+  while (out.length < n && tries++ < 200) {
+    const v = item.ans + rnd(-span, span);
+    if (v < 0 || v > item.max || v === item.ans || out.indexOf(String(v)) >= 0) { if (tries > 60) span++; continue; }
+    out.push(String(v));
+  }
+  return out;
+}
+function pickItems(grade, n) {
+  const out = [], seen = {};
+  if (S.game === 'math') { for (let i = 0; i < n; i++) out.push(makeSum(grade, seen)); return out; }
+  const pool = shuffle(WORDS[grade].slice());
+  for (let i = 0; i < pool.length && out.length < n; i++) { const w = pool[i]; if (seen[w[0]]) continue; seen[w[0]] = 1;
+    out.push({parts: w[0].split(''), label: w[0], pic: w[1] || '🗣️', picDone: w[1] || '🗣️', sayQ: ['w_' + w[0]], sayDone: ['w_' + w[0]]}); }   // a sight word has no picture: listen, or tap 🔊
+  return out;
+}
+function distractors(item, n) {
+  if (item.sum) return numberDistractors(item, n);
+  return shuffle('abcdefghijklmnopqrstuvwxyz'.split('').filter(c => item.parts.indexOf(c) < 0)).slice(0, n);
+}
+
+/* ---------------- choices + stars, per kid ---------------- */
+const S = {game: 'spell', players: '1', grade: 'K'};
+const OK = {game: ['spell', 'math'], players: ['1', '2'], grade: ['K', '1', '2']};
+let kid = {id: 'default', name: '', age: 0}, gotHello = false, starTotal = 0, stored = false;
+const storeUrl = () => '/api/store/move/' + encodeURIComponent(kid.id) + '/settings.json';
+const lsKey = () => 'move.settings.' + kid.id;
+function paintMenu() {
+  for (const [id, key] of [['oGame', 'game'], ['oPlayers', 'players'], ['oGrade', 'grade']])
+    $(id).querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === S[key]));
+  $('tagline').textContent = GAMES[S.game].tag;
+  $('total').textContent = starTotal ? '⭐ ' + starTotal : '';
+}
+async function loadS() {
+  const forKid = kid.id; let p = null;
+  if (LIVE) { try { const r = await fetch(storeUrl(), {cache: 'no-store'}); if (r.ok) p = await r.json(); } catch (e) {} }
+  if (!p) { try { p = JSON.parse(localStorage.getItem(lsKey()) || 'null'); } catch (e) {} }
+  if (forKid !== kid.id) return;
+  stored = !!(p && typeof p === 'object'); starTotal = 0;
+  if (stored) { for (const k in OK) if (OK[k].indexOf(String(p[k])) >= 0) S[k] = String(p[k]); starTotal = Math.max(0, +p.stars || 0); }
+  else if (kid.age) S.grade = kid.age <= 5 ? 'K' : kid.age === 6 ? '1' : '2';      // first visit: the grade that fits the kid's age
+  for (const k in OK) { const v = Q.get(k); if (v && OK[k].indexOf(v) >= 0) S[k] = v; }   // ?game=math&players=2&grade=1 (tests, a link)
+  paintMenu();
+}
+function saveS() {
+  stored = true;                                                   // from here on the choices on screen are the truth; a late hello must not reload over them
+  const body = JSON.stringify({game: S.game, players: S.players, grade: S.grade, stars: starTotal});
+  try { localStorage.setItem(lsKey(), body); } catch (e) {}
+  if (LIVE) { try { fetch(storeUrl(), {method: 'PUT', headers: {'Content-Type': 'application/json'}, body, keepalive: true}).catch(() => {}); } catch (e) {} }
+}
+for (const [id, key] of [['oGame', 'game'], ['oPlayers', 'players'], ['oGrade', 'grade']])
+  $(id).querySelectorAll('button').forEach(b => b.addEventListener('click', () => { S[key] = b.dataset.v; paintMenu(); saveS(); }));
+
+/* ---------------- sound: tiny synthesized pops (no files), the voice from clips ---------------- */
+let AC = null;
+const ceiling = () => (window.KT && KT.ceiling != null) ? Math.max(0, Math.min(1, KT.ceiling)) : 1;
+function audio() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === 'suspended') AC.resume(); return AC; }
+function tone(f0, f1, dur, type, gain, when) {
+  const ac = audio(), vol = (gain || .3) * ceiling(); if (!ac || vol <= 0) return; const t = ac.currentTime + (when || 0);
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type || 'sine'; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + dur + .02);
+}
+const SFX = {
+  pop:   () => { tone(520, 1400, .12, 'sine', .35); tone(900, 200, .08, 'triangle', .12, .02); },
+  wrong: () => { tone(220, 140, .22, 'square', .12); },
+  word:  () => { [523, 659, 784, 1047].forEach((f, i) => tone(f, f, .18, 'triangle', .22, i * .09)); },
+  star:  () => { tone(1568, 2093, .25, 'sine', .18); }
+};
+// the voice: one line at a time. say(keys) drops what was being said; {queue:true} waits its turn (2 players each get their word)
+const VO = {}, said = [];
+function clip(key) { let a = VO[key]; if (!a) { a = VO[key] = new Audio('voice/' + key + '.mp3'); a.preload = 'auto'; } return a; }
+let vq = [], vcur = null;
+function sayNext() {
+  if (vcur || !vq.length) return;
+  const key = vq.shift(), a = clip(key); vcur = a; said.push(key); if (said.length > 60) said.shift();
+  let t = 0;
+  const done = () => { a.removeEventListener('ended', done); a.removeEventListener('error', done); clearTimeout(t); if (vcur === a) { vcur = null; sayNext(); } };
+  a.addEventListener('ended', done); a.addEventListener('error', done); t = setTimeout(done, 5000);
+  try { a.currentTime = 0; a.volume = ceiling(); const p = a.play(); if (p && p.catch) p.catch(done); } catch (e) { done(); }
+}
+function hush() { vq = []; if (vcur) { const a = vcur; vcur = null; try { a.pause(); } catch (e) {} } }
+function say(keys, opt) { if (!opt || !opt.queue) hush(); vq = vq.concat(keys); if (vq.length > 16) vq = vq.slice(-16); sayNext(); }
+function sayLetter(ch) {                                           // a letter's NAME, at once, beside whatever the line is saying
+  const a = clip('l_' + ch); said.push('l_' + ch);
+  try { a.currentTime = 0; a.volume = ceiling(); const p = a.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {}
+}
+
+/* ---------------- camera: the helper's MJPEG stream (or a webcam where there is no helper) + the motion grid ---------------- */
+let camPort = '8095';
+try { const q = Q.get('cam_port'); if (q) camPort = q; else if (window.parent && window.parent.CAM_PORT) camPort = String(window.parent.CAM_PORT); } catch (e) {}
+const HELPER = 'http://127.0.0.1:' + camPort;
+const camEl = $('cam'), vid = $('vid'), glowCv = $('glow'), camMsg = $('camMsg');
+camEl.crossOrigin = 'anonymous';
+const CAM = {state: 'off', mode: null, why: '', perm: null, token: '', gen: 0, abort: null, reopenT: 0, timer: 0, stream: null, busy: false, buf: null,
+             decode: 'ImageDecoder' in window ? 'webcodecs' : 'bitmap', fmt: '', decErr: 0, opens: 0, openAt: 0, lastRx: 0, shown: false,
+             rx: 0, frames: 0, dropped: 0, ms: 0, msN: 0, status: null};
+let grid = null, MAP = {s: 1, ox: 0, oy: 0}, FLIPX = true, FLIPY = false, W = 0, H = 0;
+// every request for pictures names the cheap profile; a request without it would switch the helper back to "photo" (a camera restart)
+const hUrl = (p, q) => HELPER + p + '?profile=motion' + (q ? '&' + q : '') + (CAM.token ? '&token=' + encodeURIComponent(CAM.token) : '');
+let msgT = 0;
+function tell(text, ms) { camMsg.textContent = text; camMsg.classList.add('show'); clearTimeout(msgT); msgT = setTimeout(() => camMsg.classList.remove('show'), ms || 7000); }
+function fetchT(url, opt, ms) { const ac = new AbortController(), t = setTimeout(() => ac.abort(), ms); return fetch(url, Object.assign({signal: ac.signal, cache: 'no-store'}, opt || {})).finally(() => clearTimeout(t)); }
+function setFlip(mode) {
+  // both lenses look at the player, so the picture is a mirror. The helper's sensors sit upside down in the pod: the Camera tile
+  // keeps the turn per camera in localStorage (kt-camera-view, default 180°) and this tile follows it; ?rot=0|180 overrides.
+  let rot = 0;
+  if (mode === 'helper') { rot = 180; try { const v = JSON.parse(localStorage.getItem('kt-camera-view') || 'null'); if (v && v.rot && v.rot[LENS] != null) rot = +v.rot[LENS]; } catch (e) {}
+    if (Q.get('rot') != null) rot = +Q.get('rot'); }
+  FLIPY = rot === 180; FLIPX = !FLIPY;                              // mirror alone = flip x; turned 180° and mirrored = flip y
+  const tf = 'scale(' + (FLIPX ? -1 : 1) + ',' + (FLIPY ? -1 : 1) + ')';
+  camEl.style.transform = vid.style.transform = glowCv.style.transform = tf;
+}
+function camShow(el) { if (CAM.shown) return; CAM.shown = true; el.classList.add('on'); document.body.classList.add('camon'); }
+async function camStart() {
+  if (CAM.state !== 'off' || Q.get('cam') === '0') return;        // ?cam=0: tap only (to measure the game without the camera)
+  const gen = ++CAM.gen; CAM.state = 'starting'; CAM.why = '';
+  // 1. may this tile use the camera? The launcher asks the grown-up the first time; a page with no launcher above it is on its own
+  if (!CAM.perm) {
+    let perm = {granted: true, token: Q.get('token') || '', state: 'standalone'};
+    if (window.KT && KT.permission) perm = await Promise.race([KT.permission('camera'), new Promise(r => setTimeout(() => { if (!gotHello) r(perm); }, 2500))]);
+    if (gen !== CAM.gen) return;
+    if (!perm.granted) { CAM.state = 'off'; CAM.why = 'denied'; tell('📷 The camera is not allowed. Tap the bubbles!'); return; }
+    CAM.perm = perm; CAM.token = perm.token || CAM.token;
+  }
+  // 2. the tablet's camera helper: front camera, cheap profile
+  let r = null;
+  try { r = await fetchT(hUrl('/select/' + LENS), {method: 'POST'}, 3000); } catch (e) {}
+  if (gen !== CAM.gen) return;
+  if (r && r.status === 403) {
+    let j = {}; try { j = await r.json(); } catch (e) {}
+    if (gen !== CAM.gen) return;
+    CAM.state = 'off'; CAM.why = j.paused ? 'paused' : 'denied';
+    tell(j.paused ? '📷 The camera is switched off. Tap the bubbles!' : '📷 The camera is not allowed. Tap the bubbles!'); return;
+  }
+  if (r) { CAM.mode = 'helper'; CAM.state = 'on'; setFlip('helper'); openStream(gen); return; }
+  // 3. no helper here (a laptop, the public demo page): the browser's own camera, if it has one and lets us
+  if (await webcamStart(gen)) return;
+  if (gen !== CAM.gen) return;
+  CAM.state = 'off'; CAM.why = CAM.why || 'none'; tell('📷 No camera here. Tap the bubbles!');
+}
+function camStop() {
+  CAM.gen++; CAM.state = 'off'; CAM.mode = null; CAM.shown = false; CAM.busy = false;
+  if (CAM.abort) { try { CAM.abort.abort(); } catch (e) {} CAM.abort = null; }
+  clearTimeout(CAM.reopenT); clearInterval(CAM.timer); CAM.timer = 0;
+  camEl.removeAttribute('src'); camEl.classList.remove('on');     // no src = no viewer: the helper rests the sensor 20 s later
+  if (CAM.stream) { try { CAM.stream.getTracks().forEach(t => t.stop()); } catch (e) {} CAM.stream = null; vid.srcObject = null; }
+  vid.classList.remove('on'); document.body.classList.remove('camon');
+  grid = null; glowLit = false; camMsg.classList.remove('show');
+}
+function openStream(gen) {
+  if (gen !== CAM.gen) return;
+  if (CAM.abort) { try { CAM.abort.abort(); } catch (e) {} }
+  if (grid) grid.prev = null;                                      // the first picture after a (re)start is not compared with an old one
+  CAM.opens++; CAM.openAt = performance.now();
+  camEl.src = hUrl('/stream', 't=' + Date.now());                  // the picture on screen
+  readStream(gen);                                                 // the same stream again, for the motion grid
+}
+// the stream can END (the camera restarted, another tile switched it) or stall: open it again
+function reopenSoon(gen, ms) { clearTimeout(CAM.reopenT); CAM.reopenT = setTimeout(() => { if (gen === CAM.gen && CAM.mode === 'helper') openStream(gen); }, ms); }
+camEl.onerror = () => { if (CAM.mode === 'helper') reopenSoon(CAM.gen, 1500); };
+camEl.onload = () => { if (CAM.mode === 'helper') camShow(camEl); };       // the sky stays until there is a picture to show
+function crlf2(a) { for (let k = 0, n = a.length - 3; k < n; k++) if (a[k] === 13 && a[k + 1] === 10 && a[k + 2] === 13 && a[k + 3] === 10) return k; return -1; }
+async function readStream(gen) {
+  const ac = new AbortController(); CAM.abort = ac;
+  try {
+    const r = await fetch(hUrl('/stream', 'grid=1&t=' + Date.now()), {signal: ac.signal, cache: 'no-store'});
+    if (r.status === 403) {                                        // switched off for everything, or the permission was taken away
+      let j = {}; try { j = await r.json(); } catch (e) {}
+      if (gen === CAM.gen) { camStop(); CAM.why = j.paused ? 'paused' : 'denied'; tell(j.paused ? '📷 The camera is switched off. Tap the bubbles!' : '📷 The camera is not allowed. Tap the bubbles!'); }
+      return;
+    }
+    if (!r.ok || !r.body) throw new Error('http ' + r.status);
+    const rd = r.body.getReader(); let buf = null;
+    for (;;) {
+      const {done, value} = await rd.read();
+      if (done || gen !== CAM.gen) break;
+      if (buf && buf.length) { const nb = new Uint8Array(buf.length + value.length); nb.set(buf); nb.set(value, buf.length); buf = nb; } else buf = value;
+      for (;;) {                                                   // --frame / Content-Type / Content-Length / blank line / JPEG
+        const h = crlf2(buf); if (h < 0) { if (buf.length > 6e6) buf = null; break; }
+        const m = /content-length:\s*(\d+)/i.exec(String.fromCharCode.apply(null, buf.subarray(Math.max(0, h - 200), h)));
+        if (!m) { buf = buf.subarray(h + 4); continue; }
+        const end = h + 4 + (+m[1]); if (buf.length < end) break;
+        onJpeg(buf.subarray(h + 4, end), gen); buf = buf.subarray(end);
+      }
+    }
+  } catch (e) {}
+  if (gen === CAM.gen && CAM.mode === 'helper' && CAM.abort === ac) reopenSoon(gen, 1000);
+}
+function onJpeg(jpg, gen) {
+  CAM.rx++; CAM.lastRx = performance.now();
+  if (CAM.busy) { CAM.dropped++; return; }                         // still on the last picture: this one is skipped, never queued
+  CAM.busy = true;
+  (CAM.decode === 'webcodecs' ? decodeSmall(jpg, gen) : decodeBitmap(jpg, gen))
+    .catch(() => { if (++CAM.decErr >= 3 && CAM.decode === 'webcodecs') { CAM.decode = 'bitmap'; CAM.decErr = 0; } })
+    .then(() => { CAM.busy = false; });
+}
+// E2: the JPEG decoded at reduced size by the decoder itself (DCT scaling, off the main thread), copied out as raw pixels
+async function decodeSmall(jpg, gen) {
+  const dec = new ImageDecoder({data: jpg, type: 'image/jpeg', desiredWidth: 160, desiredHeight: 120, preferAnimation: false});
+  let image = null;
+  try {
+    image = (await dec.decode()).image;
+    const fmt = image.format || '', vr = image.visibleRect, w = vr ? vr.width : image.codedWidth, h = vr ? vr.height : image.codedHeight;
+    if (!/^(RGB|BGR|I4|NV)/.test(fmt)) throw new Error('pixel format ' + fmt);
+    const need = image.allocationSize(); if (!CAM.buf || CAM.buf.length < need) CAM.buf = new Uint8Array(need);
+    const lay = await image.copyTo(CAM.buf);
+    if (gen !== CAM.gen) return;
+    const t0 = performance.now(); CAM.fmt = w + '×' + h + ' ' + fmt;
+    luma(CAM.buf, lay[0].offset, lay[0].stride, w, h, fmt);
+    CAM.ms += performance.now() - t0; CAM.msN++; CAM.decErr = 0;
+  } finally { if (image) image.close(); dec.close(); }
+}
+// no WebCodecs: a small bitmap (decode + resize off the main thread), read through a tiny canvas
+let tinyCv = null, tinyCx = null;
+function tiny(w, h) { if (!tinyCv) { tinyCv = document.createElement('canvas'); tinyCx = tinyCv.getContext('2d', {willReadFrequently: true}); }
+  if (tinyCv.width !== w || tinyCv.height !== h) { tinyCv.width = w; tinyCv.height = h; } return tinyCx; }
+async function decodeBitmap(jpg, gen) {
+  const bm = await createImageBitmap(new Blob([jpg], {type: 'image/jpeg'}), {resizeWidth: 160, resizeQuality: 'low'});
+  try {
+    if (gen !== CAM.gen) return;
+    const t0 = performance.now(), w = bm.width, h = bm.height, cx = tiny(w, h);
+    cx.drawImage(bm, 0, 0); CAM.fmt = w + '×' + h + ' bitmap';
+    luma(cx.getImageData(0, 0, w, h).data, 0, w * 4, w, h, 'RGBA');
+    CAM.ms += performance.now() - t0; CAM.msN++;
+  } finally { bm.close(); }
+}
+// the webcam fallback has no JPEG stream to read: the <video> is drawn into the same tiny canvas, at most 12 times a second
+async function webcamStart(gen) {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { CAM.why = window.isSecureContext ? 'none' : 'insecure'; return false; }
+  let s = null;
+  try { s = await navigator.mediaDevices.getUserMedia({video: {facingMode: LENS === 'rear' ? 'environment' : 'user', width: {ideal: 640}, height: {ideal: 480}, frameRate: {ideal: 15, max: 30}}, audio: false}); }
+  catch (e) { CAM.why = e && e.name || 'error'; return false; }
+  if (gen !== CAM.gen) { s.getTracks().forEach(t => t.stop()); return true; }
+  CAM.stream = s; CAM.mode = 'webcam'; CAM.state = 'on'; setFlip('webcam'); vid.srcObject = s;
+  try { await vid.play(); } catch (e) {}
+  if (gen !== CAM.gen) return true;
+  let lastT = -1;
+  CAM.timer = setInterval(() => {
+    if (vid.readyState < 2 || !vid.videoWidth || vid.currentTime === lastT) return;
+    lastT = vid.currentTime; camShow(vid); CAM.rx++; CAM.lastRx = performance.now();
+    const t0 = performance.now(), w = 160, h = Math.max(8, Math.round(160 * vid.videoHeight / vid.videoWidth)), cx = tiny(w, h);
+    cx.drawImage(vid, 0, 0, w, h); CAM.fmt = w + '×' + h + ' video';
+    luma(cx.getImageData(0, 0, w, h).data, 0, w * 4, w, h, 'RGBA');
+    CAM.ms += performance.now() - t0; CAM.msN++;
+  }, 83);
+  return true;
+}
+// raw pixels → a luma grid no wider than 176 cells, compared with the last picture's in the same pass: which cells changed?
+function luma(buf, off, stride, w, h, fmt) {
+  const st = Math.max(1, Math.ceil(w / 176)), gw = Math.floor(w / st), gh = Math.floor(h / st), n = gw * gh;
+  let g = grid;
+  if (!g || g.w !== gw || g.h !== gh) { g = grid = {w: gw, h: gh, prev: null, spare: null, motion: new Uint8Array(n), total: 0}; fitGrid(); }
+  const first = !g.prev, prev = g.prev || (g.prev = new Uint8Array(n)), cur = g.spare || new Uint8Array(n), mo = g.motion, thr = SENS.diff;
+  let k = 0, total = 0;
+  if (fmt[0] === 'I' || fmt[0] === 'N') {                           // planar YUV: plane 0 is luma already
+    for (let y = 0; y < gh; y++) { let j = off + y * st * stride;
+      for (let x = 0; x < gw; x++, j += st, k++) { const v = buf[j], d = v - prev[k], m = (d > thr || d < -thr) ? 1 : 0; cur[k] = v; mo[k] = m; total += m; } }
+  } else {                                                          // RGBX / BGRX: 77 R + 150 G + 29 B, in integers
+    const R = fmt[0] === 'B' ? 2 : 0, B = 2 - R, s4 = st * 4;
+    for (let y = 0; y < gh; y++) { let j = off + y * st * stride;
+      for (let x = 0; x < gw; x++, j += s4, k++) { const v = (buf[j + R] * 77 + buf[j + 1] * 150 + buf[j + B] * 29) >> 8, d = v - prev[k], m = (d > thr || d < -thr) ? 1 : 0; cur[k] = v; mo[k] = m; total += m; } }
+  }
+  if (first) { mo.fill(0); total = 0; }                             // the first picture after a (re)start has nothing to be compared with
+  g.spare = prev; g.prev = cur; g.total = total / n;
+  CAM.frames++;
+  if (CAM.mode === 'helper' && camEl.naturalWidth) camShow(camEl);
+  if (playing && !paused) onMotion(performance.now());
+  drawGlow();
+}
+// "the game sees you": white dots where the picture moved, on a canvas the size of the grid (the GPU scales it up with the picture)
+let glowCx = null, glowImg = null, glowLit = false;
+function drawGlow() {
+  const g = grid; if (!g) return;
+  if (!glowCx) glowCx = glowCv.getContext('2d');
+  if (glowCv.width !== g.w || glowCv.height !== g.h || !glowImg) { glowCv.width = g.w; glowCv.height = g.h; glowImg = glowCx.createImageData(g.w, g.h); glowImg.data.fill(255);
+    for (let j = 3; j < glowImg.data.length; j += 4) glowImg.data[j] = 0; glowLit = false; }
+  if (!g.total && !glowLit) return;                                // a still room: nothing to draw, nothing to composite
+  const d = glowImg.data, mo = g.motion, w = g.w; let lit = false;
+  for (let y = 0; y < g.h; y += 2) for (let x = 0, i = y * w; x < w; x += 2, i += 2) {      // a dot on every other cell, every other row
+    const j = i * 4 + 3; let a = d[j] >> 1; if (a < 26) a = 0;       // the last pictures' dots fade
+    if (mo[i]) a = 215;
+    if (a !== d[j]) d[j] = a; if (a) lit = true;
+  }
+  glowCx.putImageData(glowImg, 0, 0); glowLit = lit;
+}
+function fitGrid() {                                                // the same "cover" crop as the CSS picture, so grid cells line up with the screen
+  W = window.innerWidth; H = window.innerHeight;
+  if (grid) { const s = Math.max(W / grid.w, H / grid.h); MAP = {s, ox: (W - grid.w * s) / 2, oy: (H - grid.h * s) / 2}; }
+}
+function motionIn(cx, cy, r) {                                      // how much of a circle (screen px) is moving: 0..1
+  const g = grid, s = MAP.s; let gx = (cx - MAP.ox) / s, gy = (cy - MAP.oy) / s;
+  if (FLIPX) gx = g.w - gx; if (FLIPY) gy = g.h - gy;
+  const gr = Math.max(2, r / s), r2 = gr * gr;
+  const x0 = Math.max(0, Math.floor(gx - gr)), x1 = Math.min(g.w - 1, Math.ceil(gx + gr)), y0 = Math.max(0, Math.floor(gy - gr)), y1 = Math.min(g.h - 1, Math.ceil(gy + gr));
+  let cnt = 0, hit = 0;
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { const dx = x + .5 - gx, dy = y + .5 - gy; if (dx * dx + dy * dy <= r2) { cnt++; hit += g.motion[y * g.w + x]; } }
+  return cnt ? hit / cnt : 0;
+}
+// once per NEW camera picture: which bubble is a hand in?
+function onMotion(now) {
+  const g = grid, calm = g.total < .45, F = SENS.frac;              // most of the picture changed at once = somebody walked through, not a hand
+  for (const L of lanes) {
+    let best = null, bestF = 0;
+    for (const b of L.bubbles) {
+      let hit = 0;
+      if (calm && now - b.born > 350) { const f = motionIn(b.x, b.y, b.r * .9); if (f >= F) { hit = b.hit + 1; if (hit >= HIT_FRAMES && f > bestF) { bestF = f; best = b; } } }
+      if ((hit > 0) !== (b.hit > 0)) b.el.classList.toggle('hit', hit > 0);
+      b.hit = hit;
+    }
+    if (best && now - L.lastPop > 650) { if (best.ch === L.parts[L.pos]) popBubble(L, best, now, true); else wrongBubble(L, best, now); }
+  }
+}
+
+/* ---------------- the game ---------------- */
+const lanesEl = $('lanes'), field = $('field'), menu = $('menu'), endEl = $('end'), toast = $('toast'), dbg = $('dbg');
+let lanes = [], playing = false, paused = false, round = 0, activeSent = 0, lastActive = 0;
+const tierT = () => (window.KT && KT.TIERS && KT.TIERS[KT.tier]) || {target: 75, deadBottom: 0};
+function laneRect(L) {
+  const z = L.zoneEl.getBoundingClientRect(), pad = 12, dead = tierT().deadBottom || 0;      // pre-reader: nothing to tap in the bottom 60 px
+  L.zone = {x: z.left + pad, y: z.top + pad, w: Math.max(40, z.width - 2 * pad), h: Math.max(40, z.height - 2 * pad - dead)};
+}
+function bubbleRadius(L, n) {
+  const z = L.zone; let r = Math.min(z.w, z.h) * (lanes.length > 1 ? .12 : .095);
+  r = Math.max(r, tierT().target / 2);                             // a bubble is a touch target too: never under the tier's minimum
+  return Math.max(34, Math.min(r, 80, Math.sqrt(.34 * z.w * z.h / (n * Math.PI))));   // …unless that many would not fit
+}
+function makeLane(i, n) {
+  const el = document.createElement('div'); el.className = 'lane' + (n > 1 ? ' two' : ''); el.style.setProperty('--c', COLORS[i]);
+  el.innerHTML = '<div class="head"><button class="say" aria-label="Hear it again">🔊</button><div class="mid">' + (n > 1 ? '<div class="who">PLAYER ' + (i + 1) + '</div>' : '') +
+    '<div class="pic' + (S.game === 'math' ? ' sum' : '') + '"></div><div class="count"></div><div class="slots"></div><div class="stars"></div></div></div><div class="zone"></div>';
+  lanesEl.appendChild(el);
+  const L = {i, el, zoneEl: el.querySelector('.zone'), picEl: el.querySelector('.pic'), color: COLORS[i], words: pickItems(S.grade, PER_ROUND), wi: 0, item: null, parts: [], pos: 0,
+             bubbles: [], mistakes: 0, stars: [], lastPop: 0, lastAct: 0, done: false, zone: null};
+  el.querySelector('.say').addEventListener('click', () => { if (L.item) say(L.item.sayQ); bump(L); L.lastAct = performance.now(); });
+  return L;
+}
+function bump(L) { L.picEl.classList.add('bump'); setTimeout(() => L.picEl.classList.remove('bump'), 260); }
+function paintSlots(L) {
+  let html = '';
+  for (let i = 0; i < L.parts.length; i++) html += '<div class="slot' + (i < L.pos ? ' done' : i === L.pos ? ' next' : '') + (L.parts[i].length > 1 ? ' wide' : '') + '">' + (i < L.pos ? L.parts[i] : '') + '</div>';
+  L.el.querySelector('.slots').innerHTML = html;
+  let st = ''; for (let i = 0; i < PER_ROUND; i++) st += i < L.stars.length ? '⭐' : '<span class="no">☆</span>';
+  L.el.querySelector('.stars').innerHTML = st;
+}
+const alive = (L, r) => playing && r === round && lanes.indexOf(L) >= 0;      // timers must not touch a lane (or a round) that is gone
+function clearBubbles(L, fade) {
+  for (const b of L.bubbles) { if (fade) { b.el.classList.add('pop'); const e = b.el; setTimeout(() => e.remove(), 260); } else b.el.remove(); }
+  L.bubbles = [];
+}
+function nextWord(L) {
+  const r = round; if (!alive(L, r)) return;
+  if (L.wi >= L.words.length) { L.done = true; L.picEl.textContent = '🏆'; L.picEl.classList.remove('sum'); L.el.querySelector('.count').innerHTML = ''; L.el.querySelector('.slots').innerHTML = ''; clearBubbles(L); checkEnd(); return; }
+  const it = L.words[L.wi]; L.item = it; L.parts = it.parts; L.pos = 0; L.mistakes = 0; L.lastAct = performance.now();
+  L.picEl.textContent = it.pic; L.el.querySelector('.count').innerHTML = it.count || '';
+  paintSlots(L); spawnBubbles(L); bump(L);
+  say(it.sayQ, {queue: true});
+}
+function labelSize(ch, r) { return Math.round(r * (ch.length > 1 ? .82 : 1.15)); }          // two digits (Math Pop) need a smaller font
+function spawnBubbles(L) {
+  clearBubbles(L); laneRect(L);
+  const chars = shuffle(L.parts.concat(distractors(L.item, DISTRACT[S.grade]))), z = L.zone, r = bubbleRadius(L, chars.length), out = [], now = performance.now();
+  for (const ch of chars) {
+    let best = null, bestD = -1;
+    for (let t = 0; t < 24; t++) {                                 // scatter: the candidate farthest from the others wins
+      const x = z.x + r + Math.random() * Math.max(1, z.w - 2 * r), y = z.y + r + Math.random() * Math.max(1, z.h - 2 * r); let d = 1e9;
+      for (const o of out) d = Math.min(d, Math.hypot(o.x - x, o.y - y));
+      if (d > bestD) { bestD = d; best = {x, y}; }
+    }
+    const sp = Math.max(8, Math.min(z.w, z.h) * .04), a = Math.random() * Math.PI * 2, hue = Math.round(Math.random() * 360);
+    const el = document.createElement('div'); el.className = 'bub'; el.style.width = el.style.height = Math.round(2 * r) + 'px';
+    el.innerHTML = '<div class="in" style="font-size:' + labelSize(ch, r) + 'px;background:radial-gradient(circle at 32% 30%,hsl(' + hue + ',95%,86%) 8%,hsl(' + hue + ',85%,64%) 70%,hsl(' + hue + ',80%,47%) 100%)">' + ch + '</div>';
+    const b = {ch, x: best.x, y: best.y, r, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, ph: Math.random() * 6.28, hue, hit: 0, wrongAt: -1e9, born: now, el, tx: null, ty: null};
+    place(b); field.appendChild(el); out.push(b);
+  }
+  L.bubbles = out;
+  requestAnimationFrame(() => requestAnimationFrame(() => { for (const b of out) b.el.classList.add('live'); }));   // grow in: one transition, once
+}
+function place(b) {                                                 // whole pixels; a bubble that did not move a pixel is not written
+  const tx = Math.round(b.x - b.r), ty = Math.round(b.y - b.r);
+  if (tx === b.tx && ty === b.ty) return false;
+  b.tx = tx; b.ty = ty; b.el.style.transform = 'translate3d(' + tx + 'px,' + ty + 'px,0)'; return true;
+}
+function flyTo(L, b, slot) {                                        // the popped letter flies into its box (one transition)
+  const tr = slot.getBoundingClientRect(), d = Math.round(2 * b.r), f = document.createElement('div');
+  f.className = 'fly'; f.style.width = f.style.height = d + 'px'; f.style.fontSize = labelSize(b.ch, b.r) + 'px'; f.style.background = 'hsl(' + b.hue + ',90%,70%)'; f.textContent = b.ch;
+  f.style.transform = 'translate3d(' + Math.round(b.x - b.r) + 'px,' + Math.round(b.y - b.r) + 'px,0)';
+  field.appendChild(f);
+  requestAnimationFrame(() => requestAnimationFrame(() => { f.style.transform = 'translate3d(' + Math.round(tr.left + tr.width / 2 - b.r) + 'px,' + Math.round(tr.top + tr.height / 2 - b.r) + 'px,0) scale(.5)'; }));
+  setTimeout(() => f.remove(), 460);
+}
+function confetti(L) {                                              // 14 paper bits fall once; no loop draws them
+  if (still()) return;
+  const z = L.zone, bits = [];
+  for (let i = 0; i < 14; i++) { const c = document.createElement('div'); c.className = 'conf'; c.style.background = 'hsl(' + rnd(0, 359) + ',90%,62%)';
+    const x = Math.round(z.x + Math.random() * z.w); c.style.transform = 'translate3d(' + x + 'px,' + Math.round(z.y - 16) + 'px,0)';
+    c.dataset.to = 'translate3d(' + (x + rnd(-70, 70)) + 'px,' + Math.round(z.y + z.h * (.55 + Math.random() * .45)) + 'px,0) rotate(' + rnd(-300, 300) + 'deg)';
+    field.appendChild(c); bits.push(c); }
+  requestAnimationFrame(() => requestAnimationFrame(() => { for (const c of bits) { c.style.transform = c.dataset.to; c.style.opacity = '0'; } }));
+  setTimeout(() => { for (const c of bits) c.remove(); }, 1400);
+}
+function showToast(t) { toast.textContent = t; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 1100); }
+// a bubble popped by MOVING is a child playing with the hands off the screen: tell the launcher, which counts it like a touch
+// (its left-open rule would otherwise put a round that nobody touches to sleep). Never more often than every 10 s.
+function handsOffSignal() {
+  const t = Date.now(); if (t - lastActive < 10000) return;
+  lastActive = t; activeSent++; post({kt: 'active', why: 'move'});
+}
+function popBubble(L, b, now, byMotion) {
+  const r = round;
+  L.pos++; L.lastPop = now; L.lastAct = now; SFX.pop();
+  L.bubbles.splice(L.bubbles.indexOf(b), 1);
+  b.el.classList.remove('hint', 'hit'); b.el.classList.add('pop'); setTimeout(() => b.el.remove(), 260);
+  if (byMotion) handsOffSignal();
+  const slot = L.el.querySelectorAll('.slot')[L.pos - 1];
+  if (slot && !still()) { flyTo(L, b, slot); setTimeout(() => { if (alive(L, r)) paintSlots(L); }, 420); } else paintSlots(L);
+  if (L.pos >= L.parts.length) {
+    clearBubbles(L, true); const it = L.item;
+    L.stars.push(L.mistakes <= 1 ? 3 : L.mistakes <= 3 ? 2 : 1);  // fewer wrong pops, more stars
+    setTimeout(() => { if (!alive(L, r)) return; SFX.word(); say(it.sayDone, {queue: true}); L.picEl.textContent = it.picDone;      // 3 + 5 = 8
+      showToast(['Nice!', 'Wow!', 'Super!', 'Yes!', 'Great!'][rnd(0, 4)]); confetti(L); }, 260);
+    setTimeout(() => { if (alive(L, r)) { SFX.star(); paintSlots(L); } }, 900);
+    setTimeout(() => { if (alive(L, r)) { L.wi++; nextWord(L); } }, 2300);
+  } else if (!L.item.sum) sayLetter(b.ch);
+}
+function wrongBubble(L, b, now) {
+  if (now - b.wrongAt < 900) return; b.wrongAt = now; L.mistakes++; L.lastAct = now; SFX.wrong();
+  const e = b.el; e.classList.remove('wrong'); void e.offsetWidth; e.classList.add('wrong'); setTimeout(() => e.classList.remove('wrong'), 420);
+}
+function checkEnd() {
+  if (!lanes.every(L => L.done)) return;
+  const r = round;
+  setTimeout(() => {
+    if (!playing || r !== round) return;
+    let total = 0, html = '';
+    for (const L of lanes) { const s = L.stars.reduce((a, b) => a + b, 0); total += s;
+      html += '<div class="sc" style="--c:' + L.color + '">' + (lanes.length > 1 ? '<div class="who">PLAYER ' + (L.i + 1) + '</div>' : '') + '<div class="n">' + s + ' ⭐</div><div class="s">' + L.words.map(w => w.label).join(' · ') + '</div></div>'; }
+    const two = lanes.length > 1;
+    stopRound();                                                   // the score screen runs nothing: no loop, no stream
+    lanesEl.innerHTML = ''; field.innerHTML = '';                  // …and nothing of the round shows through behind it
+    $('score').innerHTML = html;
+    $('endTag').textContent = two ? 'Team total: ' + total + ' stars!' : total + ' stars out of ' + (PER_ROUND * 3) + '!';
+    endEl.hidden = false; SFX.word(); say([(two ? 'end2_' : 'end1_') + total]);
+    starTotal += total; saveS(); paintMenu();
+  }, 900);
+}
+
+/* ---------------- ONE loop, capped: it only moves bubbles ---------------- */
+// A timer, not requestAnimationFrame: rAF would wake the page's frame machinery at the display's 60 Hz just to skip every other
+// call; a 33 ms timer wakes it 30 times a second and the browser makes a frame only when a bubble really moved (?loop=raf = the
+// rAF variant, to compare on the device).
+let raf = 0, loopT = 0, running = false, lastStep = 0, lastSlow = 0;
+const USE_RAF = Q.get('loop') === 'raf';
+const stat = {steps: 0, writes: 0, t0: 0, fps: 0, wps: 0, cam0: 0, rx0: 0, camFps: 0, rxFps: 0, ms: 0};
+function loopStart() { if (running) return; running = true; lastStep = 0;
+  if (USE_RAF) raf = requestAnimationFrame(frame); else loopT = setInterval(() => step(performance.now()), Math.round(1000 / FPS)); }
+function loopStop() { running = false; cancelAnimationFrame(raf); raf = 0; clearInterval(loopT); loopT = 0; }
+function frame(now) { if (!running) return; raf = requestAnimationFrame(frame); if (now - lastStep >= STEP_MS) step(now); }
+function step(now) {
+  const dt = lastStep ? Math.min(.1, (now - lastStep) / 1000) : 0; lastStep = now; stat.steps++;
+  for (const L of lanes) {
+    const z = L.zone;
+    for (const b of L.bubbles) {
+      b.ph += dt * 1.3; b.x += b.vx * dt; b.y += b.vy * dt + Math.sin(b.ph) * 8 * dt;
+      if (b.x < z.x + b.r) { b.x = z.x + b.r; b.vx = Math.abs(b.vx); } else if (b.x > z.x + z.w - b.r) { b.x = z.x + z.w - b.r; b.vx = -Math.abs(b.vx); }
+      if (b.y < z.y + b.r) { b.y = z.y + b.r; b.vy = Math.abs(b.vy); } else if (b.y > z.y + z.h - b.r) { b.y = z.y + z.h - b.r; b.vy = -Math.abs(b.vy); }
+      if (place(b)) stat.writes++;
+    }
+  }
+  if (now - lastSlow > 500) { lastSlow = now; slow(now); }
+}
+function slow(now) {                                                // twice a second: the hint, the stream watchdog, the numbers
+  for (const L of lanes) { const idle = now - L.lastAct > 7000, need = L.parts[L.pos]; let given = false;
+    for (const b of L.bubbles) { const on = idle && !given && b.ch === need; if (on) given = true; if (on !== !!b.hint) { b.hint = on; b.el.classList.toggle('hint', on); } } }
+  if (CAM.mode === 'helper' && now - Math.max(CAM.lastRx, CAM.openAt) > 4000) { CAM.openAt = now; reopenSoon(CAM.gen, 10); }   // no picture for 4 s
+  if (now - stat.t0 >= 1000) { const k = 1000 / (now - stat.t0);
+    stat.fps = Math.round(stat.steps * k); stat.wps = Math.round(stat.writes * k); stat.camFps = +((CAM.frames - stat.cam0) * k).toFixed(1); stat.rxFps = +((CAM.rx - stat.rx0) * k).toFixed(1);
+    stat.ms = CAM.msN ? +(CAM.ms / CAM.msN).toFixed(2) : 0; CAM.ms = 0; CAM.msN = 0;
+    stat.steps = 0; stat.writes = 0; stat.cam0 = CAM.frames; stat.rx0 = CAM.rx; stat.t0 = now;
+    if (DEBUG) debugLine(); }
+}
+let statusT = 0;
+function debugLine() {
+  const st = CAM.status, c = st && st.camera, src = CAM.mode === 'helper' ? camEl.naturalWidth + '×' + camEl.naturalHeight : CAM.mode === 'webcam' ? vid.videoWidth + '×' + vid.videoHeight : '-';
+  dbg.textContent = 'game ' + stat.fps + ' fps (cap ' + FPS + ') · ' + stat.wps + ' moves/s\n' +
+    'camera ' + (CAM.mode || 'off' + (CAM.why ? ' (' + CAM.why + ')' : '')) + ' ' + src + ' · ' + stat.rxFps + ' pictures/s, ' + stat.camFps + ' analysed · ' + stat.ms + ' ms each\n' +
+    'grid ' + (grid ? grid.w + '×' + grid.h : '-') + ' from ' + (CAM.fmt || '-') + ' (' + CAM.decode + ') · moving ' + (grid ? Math.round(grid.total * 100) : 0) + '% · skipped ' + CAM.dropped + ' · opened ' + CAM.opens +
+    (st ? '\nhelper: libcamera ' + (st.libcamera || '?') + ' · profile ' + (st.profile || '?') + ' of [' + (st.profiles || []).join(' ') + ']' + (c ? ' · view ' + (c.view || c.size || []).join('×') + ' · ' + (c.stream_fps || c.read_fps || '?') + ' fps' : '') : '');
+  if (CAM.mode === 'helper' && Date.now() - statusT > 2000) { statusT = Date.now();        // debug only: /status never changes the profile
+    fetchT(hUrl('/status'), {}, 1500).then(r => r.json()).then(j => { CAM.status = j; }).catch(() => {}); }
+}
+
+/* ---------------- start / stop ---------------- */
+function resize() { fitGrid(); for (const L of lanes) { laneRect(L); const z = L.zone; for (const b of L.bubbles) { b.x = Math.min(Math.max(b.x, z.x + b.r), z.x + z.w - b.r); b.y = Math.min(Math.max(b.y, z.y + b.r), z.y + z.h - b.r); place(b); } } }
+window.addEventListener('resize', resize);
+function startGame() {
+  audio(); hush(); round++;
+  lanesEl.innerHTML = ''; field.innerHTML = ''; lanes = [];
+  const n = S.players === '2' ? 2 : 1;
+  for (let i = 0; i < n; i++) lanes.push(makeLane(i, n));
+  menu.hidden = true; endEl.hidden = true; $('stop').hidden = parent !== window; playing = true; paused = false;   // the launcher's ◁ leaves a round; a page on its own gets ✕
+  for (const L of lanes) for (const it of L.words) for (const k of it.sayQ.concat(it.sayDone)) clip(k);            // fetch the round's clips now, not at the first word
+  fitGrid(); say([GAMES[S.game].intro]);
+  for (const L of lanes) { laneRect(L); nextWord(L); }
+  loopStart(); camStart();                                         // the camera only now, and only while a round is on
+}
+function stopRound() { playing = false; paused = false; loopStop(); camStop(); $('stop').hidden = true; }
+function toMenu() { stopRound(); hush(); round++; lanes = []; lanesEl.innerHTML = ''; field.innerHTML = ''; toast.classList.remove('show'); endEl.hidden = true; menu.hidden = false; }
+$('start').addEventListener('click', startGame);
+$('again').addEventListener('click', startGame);
+$('toMenu').addEventListener('click', toMenu);
+$('stop').addEventListener('click', toMenu);
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && menu.hidden) toMenu();
+  if (e.key === 'd') { DEBUG = !DEBUG; dbg.style.display = DEBUG ? 'block' : 'none'; }
+});
+// a page nobody sees does nothing: no loop, no stream. It picks the round up again when it is shown
+function pause() { if (playing && !paused) { paused = true; loopStop(); camStop(); hush(); } }
+function resume() { if (playing && paused) { paused = false; for (const L of lanes) L.lastAct = performance.now(); loopStart(); camStart(); } }
+document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); else resume(); });
+window.addEventListener('pagehide', () => { loopStop(); camStop(); hush(); });
+
+/* tap: always works, camera or not — the nearest bubble under the finger */
+function pointerPop(px, py) {
+  if (!playing || paused) return; const now = performance.now(); let best = null, bestL = null, bd = 1e9;
+  for (const L of lanes) for (const b of L.bubbles) { const d = Math.hypot(b.x - px, b.y - py); if (d <= b.r * 1.15 && d < bd) { bd = d; best = b; bestL = L; } }
+  if (!best) return;
+  if (best.ch === bestL.parts[bestL.pos]) popBubble(bestL, best, now, false); else wrongBubble(bestL, best, now);
+}
+lanesEl.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; audio(); pointerPop(e.clientX, e.clientY); });
+
+/* ---------------- the launcher: who is playing, ◁, the camera permission ---------------- */
+window.addEventListener('message', e => {
+  const d = e.data || {};
+  if (d.kt === 'hello') {
+    gotHello = true; const prev = kid.id;
+    if (d.kid && d.kid.id) kid = {id: String(d.kid.id), name: d.kid.name || '', age: +d.kid.age || 0};
+    if (kid.id !== prev || !stored) { if (!playing) loadS(); }
+  } else if (d.kt === 'hello-token' && d.token) { CAM.token = String(d.token); if (CAM.perm) CAM.perm.token = CAM.token; }
+  else if (d.kt === 'perm-changed' && d.resource === 'camera') {
+    if (!d.granted) { CAM.perm = null; if (CAM.state !== 'off') { camStop(); CAM.why = 'denied'; tell('📷 The camera is not allowed. Tap the bubbles!'); } }
+    else { CAM.perm = {granted: true, token: d.token || CAM.token}; CAM.token = CAM.perm.token; if (playing && !paused && CAM.state === 'off') camStart(); }
+  } else if (d.kt === 'back' && (playing || !endEl.hidden)) { toMenu(); post({kt: 'back', handled: true}); }
+});
+post({kt: 'who'});
+
+/* boot: the start screen. Nothing runs here. */
+if (DEBUG) dbg.style.display = 'block';
+fitGrid(); paintMenu(); loadS();
+window.MV = {
+  get state() { return {screen: !menu.hidden ? 'menu' : !endEl.hidden ? 'end' : 'play', playing, paused, running, S: Object.assign({}, S), kid: kid.id, starTotal, activeSent,
+    lanes: lanes.map(L => ({i: L.i, pos: L.pos, parts: L.parts, wi: L.wi, done: L.done, stars: L.stars.slice(), mistakes: L.mistakes, label: L.item && L.item.label,
+      bubbles: L.bubbles.map(b => ({ch: b.ch, x: Math.round(b.x), y: Math.round(b.y), r: Math.round(b.r), hit: b.hit})), zone: L.zone})),
+    cam: {state: CAM.state, mode: CAM.mode, why: CAM.why, decode: CAM.decode, fmt: CAM.fmt, rx: CAM.rx, frames: CAM.frames, dropped: CAM.dropped, opens: CAM.opens, src: camEl.getAttribute('src') || '',
+          grid: grid ? [grid.w, grid.h] : null, total: grid ? grid.total : 0, flip: [FLIPX, FLIPY], map: MAP, natural: [camEl.naturalWidth, camEl.naturalHeight]},
+    stat: Object.assign({}, stat), said: said.slice()}; },
+  motionIn, toMenu, startGame
+};
+})();
+</script>
+</body>
+</html>

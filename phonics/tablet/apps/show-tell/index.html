@@ -204,10 +204,23 @@ const CCM = [[1.60, -0.45, -0.15], [-0.30, 1.55, -0.25], [0.00, -0.55, 1.55]];
 const tune = { wb: [1.08, 1.0, 1.10], gain: 1.25, off: -20, n: 0 };
 let CM = [];
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+/* 2026-11-16, the camera helper on the newer libcamera (status.libcamera >= 0.5; docs/CAMERA.md), same rules as the Camera
+   tile: its pictures arrive balanced, so the matrix runs at 60 %, the white balance is a trim of at most ±25 % measured
+   on the unclipped pixels, and the lens tint (both lenses are 12–13 % redder in the middle) is multiplied out of the
+   STILL before the colour step — the picture on the card and the one the model gets. The small live view keeps the tint. */
+let libNew = false;
+const CCM_SOFT = CCM.map((r, i) => r.map((v, j) => (i === j ? 1 : 0) + 0.6 * (v - (i === j ? 1 : 0))));
+const TINT = [[0, 0.88, 0.98], [0.25, 0.90, 0.985], [0.42, 0.935, 0.99], [0.58, 0.972, 0.995], [0.75, 1, 1], [1, 1, 1]];   // radius, red gain, blue gain
+function tintCanvas(x, W, H) {
+  if (!libNew) return;
+  const g = x.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.hypot(W, H) / 2);
+  for (const [r, a, b] of TINT) g.addColorStop(r, `rgb(${Math.round(255 * a)},255,${Math.round(255 * b)})`);
+  x.save(); x.globalCompositeOperation = 'multiply'; x.fillStyle = g; x.fillRect(0, 0, W, H); x.restore();
+}
 function setColour() {
   const L = [0.2126, 0.7152, 0.0722], sat = 1.2;
   const S = [0, 1, 2].map(i => [0, 1, 2].map(j => (1 - sat) * L[j] + (i === j ? sat : 0)));
-  CM = [0, 1, 2].map(i => { const r = [0, 1, 2].map(j => { let v = 0; for (let k = 0; k < 3; k++) v += S[i][k] * CCM[k][j]; return v * tune.wb[j] * tune.gain; }); return [...r, tune.off]; });
+  CM = [0, 1, 2].map(i => { const r = [0, 1, 2].map(j => { let v = 0; for (let k = 0; k < 3; k++) v += S[i][k] * (libNew ? CCM_SOFT : CCM)[k][j]; return v * tune.wb[j] * tune.gain; }); return [...r, tune.off]; });
   $('ccmM').setAttribute('values', CM.map(r => `${r[0].toFixed(4)} ${r[1].toFixed(4)} ${r[2].toFixed(4)} 0 ${(r[3] / 255).toFixed(4)}`).join('  ') + '  0 0 0 1 0');
 }
 function applyColour(img) {
@@ -218,10 +231,15 @@ function applyColour(img) {
 }
 const mc = document.createElement('canvas'); mc.width = 48; mc.height = 36;
 function measure(bmp) {
-  const x = mc.getContext('2d', { willReadFrequently: true }); x.drawImage(bmp, 0, 0, 48, 36);
-  const d = x.getImageData(0, 0, 48, 36).data, n = d.length / 4; let sr = 0, sg = 0, sb = 0, sl = 0; const px = [];
-  for (let i = 0; i < d.length; i += 4) { const r = d[i], g = d[i + 1], b = d[i + 2], l = 0.2126 * r + 0.7152 * g + 0.0722 * b; sr += r; sg += g; sb += b; sl += l; px.push([r, g, b, l]); }
+  const x = mc.getContext('2d', { willReadFrequently: true }); x.drawImage(bmp, 0, 0, 48, 36); tintCanvas(x, 48, 36);
+  const d = x.getImageData(0, 0, 48, 36).data; let n = 0, sr = 0, sg = 0, sb = 0, sl = 0; const px = [];
+  for (let i = 0; i < d.length; i += 4) { const r = d[i], g = d[i + 1], b = d[i + 2], l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    if (libNew && (Math.max(r, g, b) > 242 || l < 14)) continue;      // a lamp or a black corner says nothing about the light's colour
+    sr += r; sg += g; sb += b; sl += l; n++; px.push([r, g, b, l]); }
+  if (n < 40) return { wb: [1, 1, 1], gain: 1.1, off: 0 };
   px.sort((a, b) => b[3] - a[3]); const hi = px[Math.floor(n * 0.02)][3], mean = sl / n, top = px.slice(0, Math.max(8, Math.floor(n * 0.1)));
+  if (libNew) { const g2 = clamp((235 - 125) / Math.max(40, hi - mean), 0.9, 1.45);
+    return { wb: [clamp(sg / Math.max(1, sr), 0.85, 1.25), 1, clamp(sg / Math.max(1, sb), 0.85, 1.25)], gain: g2, off: clamp(125 - mean * g2, -60, 45) }; }
   const tr = top.reduce((s, p) => s + p[0], 0) / top.length, tg = top.reduce((s, p) => s + p[1], 0) / top.length, tb = top.reduce((s, p) => s + p[2], 0) / top.length;
   const dark = clamp((75 - mean) / 55, 0, 1), wG = 0.5 + 0.5 * dark, wbMax = 1.7 + dark;
   return { wb: [clamp(wG * (sg / Math.max(1, sr)) + (1 - wG) * (tg / Math.max(1, tr)), 0.75, wbMax), 1, clamp(wG * (sg / Math.max(1, sb)) + (1 - wG) * (tg / Math.max(1, tb)), 0.75, wbMax)],
@@ -232,10 +250,10 @@ async function tuneLoop() {
   if (helperUp && !busy && !tuning) {
     tuning = true;
     try { const m = measure(await createImageBitmap(await (await fetch(hUrl('/snap.jpg', 't=' + Date.now()), { cache: 'no-store' })).blob()));
-      const a = tune.n === 0 ? 1 : 0.25; tune.wb = tune.wb.map((v, i) => v + (m.wb[i] - v) * a); tune.gain += (m.gain - tune.gain) * a; tune.off += (m.off - tune.off) * a; tune.n++; setColour(); } catch (e) {}
+      const a = tune.n < 4 ? 1 : 0.25; tune.wb = tune.wb.map((v, i) => v + (m.wb[i] - v) * a); tune.gain += (m.gain - tune.gain) * a; tune.off += (m.off - tune.off) * a; tune.n++; setColour(); } catch (e) {}
     tuning = false;
   }
-  setTimeout(tuneLoop, tune.n >= 3 ? 4000 : 2000);
+  setTimeout(tuneLoop, tune.n >= 4 ? 4000 : 2000);
 }
 
 /* ---------- who is playing ---------- */
@@ -287,6 +305,8 @@ async function poll() {
   try { const j = await (await fetch(hUrl('/status'), { cache: 'no-store' })).json();
     const was = helperUp; helperUp = !!(j.camera && j.camera.alive); camOff = !!j.paused;
     if (j.active) active = j.active; if (j.camera && j.camera.size) { frameW = j.camera.size[0]; frameH = j.camera.size[1]; }
+    const lv = /^(\d+)\.(\d+)/.exec(j.libcamera || ''), nw = !!lv && (+lv[1] > 0 || +lv[2] >= 5);
+    if (nw !== libNew) { libNew = nw; tune.n = 0; if (nw) { tune.wb = [1, 1, 1]; tune.gain = 1.1; tune.off = 0; } setColour(); }
     if (helperUp && !was) { fit(); stream(); }
   } catch (e) { helperUp = false; camOff = false; }
   try { const r = await fetch(BRAIN + '/status', { cache: 'no-store' }); brainUp = r.ok; } catch (e) { brainUp = false; }
@@ -311,6 +331,7 @@ async function look() {
     const r = rot(), turned = r % 180 !== 0, W = turned ? bmp.height : bmp.width, H = turned ? bmp.width : bmp.height;
     const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
     x.save(); x.translate(W / 2, H / 2); x.rotate(r * Math.PI / 180); x.scale(mir() ? -1 : 1, 1); x.drawImage(bmp, -bmp.width / 2, -bmp.height / 2); x.restore();
+    tintCanvas(x, W, H);
     x.putImageData(applyColour(x.getImageData(0, 0, W, H)), 0, 0);
     const shown = await new Promise(res => c.toBlob(res, 'image/jpeg', 0.85));
     const t = document.createElement('canvas'); t.width = 240; t.height = Math.round(240 * H / W); t.getContext('2d').drawImage(c, 0, 0, t.width, t.height);
@@ -321,6 +342,7 @@ async function look() {
     // crop is tried too and the surer answer wins (a thing that fills the frame still wins on the full picture).
     const u = document.createElement('canvas'); u.width = W; u.height = H; const ux = u.getContext('2d');
     ux.save(); ux.translate(W / 2, H / 2); ux.rotate(r * Math.PI / 180); ux.drawImage(bmp, -bmp.width / 2, -bmp.height / 2); ux.restore();
+    tintCanvas(ux, W, H);
     ux.putImageData(applyColour(ux.getImageData(0, 0, W, H)), 0, 0);
     const forBrain = await new Promise(res => u.toBlob(res, 'image/jpeg', 0.9));
     const k = document.createElement('canvas'); k.width = Math.round(W * 0.6); k.height = Math.round(H * 0.6);
@@ -422,7 +444,7 @@ setColour(); fit(); refreshCount();
   }
   poll(); setTimeout(tuneLoop, 800);
 })();
-window.KTST = { get state() { return { helperUp, brainUp, busy, permDenied, permToken, kid: kid.id, last: last && { word: last.word, label: last.label, conf: last.conf, ms: last.ms }, rules: RULES.length, voices: VOICES.size }; }, look, kidWord, pickWord, store };
+window.KTST = { get state() { return { libNew, tune: { wb: tune.wb.slice(), gain: tune.gain, off: tune.off }, helperUp, brainUp, busy, permDenied, permToken, kid: kid.id, last: last && { word: last.word, label: last.label, conf: last.conf, ms: last.ms }, rules: RULES.length, voices: VOICES.size }; }, look, kidWord, pickWord, store };
 })();
 </script>
 </body>

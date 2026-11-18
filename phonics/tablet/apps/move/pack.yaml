@@ -1,0 +1,17 @@
+pack: 1
+id: move
+name: Move to Learn
+version: 1.0.0
+icon: 🤸
+color: "#2f77c9"
+description: pop letters and numbers by moving
+group: play
+tier: pre-reader
+tile:
+  start_url: index.html
+needs: [autoplay]
+permissions: [audio, camera]
+data: data/move
+data_version: 1
+single_instance: true
+owner: Claude

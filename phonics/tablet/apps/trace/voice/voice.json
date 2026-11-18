@@ -1,0 +1,690 @@
+{
+ "voice": "en_US-kristin-medium",
+ "length_scale": 1.08,
+ "prompts": {
+  "w_am": {
+   "file": "w_am.mp3",
+   "text": "am!",
+   "phonemes": "ˈam!",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.46,
+   "other_s": 0.7
+  },
+  "w_an": {
+   "file": "w_an.mp3",
+   "text": "an.",
+   "phonemes": "ˈan.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.41,
+   "other_s": 0.45
+  },
+  "w_at": {
+   "file": "w_at.mp3",
+   "text": "at.",
+   "phonemes": "ˈat.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.43,
+   "other_s": 0.43
+  },
+  "w_back": {
+   "file": "w_back.mp3",
+   "text": "back.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.35,
+   "other_s": 0.45,
+   "phonemes": "bˈak."
+  },
+  "w_beach": {
+   "file": "w_beach.mp3",
+   "text": "Beach.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.48,
+   "other_s": 0.5,
+   "phonemes": "bˈiːtʃ."
+  },
+  "w_bell": {
+   "file": "w_bell.mp3",
+   "text": "bell.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.35,
+   "other_s": 0.44,
+   "phonemes": "bˈɛl."
+  },
+  "w_box": {
+   "file": "w_box.mp3",
+   "text": "box.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.51,
+   "other_s": 0.54,
+   "phonemes": "bˈɒks."
+  },
+  "w_bus": {
+   "file": "w_bus.mp3",
+   "text": "bus.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.46,
+   "other_s": 0.46,
+   "phonemes": "bˈʌs."
+  },
+  "w_buzz": {
+   "file": "w_buzz.mp3",
+   "text": "buzz.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.46,
+   "other_s": 0.44,
+   "phonemes": "bˈʌz."
+  },
+  "w_dad": {
+   "file": "w_dad.mp3",
+   "text": "dad.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.45,
+   "other_s": 0.48,
+   "phonemes": "dˈad."
+  },
+  "w_deck": {
+   "file": "w_deck.mp3",
+   "text": "deck.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.33,
+   "other_s": 0.37,
+   "phonemes": "dˈɛk."
+  },
+  "w_did": {
+   "file": "w_did.mp3",
+   "text": "did.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.35,
+   "other_s": 0.33,
+   "phonemes": "dˈɪd."
+  },
+  "w_dim": {
+   "file": "w_dim.mp3",
+   "text": "dim!",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.55,
+   "other_s": 0.9,
+   "phonemes": "dˈɪm!"
+  },
+  "w_dip": {
+   "file": "w_dip.mp3",
+   "text": "dip.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.35,
+   "other_s": 0.34,
+   "phonemes": "dˈɪp."
+  },
+  "w_doll": {
+   "file": "w_doll.mp3",
+   "text": "doll.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.41,
+   "other_s": 0.43,
+   "phonemes": "dˈɒl."
+  },
+  "w_fan": {
+   "file": "w_fan.mp3",
+   "text": "fan.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.5,
+   "other_s": 0.44,
+   "phonemes": "fˈan."
+  },
+  "w_farm": {
+   "file": "w_farm.mp3",
+   "text": "Farm.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.53,
+   "other_s": 0.57,
+   "phonemes": "fˈɑːm."
+  },
+  "w_garden": {
+   "file": "w_garden.mp3",
+   "text": "Garden.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.48,
+   "other_s": 0.58,
+   "phonemes": "ɡˈɑːdən."
+  },
+  "w_got": {
+   "file": "w_got.mp3",
+   "text": "got.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.43,
+   "other_s": 0.44,
+   "phonemes": "ɡˈɒt."
+  },
+  "w_grandma": {
+   "file": "w_grandma.mp3",
+   "text": "Grandma.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.69,
+   "other_s": 0.63,
+   "phonemes": "ɡɹˈandmɑː."
+  },
+  "w_grandpa": {
+   "file": "w_grandpa.mp3",
+   "text": "Grandpa.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.76,
+   "other_s": 0.73,
+   "phonemes": "ɡɹˈandpɑː."
+  },
+  "w_hill": {
+   "file": "w_hill.mp3",
+   "text": "hill.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.39,
+   "other_s": 0.37,
+   "phonemes": "hˈɪl."
+  },
+  "w_him": {
+   "file": "w_him.mp3",
+   "text": "him.",
+   "phonemes": "hˈɪm.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.43,
+   "other_s": 0.44
+  },
+  "w_home": {
+   "file": "w_home.mp3",
+   "text": "Home.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.5,
+   "other_s": 0.49,
+   "phonemes": "hˈəʊm."
+  },
+  "w_in": {
+   "file": "w_in.mp3",
+   "text": "in.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.42,
+   "other_s": 0.42,
+   "phonemes": "ˈɪn."
+  },
+  "w_it": {
+   "file": "w_it.mp3",
+   "text": "it.",
+   "phonemes": "ˈɪt.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.33,
+   "other_s": 0.38
+  },
+  "w_jet": {
+   "file": "w_jet.mp3",
+   "text": "jet.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.42,
+   "other_s": 0.4,
+   "phonemes": "dʒˈɛt."
+  },
+  "w_job": {
+   "file": "w_job.mp3",
+   "text": "job.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.38,
+   "other_s": 0.37,
+   "phonemes": "dʒˈɒb."
+  },
+  "w_jug": {
+   "file": "w_jug.mp3",
+   "text": "jug.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.42,
+   "other_s": 0.39,
+   "phonemes": "dʒˈʌɡ."
+  },
+  "w_kick": {
+   "file": "w_kick.mp3",
+   "text": "kick.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.33,
+   "other_s": 0.31,
+   "phonemes": "kˈɪk."
+  },
+  "w_kid": {
+   "file": "w_kid.mp3",
+   "text": "kid.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.45,
+   "other_s": 0.33,
+   "phonemes": "kˈɪd."
+  },
+  "w_kin": {
+   "file": "w_kin.mp3",
+   "text": "kin.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.44,
+   "other_s": 0.43,
+   "phonemes": "kˈɪn."
+  },
+  "w_kiss": {
+   "file": "w_kiss.mp3",
+   "text": "kiss.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.51,
+   "other_s": 0.52,
+   "phonemes": "kˈɪs."
+  },
+  "w_lake": {
+   "file": "w_lake.mp3",
+   "text": "Lake.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.42,
+   "other_s": 0.39,
+   "phonemes": "lˈeɪk."
+  },
+  "w_leg": {
+   "file": "w_leg.mp3",
+   "text": "leg.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.37,
+   "other_s": 0.46,
+   "phonemes": "lˈɛɡ."
+  },
+  "w_library": {
+   "file": "w_library.mp3",
+   "text": "Library.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.8,
+   "other_s": 0.75,
+   "phonemes": "lˈaɪbɹəɹi."
+  },
+  "w_lip": {
+   "file": "w_lip.mp3",
+   "text": "lip.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.46,
+   "other_s": 0.42,
+   "phonemes": "lˈɪp."
+  },
+  "w_lot": {
+   "file": "w_lot.mp3",
+   "text": "lot.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.42,
+   "other_s": 0.44,
+   "phonemes": "lˈɒt."
+  },
+  "w_mess": {
+   "file": "w_mess.mp3",
+   "text": "mess.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.52,
+   "other_s": 0.49,
+   "phonemes": "mˈɛs."
+  },
+  "w_miss": {
+   "file": "w_miss.mp3",
+   "text": "miss.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.48,
+   "other_s": 0.53,
+   "phonemes": "mˈɪs."
+  },
+  "w_mix": {
+   "file": "w_mix.mp3",
+   "text": "mix.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.56,
+   "other_s": 0.58,
+   "phonemes": "mˈɪks."
+  },
+  "w_mom": {
+   "file": "w_mom.mp3",
+   "text": "Mom.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.44,
+   "other_s": 0.48,
+   "phonemes": "mˈɒm."
+  },
+  "w_mud": {
+   "file": "w_mud.mp3",
+   "text": "mud.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.37,
+   "other_s": 0.42,
+   "phonemes": "mˈʌd."
+  },
+  "w_nap": {
+   "file": "w_nap.mp3",
+   "text": "nap.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.46,
+   "other_s": 0.5,
+   "phonemes": "nˈap."
+  },
+  "w_neck": {
+   "file": "w_neck.mp3",
+   "text": "neck.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.39,
+   "other_s": 0.42,
+   "phonemes": "nˈɛk."
+  },
+  "w_nut": {
+   "file": "w_nut.mp3",
+   "text": "nut.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.43,
+   "other_s": 0.49,
+   "phonemes": "nˈʌt."
+  },
+  "w_off": {
+   "file": "w_off.mp3",
+   "text": "off.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.43,
+   "other_s": 0.49,
+   "phonemes": "ˈɒf."
+  },
+  "w_on": {
+   "file": "w_on.mp3",
+   "text": "on.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.4,
+   "other_s": 0.41,
+   "phonemes": "ˈɒn."
+  },
+  "w_park": {
+   "file": "w_park.mp3",
+   "text": "Park.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.44,
+   "other_s": 0.44,
+   "phonemes": "pˈɑːk."
+  },
+  "w_pat": {
+   "file": "w_pat.mp3",
+   "text": "pat.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.44,
+   "other_s": 0.5,
+   "phonemes": "pˈat."
+  },
+  "w_pats": {
+   "file": "w_pats.mp3",
+   "text": "pats.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.58,
+   "other_s": 0.57,
+   "phonemes": "pˈats."
+  },
+  "w_pick": {
+   "file": "w_pick.mp3",
+   "text": "pick.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.31,
+   "other_s": 0.32,
+   "phonemes": "pˈɪk."
+  },
+  "w_playground": {
+   "file": "w_playground.mp3",
+   "text": "Playground.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.69,
+   "other_s": 0.81,
+   "phonemes": "plˈeɪɡɹaʊnd."
+  },
+  "w_pool": {
+   "file": "w_pool.mp3",
+   "text": "Pool.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.5,
+   "other_s": 0.55,
+   "phonemes": "pˈuːl."
+  },
+  "w_puff": {
+   "file": "w_puff.mp3",
+   "text": "puff.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.45,
+   "other_s": 0.45,
+   "phonemes": "pˈʌf."
+  },
+  "w_quick": {
+   "file": "w_quick.mp3",
+   "text": "quick.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.38,
+   "other_s": 0.37,
+   "phonemes": "kwˈɪk."
+  },
+  "w_quit": {
+   "file": "w_quit.mp3",
+   "text": "quit.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.39,
+   "other_s": 0.38,
+   "phonemes": "kwˈɪt."
+  },
+  "w_quiz": {
+   "file": "w_quiz.mp3",
+   "text": "quiz.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.48,
+   "other_s": 0.54,
+   "phonemes": "kwˈɪz."
+  },
+  "w_rock": {
+   "file": "w_rock.mp3",
+   "text": "rock!",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.44,
+   "other_s": 1.45,
+   "phonemes": "ɹˈɒk!"
+  },
+  "w_rug": {
+   "file": "w_rug.mp3",
+   "text": "rug.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.53,
+   "other_s": 0.51,
+   "phonemes": "ɹˈʌɡ."
+  },
+  "w_sad": {
+   "file": "w_sad.mp3",
+   "text": "sad.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.5,
+   "other_s": 0.52,
+   "phonemes": "sˈad."
+  },
+  "w_sap": {
+   "file": "w_sap.mp3",
+   "text": "sap.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.5,
+   "other_s": 0.54,
+   "phonemes": "sˈap."
+  },
+  "w_school": {
+   "file": "w_school.mp3",
+   "text": "School.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.74,
+   "other_s": 0.73,
+   "phonemes": "skˈuːl."
+  },
+  "w_sip": {
+   "file": "w_sip.mp3",
+   "text": "sip.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.51,
+   "other_s": 0.55,
+   "phonemes": "sˈɪp."
+  },
+  "w_six": {
+   "file": "w_six.mp3",
+   "text": "six.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.62,
+   "other_s": 0.59,
+   "phonemes": "sˈɪks."
+  },
+  "w_sock": {
+   "file": "w_sock.mp3",
+   "text": "sock!",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.68,
+   "other_s": 0.9,
+   "phonemes": "sˈɒk!"
+  },
+  "w_store": {
+   "file": "w_store.mp3",
+   "text": "Store.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.65,
+   "other_s": 0.67,
+   "phonemes": "stˈɔː."
+  },
+  "w_taps": {
+   "file": "w_taps.mp3",
+   "text": "taps.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.59,
+   "other_s": 0.64,
+   "phonemes": "tˈaps."
+  },
+  "w_tip": {
+   "file": "w_tip.mp3",
+   "text": "tip.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.44,
+   "other_s": 0.42,
+   "phonemes": "tˈɪp."
+  },
+  "w_up": {
+   "file": "w_up.mp3",
+   "text": "up.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.35,
+   "other_s": 0.4,
+   "phonemes": "ˈʌp."
+  },
+  "w_vet": {
+   "file": "w_vet.mp3",
+   "text": "vet.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.4,
+   "other_s": 0.35,
+   "phonemes": "vˈɛt."
+  },
+  "w_will": {
+   "file": "w_will.mp3",
+   "text": "will.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.43,
+   "other_s": 0.44,
+   "phonemes": "wˈɪl."
+  },
+  "w_yet": {
+   "file": "w_yet.mp3",
+   "text": "yet.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.42,
+   "other_s": 0.42,
+   "phonemes": "jˈɛt."
+  },
+  "w_yum": {
+   "file": "w_yum.mp3",
+   "text": "yum.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.52,
+   "other_s": 0.54,
+   "phonemes": "jˈʌm."
+  },
+  "w_zap": {
+   "file": "w_zap.mp3",
+   "text": "zap.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.51,
+   "other_s": 0.52,
+   "phonemes": "zˈap."
+  },
+  "w_zoo": {
+   "file": "w_zoo.mp3",
+   "text": "Zoo.",
+   "length_scale": 1.08,
+   "noise_w": 0.0,
+   "speech_s": 0.54,
+   "other_s": 0.59,
+   "phonemes": "zˈuː."
+  }
+ }
+}

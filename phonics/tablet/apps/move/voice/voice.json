@@ -1,0 +1,851 @@
+{
+ "voice": "en_US-kristin-medium",
+ "length_scale": 1.05,
+ "clips": {
+  "w_cat": {
+   "text": "cat.",
+   "ms": 613,
+   "phonemes": "kˈat."
+  },
+  "w_dog": {
+   "text": "dog.",
+   "ms": 579,
+   "phonemes": "dˈɒɡ."
+  },
+  "w_sun": {
+   "text": "sun.",
+   "ms": 673,
+   "phonemes": "sˈʌn."
+  },
+  "w_pig": {
+   "text": "pig.",
+   "ms": 595,
+   "phonemes": "pˈɪɡ."
+  },
+  "w_bus": {
+   "text": "bus.",
+   "ms": 552,
+   "phonemes": "bˈʌs."
+  },
+  "w_hat": {
+   "text": "hat.",
+   "ms": 580,
+   "phonemes": "hˈat."
+  },
+  "w_cup": {
+   "text": "cup.",
+   "ms": 488,
+   "phonemes": "kˈʌp."
+  },
+  "w_bed": {
+   "text": "bed.",
+   "ms": 495,
+   "phonemes": "bˈɛd."
+  },
+  "w_fox": {
+   "text": "fox.",
+   "ms": 717,
+   "phonemes": "fˈɒks."
+  },
+  "w_egg": {
+   "text": "egg.",
+   "ms": 498,
+   "phonemes": "ˈɛɡ."
+  },
+  "w_bat": {
+   "text": "bat.",
+   "ms": 527,
+   "phonemes": "bˈat."
+  },
+  "w_cow": {
+   "text": "cow.",
+   "ms": 547,
+   "phonemes": "kˈaʊ."
+  },
+  "w_ant": {
+   "text": "ant.",
+   "ms": 523,
+   "phonemes": "ˈant."
+  },
+  "w_bug": {
+   "text": "bug.",
+   "ms": 544,
+   "phonemes": "bˈʌɡ."
+  },
+  "w_map": {
+   "text": "map.",
+   "ms": 621,
+   "phonemes": "mˈap."
+  },
+  "w_pen": {
+   "text": "pen.",
+   "ms": 516,
+   "phonemes": "pˈɛn."
+  },
+  "w_box": {
+   "text": "box.",
+   "ms": 685,
+   "phonemes": "bˈɒks."
+  },
+  "w_car": {
+   "text": "car.",
+   "ms": 660,
+   "phonemes": "kˈɑː."
+  },
+  "w_hen": {
+   "text": "hen.",
+   "ms": 466,
+   "phonemes": "hˈɛn."
+  },
+  "w_jam": {
+   "text": "jam.",
+   "ms": 598,
+   "phonemes": "dʒˈam."
+  },
+  "w_owl": {
+   "text": "owl.",
+   "ms": 497,
+   "phonemes": "ˈaʊl."
+  },
+  "w_pan": {
+   "text": "pan.",
+   "ms": 617,
+   "phonemes": "pˈan."
+  },
+  "w_web": {
+   "text": "web.",
+   "ms": 924,
+   "phonemes": "wˈɛb!"
+  },
+  "w_zip": {
+   "text": "zip.",
+   "ms": 675,
+   "phonemes": "zˈɪp."
+  },
+  "w_ship": {
+   "text": "ship.",
+   "ms": 690,
+   "phonemes": "ʃˈɪp."
+  },
+  "w_frog": {
+   "text": "frog.",
+   "ms": 623,
+   "phonemes": "fɹˈɒɡ."
+  },
+  "w_fish": {
+   "text": "fish.",
+   "ms": 689,
+   "phonemes": "fˈɪʃ."
+  },
+  "w_duck": {
+   "text": "duck.",
+   "ms": 472,
+   "phonemes": "dˈʌk."
+  },
+  "w_crab": {
+   "text": "crab.",
+   "ms": 930,
+   "phonemes": "kɹˈab!"
+  },
+  "w_drum": {
+   "text": "drum.",
+   "ms": 588,
+   "phonemes": "dɹˈʌm."
+  },
+  "w_flag": {
+   "text": "flag.",
+   "ms": 660,
+   "phonemes": "flˈaɡ."
+  },
+  "w_shell": {
+   "text": "shell.",
+   "ms": 585,
+   "phonemes": "ʃˈɛl."
+  },
+  "w_clock": {
+   "text": "clock.",
+   "ms": 593,
+   "phonemes": "klˈɒk."
+  },
+  "w_truck": {
+   "text": "truck.",
+   "ms": 562,
+   "phonemes": "tɹˈʌk."
+  },
+  "w_sock": {
+   "text": "sock.",
+   "ms": 962,
+   "phonemes": "sˈɒk."
+  },
+  "w_milk": {
+   "text": "milk.",
+   "ms": 584,
+   "phonemes": "mˈɪlk."
+  },
+  "w_nest": {
+   "text": "nest.",
+   "ms": 671,
+   "phonemes": "nˈɛst."
+  },
+  "w_ring": {
+   "text": "ring.",
+   "ms": 708,
+   "phonemes": "ɹˈɪŋ."
+  },
+  "w_star": {
+   "text": "star.",
+   "ms": 867,
+   "phonemes": "stˈɑː."
+  },
+  "w_tree": {
+   "text": "tree.",
+   "ms": 662,
+   "phonemes": "tɹˈiː."
+  },
+  "w_snake": {
+   "text": "snake.",
+   "ms": 714,
+   "phonemes": "snˈeɪk."
+  },
+  "w_hand": {
+   "text": "hand.",
+   "ms": 707,
+   "phonemes": "hˈand."
+  },
+  "w_moon": {
+   "text": "moon.",
+   "ms": 608,
+   "phonemes": "mˈuːn."
+  },
+  "w_bell": {
+   "text": "bell.",
+   "ms": 557,
+   "phonemes": "bˈɛl."
+  },
+  "w_king": {
+   "text": "king.",
+   "ms": 564,
+   "phonemes": "kˈɪŋ."
+  },
+  "w_chick": {
+   "text": "chick.",
+   "ms": 538,
+   "phonemes": "tʃˈɪk."
+  },
+  "w_brush": {
+   "text": "brush.",
+   "ms": 561,
+   "phonemes": "bɹˈʌʃ."
+  },
+  "w_crown": {
+   "text": "crown.",
+   "ms": 586,
+   "phonemes": "kɹˈaʊn."
+  },
+  "w_swim": {
+   "text": "swim.",
+   "ms": 791,
+   "phonemes": "swˈɪm."
+  },
+  "w_ghost": {
+   "text": "ghost.",
+   "ms": 585,
+   "phonemes": "ɡˈəʊst."
+  },
+  "w_plant": {
+   "text": "plant.",
+   "ms": 615,
+   "phonemes": "plˈant."
+  },
+  "w_lamp": {
+   "text": "lamp.",
+   "ms": 614,
+   "phonemes": "lˈamp."
+  },
+  "w_cake": {
+   "text": "cake.",
+   "ms": 565,
+   "phonemes": "kˈeɪk."
+  },
+  "w_whale": {
+   "text": "whale.",
+   "ms": 661,
+   "phonemes": "wˈeɪl."
+  },
+  "w_grapes": {
+   "text": "grapes.",
+   "ms": 819,
+   "phonemes": "ɡɹˈeɪps."
+  },
+  "w_mouse": {
+   "text": "mouse.",
+   "ms": 618,
+   "phonemes": "mˈaʊs."
+  },
+  "w_house": {
+   "text": "house.",
+   "ms": 681,
+   "phonemes": "hˈaʊs."
+  },
+  "w_boat": {
+   "text": "boat.",
+   "ms": 563,
+   "phonemes": "bˈəʊt."
+  },
+  "w_rain": {
+   "text": "rain.",
+   "ms": 460,
+   "phonemes": "ɹˈeɪn."
+  },
+  "w_train": {
+   "text": "train.",
+   "ms": 673,
+   "phonemes": "tɹˈeɪn."
+  },
+  "w_bike": {
+   "text": "bike.",
+   "ms": 463,
+   "phonemes": "bˈaɪk."
+  },
+  "w_kite": {
+   "text": "kite.",
+   "ms": 580,
+   "phonemes": "kˈaɪt."
+  },
+  "w_snail": {
+   "text": "snail.",
+   "ms": 702,
+   "phonemes": "snˈeɪl."
+  },
+  "w_cloud": {
+   "text": "cloud.",
+   "ms": 576,
+   "phonemes": "klˈaʊd."
+  },
+  "w_plane": {
+   "text": "plane.",
+   "ms": 660,
+   "phonemes": "plˈeɪn."
+  },
+  "w_sheep": {
+   "text": "sheep.",
+   "ms": 609,
+   "phonemes": "ʃˈiːp."
+  },
+  "w_cheese": {
+   "text": "cheese.",
+   "ms": 773,
+   "phonemes": "tʃˈiːz."
+  },
+  "w_bread": {
+   "text": "bread.",
+   "ms": 635,
+   "phonemes": "bɹˈɛd."
+  },
+  "w_pizza": {
+   "text": "pizza.",
+   "ms": 654,
+   "phonemes": "pˈiːtsə."
+  },
+  "w_robot": {
+   "text": "robot.",
+   "ms": 688,
+   "phonemes": "ɹˈəʊbɒt."
+  },
+  "w_tiger": {
+   "text": "tiger.",
+   "ms": 649,
+   "phonemes": "tˈaɪɡə."
+  },
+  "w_flower": {
+   "text": "flower.",
+   "ms": 737,
+   "phonemes": "flˈaʊə."
+  },
+  "w_rocket": {
+   "text": "rocket.",
+   "ms": 712,
+   "phonemes": "ɹˈɒkɪt."
+  },
+  "w_candle": {
+   "text": "candle.",
+   "ms": 669,
+   "phonemes": "kˈandəl."
+  },
+  "w_koala": {
+   "text": "koala.",
+   "ms": 699,
+   "phonemes": "kəʊˈɑːlə."
+  },
+  "w_panda": {
+   "text": "panda.",
+   "ms": 685,
+   "phonemes": "pˈandə."
+  },
+  "w_zebra": {
+   "text": "zebra.",
+   "ms": 761,
+   "phonemes": "zˈɛbɹə."
+  },
+  "w_said": {
+   "text": "said.",
+   "ms": 547,
+   "phonemes": "sˈɛd."
+  },
+  "w_they": {
+   "text": "they.",
+   "ms": 552,
+   "phonemes": "ðeɪ."
+  },
+  "w_when": {
+   "text": "when.",
+   "ms": 591,
+   "phonemes": "wˌɛn."
+  },
+  "w_what": {
+   "text": "what.",
+   "ms": 545,
+   "phonemes": "wˌɒt."
+  },
+  "w_want": {
+   "text": "want.",
+   "ms": 605,
+   "phonemes": "wˈɒnt."
+  },
+  "w_because": {
+   "text": "because.",
+   "ms": 753,
+   "phonemes": "bɪkˈɒz."
+  },
+  "w_friend": {
+   "text": "friend.",
+   "ms": 686,
+   "phonemes": "fɹˈɛnd."
+  },
+  "l_a": {
+   "text": "A.",
+   "ms": 533,
+   "phonemes": "ˈeɪ."
+  },
+  "l_b": {
+   "text": "B.",
+   "ms": 655,
+   "phonemes": "bˈiː."
+  },
+  "l_c": {
+   "text": "C.",
+   "ms": 654,
+   "phonemes": "sˈiː."
+  },
+  "l_d": {
+   "text": "D.",
+   "ms": 539,
+   "phonemes": "dˈiː."
+  },
+  "l_e": {
+   "text": "E.",
+   "ms": 497,
+   "phonemes": "ˈiː."
+  },
+  "l_f": {
+   "text": "F.",
+   "ms": 471,
+   "phonemes": "ˈɛf!"
+  },
+  "l_g": {
+   "text": "G.",
+   "ms": 569,
+   "phonemes": "dʒˈiː."
+  },
+  "l_h": {
+   "text": "H.",
+   "ms": 619,
+   "phonemes": "ˈeɪtʃ."
+  },
+  "l_i": {
+   "text": "I.",
+   "ms": 555,
+   "phonemes": "ˈaɪ."
+  },
+  "l_j": {
+   "text": "J.",
+   "ms": 614,
+   "phonemes": "dʒˈeɪ."
+  },
+  "l_k": {
+   "text": "K.",
+   "ms": 537,
+   "phonemes": "kˈeɪ."
+  },
+  "l_l": {
+   "text": "L.",
+   "ms": 571,
+   "phonemes": "ˈɛl."
+  },
+  "l_m": {
+   "text": "M.",
+   "ms": 796,
+   "phonemes": "ˈɛm."
+  },
+  "l_n": {
+   "text": "N.",
+   "ms": 585,
+   "phonemes": "ˈɛn."
+  },
+  "l_o": {
+   "text": "O.",
+   "ms": 566,
+   "phonemes": "ˈəʊ."
+  },
+  "l_p": {
+   "text": "P.",
+   "ms": 585,
+   "phonemes": "pˈiː."
+  },
+  "l_q": {
+   "text": "Q.",
+   "ms": 632,
+   "phonemes": "kjˈuː."
+  },
+  "l_r": {
+   "text": "R.",
+   "ms": 495,
+   "phonemes": "ˈɑː."
+  },
+  "l_s": {
+   "text": "S.",
+   "ms": 555,
+   "phonemes": "ˈɛs."
+  },
+  "l_t": {
+   "text": "T.",
+   "ms": 605,
+   "phonemes": "tˈiː."
+  },
+  "l_u": {
+   "text": "U.",
+   "ms": 402,
+   "phonemes": "jˈuː."
+  },
+  "l_v": {
+   "text": "V.",
+   "ms": 578,
+   "phonemes": "vˈiː."
+  },
+  "l_w": {
+   "text": "W.",
+   "ms": 685,
+   "phonemes": "dˈʌbəljˌuː."
+  },
+  "l_x": {
+   "text": "X.",
+   "ms": 584,
+   "phonemes": "ˈɛks."
+  },
+  "l_y": {
+   "text": "Y.",
+   "ms": 590,
+   "phonemes": "wˈaɪ."
+  },
+  "l_z": {
+   "text": "Zee.",
+   "ms": 587,
+   "phonemes": "zˈiː."
+  },
+  "n0": {
+   "text": "zero.",
+   "ms": 677,
+   "phonemes": "zˈiəɹəʊ."
+  },
+  "n21": {
+   "text": "twenty one.",
+   "ms": 877,
+   "phonemes": "twˈɛnti wˌɒn."
+  },
+  "n22": {
+   "text": "twenty two.",
+   "ms": 983,
+   "phonemes": "twˈɛnti tˈuː."
+  },
+  "n23": {
+   "text": "twenty three.",
+   "ms": 1040,
+   "phonemes": "twˈɛnti θɹˈiː."
+  },
+  "n24": {
+   "text": "twenty four.",
+   "ms": 934,
+   "phonemes": "twˈɛnti fˈɔː."
+  },
+  "n25": {
+   "text": "twenty five.",
+   "ms": 1174,
+   "phonemes": "twˈɛnti fˈaɪv."
+  },
+  "n26": {
+   "text": "twenty six.",
+   "ms": 1055,
+   "phonemes": "twˈɛnti sˈɪks."
+  },
+  "n27": {
+   "text": "twenty seven.",
+   "ms": 951,
+   "phonemes": "twˈɛnti sˈɛvən."
+  },
+  "n28": {
+   "text": "twenty eight.",
+   "ms": 980,
+   "phonemes": "twˈɛntiʲ ˈeɪt."
+  },
+  "n29": {
+   "text": "twenty nine.",
+   "ms": 1021,
+   "phonemes": "twˈɛnti nˈaɪn."
+  },
+  "n30": {
+   "text": "thirty.",
+   "ms": 760,
+   "phonemes": "θˈɜːti."
+  },
+  "plus": {
+   "text": "plus.",
+   "ms": 612,
+   "phonemes": "plˈʌs."
+  },
+  "takeaway": {
+   "text": "take away.",
+   "ms": 874,
+   "phonemes": "tˈeɪk ɐwˈeɪ."
+  },
+  "minus": {
+   "text": "minus.",
+   "ms": 845,
+   "phonemes": "mˈaɪnəs."
+  },
+  "is": {
+   "text": "is.",
+   "ms": 674,
+   "phonemes": "ɪz."
+  },
+  "end1_5": {
+   "text": "Great job! You got five stars!",
+   "ms": 2495,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb!juː ɡɒt fˈaɪv stˈɑːz!"
+  },
+  "end1_6": {
+   "text": "Great job! You got six stars!",
+   "ms": 2308,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb!juː ɡɒt sˈɪks stˈɑːz!"
+  },
+  "end1_7": {
+   "text": "Great job! You got seven stars!",
+   "ms": 2448,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb!juː ɡɒt sˈɛvən stˈɑːz!"
+  },
+  "end1_8": {
+   "text": "Great job! You got eight stars!",
+   "ms": 2258,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb!juː ɡɒt ˈeɪt stˈɑːz!"
+  },
+  "end1_9": {
+   "text": "Great job! You got nine stars!",
+   "ms": 2390,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb!juː ɡɒt nˈaɪn stˈɑːz!"
+  },
+  "end1_10": {
+   "text": "Great job! You got ten stars!",
+   "ms": 2294,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb!juː ɡɒt tˈɛn stˈɑːz!"
+  },
+  "end1_11": {
+   "text": "Great job! You got eleven stars!",
+   "ms": 2525,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb!juː ɡɒt ɪlˈɛvən stˈɑːz!"
+  },
+  "end1_12": {
+   "text": "Great job! You got twelve stars!",
+   "ms": 2315,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb!juː ɡɒt twˈɛlv stˈɑːz!"
+  },
+  "end1_13": {
+   "text": "Great job! You got thirteen stars!",
+   "ms": 2532,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb!juː ɡɒt θˈɜːtiːn stˈɑːz!"
+  },
+  "end1_14": {
+   "text": "Great job! You got fourteen stars!",
+   "ms": 2778,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb!juː ɡɒt fˈɔːtiːn stˈɑːz!"
+  },
+  "end1_15": {
+   "text": "Great job! You got fifteen stars!",
+   "ms": 2758,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb!juː ɡɒt fˈɪftiːn stˈɑːz!"
+  },
+  "end2_10": {
+   "text": "Great job, both of you! Ten stars!",
+   "ms": 2584,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!tˈɛn stˈɑːz!"
+  },
+  "end2_11": {
+   "text": "Great job, both of you! Eleven stars!",
+   "ms": 2765,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!ɪlˈɛvən stˈɑːz!"
+  },
+  "end2_12": {
+   "text": "Great job, both of you! Twelve stars!",
+   "ms": 2875,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!twˈɛlv stˈɑːz!"
+  },
+  "end2_13": {
+   "text": "Great job, both of you! Thirteen stars!",
+   "ms": 3064,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!θˈɜːtiːn stˈɑːz!"
+  },
+  "end2_14": {
+   "text": "Great job, both of you! Fourteen stars!",
+   "ms": 3050,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!fˈɔːtiːn stˈɑːz!"
+  },
+  "end2_15": {
+   "text": "Great job, both of you! Fifteen stars!",
+   "ms": 3217,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!fˈɪftiːn stˈɑːz!"
+  },
+  "end2_16": {
+   "text": "Great job, both of you! Sixteen stars!",
+   "ms": 3068,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!sˈɪkstiːn stˈɑːz!"
+  },
+  "end2_17": {
+   "text": "Great job, both of you! Seventeen stars!",
+   "ms": 3049,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!sˈɛvəntˌiːn stˈɑːz!"
+  },
+  "end2_18": {
+   "text": "Great job, both of you! Eighteen stars!",
+   "ms": 2768,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!ˈeɪtiːn stˈɑːz!"
+  },
+  "end2_19": {
+   "text": "Great job, both of you! Nineteen stars!",
+   "ms": 2830,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!nˈaɪntiːn stˈɑːz!"
+  },
+  "end2_20": {
+   "text": "Great job, both of you! Twenty stars!",
+   "ms": 2505,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!twˈɛnti stˈɑːz!"
+  },
+  "end2_21": {
+   "text": "Great job, both of you! Twenty one stars!",
+   "ms": 3075,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!twˈɛnti wˈɒn stˈɑːz!"
+  },
+  "end2_22": {
+   "text": "Great job, both of you! Twenty two stars!",
+   "ms": 3077,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!twˈɛnti tˈuː stˈɑːz!"
+  },
+  "end2_23": {
+   "text": "Great job, both of you! Twenty three stars!",
+   "ms": 3145,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!twˈɛnti θɹˈiː stˈɑːz!"
+  },
+  "end2_24": {
+   "text": "Great job, both of you! Twenty four stars!",
+   "ms": 3018,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!twˈɛnti fˈɔː stˈɑːz!"
+  },
+  "end2_25": {
+   "text": "Great job, both of you! Twenty five stars!",
+   "ms": 3250,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!twˈɛnti fˈaɪv stˈɑːz!"
+  },
+  "end2_26": {
+   "text": "Great job, both of you! Twenty six stars!",
+   "ms": 3128,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!twˈɛnti sˈɪks stˈɑːz!"
+  },
+  "end2_27": {
+   "text": "Great job, both of you! Twenty seven stars!",
+   "ms": 3286,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!twˈɛnti sˈɛvən stˈɑːz!"
+  },
+  "end2_28": {
+   "text": "Great job, both of you! Twenty eight stars!",
+   "ms": 3027,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!twˈɛntiʲ ˈeɪt stˈɑːz!"
+  },
+  "end2_29": {
+   "text": "Great job, both of you! Twenty nine stars!",
+   "ms": 3247,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!twˈɛnti nˈaɪn stˈɑːz!"
+  },
+  "end2_30": {
+   "text": "Great job, both of you! Thirty stars!",
+   "ms": 2719,
+   "phonemes": "ɡɹˈeɪt dʒˈɒb, bˈəʊθ ɒv juː!θˈɜːti stˈɑːz!"
+  },
+  "intro_spell": {
+   "text": "Pop the letters to spell the word!",
+   "ms": 2311,
+   "phonemes": "pˈɒp ðə lˈɛtəz tə spˈɛl ðə wˈɜːd!"
+  },
+  "intro_math": {
+   "text": "Pop the right answer!",
+   "ms": 1295,
+   "phonemes": "pˈɒp ðə ɹˈaɪt ˈansə!"
+  },
+  "say_spell": {
+   "text": "Spelling.",
+   "ms": 808,
+   "phonemes": "spˈɛlɪŋ."
+  },
+  "say_math": {
+   "text": "Math.",
+   "ms": 750,
+   "phonemes": "mˈaθ."
+  },
+  "say_p1": {
+   "text": "One player.",
+   "ms": 992,
+   "phonemes": "wˈɒn plˈeɪə."
+  },
+  "say_p2": {
+   "text": "Two players.",
+   "ms": 1080,
+   "phonemes": "tˈuː plˈeɪəz."
+  },
+  "say_gk": {
+   "text": "Kindergarten.",
+   "ms": 1012,
+   "phonemes": "kˈɪndəɡˌɑːtən."
+  },
+  "say_g1": {
+   "text": "First grade.",
+   "ms": 1163,
+   "phonemes": "fˈɜːst ɡɹˈeɪd."
+  },
+  "say_g2": {
+   "text": "Second grade.",
+   "ms": 1133,
+   "phonemes": "sˈɛkənd ɡɹˈeɪd."
+  },
+  "say_hear": {
+   "text": "Hear it again.",
+   "ms": 1037,
+   "phonemes": "hˈiəɹ ɪt ɐɡˈɛn."
+  },
+  "say_menu": {
+   "text": "Menu.",
+   "ms": 788,
+   "phonemes": "mˈɛnjuː."
+  },
+  "say_stop": {
+   "text": "Stop.",
+   "ms": 665,
+   "phonemes": "stˈɒp."
+  }
+ }
+}

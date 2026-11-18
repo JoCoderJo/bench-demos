@@ -1,0 +1,27 @@
+{
+ "_doc": "Trace It — what the Words, Names and Places tabs offer out of the box. Read by build.py (→ data.json) and make-voice.py (→ voice/). words: the Sound Book lessons of these stages (tools/soundbook.json), in lesson order; 'emoji' adds pictures to the Word Builder table for lesson words it lacks (only where a picture really fits). names / places: GENERIC starters only. PRIVACY: this bundle is also the public demo page — a real family name, town or street must never be written here; those are added on the tablet (the ➕ tile) and live in the tablet's store (/api/store/trace/custom.json).",
+ "word_stages": [1],
+ "emoji": {"sad": "😢", "kid": "🧒", "sock": "🧦", "nut": "🥜", "bus": "🚌", "leg": "🦵", "lip": "👄", "bell": "🔔",
+           "hill": "⛰️", "kiss": "💋", "box": "📦", "six": "6️⃣", "zap": "⚡", "buzz": "🐝", "yum": "😋", "up": "⬆️",
+           "mix": "🥣", "sip": "🥤", "dad": "👨", "quiz": "❓", "doll": "🪆", "rock": "🪨"},
+ "names": [
+  {"w": "Mom", "emoji": "👩"},
+  {"w": "Dad", "emoji": "👨"},
+  {"w": "Grandma", "emoji": "👵"},
+  {"w": "Grandpa", "emoji": "👴"}
+ ],
+ "places": [
+  {"w": "Home", "emoji": "🏠"},
+  {"w": "School", "emoji": "🏫"},
+  {"w": "Park", "emoji": "🌳"},
+  {"w": "Zoo", "emoji": "🦁"},
+  {"w": "Farm", "emoji": "🚜"},
+  {"w": "Beach", "emoji": "🏖️"},
+  {"w": "Library", "emoji": "📚"},
+  {"w": "Store", "emoji": "🛒"},
+  {"w": "Pool", "emoji": "🏊"},
+  {"w": "Lake", "emoji": "🛶"},
+  {"w": "Garden", "emoji": "🌷"},
+  {"w": "Playground", "emoji": "🛝"}
+ ]
+}

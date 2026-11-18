@@ -72,7 +72,9 @@
   },
   "w_and": {
    "file": "w_and.mp3",
-   "text": "and"
+   "text": "and",
+   "phonemes": "ˈand.",
+   "speech_s": 0.51
   },
   "w_my": {
    "file": "w_my.mp3",
@@ -92,7 +94,9 @@
   },
   "w_at": {
    "file": "w_at.mp3",
-   "text": "at"
+   "text": "at",
+   "phonemes": "ˈat.",
+   "speech_s": 0.42
   },
   "w_up": {
    "file": "w_up.mp3",
@@ -124,7 +128,9 @@
   },
   "w_am": {
    "file": "w_am.mp3",
-   "text": "am"
+   "text": "am",
+   "phonemes": "ˈam.",
+   "speech_s": 0.69
   },
   "w_like": {
    "file": "w_like.mp3",

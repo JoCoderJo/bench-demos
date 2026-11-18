@@ -34,6 +34,11 @@
   #stage { flex:1; min-width:0; min-height:0; display:flex; align-items:center; justify-content:center; padding:10px; position:relative; }
   #box { position:relative; background:#000; border-radius:18px; overflow:hidden; }
   #live { position:absolute; left:50%; top:50%; transform-origin:center; display:block; }
+  /* #lv = the live picture and, multiplied into it, the lens-tint layer; the colour filter is on the GROUP, so the tint is
+     taken out BEFORE the colour matrix — the same order as in a saved picture. (As a layer over the filtered picture it
+     removed only half: the matrix and the contrast had already doubled the tint. Measured on PPQ 2026-11-16.) */
+  #lv { position:absolute; inset:0; isolation:isolate; }
+  #tint { position:absolute; inset:0; pointer-events:none; mix-blend-mode:multiply; display:none; }
   #stk { position:absolute; inset:0; }
   .s { position:absolute; left:0; top:0; transform-origin:center; line-height:1; white-space:nowrap; touch-action:none; }
   .s.sel { outline:3px dashed rgba(255,255,255,.85); outline-offset:6px; border-radius:8px; }
@@ -59,7 +64,7 @@
   #camsw button { font-size:17px; min-height:56px; }
 
   /* sticker drawer slides over the bottom of the stage */
-  #drawer { position:absolute; left:12px; right:12px; bottom:12px; background:rgba(27,34,44,.96); border-radius:18px; padding:10px; display:none; flex-direction:column; gap:8px; max-height:46%; }
+  #drawer { position:absolute; left:12px; right:12px; bottom:12px; background:rgba(27,34,44,.96); border-radius:18px; padding:10px; display:none; flex-direction:column; gap:8px; max-height:66%; }
   #drawer.on { display:flex; }
   #colpanel { position:absolute; left:12px; right:12px; bottom:12px; background:rgba(27,34,44,.96); border-radius:18px; padding:10px 14px; display:none; flex-direction:column; gap:4px; max-height:70%; overflow-y:auto; touch-action:pan-y; }
   #colpanel.on { display:flex; }
@@ -74,6 +79,8 @@
   .pick { flex:none; width:84px; height:84px; border-radius:16px; background:#2a3340; display:flex; align-items:center; justify-content:center; font-size:52px; line-height:1; padding:6px; }
   .pick svg { width:64px; height:64px; }
   .pick:active { background:var(--on); }
+  #looks { display:flex; gap:10px; overflow-x:auto; overflow-y:hidden; padding:4px 2px 8px; touch-action:pan-x; }
+  .pick.on { outline:4px solid var(--on); outline-offset:-4px; background:#34405a; }
 
   /* ---- gallery */
   #gal { flex-direction:column; background:#f3f5f9; color:#1d2a3a; }
@@ -136,7 +143,7 @@ button{min-height:max(64px,var(--tgt));min-width:max(64px,var(--tgt))}
 <div class="screen on" id="cam">
   <div id="stage">
     <div id="box">
-      <img id="live" alt="">
+      <div id="lv"><img id="live" alt=""><div id="tint"></div></div>
       <div id="stk"></div>
       <div id="veil">starting camera…</div>
       <div id="count"></div>
@@ -154,6 +161,8 @@ button{min-height:max(64px,var(--tgt));min-width:max(64px,var(--tgt))}
         <button id="bClear" style="min-height:52px;font-size:16px">Clear all</button>
         <button id="bDrawerX" style="min-height:52px;font-size:16px">Close</button></div>
       <div id="shelf"></div>
+      <div class="row"><h3>Looks</h3></div>
+      <div id="looks"></div>
     </div>
   </div>
   <div id="side">
@@ -229,14 +238,44 @@ live.crossOrigin = 'anonymous';          // the helper sends Access-Control-Allo
    AWB only, no colour matrix, hazy lifted blacks, and the cast changes with the room's light (Joe, 2026-10-26: fixed numbers
    came out "very light and slightly grey/green" → auto by default, manual controls on request). */
 const CCM = [[1.60, -0.45, -0.15], [-0.30, 1.55, -0.25], [0.00, -0.55, 1.55]];   // IMX219-style colour matrix, daylight-ish
+/* 2026-11-16, the helper on the newer libcamera (status.libcamera >= 0.5; docs/CAMERA.md): its pictures arrive balanced, so
+   the strong matrix and the bright-patch white balance above — built against 0.4.0's casts — now ADD colour: with the
+   ceiling lamp in view the middle of the picture went purple on the real panel. For that helper: the matrix at 60 %,
+   white balance from the unclipped pixels only and within ±20 %, gentler levels, and the LENS TINT taken out first —
+   both IMX219 lenses are 12–13 % redder in the middle than at the edge (measured on two scenes, both cameras), which
+   any matrix or saturation multiplies. */
+let libNew = false;
+const CCM_SOFT = CCM.map((r, i) => r.map((v, j) => (i === j ? 1 : 0) + 0.6 * (v - (i === j ? 1 : 0))));
+// lens tint: [radius 0 centre … 1 corner, gain for red, gain for blue] — multiplied into the picture before anything else
+const TINT = [[0, 0.88, 0.98], [0.25, 0.90, 0.985], [0.42, 0.935, 0.99], [0.58, 0.972, 0.995], [0.75, 1, 1], [1, 1, 1]];
+const tintStops = k => TINT.map(([r, a, b]) => [r, `rgb(${Math.round(255 * (1 - k * (1 - a)))},255,${Math.round(255 * (1 - k * (1 - b)))})`]);
+const tintK = () => (libNew && active ? (colFor(active).tint == null ? 1 : colFor(active).tint) : 0);
+function tintCanvas(x, W, H, R) {                 // multiply the lens tint into a canvas whose centre is the frame's centre
+  const k = tintK(); if (!k) return;
+  const g = x.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, R);
+  for (const [r, col] of tintStops(k)) g.addColorStop(r, col);
+  x.save(); x.globalCompositeOperation = 'multiply'; x.fillStyle = g; x.fillRect(0, 0, W, H); x.restore();
+}
+function tintLayer() {                            // the same on the live view: a layer the GPU multiplies in
+  const t = $('tint'), k = tintK();
+  if (!k) { t.style.display = 'none'; return; }
+  const R = zoom * Math.hypot(box.clientWidth, box.clientHeight) / 2;
+  t.style.display = 'block';
+  t.style.background = `radial-gradient(circle ${R.toFixed(0)}px at center, ${tintStops(k).map(([r, c]) => c + ' ' + (r * 100).toFixed(0) + '%').join(', ')})`;
+}
 const COL_DEF = { auto: true, wbR: 1.08, wbB: 1.10, gain: 1.25, off: -20, sat: 1.25 };
 const tune = { wb: [1.08, 1.0, 1.10], gain: 1.25, off: -20, dark: 0, n: 0 }; // what auto measured (eased)
 let CM = [];
-function colFor(cam) { if (!V.col) V.col = {}; if (!V.col[cam]) V.col[cam] = Object.assign({}, COL_DEF); return V.col[cam]; }
+/* Hand-set colour is kept per camera AND per camera library: numbers somebody set against 0.4.0's casts (found on PPQ
+   2026-11-16: front = Auto off, Red 1.13, Blue 1.18, Contrast 1.80) turn the newer library's balanced picture purple.
+   With the newer library the tile therefore starts on Auto again, and the old numbers stay for the old helper. */
+const colKey = () => (libNew ? 'col7' : 'col');
+function colFor(cam) { const k = colKey(); if (!V[k]) V[k] = {}; if (!V[k][cam]) V[k][cam] = Object.assign({}, COL_DEF); return V[k][cam]; }
 function colourMatrix(wb, gain, off, sat) {                             // rows r,g,b: [m00 m01 m02 off]
   const L = [0.2126, 0.7152, 0.0722];
   const S = [0, 1, 2].map(i => [0, 1, 2].map(j => (1 - sat) * L[j] + (i === j ? sat : 0)));
-  const m = [0, 1, 2].map(i => [0, 1, 2].map(j => { let v = 0; for (let k = 0; k < 3; k++) v += S[i][k] * CCM[k][j]; return v * wb[j]; }));
+  const C = libNew ? CCM_SOFT : CCM;
+  const m = [0, 1, 2].map(i => [0, 1, 2].map(j => { let v = 0; for (let k = 0; k < 3; k++) v += S[i][k] * C[k][j]; return v * wb[j]; }));
   return m.map(r => [r[0] * gain, r[1] * gain, r[2] * gain, off]);
 }
 function current() {                                                    // the numbers in force right now
@@ -244,13 +283,30 @@ function current() {                                                    // the n
   // in the dark, auto also eases the saturation toward 1 (noise and the green cast are what saturation would amplify)
   return c.auto ? { wb: tune.wb, gain: tune.gain, off: tune.off, sat: 1 + (c.sat - 1) * (1 - 0.6 * tune.dark), auto: true } : { wb: [c.wbR, 1, c.wbB], gain: c.gain, off: c.off, sat: c.sat, auto: false };
 }
+/* Looks (2026-11-16): one more 3x4 matrix AFTER the colour correction — the preview's filter and the saved picture use
+   the same CM, so a look is on the screen exactly what lands in the gallery. */
+const _satM = (k, c, o) => { const L = [0.2126, 0.7152, 0.0722]; return [0, 1, 2].map(i => [0, 1, 2].map(j => c * ((1 - k) * L[j] + (i === j ? k : 0))).concat([o])); };
+const LOOKS = {
+  normal: ['🌈', 'Normal',          [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]]],
+  bw:     ['🐼', 'Black and white', _satM(0, 1.05, -4)],
+  old:    ['📜', 'Old photo',       [[0.393, 0.769, 0.189, 0], [0.349, 0.686, 0.168, 0], [0.272, 0.534, 0.131, 0]]],
+  pop:    ['💥', 'Pop',             _satM(1.9, 1.15, -19)],
+  cool:   ['❄️', 'Cool',            [[0.86, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1.22, 0]]],
+  warm:   ['🔥', 'Warm',            [[1.16, 0, 0, 0], [0, 1.02, 0, 0], [0, 0, 0.78, 0]]],
+  inside: ['🙃', 'Inside out',      [[-1, 0, 0, 255], [0, -1, 0, 255], [0, 0, -1, 255]]],
+};
+function withLook(cm) {
+  const L = (LOOKS[V && V.look] || LOOKS.normal)[2];
+  return L.map(l => [0, 1, 2, 3].map(j => l[0] * cm[0][j] + l[1] * cm[1][j] + l[2] * cm[2][j] + (j === 3 ? l[3] : 0)));
+}
 function setColour() {
   const c = current();
-  CM = colourMatrix(c.wb, c.gain, c.off, c.sat);
+  CM = withLook(colourMatrix(c.wb, c.gain, c.off, c.sat));
+  tintLayer();
   $('ccmM').setAttribute('values', CM.map(r => `${r[0].toFixed(4)} ${r[1].toFixed(4)} ${r[2].toFixed(4)} 0 ${(r[3] / 255).toFixed(4)}`).join('  ') + '  0 0 0 1 0');
   syncColourUI();
 }
-live.style.filter = 'url(#ccm)';
+$('lv').style.filter = 'url(#ccm)';
 function applyColour(img) {                                             // ImageData in place, same numbers as the preview
   const d = img.data, [r0, r1, r2] = CM;
   for (let i = 0; i < d.length; i += 4) {
@@ -266,17 +322,25 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 function measure(bmp) {
   const x = measureCanvas.getContext('2d', { willReadFrequently: true });
   x.drawImage(bmp, 0, 0, 48, 36);
-  const d = x.getImageData(0, 0, 48, 36).data, n = d.length / 4;
-  let sr = 0, sg = 0, sb = 0, sl = 0; const px = [];
+  tintCanvas(x, 48, 36, Math.hypot(48, 36) / 2);                        // measure what the matrix will see
+  const d = x.getImageData(0, 0, 48, 36).data;
+  let sr = 0, sg = 0, sb = 0, sl = 0, n = 0; const px = [];
   for (let i = 0; i < d.length; i += 4) {
-    const r = d[i], g = d[i + 1], b = d[i + 2], l = 0.2126 * r + 0.7152 * g + 0.0722 * b; sr += r; sg += g; sb += b; sl += l; px.push([r, g, b, l]);
+    const r = d[i], g = d[i + 1], b = d[i + 2], l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    if (libNew && (Math.max(r, g, b) > 242 || l < 14)) continue;        // a lamp or a black corner says nothing about the light's colour
+    sr += r; sg += g; sb += b; sl += l; n++; px.push([r, g, b, l]);
   }
+  if (n < 40) return { wb: [1, 1, 1], gain: 1.1, off: 0, dark: 0 };     // (nearly) everything clipped or black: leave the picture alone
   px.sort((a, b) => b[3] - a[3]);
   const hi = px[Math.floor(n * 0.02)][3], mean = sl / n, top = px.slice(0, Math.max(8, Math.floor(n * 0.1)));
   const tr = top.reduce((s, p) => s + p[0], 0) / top.length, tg = top.reduce((s, p) => s + p[1], 0) / top.length, tb = top.reduce((s, p) => s + p[2], 0) / top.length;
   // low light: the sensor's gain runs up and the Bayer pattern's double green takes over ("heavy green", Joe 2026-10-26).
   // dark = 0 in normal light → 1 when very dark: trust the grey-world mean over the (noisy) bright patch, allow stronger
   // white-balance gains, and tone the saturation down (see setColour)
+  if (libNew) {                                                          // balanced already: a small trim, never a rescue
+    const g2 = clamp((235 - 125) / Math.max(40, hi - mean), 0.9, 1.45);
+    return { wb: [clamp(sg / Math.max(1, sr), 0.85, 1.25), 1, clamp(sg / Math.max(1, sb), 0.85, 1.25)], gain: g2, off: clamp(125 - mean * g2, -60, 45), dark: clamp((75 - mean) / 55, 0, 1) };
+  }
   const dark = clamp((75 - mean) / 55, 0, 1), wG = 0.5 + 0.5 * dark, wbMax = 1.7 + 1.0 * dark;
   const wbR = clamp(wG * (sg / Math.max(1, sr)) + (1 - wG) * (tg / Math.max(1, tr)), 0.75, wbMax);
   const wbB = clamp(wG * (sg / Math.max(1, sb)) + (1 - wG) * (tg / Math.max(1, tb)), 0.75, wbMax);
@@ -291,16 +355,18 @@ async function tuneLoop() {
     try {
       const blob = await (await fetch(hUrl('/snap.jpg', 't=' + Date.now()), { cache: 'no-store' })).blob();
       const m = measure(await createImageBitmap(blob));
-      const a = tune.n === 0 ? 1 : 0.25;                                   // first measurement lands at once, then eased
+      // the first four measurements (1.5 s apart) land at once, then eased: the first one or two see a camera that is still
+      // settling after its wake, and easing from THAT left a cast for 15 s and more (PPQ 2026-11-16)
+      const a = tune.n < 4 ? 1 : 0.25;
       tune.wb = tune.wb.map((v, i) => v + (m.wb[i] - v) * a); tune.gain += (m.gain - tune.gain) * a; tune.off += (m.off - tune.off) * a; tune.dark += (m.dark - tune.dark) * a; tune.n++;
       setColour();
     } catch (e) {}
     tuning = false;
   }
-  setTimeout(tuneLoop, tune.n >= 3 ? 4000 : 1500);
+  setTimeout(tuneLoop, tune.n >= 4 ? 4000 : 1500);
 }
 /* the Colour panel: Auto, then five sliders; touching a slider takes over from auto (starting from auto's numbers) */
-const SLIDERS = { wbR: ['Red', 0.6, 1.8, 0.01], wbB: ['Blue', 0.6, 1.8, 0.01], off: ['Brightness', -90, 90, 1], gain: ['Contrast', 0.7, 2.2, 0.01], sat: ['Colour', 0.4, 2.2, 0.01] };
+const SLIDERS = { wbR: ['Red', 0.6, 1.8, 0.01], wbB: ['Blue', 0.6, 1.8, 0.01], off: ['Brightness', -90, 90, 1], gain: ['Contrast', 0.7, 2.2, 0.01], sat: ['Colour', 0.4, 2.2, 0.01], tint: ['Lens tint', 0, 1.8, 0.05] };
 for (const [k, [label, min, max, step]] of Object.entries(SLIDERS)) {
   const row = document.createElement('label'); row.className = 'sl';
   row.innerHTML = `<span>${label}</span><input type="range" data-k="${k}" min="${min}" max="${max}" step="${step}"><b></b>`;
@@ -308,21 +374,22 @@ for (const [k, [label, min, max, step]] of Object.entries(SLIDERS)) {
   row.querySelector('input').addEventListener('input', ev => {
     if (!active) return;
     const c = colFor(active);
-    if (c.auto && k !== 'sat') { c.wbR = tune.wb[0]; c.wbB = tune.wb[2]; c.gain = tune.gain; c.off = tune.off; c.auto = false; }
-    c[k] = +ev.target.value; saveV(); setColour();
+    if (c.auto && k !== 'sat' && k !== 'tint') { c.wbR = tune.wb[0]; c.wbB = tune.wb[2]; c.gain = tune.gain; c.off = tune.off; c.auto = false; }
+    c[k] = +ev.target.value; if (k === 'tint') tune.n = 0; saveV(); setColour();
   });
 }
 function syncColourUI() {
   if (!$('colpanel').classList.contains('on')) return;
   const c = current();
   $('bAuto').classList.toggle('on', c.auto); $('bAuto').textContent = c.auto ? 'Auto: on' : 'Auto: off';
-  const vals = { wbR: c.wb[0], wbB: c.wb[2], off: c.off, gain: c.gain, sat: c.sat };
+  const vals = { wbR: c.wb[0], wbB: c.wb[2], off: c.off, gain: c.gain, sat: c.sat, tint: tintK() };
+  document.querySelector('#sliders input[data-k="tint"]').parentElement.style.display = libNew ? '' : 'none';
   document.querySelectorAll('#sliders input').forEach(i => { if (document.activeElement !== i) i.value = vals[i.dataset.k]; i.parentElement.querySelector('b').textContent = (+vals[i.dataset.k]).toFixed(i.dataset.k === 'off' ? 0 : 2); });
 }
 $('bCol').onclick = () => { const on = $('colpanel').classList.toggle('on'); $('bCol').classList.toggle('on', on); if (on) { $('drawer').classList.remove('on'); $('bStick').classList.remove('on'); } syncColourUI(); };
 $('bColX').onclick = () => { $('colpanel').classList.remove('on'); $('bCol').classList.remove('on'); };
 $('bAuto').onclick = () => { if (!active) return; const c = colFor(active); c.auto = !c.auto; if (c.auto) tune.n = 0; saveV(); setColour(); };
-$('bColReset').onclick = () => { if (!active) return; V.col[active] = Object.assign({}, COL_DEF); tune.n = 0; saveV(); setColour(); };
+$('bColReset').onclick = () => { if (!active) return; const k = colKey(); if (!V[k]) V[k] = {}; V[k][active] = Object.assign({}, COL_DEF); tune.n = 0; saveV(); setColour(); };
 
 /* ---------- view settings per camera (shared with the earlier plain viewer) ---------- */
 let V;
@@ -376,6 +443,7 @@ const toast = text => { try { parent.postMessage({ kt: 'toast', text }, '*'); } 
 
 /* ---------- the live box: fit, rotate, mirror ---------- */
 let active = null, switching = false, helperUp = false, frameW = 640, frameH = 480;
+let zoom = 1;                       // 1 or 2: the middle of the picture, twice as big — on the screen and in the saved picture
 function fit() {
   const stage = $('stage'), W = stage.clientWidth - 20, H = stage.clientHeight - 20;
   const rot = active ? (V.rot[active] || 0) : 0, turned = rot % 180 !== 0;
@@ -385,7 +453,8 @@ function fit() {
   box.style.width = bw + 'px'; box.style.height = bh + 'px';
   const iw = turned ? bh : bw, ih = turned ? bw : bh;
   live.style.width = iw + 'px'; live.style.height = ih + 'px';
-  live.style.transform = `translate(-50%,-50%) rotate(${rot}deg) scaleX(${active && V.mir[active] ? -1 : 1})`;
+  live.style.transform = `translate(-50%,-50%) rotate(${rot}deg) scaleX(${active && V.mir[active] ? -1 : 1})` + (zoom > 1 ? ` scale(${zoom})` : '');
+  tintLayer();
   renderStickers();
 }
 function syncButtons() {
@@ -422,7 +491,15 @@ async function poll() {
     }
     if (!helperUp) { helperUp = true; box.classList.remove('off'); }
     const c = j.camera;
-    if (c && c.size) { frameW = c.size[0]; frameH = c.size[1]; }
+    const lv = /^(\d+)\.(\d+)/.exec(j.libcamera || ''), nw = !!lv && (+lv[1] > 0 || +lv[2] >= 5);
+    if (nw !== libNew) {
+      libNew = nw; tune.n = 0;
+      // until the first measurement lands (about 10 s after the tile opens on PPQ) show the newer library's picture as it
+      // comes — it is balanced; the start numbers below were made for 0.4.0 and gave those seconds a blue-pink cast
+      if (nw) { tune.wb = [1, 1, 1]; tune.gain = 1.1; tune.off = 0; tune.dark = 0; }
+      setColour();
+    }
+    if (c && c.size) { const v = c.view || c.size; if (v[0] !== frameW || v[1] !== frameH) { frameW = v[0]; frameH = v[1]; fit(); } }
     if (j.active && j.active !== active && !switching) { active = j.active; tune.n = 0; syncButtons(); setColour(); fit(); stream(); }
     $('st').textContent = c ? (c.alive ? `${c.size[0]}×${c.size[1]} · ${c.read_fps} fps` + (face.on ? ' · 😀 face' : '') : 'starting camera…') : (j.idle ? 'starting camera…' : 'no camera selected');
     if (c && !c.alive && !switching) { box.classList.add('busy'); veil.textContent = c.last_error ? 'camera trouble: ' + c.last_error : 'starting camera…'; }
@@ -545,6 +622,18 @@ stkLayer.addEventListener('pointermove', ev => {
 });
 const up = ev => { ptrs.delete(ev.pointerId); if (ptrs.size === 0) gest = null; else if (ptrs.size === 1 && gest && gest.mode === 'pinch') { const p = [...ptrs.values()][0]; gest = { s: gest.s, mode: 'drag', x: gest.s.x, y: gest.s.y, px: p.x, py: p.y }; } };
 stkLayer.addEventListener('pointerup', up); stkLayer.addEventListener('pointercancel', up);
+/* the Looks shelf in the same drawer: twice as big, four in one, then the looks */
+function lookPick(id, icon, title, tap) {
+  const b = document.createElement('button'); b.className = 'pick'; b.dataset.look = id; b.textContent = icon; b.title = title;
+  b.setAttribute('aria-label', title); b.setAttribute('data-say-text', title); b.onclick = () => { tap(); syncLooks(); blip(700); };
+  $('looks').appendChild(b);
+}
+function syncLooks() {
+  document.querySelectorAll('#looks .pick').forEach(b => { const k = b.dataset.look; b.classList.toggle('on', k === 'zoom' ? zoom > 1 : k === 'four' ? !!V.four : (V.look || 'normal') === k); });
+}
+lookPick('zoom', '🔍', 'Twice as big', () => { zoom = zoom > 1 ? 1 : 2; fit(); });
+lookPick('four', '🎞️', 'Four pictures in one', () => { V.four = !V.four; saveV(); });
+for (const [id, [icon, title]] of Object.entries(LOOKS)) lookPick(id, icon, title, () => { V.look = id; saveV(); setColour(); });
 $('bStick').onclick = () => { $('drawer').classList.toggle('on'); $('bStick').classList.toggle('on', $('drawer').classList.contains('on')); };
 $('bDrawerX').onclick = () => { $('drawer').classList.remove('on'); $('bStick').classList.remove('on'); };
 $('bClear').onclick = () => { stickers = []; selId = null; renderStickers(); blip(300); };
@@ -589,6 +678,7 @@ async function faceLoop() {
       try { img = faceFrame(src); }
       catch (e) { if (faceSrc === 'img') { faceSrc = 'snap'; face.err = 'live image is cross-origin, using snapshots'; } throw e; }
       const f = findFace(img);
+      if (f && zoom > 1) { f.cx = (f.cx - 0.5) * zoom + 0.5; f.cy = (f.cy - 0.5) * zoom + 0.5; f.s *= zoom; }
       if (f) {
         const a = face.on ? 0.45 : 1;                                   // ease, but land at once when the face first appears
         face.cx += (f.cx - face.cx) * a; face.cy += (f.cy - face.cy) * a; face.s += (f.s - face.s) * a;
@@ -617,29 +707,52 @@ function shutterSound() {
     setTimeout(() => ac.close(), 400);
   } catch (e) {}
 }
+async function grabFrame(scale) {
+  // one finished picture as a canvas: the helper's WHOLE frame (full=1: 1640x1232 with the newer libcamera, not the
+  // half-size stream), as shown — turned, mirrored, the middle of it when zoomed — then colour + look, then stickers
+  const blob = await (await fetch(hUrl('/snap.jpg', 'full=1&t=' + Date.now()), { cache: 'no-store' })).blob();
+  const bmp = await createImageBitmap(blob);
+  const rot = V.rot[active] || 0, mir = !!V.mir[active], turned = rot % 180 !== 0;
+  const fw = turned ? bmp.height : bmp.width, fh = turned ? bmp.width : bmp.height;
+  const W = Math.round(fw / zoom * scale), H = Math.round(fh / zoom * scale);
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+  x.save(); x.translate(W / 2, H / 2); x.rotate(rot * Math.PI / 180); x.scale((mir ? -1 : 1) * scale, scale); x.drawImage(bmp, -bmp.width / 2, -bmp.height / 2); x.restore();
+  tintCanvas(x, W, H, zoom * Math.hypot(W, H) / 2);
+  x.putImageData(applyColour(x.getImageData(0, 0, W, H)), 0, 0);
+  for (const s of stickers) {                                     // same fractions as on screen; the box shows what the canvas holds
+    const w = s.w * W, cx = s.x * W, cy = s.y * H;
+    x.save(); x.translate(cx, cy); x.rotate(s.r * Math.PI / 180);
+    if (s.kind === 'e') { x.font = `${w / EMOJI_W}px "Noto Color Emoji", sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(s.v, 0, w / EMOJI_W * 0.06); }
+    else { const h = w * stickerAR(s), im = await svgImage(s.v, w, h); if (im) x.drawImage(im, -w / 2, -h / 2, w, h); }
+    x.restore();
+  }
+  return c;
+}
+async function countdown(nums) {
+  const cnt = $('count');
+  for (const n of nums) { cnt.textContent = n; cnt.classList.add('on'); blip(n === 1 ? 900 : 600); await sleep(450); }
+  cnt.textContent = '😀'; await sleep(250); cnt.classList.remove('on');
+}
+function flashNow() { $('flash').classList.add('on'); shutterSound(); setTimeout(() => $('flash').classList.remove('on'), 60); }
+function fourInOne(shots) {            // 2 x 2 on white, like a photo-booth strip
+  const w = shots[0].width, h = shots[0].height, pad = Math.round(w * 0.035);
+  const c = document.createElement('canvas'); c.width = 2 * w + 3 * pad; c.height = 2 * h + 3 * pad; const x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
+  shots.forEach((s, i) => x.drawImage(s, pad + (i % 2) * (w + pad), pad + (i >> 1) * (h + pad)));
+  return c;
+}
 async function takePicture() {
   if (!active || !helperUp || taking) return;
   taking = true; $('shutter').disabled = true;
-  const cnt = $('count');
-  for (const n of [3, 2, 1]) { cnt.textContent = n; cnt.classList.add('on'); blip(n === 1 ? 900 : 600); await sleep(450); }
-  cnt.textContent = '😀'; await sleep(250); cnt.classList.remove('on');
   let ok = false;
   try {
-    const blob = await (await fetch(hUrl('/snap.jpg', 't=' + Date.now()), { cache: 'no-store' })).blob();
-    const bmp = await createImageBitmap(blob);
-    $('flash').classList.add('on'); shutterSound(); setTimeout(() => $('flash').classList.remove('on'), 60);
-    const rot = V.rot[active] || 0, mir = !!V.mir[active], turned = rot % 180 !== 0;
-    const W = turned ? bmp.height : bmp.width, H = turned ? bmp.width : bmp.height;
-    const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
-    x.save(); x.translate(W / 2, H / 2); x.rotate(rot * Math.PI / 180); x.scale(mir ? -1 : 1, 1); x.drawImage(bmp, -bmp.width / 2, -bmp.height / 2); x.restore();
-    x.putImageData(applyColour(x.getImageData(0, 0, W, H)), 0, 0);
-    for (const s of stickers) {                                     // same fractions as on screen; the box shows the whole frame
-      const w = s.w * W, cx = s.x * W, cy = s.y * H;
-      x.save(); x.translate(cx, cy); x.rotate(s.r * Math.PI / 180);
-      if (s.kind === 'e') { x.font = `${w / EMOJI_W}px "Noto Color Emoji", sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(s.v, 0, w / EMOJI_W * 0.06); }
-      else { const h = w * stickerAR(s), im = await svgImage(s.v, w, h); if (im) x.drawImage(im, -w / 2, -h / 2, w, h); }
-      x.restore();
-    }
+    let c;
+    if (V.four) {
+      const shots = [];
+      for (let i = 0; i < 4; i++) { await countdown(i ? [2, 1] : [3, 2, 1]); shots.push(await grabFrame(0.5)); flashNow(); await sleep(400); }
+      c = fourInOne(shots);
+    } else { await countdown([3, 2, 1]); c = await grabFrame(1); flashNow(); }
+    const W = c.width, H = c.height;
     const jpg = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.9));
     const t = document.createElement('canvas'); t.width = 240; t.height = Math.round(240 * H / W); t.getContext('2d').drawImage(c, 0, 0, t.width, t.height);
     const thumb = await new Promise(r => t.toBlob(r, 'image/jpeg', 0.8));
@@ -716,7 +829,7 @@ const home = () => { try { parent.postMessage({ kt: 'home' }, '*'); } catch (e) 
 $('bDone').onclick = home; $('bGalDone').onclick = home;
 
 /* ---------- go ---------- */
-setColour(); syncButtons(); fit(); refreshCount();
+setColour(); syncButtons(); syncLooks(); fit(); refreshCount();
 (async () => {
   if (window.KT && KT.permission) {
     const p = await KT.permission('camera');
@@ -731,7 +844,7 @@ setColour(); syncButtons(); fit(); refreshCount();
   poll(); setTimeout(tuneLoop, 600); setTimeout(faceLoop, 1200);
 })();
 // test hook (tests/camera_dom.py)
-window.KTCAM = { get state() { return { active, helperUp, permDenied, permToken, stickers: stickers.map(s => ({ kind: s.kind, v: s.v, x: +s.x.toFixed(3), y: +s.y.toFixed(3), w: +s.w.toFixed(3), r: Math.round(s.r), anchor: s.anchor })), kid: kid.id, taking, tuned: tune.n }; }, addSticker, takePicture, select, get CM() { return CM; }, get tune() { return tune; }, measure, get face() { return Object.assign({ src: faceSrc }, face); }, get col() { return active ? colFor(active) : null; } };
+window.KTCAM = { get state() { return { active, helperUp, permDenied, permToken, stickers: stickers.map(s => ({ kind: s.kind, v: s.v, x: +s.x.toFixed(3), y: +s.y.toFixed(3), w: +s.w.toFixed(3), r: Math.round(s.r), anchor: s.anchor })), kid: kid.id, taking, tuned: tune.n, zoom, look: V.look || 'normal', four: !!V.four, frame: [frameW, frameH], libNew, tint: tintK() }; }, addSticker, grabFrame, takePicture, select, get CM() { return CM; }, get tune() { return tune; }, measure, get face() { return Object.assign({ src: faceSrc }, face); }, get col() { return active ? colFor(active) : null; } };
 })();
 </script>
 </body>

@@ -4,44 +4,71 @@
 <title>Trace It</title>
 <link rel="stylesheet" href="../../design/tiers.css"><script src="../../design/kt.js"></script>
 <script src="letters.js"></script>
-<!-- tablet/apps/trace — Trace It: finger-trace the lowercase letters with stroke order (PLAN §12 C8 / D-030, 2026-11-09).
-       Letters   the 26 letters as big tiles in the phonics order of Letter Sounds (tools/sounds.json, via build.py → data.json);
-                 a traced letter carries a star. Tap = open, hold = hear the letter's sound.
-       Trace     the letter drawn large from OUR OWN stroke data (letters.js — no font outline) on handwriting lines. A numbered
-                 dot sits where the stroke starts and little arrows show the way; the child drags the dot along the grey
-                 stroke and the part behind it fills with colour. Strokes go in order and in direction (a finger going
-                 against the stroke moves nothing). Nothing punishes: off the path the dot simply waits where it is, a
-                 resting palm or a second finger does nothing, a cut corner or a skipped little push-up is forgiven.
-                 👀 plays the strokes in order (by itself the first time a kid meets a letter; a touch stops it).
-                 Last stroke done = success earcon + pulse + a star, then ➡️ next letter, 🔁 again, 🔡 back to the letters.
-                 The start dot's ring and the arrows pulse for 20 s after the last touch, then stand still until the next
-                 one (docs/CHIPS.md rule 1: a tile left open on a letter must not keep the graphics chip drawing frames).
-     Sound: kt.js earcons; the letter's SOUND is a vouched-for recording copied by build.py (D-010: an isolated letter sound
-     is never synthesised — no clip = silent, and the 🔊 button hides). No text needs reading; every button has an aria-label.
-     Progress per kid: /api/store/trace/<kid>/progress.json {stars, traced:{letter:n}} via the launcher's hello (D-008),
-     localStorage on a laptop. ◁ (kt:'back') on the trace screen goes back to the letters.
-     ?sheet=1 draws all 26 letters with stroke numbers and direction arrows — the review sheet for letters.js.
+<!-- tablet/apps/trace — Trace It: finger-trace letters, words, names and places with stroke order (PLAN §12 C8 / D-030, 2026-11-09;
+     capitals, words, names, places and the Zaner-Bloser pen paths 2026-11-16, Joe: "for trace app, adding upper case, lower case
+     and full words and name and places").
+       Pick      five tabs (icon + label, hold = hear the label): small letters · capital letters · Words · Names · Places.
+                 Letters are big tiles in the phonics order of Letter Sounds (tools/sounds.json, via build.py → data.json);
+                 Words are the Sound Book's early lesson words with a picture where one fits; Names are the kids on this
+                 tablet, Mom / Dad / Grandma / Grandpa and the family's own; Places are Home / School / Park … and the
+                 family's own. A traced tile carries a star. Tap = open, hold = hear it. The ➕ tile on Names and Places
+                 opens a sheet for a grown-up: a text field + Add, and Remove (asked twice) for what the family added.
+                 PRIVACY: a family's names and places live in the tablet's store (/api/store/trace/custom.json, shared by
+                 the kids; localStorage on a laptop) and nowhere in this repo — the bundle is also the public demo page.
+       Trace     the letter drawn large from OUR OWN stroke data (letters.js — no font outline) on handwriting lines, like a
+                 tracing worksheet: a light band where the ink will go, the pen path as a dotted centre line with small
+                 direction arrows, a numbered dot where each stroke starts. The child drags the dot along the path and the
+                 part behind it fills with colour. Strokes go in order and in direction (a finger going against the stroke
+                 moves nothing). Nothing punishes: off the path the dot simply waits where it is, a resting palm or a
+                 second finger does nothing, a cut corner or a skipped little push-up is forgiven.
+                 A WORD is traced letter by letter, left to right, on the one set of lines: the letters are spaced from
+                 their own shapes, the whole word is scaled to fit, finished letters stay inked, the next one lights up.
+                 👀 plays the strokes of the letter in order (by itself the first time a kid meets a letter on a letter tab;
+                 a touch stops it). The end = success earcon + pulse + a star, the word (or the letter's sound) is said,
+                 then ➡️ next, 🔁 again, and back to the tiles.
+                 The start dot's ring and the arrows ahead of it pulse for 20 s after the last touch, then stand still until
+                 the next one (docs/CHIPS.md rule 1: a tile left open must not keep the graphics chip drawing frames).
+                 Nothing else on any screen animates by itself and there is no timer.
+     Sound: kt.js earcons; a letter's SOUND is a vouched-for recording copied by build.py (D-010: an isolated letter sound
+     is never synthesised — no clip = silent, and the 🔊 button hides). A built-in word, name or place has a whole-word clip
+     (a human recording, else Piper at build time). A name or place the family typed — and a kid's own name — has no clip:
+     the page asks the launcher to speak it ({kt:'tts'}, the bridge of design/kt.js) and never calls speechSynthesis itself.
+     NOTE 2026-11-16: the launcher turns that into GET /api/tts, and the agent has no such route yet, so on the tablet a
+     typed name is traced with its star and the success sound but is NOT spoken; it will be the day the agent can speak.
+     Progress per kid: /api/store/trace/<kid>/progress.json {stars, traced:{letter:n}, words:{text:n}} via the launcher's
+     hello (D-008), localStorage on a laptop; a file from before 2026-11-16 ({stars, traced}) reads as it is.
+     ◁ (kt:'back') closes the grown-up's sheet, or goes from the trace screen back to the tiles.
+     ?sheet=1 draws every small letter and capital with stroke numbers and direction arrows, and a few words — the review
+     sheet for letters.js. ?style=<id> picks another handwriting style from letters.js (there is one today).
      window.TR exposes read-only state and the stroke points for tablet/tests/trace_dom.py. -->
 <style>
-:root{--ink:var(--kt-ink,#1d2a3a);--dim:var(--kt-dim,#5b6b80);--card:var(--kt-surface,#fff);--ok:var(--kt-ok,#009e73);--pen:#d6336c;--todo:#c9d1dc;--line:#8db4dc;--line2:#4a86c5;
+:root{--ink:var(--kt-ink,#1d2a3a);--dim:var(--kt-dim,#5b6b80);--card:var(--kt-surface,#fff);--ok:var(--kt-ok,#009e73);--pen:#d6336c;--todo:#c9d1dc;--band:#e2e6ec;--way:#8590a1;--line:#8db4dc;--line2:#4a86c5;
   --r:var(--kt-radius-card,22px);--shadow:0 8px 24px var(--kt-shadow,rgba(20,40,80,.16));--tgt:var(--kt-target-min,75px);--gap:var(--kt-target-gap,10px);--dead:var(--kt-target-dead-bottom,0px);
   --big:max(var(--tgt),88px);--t:calc(var(--kt-motion-base,160ms) * var(--motion-scale,1))}
-@supports (color:color-mix(in srgb,red,blue)){:root{--todo:color-mix(in srgb,var(--ink) 22%,var(--card))}}
+@supports (color:color-mix(in srgb,red,blue)){:root{--todo:color-mix(in srgb,var(--ink) 22%,var(--card));--band:color-mix(in srgb,var(--ink) 12%,var(--card));--way:color-mix(in srgb,var(--ink) 52%,var(--card))}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(160deg,var(--kt-bg-2,#dfe3ff),var(--kt-bg,#f6f7ff));color:var(--ink);font:var(--kt-type-body,20px)/1.3 var(--kt-font-ui,system-ui,sans-serif);touch-action:manipulation}
 body{display:flex;flex-direction:column}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 .screen{display:none;flex:1;min-height:0}
 .screen.on{display:flex}
-/* ---- the letters */
+/* ---- the tiles */
 #pick{flex-direction:column}
 #bar{display:flex;align-items:center;gap:12px;padding:6px 24px;min-height:56px;flex:none}
-#bar h1{font-size:var(--kt-type-title,30px);margin:0;line-height:1.1}
-#who{margin-left:auto;color:var(--dim);font-size:var(--kt-type-label,18px);font-weight:700}
-#stars{font-size:var(--kt-type-label,20px);font-weight:700;min-width:80px;text-align:right}
+#bar h1{font-size:var(--kt-type-title,30px);margin:0;line-height:1.1;white-space:nowrap}
+.tabs{display:flex;gap:var(--gap);margin-left:12px}
+.tabs button{min-width:var(--tgt);min-height:var(--tgt);padding:0 18px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-size:var(--kt-type-label,18px);font-weight:700;white-space:nowrap;background:rgba(120,130,150,.14);transition:transform var(--t)}
+.tabs button.on{background:var(--card);box-shadow:var(--shadow)}
+.tabs button:active,.tabs button.kt-press{transform:scale(.95)}
+.tabs .kt-icon{font-size:calc(var(--tgt) * .5)}
+:root[data-tier=pre-reader] .tabs button{padding:0}
+#who{margin-left:auto;color:var(--dim);font-size:var(--kt-type-label,18px);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#stars{font-size:var(--kt-type-label,20px);font-weight:700;min-width:80px;text-align:right;white-space:nowrap}
 #grid{flex:1;min-height:0;overflow-y:auto;touch-action:pan-y;display:grid;grid-template-columns:repeat(auto-fill,minmax(max(var(--tgt),110px),1fr));grid-auto-rows:minmax(var(--tgt),1fr);
   gap:var(--gap);padding:4px 24px max(16px,var(--dead));scrollbar-width:none}
 #grid::-webkit-scrollbar{display:none}
+#grid.wide{grid-template-columns:repeat(auto-fill,minmax(max(var(--tgt),212px),1fr));grid-auto-rows:max(var(--tgt),112px);align-content:start}
 .lt{position:relative;min-width:var(--tgt);min-height:var(--tgt);border-radius:var(--r);background:var(--card);box-shadow:var(--shadow);overflow:hidden;transition:transform var(--t)}
 .lt:active,.lt.kt-press{transform:scale(.95)}
 .lt svg{position:absolute;left:6px;top:6px;width:calc(100% - 12px);height:calc(100% - 12px);pointer-events:none}
@@ -52,7 +79,30 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .lt.got .ms{stroke:var(--pen)}
 .lt.got .mk{fill:var(--pen)}
 .lt .st{position:absolute;top:4px;right:6px;font-size:26px;line-height:1;pointer-events:none}
-/* ---- one letter */
+.lt.word{display:flex;align-items:center;gap:4px;padding:6px 10px}
+.lt.word .em{flex:none;width:52px;font-size:40px;line-height:1;text-align:center;pointer-events:none}
+.lt.word svg{position:static;flex:1;min-width:0;width:auto;height:100%}
+.lt.word .st{font-size:22px}
+.lt.add{display:grid;place-items:center;font-size:48px;line-height:1;background:rgba(120,130,150,.14);box-shadow:none;border:3px dashed var(--line)}
+/* ---- the grown-up's sheet: the family's own names / places */
+#edit{position:fixed;inset:0;z-index:5;display:none;justify-content:center;align-items:flex-start;padding:12px 24px calc(12px + var(--dead));background:rgba(20,30,50,.5)}
+#edit.on{display:flex}
+#eCard{width:min(880px,100%);max-height:100%;display:flex;flex-direction:column;gap:var(--gap);padding:16px;border-radius:var(--r);background:var(--card);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+#eTop{display:flex;align-items:center;gap:var(--gap);flex:none}
+#eText{flex:1;min-width:0;height:var(--tgt);padding:0 18px;border:3px solid var(--line2);border-radius:18px;background:var(--card);color:var(--ink);font:inherit;font-size:var(--kt-type-title,30px);font-weight:700;
+  user-select:text;-webkit-user-select:text;outline:none}
+#eText::placeholder{color:var(--dim);font-weight:400}
+.eb{flex:none;min-width:var(--tgt);min-height:var(--tgt);padding:0 22px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:rgba(120,130,150,.18);
+  font-size:var(--kt-type-label,18px);font-weight:700;white-space:nowrap;transition:transform var(--t)}
+.eb:active,.eb.kt-press{transform:scale(.95)}
+.eb.go{background:var(--pen);color:#fff}
+.eb.warn{background:var(--kt-bad,#d55e00);color:#fff}
+#eNote{flex:none;min-height:1.4em;color:var(--dim);font-size:var(--kt-type-label,18px)}
+#eList{min-height:0;overflow-y:auto;touch-action:pan-y;display:flex;flex-direction:column;gap:var(--gap);scrollbar-width:none}
+#eList::-webkit-scrollbar{display:none}
+.erow{flex:none;display:flex;align-items:center;gap:var(--gap);padding-left:18px;border-radius:999px;background:rgba(120,130,150,.1)}
+.erow .en{flex:1;min-width:0;font-size:var(--kt-type-title,26px);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ---- one letter, or one word */
 #trace{flex-direction:row;gap:var(--gap);padding:12px 24px}
 :root[data-hand=left] #trace{flex-direction:row-reverse}
 .col{display:flex;flex-direction:column;gap:var(--gap);width:var(--big);flex:none;padding-bottom:var(--dead)}
@@ -69,13 +119,15 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 #svg .guide .gb{stroke:var(--line2);stroke-width:4}
 #svg .guide .gd{stroke-dasharray:3 10}
 #svg polyline{fill:none;stroke-linecap:round;stroke-linejoin:round}
-#svg .base polyline{stroke:var(--todo)}
-#svg .base circle{fill:var(--todo)}
+#svg .base polyline{stroke:var(--band)}
+#svg .base circle{fill:var(--band)}
+#svg .way polyline{stroke:var(--way)}
+#svg .way circle,#svg .way polygon{fill:var(--way)}
 #svg .ink polyline{stroke:var(--pen)}
 #svg .ink circle{fill:var(--pen)}
 #trace.won #svg .ink polyline{stroke:var(--ok)}
 #trace.won #svg .ink circle{fill:var(--ok)}
-#trace.demo #svg .ink,#trace.demo #svg .marks{visibility:hidden}
+#trace.demo #svg .ink .now,#trace.demo #svg .marks{visibility:hidden}
 #svg .demo polyline{stroke:var(--ink)}
 #svg .demo .dd{fill:var(--ink)}
 #svg .demo .hand{fill:var(--kt-accent,#e69f00);stroke:#fff}
@@ -88,7 +140,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 #svg .dnum circle{fill:var(--ink);stroke:#fff}
 #svg .later circle{fill:var(--card);stroke:var(--dim);stroke-width:2.5}
 #svg .later text{fill:var(--dim)}
-#svg .chev{stroke:#fff;animation:chev 1.2s ease-in-out infinite}
+#svg .chev{stroke:var(--pen);animation:chev 1.2s ease-in-out infinite}
 #svg .chev.c1{animation-delay:.18s}
 #svg .chev.c2{animation-delay:.36s}
 #pips{position:absolute;left:16px;top:14px;display:flex;gap:10px;pointer-events:none}
@@ -105,13 +157,18 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 :root[data-motion=off] #svg .bead .ring,:root[data-motion=off] #svg .chev,:root[data-motion=off] #trace.done #bNext{animation:none}
 /* ---- ?sheet=1 : every letter with its stroke numbers, for checking letters.js by eye */
 body.sheet{display:block;overflow:auto;height:auto;background:#fff}
-#sheet{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;padding:14px}
+#sheet{padding:14px}
+#sheet h2{font:700 20px system-ui,sans-serif;color:#36475c;margin:6px 0 8px}
+#sheet .rowg{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:18px}
+#sheet .roww{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 #sheet figure{margin:0;border:1px solid #d5dbe5;border-radius:12px;background:#fff}
 #sheet svg{display:block;width:100%;height:auto}
 #sheet figcaption{font:700 15px system-ui,sans-serif;color:#36475c;text-align:center;padding:0 0 6px}
 </style></head><body>
 <div class="screen on" id="pick">
-  <div id="bar"><h1>Trace It</h1><div id="who"></div><div id="stars"></div></div>
+  <div id="bar"><h1>Trace It</h1>
+    <div class="tabs" id="tabs"><button data-tab="small" class="on" data-say="voice/label_small.mp3" data-say-text="Small letters"><span class="kt-icon">🔡</span><span class="kt-label">abc</span></button><button data-tab="caps" data-say="voice/label_caps.mp3" data-say-text="Capital letters"><span class="kt-icon">🔠</span><span class="kt-label">ABC</span></button><button data-tab="words" data-say="voice/label_words.mp3" data-say-text="Words"><span class="kt-icon">📖</span><span class="kt-label">Words</span></button><button data-tab="names" data-say="voice/label_names.mp3" data-say-text="Names"><span class="kt-icon">👪</span><span class="kt-label">Names</span></button><button data-tab="places" data-say="voice/label_places.mp3" data-say-text="Places"><span class="kt-icon">🏠</span><span class="kt-label">Places</span></button></div>
+    <div id="who"></div><div id="stars"></div></div>
   <div id="grid"></div>
 </div>
 <div class="screen" id="trace">
@@ -127,6 +184,13 @@ body.sheet{display:block;overflow:auto;height:auto;background:#fff}
     <button class="rb" id="bAll" data-kt-up aria-label="All the letters">🔡</button>
   </div>
 </div>
+<div id="edit">
+  <div id="eCard">
+    <div id="eTop"><input id="eText" type="text" maxlength="24" autocapitalize="words" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="A name to add" placeholder="Type a name"><button class="eb go" id="eAdd" aria-label="Add">➕ Add</button><button class="eb" id="eClose" data-kt-up aria-label="Done">✔️ Done</button></div>
+    <div id="eNote"></div>
+    <div id="eList"></div>
+  </div>
+</div>
 <script>
 'use strict';
 // The forgiving touch-tap helper lives in design/kt.js; this fallback covers the page opened without it.
@@ -140,49 +204,101 @@ if(!window.KT)(function(){
 })();
 const $=id=>document.getElementById(id);
 const T=window.TRACE;                                  // letters.js: the stroke data and its sampler
+const QS=new URLSearchParams(location.search);
+if(QS.get('style'))T.use(QS.get('style'));             // another handwriting style from letters.js (the default is the one in use)
 const NS='http://www.w3.org/2000/svg';
 const LIVE=location.protocol.startsWith('http');
 const SW=11;                                           // drawn stroke width, in letter units (a small letter is 50 tall)
 const PADT=17,PADB=15;                                 // room above the top line and under the bottom line
+const SIDE=70,SIDEW=46;                                // room left + right of one letter / of a word, in units
 const TOL={'pre-reader':16,reader:13,tinkerer:11,maker:10};   // how far from the stroke a finger still counts (units; ≈ 60 px for a pre-reader)
+const TOLPX={'pre-reader':42,reader:36,tinkerer:30,maker:28}; // … and never less than this many px: a word is drawn smaller, a finger is not
 const AHEAD=40;                                        // how far ahead of the dot a MOVING finger may pull it (cuts a corner, skips a short push-up)
 const LAND=20;                                         // … and how far ahead a finger that just touched down may land
 const TURN=4;                                          // a finger's direction is where it went over its last 4 units …
 const ALONG=.3;                                        // … and it must point within about 70° of the stroke's own direction
 const BUMP=1.5;                                        // a point past a turn must be this much closer to win (keeps a retraced stem honest)
-const ENDSLACK=8;                                      // the last bit of a stroke finishes by itself (the dot is 7.5 wide: it is "there")
+const ENDSLACK=8;                                      // the last bit of a stroke finishes by itself (the dot is 7.5 wide: it is "there") — in a word
+                                                       // drawn small, half the finger's tolerance if that is more (a finger is not smaller there)
 const GRAB=8;                                          // the finger has to be at the dot to move it: within the tolerance + this
-const REST=+new URLSearchParams(location.search).get('rest')||20000;   // ms without a touch before the ring and the arrows stand still (?rest= is for the test)
+const REST=+QS.get('rest')||20000;                     // ms without a touch before the ring and the arrows stand still (?rest= is for the test)
+const MAXLEN=12;                                       // a word, name or place is at most this long (it has to fit the screen)
+const AIR=27,CLEAR=15,WORDGAP=52;                      // letter spacing: the mean white between two letters' pen paths, the least anywhere, a space
+const TABS={small:{icon:'🔡',all:'All the letters',back:'Back to the letters',next:'Next letter'},caps:{icon:'🔠',all:'All the letters',back:'Back to the letters',next:'Next letter'},
+  words:{icon:'📖',all:'All the words',back:'Back to the words',next:'Next word'},names:{icon:'👪',all:'All the names',back:'Back to the names',next:'Next name',add:'Add a name',type:'Type a name'},
+  places:{icon:'🏠',all:'All the places',back:'Back to the places',next:'Next place',add:'Add a place',type:'Type a place'}};
+const AV={frog:'🐸',fox:'🦊',cat:'🐱',owl:'🦉',bunny:'🐰',dino:'🦖',bear:'🐻',star:'⭐'};   // the launcher's kid faces
 // the phonics order of Letter Sounds (tools/sounds.json "order", single letters); build.py writes the live one into data.json
 let ORDER='smfnlrvzaeiouhwybdgptckjqx'.split('');
 let SOUNDS={};                                         // letter → vouched-for clip of its sound (data.json); none = silent
-let kid={id:'default',name:''},prog={stars:0,traced:{}},progLoaded=false;
-let cur=null;                                          // the letter on the trace screen: {ch,g,si,i,done}
+let BUILT={words:[],names:[],places:[]};               // data.json: [{w, emoji, clip}] — the Sound Book words and the generic starters
+let own={names:[],places:[]};                          // the family's own, typed on this tablet (the store; never in the repo)
+let kids=[];                                           // the named kids of this tablet [{t, emoji}]
+let tab='small',shown=[];                              // the tab on screen and its items [{t, kind:'letter'|'word', emoji, clip, own}]
+let kid={id:'default',name:'',avatar:''},prog={stars:0,traced:{},words:{}},progLoaded=false;
+let cur=null;                                          // what is on the trace screen: {it, lay, li, g, si, i, done} — letter li of the word, its stroke si, point i
 let W=0,H=0,k=1,ox=0,oy=0,L=null;                      // stage size, px per unit, origin, the svg layers
 const demo={on:false,raf:0,timer:0};
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const post=m=>{try{parent.postMessage(m,'*');}catch(e){}};
 const snd=(n,el)=>{if(window.KT){KT.sound(n,el);return true;}return false;};
 const still=()=>document.documentElement.dataset.motion==='off'||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
-const tol=()=>TOL[document.documentElement.dataset.tier]||TOL.reader;
+const tol=()=>{const t=document.documentElement.dataset.tier;return Math.max(TOL[t]||TOL.reader,(TOLPX[t]||TOLPX.reader)/k);};
 let restT=0;
 function wake(){               // somebody is here: the cues pulse again, for REST ms
   const s=$('stage');s.classList.remove('rest');clearTimeout(restT);
   restT=setTimeout(()=>s.classList.add('rest'),REST);
 }
+// what a grown-up typed → what is traced: letters and spaces only, at most MAXLEN long, every word starts with a capital
+function clean(s){
+  s=String(s==null?'':s).normalize('NFD').replace(/[^A-Za-z ]+/g,'').replace(/ +/g,' ').trim().slice(0,MAXLEN).trim();
+  return s.split(' ').filter(Boolean).map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
+}
 
 // ---------- geometry: each stroke as points one unit apart, with the length walked so far
 const GEO={};
+const NB=28,BAND=6;                                    // a letter's left and right outline, in 28 bands of 6 units from y = -9
 function geo(ch){
-  if(GEO[ch])return GEO[ch];
+  if(GEO[ch]!==undefined)return GEO[ch];
+  if(!T.LETTERS[ch])return GEO[ch]=null;
   let minX=1e9,maxX=-1e9;
+  const lo=new Array(NB).fill(1e9),hi=new Array(NB).fill(-1e9);
   const strokes=T.LETTERS[ch].map(segs=>{
     const pts=T.sample(segs,1),cum=[0];
     for(let j=1;j<pts.length;j++)cum.push(cum[j-1]+Math.hypot(pts[j][0]-pts[j-1][0],pts[j][1]-pts[j-1][1]));
-    for(const p of pts){if(p[0]<minX)minX=p[0];if(p[0]>maxX)maxX=p[0];}
+    for(const p of pts){if(p[0]<minX)minX=p[0];if(p[0]>maxX)maxX=p[0];
+      const b=Math.max(0,Math.min(NB-1,Math.floor((p[1]+9)/BAND)));if(p[0]<lo[b])lo[b]=p[0];if(p[0]>hi[b])hi[b]=p[0];}
     return {dot:segs[0][0]==='D',pts,cum,len:cum[cum.length-1]};
   });
-  return GEO[ch]={strokes,minX,maxX};
+  return GEO[ch]={ch,strokes,minX,maxX,lo,hi};
+}
+// How far b's own x = 0 stands from a's, side by side in a word. From the shapes, not from a table: the white between the
+// two pen paths is AIR on average over the heights both letters use (so two round letters sit closer than two stems, and
+// a small letter tucks under the bar of a T), and never less than CLEAR where strokes pass each other.
+function pitch(a,b){
+  let sum=0,n=0,need=-1e9;
+  for(let i=0;i<NB;i++){
+    if(a.hi[i]>-1e8&&b.lo[i]<1e8){sum+=b.lo[i]-a.hi[i];n++;}
+    let ra=-1e9,lb=1e9;
+    for(let j=Math.max(0,i-1);j<=Math.min(NB-1,i+1);j++){if(a.hi[j]>ra)ra=a.hi[j];if(b.lo[j]<lb)lb=b.lo[j];}
+    if(ra>-1e8&&lb<1e8&&ra-lb+CLEAR>need)need=ra-lb+CLEAR;
+  }
+  return n?Math.max(need,AIR-sum/n):a.maxX-b.minX+AIR;
+}
+// A word as letters side by side on one base line: [{ch, strokes, minX, maxX}] with every point moved to its place.
+const LAY={};
+function layout(text){
+  if(LAY[text])return LAY[text];
+  const items=[];let prev=null,at=0,space=false,minX=1e9,maxX=-1e9;
+  for(const ch of String(text)){
+    const g=geo(ch);
+    if(!g){if(ch===' '&&prev)space=true;continue;}
+    const dx=!prev?-g.minX:space?at+prev.maxX+WORDGAP-g.minX:at+pitch(prev,g);
+    items.push({ch,minX:g.minX+dx,maxX:g.maxX+dx,strokes:g.strokes.map(st=>({dot:st.dot,cum:st.cum,len:st.len,pts:dx?st.pts.map(p=>[p[0]+dx,p[1]]):st.pts}))});
+    if(g.minX+dx<minX)minX=g.minX+dx;if(g.maxX+dx>maxX)maxX=g.maxX+dx;
+    prev=g;at=dx;space=false;
+  }
+  return LAY[text]={text,items,minX:items.length?minX:0,maxX:items.length?maxX:0};
 }
 const X=p=>ox+p[0]*k,Y=p=>oy+p[1]*k;
 function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const a in attrs)e.setAttribute(a,attrs[a]);if(parent)parent.appendChild(e);return e;}
@@ -191,16 +307,31 @@ function dirAt(st,j){              // unit direction of travel at point j
   const n=st.pts.length,a=st.pts[Math.min(j,n-2)],b=st.pts[Math.min(j,n-2)+1],l=Math.hypot(b[0]-a[0],b[1]-a[1])||1;
   return [(b[0]-a[0])/l,(b[1]-a[1])/l];
 }
+function starts(g){                // where each stroke's number sits: on its start, moved aside when an earlier stroke starts there too (the stem and the bowl of B)
+  const out=[];
+  g.strokes.forEach((st,si)=>{let p=st.pts[0].slice();
+    for(let n=0;n<si;n++)if(Math.hypot(out[n][0]-p[0],out[n][1]-p[1])<9)p=[p[0]+13,p[1]];
+    out.push(p);});
+  return out;
+}
+function arrows(st,every,from,fn){ // small arrowheads along a stroke, pushed to the left of travel so the two directions of a retraced stem do not hide each other
+  for(let d=from;d<st.len-3;d+=every){let j=0;while(st.cum[j]<d)j++;
+    const a=st.pts[j],t=dirAt(st,j);
+    fn((u,v)=>[a[0]+t[0]*u-t[1]*v+t[1]*2.6,a[1]+t[1]*u+t[0]*v-t[0]*2.6]);}
+}
 
 // ---------- who is playing (D-008); progress follows the kid
 let helloResolve;const hello=new Promise(r=>helloResolve=r);
 window.addEventListener('message',e=>{const d=e.data||{};
   if(d.kt==='hello'){
     const prev=kid.id;
-    if(d.kid&&d.kid.id)kid={id:String(d.kid.id),name:d.kid.name||''};else if(d.child&&d.child.name)kid.name=d.child.name;
+    if(d.kid&&d.kid.id)kid={id:String(d.kid.id),name:d.kid.name||'',avatar:d.kid.avatar||''};else if(d.child&&d.child.name){kid.name=d.child.name;kid.avatar=d.child.avatar||'';}
     helloResolve();
-    if(progLoaded&&kid.id!==prev){prog={stars:0,traced:{}};loadProg().then(toPick);}else drawBar();
-  }else if(d.kt==='back'&&cur){toPick();post({kt:'back',handled:true});}
+    if(progLoaded&&kid.id!==prev){prog={stars:0,traced:{},words:{}};Promise.all([loadProg(),loadKids()]).then(toPick);}else drawBar();
+  }else if(d.kt==='back'&&!d.handled){     // (alone on a laptop our own answer comes back to us: that is not a second ◁)
+    if($('edit').classList.contains('on')){closeEdit();post({kt:'back',handled:true});}
+    else if(cur){toPick();post({kt:'back',handled:true});}
+  }
 });
 const progKey=()=>'trace.progress.'+kid.id;
 const progUrl=()=>'/api/store/trace/'+encodeURIComponent(kid.id)+'/progress.json';
@@ -208,10 +339,13 @@ async function loadProg(){
   let p=null;
   if(LIVE){try{const r=await fetch(progUrl(),{cache:'no-store'});if(r.ok)p=await r.json();}catch(e){}}
   if(!p){try{p=JSON.parse(localStorage.getItem(progKey())||'null');}catch(e){}}
-  if(p&&typeof p==='object'){
-    const tr={};
-    for(const c of T.ABC){const n=Math.max(+((p.traced||{})[c])||0,+prog.traced[c]||0);if(n>0)tr[c]=n;}   // a letter finished while this was loading is kept
-    prog={stars:Math.max(+p.stars||0,prog.stars),traced:tr};
+  if(p&&typeof p==='object'){       // {stars, traced:{letter:n}} since 2026-11-09; capitals share `traced`, words / names / places are `words` (2026-11-16)
+    const tr={},wd={},pw=p.words&&typeof p.words==='object'?p.words:{};
+    for(const c of T.ABC.concat(T.CAPS)){const n=Math.max(+((p.traced||{})[c])||0,+prog.traced[c]||0);if(n>0)tr[c]=n;}   // a letter finished while this was loading is kept
+    for(const w of Object.keys(pw).concat(Object.keys(prog.words))){
+      if(w.length>MAXLEN||!/^[A-Za-z]+( [A-Za-z]+)*$/.test(w))continue;
+      const n=Math.max(+pw[w]||0,+prog.words[w]||0);if(n>0)wd[w]=n;}
+    prog={stars:Math.max(+p.stars||0,prog.stars),traced:tr,words:wd};
   }
 }
 function saveProg(){           // at once, not debounced: a star is rare and the kid may leave right after it
@@ -219,58 +353,170 @@ function saveProg(){           // at once, not debounced: a star is rare and the
   try{localStorage.setItem(progKey(),body);}catch(e){}
   if(LIVE){try{fetch(progUrl(),{method:'PUT',headers:{'Content-Type':'application/json'},body,keepalive:true}).catch(()=>{});}catch(e){}}
 }
+// the kids of this tablet who have a name (an unnamed kid is "Kid 1" on the lock screen: that is not a name to trace)
+async function loadKids(){
+  const out=[];
+  const add=(n,av)=>{if(/^\s*kid\s*\d*\s*$/i.test(n||''))return;      // asked of the name as typed: clean() would strip the digit and leave "Kid"
+    n=clean(n);if(n&&!out.some(x=>x.t.toLowerCase()===n.toLowerCase()))out.push({t:n,emoji:AV[av]||'⭐'});};
+  add(kid.name,kid.avatar);
+  if(LIVE){try{const r=await fetch('/api/settings',{cache:'no-store'});
+    if(r.ok){const s=await r.json();(Array.isArray(s.kids)?s.kids:[]).forEach(x=>{if(x&&typeof x==='object')add(x.name,x.avatar);});}}catch(e){}}
+  kids=out;
+}
+// the family's own names and places: ONE file for the tablet (not per kid) in the agent's store; never in the repo
+const OWN_URL='/api/store/trace/custom.json',OWN_KEY='trace.custom',OWN_MAX=24;
+function ownList(a){const out=[];(Array.isArray(a)?a:[]).forEach(s=>{s=clean(s);if(s&&out.length<OWN_MAX&&!out.some(x=>x.toLowerCase()===s.toLowerCase()))out.push(s);});return out;}
+async function loadOwn(){
+  let c=null;
+  if(LIVE){try{const r=await fetch(OWN_URL,{cache:'no-store'});if(r.ok)c=await r.json();}catch(e){}}
+  if(!c){try{c=JSON.parse(localStorage.getItem(OWN_KEY)||'null');}catch(e){}}
+  own={names:ownList(c&&c.names),places:ownList(c&&c.places)};
+}
+function saveOwn(){
+  const body=JSON.stringify(own);
+  try{localStorage.setItem(OWN_KEY,body);}catch(e){}
+  if(LIVE){try{fetch(OWN_URL,{method:'PUT',headers:{'Content-Type':'application/json'},body,keepalive:true}).catch(()=>{});}catch(e){}}
+}
 
-// ---------- sound: the letter's own sound (a recording), one at a time
+// ---------- sound: a letter's own sound or a whole word (recordings), one at a time; a typed name goes to the launcher's voice
 let audio=null;
 function stopAudio(){if(audio){try{audio.pause();}catch(e){}audio=null;}}
 function vol(){const K=window.KT;if(!K)return 1;const g=(K.TIERS&&K.TIERS._gain&&K.TIERS._gain.voice)||1;return Math.max(0,Math.min(1,g*(K.ceiling==null?1:K.ceiling)));}
-function sayLetter(){
-  const src=cur&&SOUNDS[cur.ch];if(!src)return false;
+function clipOf(it){return it.kind==='letter'?SOUNDS[it.t.toLowerCase()]||'':it.clip||'';}
+function sayIt(){
+  if(!cur)return false;
+  const it=cur.it,src=clipOf(it);
+  if(!src&&it.kind==='letter')return false;
   stopAudio();
-  const a=new Audio(src);try{a.volume=vol();}catch(e){}
-  audio=a;const p=a.play();if(p&&p.catch)p.catch(()=>{});
+  if(src){const a=new Audio(src);try{a.volume=vol();}catch(e){}
+    audio=a;const p=a.play();if(p&&p.catch)p.catch(()=>{});}
+  else post({kt:'tts',text:it.t});      // no clip can exist for a name the family typed: the launcher's voice (kt.js bridge)
   const b=$('bHear');b.classList.remove('kt-pulse-say');void b.offsetWidth;b.classList.add('kt-pulse-say');setTimeout(()=>b.classList.remove('kt-pulse-say'),1000);   // the sound's visual twin
   return true;
 }
 
-// ---------- the letters
+// ---------- the tiles
+function items(name){          // what a tab offers, in order
+  name=name||tab;
+  if(name==='small')return ORDER.map(ch=>({t:ch,kind:'letter'}));
+  if(name==='caps')return ORDER.map(ch=>({t:ch.toUpperCase(),kind:'letter'}));
+  const out=[],seen=new Set();
+  const add=(t,more)=>{const key=t.toLowerCase();if(!t||seen.has(key)||!layout(t).items.length)return;seen.add(key);out.push(Object.assign({t,kind:'word'},more));};
+  if(name==='names')kids.forEach(x=>add(x.t,{emoji:x.emoji}));
+  (BUILT[name]||[]).forEach(e=>add(e.w,{emoji:e.emoji||'',clip:e.clip||''}));
+  (own[name]||[]).forEach(t=>add(t,{own:true,emoji:name==='places'?'📍':''}));
+  return out;
+}
+const count=it=>(it.kind==='letter'?prog.traced[it.t]:prog.words[it.t])||0;
 function mini(ch){             // a letter as a small picture, from the same stroke data
-  const g=geo(ch),x0=(g.minX+g.maxX)/2-46;
-  let s='<svg viewBox="'+x0+' -16 92 182" aria-hidden="true"><path class="ml d" d="M'+x0+' 50h92"/><path class="ml" d="M'+x0+' 100h92"/>';
-  for(const st of g.strokes){
-    if(st.dot)s+='<circle class="mk" cx="'+st.pts[0][0]+'" cy="'+st.pts[0][1]+'" r="'+(SW*.62)+'"/>';
-    else s+='<polyline class="ms" points="'+st.pts.filter((p,j)=>j%2===0||j===st.pts.length-1).map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'"/>';
-  }
+  const g=geo(ch),cap=ch<'a',w=cap?112:92,x0=(g.minX+g.maxX)/2-w/2;
+  let s='<svg viewBox="'+x0+' -16 '+w+' '+(cap?132:182)+'" aria-hidden="true"><path class="ml d" d="M'+x0+' 50h'+w+'"/><path class="ml" d="M'+x0+' 100h'+w+'"/>';
+  return s+ink(g)+'</svg>';
+}
+function miniWord(text){       // a word the same way, on one base line
+  const lay=layout(text),x0=lay.minX-9,w=lay.maxX-lay.minX+18;
+  let s='<svg viewBox="'+x0.toFixed(1)+' -12 '+w.toFixed(1)+' 174" aria-hidden="true"><path class="ml d" d="M'+x0.toFixed(1)+' 50h'+w.toFixed(1)+'"/><path class="ml" d="M'+x0.toFixed(1)+' 100h'+w.toFixed(1)+'"/>';
+  lay.items.forEach(g=>{s+=ink(g);});
   return s+'</svg>';
 }
+function ink(g){
+  let s='';
+  for(const st of g.strokes){
+    if(st.dot)s+='<circle class="mk" cx="'+st.pts[0][0].toFixed(1)+'" cy="'+st.pts[0][1]+'" r="'+(SW*.62)+'"/>';
+    else s+='<polyline class="ms" points="'+st.pts.filter((p,j)=>j%2===0||j===st.pts.length-1).map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'"/>';
+  }
+  return s;
+}
 function drawBar(){
-  const n=Object.keys(prog.traced).length;
+  const n=shown.filter(count).length;
   $('stars').textContent=n?'⭐ '+n:'';$('who').textContent=kid.name||'';
 }
 function drawGrid(){
-  $('grid').innerHTML=ORDER.map(ch=>{const n=prog.traced[ch]||0,clip=SOUNDS[ch];
-    return '<button class="lt'+(n?' got':'')+'" data-ch="'+ch+'" data-kt-up aria-label="letter '+ch+'"'+(clip?' data-say="'+clip+'"':'')+'>'+mini(ch)+'<span class="st" aria-hidden="true">'+(n?'⭐':'')+'</span></button>';}).join('');
+  shown=items();
+  const letters=tab==='small'||tab==='caps';
+  let h=shown.map((it,i)=>{const n=count(it),clip=clipOf(it),star='<span class="st" aria-hidden="true">'+(n?'⭐':'')+'</span>';
+    if(it.kind==='letter')return '<button class="lt'+(n?' got':'')+'" data-i="'+i+'" data-ch="'+it.t+'" data-kt-up aria-label="'+(it.t<'a'?'capital ':'letter ')+it.t+'"'+(clip?' data-say="'+clip+'"':'')+'>'+mini(it.t)+star+'</button>';
+    return '<button class="lt word'+(n?' got':'')+'" data-i="'+i+'" data-w="'+it.t+'" data-kt-up aria-label="'+it.t+'"'+(clip?' data-say="'+clip+'"':' data-say-text="'+it.t+'"')+'>'
+      +(it.emoji?'<span class="em" aria-hidden="true">'+it.emoji+'</span>':'')+miniWord(it.t)+star+'</button>';}).join('');
+  if(TABS[tab].add)h+='<button class="lt add" id="bAdd" data-kt-up aria-label="'+TABS[tab].add+'">➕</button>';
+  const g=$('grid');g.classList.toggle('wide',!letters);g.innerHTML=h;
   drawBar();
 }
-$('grid').addEventListener('click',e=>{const b=e.target.closest('.lt');if(b)openLetter(b.dataset.ch);});
+function setTab(name){
+  if(!TABS[name])return;
+  tab=name;
+  $('tabs').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.tab===name));
+  stopAudio();drawGrid();$('grid').scrollTop=0;
+}
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setTab(b.dataset.tab);});
+$('grid').addEventListener('click',e=>{const b=e.target.closest('.lt');if(!b)return;
+  if(b.id==='bAdd')openEdit();else if(shown[+b.dataset.i])openItem(shown[+b.dataset.i]);});
 function show(name){$('pick').classList.toggle('on',name==='pick');$('trace').classList.toggle('on',name==='trace');}
 function toPick(){stopDemo();stopAudio();clearTimeout(restT);cur=null;$('trace').classList.remove('done','won');drawGrid();show('pick');}
 
-// ---------- one letter: draw
-function openLetter(ch,quiet){
-  if(!T.LETTERS[ch])return;
+// ---------- the grown-up's sheet: add to / remove from the family's own names or places
+let asking=-1;                 // the row that is being asked "remove?"
+function openEdit(){
+  if(!TABS[tab].add)return;
+  asking=-1;
+  const f=$('eText');f.value='';f.placeholder=TABS[tab].type;f.setAttribute('aria-label',TABS[tab].add);
+  note('Letters and spaces, up to '+MAXLEN+'. It stays on this tablet.');
+  drawEdit();$('edit').classList.add('on');
+}
+function closeEdit(){$('edit').classList.remove('on');try{$('eText').blur();}catch(e){}drawGrid();}
+function note(s){$('eNote').textContent=s;}
+function drawEdit(){
+  $('eList').innerHTML=own[tab].map((t,i)=>i===asking
+    ?'<div class="erow"><span class="en">Remove '+t+'?</span><button class="eb warn" data-yes="'+i+'" aria-label="Yes, remove '+t+'">Remove</button><button class="eb" data-no="'+i+'" aria-label="Keep '+t+'">Keep</button></div>'
+    :'<div class="erow"><span class="en">'+t+'</span><button class="eb" data-del="'+i+'" aria-label="Remove '+t+'">🗑️</button></div>').join('');
+}
+function addOwn(){
+  const f=$('eText'),t=clean(f.value);
+  if(!t){note('Type a word first: letters and spaces only.');return;}
+  if(!layout(t).items.length)return;
+  if(items().some(x=>x.t.toLowerCase()===t.toLowerCase())){note(t+' is already there.');f.value='';return;}
+  if(own[tab].length>=OWN_MAX){note('That is the most this list can hold. Remove one first.');return;}
+  own[tab].push(t);saveOwn();f.value='';asking=-1;
+  note('Added '+t+'.');drawEdit();drawGrid();
+}
+$('eAdd').onclick=addOwn;
+$('eText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addOwn();}});
+$('eClose').onclick=closeEdit;
+$('eList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.del!=null){asking=+b.dataset.del;drawEdit();}
+  else if(b.dataset.no!=null){asking=-1;drawEdit();}
+  else if(b.dataset.yes!=null){const t=own[tab][+b.dataset.yes];
+    if(t!=null){own[tab].splice(+b.dataset.yes,1);saveOwn();note('Removed '+t+'.');}
+    asking=-1;drawEdit();drawGrid();}
+});
+$('edit').addEventListener('click',e=>{if(e.target===$('edit'))closeEdit();});
+
+// ---------- one letter or one word: draw
+function openItem(it,quiet){
+  const lay=layout(it.t);
+  if(!lay.items.length)return;
   stopDemo();
-  cur={ch,g:geo(ch),si:0,i:0,done:false};
+  const m=TABS[tab];
+  cur={it,lay,li:0,g:lay.items[0],si:0,i:0,done:false};
   $('trace').classList.remove('done','won');
-  $('tstar').classList.toggle('on',!!prog.traced[ch]);
-  $('bHear').style.display=SOUNDS[ch]?'':'none';
+  $('tstar').classList.toggle('on',!!count(it));
+  $('bHear').style.display=it.kind==='word'||clipOf(it)?'':'none';
+  $('bHear').setAttribute('aria-label',it.kind==='word'?'Hear the word':'Hear the sound');
+  $('bBack').setAttribute('aria-label',m.back);$('bAll').setAttribute('aria-label',m.all);$('bAll').textContent=m.icon;$('bNext').setAttribute('aria-label',m.next);
   show('trace');draw();wake();
-  if(!quiet)sayLetter();
-  if(!prog.traced[ch])startDemo(700);       // the first time a kid meets a letter: show how it goes, once (a touch stops it)
+  if(!quiet)sayIt();
+  if(it.kind==='letter'&&!count(it))startDemo(700);     // the first time a kid meets a letter: show how it goes, once (a touch stops it)
 }
 function shape(st,parent,n){
   if(st.dot){const c=el('circle',{cx:X(st.pts[0]),cy:Y(st.pts[0]),r:SW*.62*k},parent);if(!n)c.style.display='none';return c;}
   return el('polyline',{points:ptsAttr(st.pts,n),'stroke-width':SW*k},parent);
+}
+function way(st,parent,now){    // the pen path of a stroke still to trace: a dotted centre line; on the letter in hand, small arrows too
+  if(st.dot){el('circle',{cx:X(st.pts[0]),cy:Y(st.pts[0]),r:Math.max(2,1.3*k)},parent);return;}
+  const w=Math.max(2.2,1.5*k);
+  el('polyline',{points:ptsAttr(st.pts,st.pts.length),'stroke-width':w.toFixed(1),'stroke-dasharray':'0.1 '+Math.max(6,3.5*k).toFixed(1)},parent);
+  if(now)arrows(st,19,11,P=>{const q=(u,v)=>{const p=P(u,v);return X(p).toFixed(1)+','+Y(p).toFixed(1);};
+    el('polygon',{points:q(-1.9,-1.9)+' '+q(2.3,0)+' '+q(-1.9,1.9)},parent);});
 }
 function draw(){
   if(!cur)return;
@@ -278,42 +524,50 @@ function draw(){
   if(r.width<20||r.height<20)return;
   if(demo.on&&L&&(r.width!==W||r.height!==H))stopDemo();
   W=r.width;H=r.height;
-  const g=cur.g,svg=$('svg');
-  k=Math.min(H/(150+PADT+PADB),W/(g.maxX-g.minX+70));
-  oy=(H-(150+PADT+PADB)*k)/2+PADT*k;ox=W/2-(g.minX+g.maxX)/2*k;
+  const lay=cur.lay,svg=$('svg'),one=lay.items.length===1;
+  k=Math.min(H/(150+PADT+PADB),W/(lay.maxX-lay.minX+(one?SIDE:SIDEW)));
+  oy=(H-(150+PADT+PADB)*k)/2+PADT*k;ox=W/2-(lay.minX+lay.maxX)/2*k;
   const keep=demo.on&&L?L.demo:null;
   svg.textContent='';
   const guide=el('g',{class:'guide'},svg);
   [[0,'gt'],[50,'gm'],[100,'gb'],[150,'gd']].forEach(a=>el('line',{x1:14,x2:W-14,y1:oy+a[0]*k,y2:oy+a[0]*k,class:a[1]},guide));
-  const base=el('g',{class:'base'},svg),ink=el('g',{class:'ink'},svg);
+  const base=el('g',{class:'base'},svg),path=el('g',{class:'way'},svg),ink=el('g',{class:'ink'},svg);
   L={ink:[]};
-  g.strokes.forEach((st,si)=>{
-    shape(st,base,st.pts.length);
-    L.ink.push(shape(st,ink,cur.done||si<cur.si?st.pts.length:(si===cur.si&&!st.dot?cur.i+1:0)));
+  lay.items.forEach((g,li)=>{                      // letters before the one in hand are inked, the ones after it wait as a dotted path
+    const past=cur.done||li<cur.li,now=!cur.done&&li===cur.li,gi=el('g',now?{class:'now'}:{},ink),row=[];
+    g.strokes.forEach((st,si)=>{
+      const done=past||(now&&si<cur.si);
+      shape(st,base,st.pts.length);
+      if(!done)way(st,path,now);
+      row.push(shape(st,gi,done?st.pts.length:(now&&si===cur.si&&!st.dot?cur.i+1:0)));
+    });
+    L.ink.push(row);
   });
   L.demo=keep?svg.appendChild(keep):el('g',{class:'demo'},svg);
   L.marks=el('g',{class:'marks'},svg);
   marks();
-  $('pips').innerHTML=g.strokes.length>1?g.strokes.map((_,si)=>'<i'+(cur.done||si<cur.si?' class="on"':'')+'></i>').join(''):'';
+  const n=one?cur.g.strokes.length:lay.items.length,at=one?cur.si:cur.li;      // the pips: the strokes of a letter, the letters of a word
+  $('pips').innerHTML=n>1?Array.from({length:n},(_,j)=>'<i'+(cur.done||j<at?' class="on"':'')+'></i>').join(''):'';
 }
-function num(parent,p,n,cls,r){       // a numbered dot
+function num(parent,p,n,cls,r){       // a numbered dot (never smaller than a number can be read in)
+  const R=Math.max(r*k,cls==='later'?10:13);
   const g=el('g',{class:cls,transform:'translate('+X(p).toFixed(1)+','+Y(p).toFixed(1)+')'},parent);
-  if(cls==='bead')el('circle',{class:'ring',r:r*k,'stroke-width':1.2*k},g);
-  el('circle',{r:r*k,'stroke-width':cls==='later'?2.5:.8*k},g);
-  el('text',{'text-anchor':'middle','dominant-baseline':'central','font-size':Math.max(12,r*1.2*k).toFixed(1)},g).textContent=n;
+  if(cls==='bead')el('circle',{class:'ring',r:R,'stroke-width':Math.max(2,1.2*k)},g);
+  el('circle',{r:R,'stroke-width':cls==='later'?2.5:Math.max(1.5,.8*k)},g);
+  el('text',{'text-anchor':'middle','dominant-baseline':'central','font-size':Math.max(12,R*1.2).toFixed(1)},g).textContent=n;
   return g;
 }
 function marks(){               // the numbered dot of the stroke to trace (it rides along), arrows ahead of it, the later starts
   const m=L.marks;m.textContent='';
   if(!cur||cur.done)return;
-  const g=cur.g;
-  for(let si=g.strokes.length-1;si>cur.si;si--)num(m,g.strokes[si].pts[0],si+1,'later',4.8);
+  const g=cur.g,at=starts(g);
+  for(let si=g.strokes.length-1;si>cur.si;si--)num(m,at[si],si+1,'later',4.8);
   const st=g.strokes[cur.si];
   if(!st.dot)[13,23,33].forEach((d,n)=>{
     const s=st.cum[cur.i]+d;if(s>st.len-1)return;
     let j=cur.i;while(st.cum[j]<s)j++;
     const a=st.pts[j],t=dirAt(st,j),P=(u,v)=>(ox+(a[0]+t[0]*u-t[1]*v)*k).toFixed(1)+','+(oy+(a[1]+t[1]*u+t[0]*v)*k).toFixed(1);
-    el('polyline',{class:'chev c'+n,points:P(-1.4,-3.3)+' '+P(2,0)+' '+P(-1.4,3.3),'stroke-width':1.7*k},m);
+    el('polyline',{class:'chev c'+n,points:P(-1.4,-3.3)+' '+P(2,0)+' '+P(-1.4,3.3),'stroke-width':Math.max(2.5,1.7*k)},m);
   });
   num(m,st.pts[cur.i],cur.si+1,'bead',7.5);
 }
@@ -322,11 +576,11 @@ function paint(){               // progress moved: at most once a frame
   if(painting)return;painting=true;
   requestAnimationFrame(()=>{painting=false;if(!cur||!L||cur.done)return;
     const st=cur.g.strokes[cur.si];
-    if(!st.dot)L.ink[cur.si].setAttribute('points',ptsAttr(st.pts,cur.i+1));
+    if(!st.dot)L.ink[cur.li][cur.si].setAttribute('points',ptsAttr(st.pts,cur.i+1));
     marks();});
 }
 
-// ---------- one letter: trace. The finger never draws by itself — it moves the dot along the stroke.
+// ---------- trace. The finger never draws by itself — it moves the dot along the stroke.
 function feed(ux,uy,dx,dy){     // a finger at (ux,uy) in letter units, going (dx,dy) — 0,0 while it has not moved yet
   if(!cur||cur.done||demo.on)return;
   const st=cur.g.strokes[cur.si],reach=tol();
@@ -345,25 +599,33 @@ function feed(ux,uy,dx,dy){     // a finger at (ux,uy) in letter units, going (d
     if((dx*(b[0]-a[0])+dy*(b[1]-a[1]))/l<ALONG)return;
   }
   cur.i=best;
-  if(cum[best]>=st.len-ENDSLACK)strokeDone();else paint();
+  if(cum[best]>=st.len-Math.max(ENDSLACK,reach/2))strokeDone();else paint();
 }
 function strokeDone(){
-  const n=cur.g.strokes.length;
+  const one=cur.lay.items.length===1;
   cur.si++;cur.i=0;wake();
-  if(cur.si>=n){finish();return;}
+  if(cur.si>=cur.g.strokes.length){                       // the letter is written: the next letter of the word, or the end
+    if(cur.li+1>=cur.lay.items.length){finish();return;}
+    cur.li++;cur.g=cur.lay.items[cur.li];cur.si=0;
+  }
   draw();
-  snd('navigate',$('pips').children[cur.si-1]);
+  // the tick's visual twin sits on a pip: the stroke just written (one letter), or in a word the letter just written — or the letter
+  // in hand when it has more strokes to go. Never on nothing: kt.js then pulses the whole PAGE (scale .94 for 160 ms), and while the
+  // page is smaller the stage is somewhere else — a finger still moving was read up to 30 px off on the first letter of every word
+  const pips=$('pips');
+  snd('navigate',pips.children[one?cur.si-1:cur.si?cur.li:cur.li-1]||pips);
 }
 function finish(){
-  const ch=cur.ch;
+  const it=cur.it;
   cur.done=true;
-  prog.traced[ch]=(prog.traced[ch]||0)+1;prog.stars=(prog.stars||0)+1;saveProg();
+  if(it.kind==='letter')prog.traced[it.t]=(prog.traced[it.t]||0)+1;else prog.words[it.t]=(prog.words[it.t]||0)+1;
+  prog.stars=(prog.stars||0)+1;saveProg();
   draw();
   $('tstar').classList.remove('on');
   $('trace').classList.add('won');
   snd('success',$('stage'));
-  setTimeout(()=>{if(cur&&cur.done&&cur.ch===ch)sayLetter();},500);
-  setTimeout(()=>{if(cur&&cur.done&&cur.ch===ch)$('trace').classList.add('done');},750);   // the buttons come a moment later, not under a finger still moving
+  setTimeout(()=>{if(cur&&cur.done&&cur.it===it)sayIt();},500);
+  setTimeout(()=>{if(cur&&cur.done&&cur.it===it)$('trace').classList.add('done');},750);   // the buttons come a moment later, not under a finger still moving
 }
 (function(){
   const st=$('stage'),down=new Map();     // pointerId → where that finger was TURN units ago and the way it has gone since
@@ -393,10 +655,10 @@ function finish(){
   st.addEventListener('dragstart',e=>e.preventDefault());
 })();
 
-// ---------- 👀 watch: the strokes draw themselves in order, with their numbers
+// ---------- 👀 watch: the strokes of the letter in hand draw themselves in order, with their numbers
 function startDemo(delay){
   stopDemo();
-  if(!cur||!L)return;
+  if(!cur||!L||cur.done)return;
   const g=cur.g,quiet=still(),SPEED=95;        // units a second
   let si=0,s=0,last=0,line=null,hand=null;
   demo.on=true;$('trace').classList.add('demo');
@@ -409,7 +671,7 @@ function startDemo(delay){
     line=el('polyline',{'stroke-width':SW*k},L.demo);
     num(L.demo,st.pts[0],si+1,'dnum',5.6);
     if(quiet){line.setAttribute('points',ptsAttr(st.pts,st.pts.length));si++;demo.timer=setTimeout(begin,700);return;}
-    hand=el('circle',{class:'hand',r:6*k,'stroke-width':.9*k},L.demo);
+    hand=el('circle',{class:'hand',r:Math.max(9,6*k),'stroke-width':Math.max(1.5,.9*k)},L.demo);
     s=0;last=0;demo.raf=requestAnimationFrame(step);
   };
   const step=t=>{
@@ -434,59 +696,73 @@ function stopDemo(){
 // ---------- buttons
 $('bBack').onclick=toPick;$('bAll').onclick=toPick;
 $('bWatch').onclick=()=>{if(cur){wake();startDemo(0);}};
-$('bHear').onclick=()=>{sayLetter();};
-$('bAgain').onclick=()=>{if(cur)openLetter(cur.ch,true);};
-$('bNext').onclick=()=>{if(cur)openLetter(ORDER[(ORDER.indexOf(cur.ch)+1)%ORDER.length]);};
+$('bHear').onclick=()=>{sayIt();};
+$('bAgain').onclick=()=>{if(cur)openItem(cur.it,true);};
+$('bNext').onclick=()=>{if(!cur)return;const list=items(),i=list.findIndex(x=>x.t===cur.it.t);if(list.length)openItem(list[(i+1)%list.length]);};
 window.addEventListener('resize',()=>{if(cur)draw();});
 
 // ---------- for tests/trace_dom.py (read-only)
 window.TR={
   get state(){const st=cur&&!cur.done?cur.g.strokes[cur.si]:null;
-    return {screen:cur?'trace':'pick',ch:cur?cur.ch:null,strokes:cur?cur.g.strokes.length:0,stroke:cur?cur.si:0,frac:st&&st.len?st.cum[cur.i]/st.len:0,
-      done:!!(cur&&cur.done),demo:demo.on,rest:$('stage').classList.contains('rest'),stars:prog.stars,traced:Object.assign({},prog.traced),kid:kid.id,order:ORDER.slice(),sounds:Object.keys(SOUNDS).filter(c=>SOUNDS[c]).length,tol:tol(),k};},
-  path(si,step){             // client px along stroke si of the letter on screen, about `step` units apart
-    const r=$('stage').getBoundingClientRect(),st=cur.g.strokes[si],out=[];let next=0;
+    return {screen:cur?'trace':'pick',tab,ch:cur?(cur.it.kind==='letter'?cur.it.t:cur.g.ch):null,text:cur?cur.it.t:null,letter:cur?cur.li:0,letters:cur?cur.lay.items.length:0,
+      strokes:cur?cur.g.strokes.length:0,stroke:cur?cur.si:0,frac:st&&st.len?st.cum[cur.i]/st.len:0,
+      done:!!(cur&&cur.done),demo:demo.on,rest:$('stage').classList.contains('rest'),stars:prog.stars,traced:Object.assign({},prog.traced),words:Object.assign({},prog.words),kid:kid.id,order:ORDER.slice(),
+      sounds:Object.keys(SOUNDS).filter(c=>SOUNDS[c]).length,tol:tol(),k,style:T.STYLE,items:shown.map(x=>x.t),own:{names:own.names.slice(),places:own.places.slice()},kids:kids.map(x=>x.t),editing:$('edit').classList.contains('on')};},
+  path(si,step,li){          // client px along stroke si of the letter in hand (or of letter li of the word), about `step` units apart
+    const r=$('stage').getBoundingClientRect(),st=(li==null?cur.g:cur.lay.items[li]).strokes[si],out=[];let next=0;
     st.pts.forEach((p,j)=>{if(st.cum[j]>=next||j===st.pts.length-1){out.push([r.left+X(p),r.top+Y(p)]);next=st.cum[j]+(step||4);}});
-    return out;}
+    return out;},
+  box(text){                 // where a word's letters stand, in letter units: [[ch, minX, maxX], …]
+    return layout(text).items.map(g=>[g.ch,g.minX,g.maxX]);},
+  clear(text){               // the least distance between the pen paths of each two neighbouring letters of a word, in letter units
+    const it=layout(text).items,pts=g=>g.strokes.reduce((a,st)=>a.concat(st.pts.filter((p,j)=>j%2===0||j===st.pts.length-1)),[]),out=[];
+    for(let n=1;n<it.length;n++){const A=pts(it[n-1]),B=pts(it[n]);let d=1e9;
+      for(const p of A)for(const q of B){const e=Math.hypot(p[0]-q[0],p[1]-q[1]);if(e<d)d=e;}
+      out.push(d);}
+    return out;},
+  clean
 };
 
 // ---------- ?sheet=1
 function sheet(){
-  const COL=['#d6336c','#0072b2','#009e73'];
-  document.body.className='sheet';
-  document.body.innerHTML='<div id="sheet">'+T.ABC.map(ch=>{
-    const g=geo(ch),x0=(g.minX+g.maxX)/2-58;
-    let s='<figure><svg viewBox="'+x0+' -24 116 198">';
-    [[0,''],[50,'8 7'],[100,''],[150,'2 6']].forEach(a=>{s+='<path d="M'+x0+' '+a[0]+'h116" fill="none" stroke="'+(a[0]===100?'#4a86c5':'#8db4dc')+'" stroke-width="'+(a[0]===100?1.6:1)+'"'+(a[1]?' stroke-dasharray="'+a[1]+'"':'')+'/>';});
+  const COL=['#d6336c','#0072b2','#009e73','#e69f00'];
+  const lines=(x0,w)=>[[0,''],[50,'8 7'],[100,''],[150,'2 6']].map(a=>'<path d="M'+x0+' '+a[0]+'h'+w+'" fill="none" stroke="'+(a[0]===100?'#4a86c5':'#8db4dc')+'" stroke-width="'+(a[0]===100?1.6:1)+'"'+(a[1]?' stroke-dasharray="'+a[1]+'"':'')+'/>').join('');
+  const letter=g=>{let s='';const at=starts(g);
     g.strokes.forEach((st,si)=>{
-      const c=COL[si%3];
+      const c=COL[si%4];
       if(st.dot)s+='<circle cx="'+st.pts[0][0]+'" cy="'+st.pts[0][1]+'" r="'+(SW*.62)+'" fill="'+c+'" opacity=".45"/>';
       else{
         s+='<polyline points="'+st.pts.map(p=>p[0].toFixed(2)+','+p[1].toFixed(2)).join(' ')+'" fill="none" stroke="'+c+'" stroke-opacity=".38" stroke-width="'+SW+'" stroke-linecap="round" stroke-linejoin="round"/>';
-        // arrowheads every 16 units, pushed to the left of travel so the two directions of a retraced stem do not hide each other
-        for(let d=9;d<st.len-3;d+=16){let j=0;while(st.cum[j]<d)j++;const a=st.pts[j],t=dirAt(st,j),P=(u,v)=>(a[0]+t[0]*u-t[1]*v+t[1]*2.6).toFixed(2)+','+(a[1]+t[1]*u+t[0]*v-t[0]*2.6).toFixed(2);
-          s+='<polygon points="'+P(-2.2,-2)+' '+P(2.4,0)+' '+P(-2.2,2)+'" fill="#1d2a3a"/>';}
+        arrows(st,16,9,P=>{const q=(u,v)=>P(u,v).map(n=>n.toFixed(2)).join(',');s+='<polygon points="'+q(-2.2,-2)+' '+q(2.4,0)+' '+q(-2.2,2)+'" fill="#1d2a3a"/>';});
         const e=st.pts[st.pts.length-1];s+='<rect x="'+(e[0]-2)+'" y="'+(e[1]-2)+'" width="4" height="4" fill="#1d2a3a"/>';
       }
-      const p=st.pts[0],off=st.dot?[11,0]:[0,0];
-      s+='<circle cx="'+(p[0]+off[0])+'" cy="'+p[1]+'" r="5.4" fill="'+c+'" stroke="#fff" stroke-width=".8"/><text x="'+(p[0]+off[0])+'" y="'+p[1]+'" text-anchor="middle" dominant-baseline="central" font-family="system-ui,sans-serif" font-weight="700" font-size="7.5" fill="#fff">'+(si+1)+'</text>';
     });
-    return s+'</svg><figcaption>'+ch+' · '+g.strokes.length+'</figcaption></figure>';
-  }).join('')+'</div>';
+    g.strokes.forEach((st,si)=>{const p=st.dot?[at[si][0]+11,at[si][1]]:at[si];       // the numbers on top, so a later stroke cannot hide one
+      s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5.4" fill="'+COL[si%4]+'" stroke="#fff" stroke-width=".8"/><text x="'+p[0]+'" y="'+p[1]+'" text-anchor="middle" dominant-baseline="central" font-family="system-ui,sans-serif" font-weight="700" font-size="7.5" fill="#fff">'+(si+1)+'</text>';});
+    return s;};
+  const fig=ch=>{const g=geo(ch),x0=(g.minX+g.maxX)/2-62;
+    return '<figure><svg viewBox="'+x0+' -24 124 198">'+lines(x0,124)+letter(g)+'</svg><figcaption>'+ch+' · '+g.strokes.length+'</figcaption></figure>';};
+  const word=t=>{const lay=layout(t),x0=lay.minX-24,w=Math.max(560,lay.maxX-lay.minX+48);
+    return '<figure><svg viewBox="'+x0+' -24 '+w+' 198">'+lines(x0,w)+lay.items.map(letter).join('')+'</svg><figcaption>'+t+'</figcaption></figure>';};
+  const words=(QS.get('words')||'Mom,Dad,Grandma,Grandpa,School,Library,Playground,jump,quick,Big Dog,Toy Fox,Wavy Tail').split(',').map(clean).filter(Boolean);
+  document.body.className='sheet';
+  document.body.innerHTML='<div id="sheet"><h2>'+T.STYLES[T.STYLE].name+' — small letters</h2><div class="rowg">'+T.ABC.map(fig).join('')+'</div><h2>Capitals</h2><div class="rowg">'+T.CAPS.map(fig).join('')
+    +'</div><h2>Words (the letter spacing)</h2><div class="roww">'+words.map(word).join('')+'</div></div>';
 }
 
 async function init(){
-  if(new URLSearchParams(location.search).get('sheet')){sheet();return;}
+  if(QS.get('sheet')){sheet();return;}
   drawGrid();
   try{const r=await fetch('data.json',{cache:'no-store'});
     if(r.ok){const d=await r.json();
       if(d&&d.sounds&&typeof d.sounds==='object')SOUNDS=d.sounds;
       if(d&&Array.isArray(d.order)&&d.order.length===26&&new Set(d.order).size===26&&d.order.every(c=>T.LETTERS[c]))ORDER=d.order;
+      for(const key of ['words','names','places'])if(d&&Array.isArray(d[key]))BUILT[key]=d[key].filter(e=>e&&typeof e.w==='string'&&/^[A-Za-z]+( [A-Za-z]+)*$/.test(e.w)&&e.w.length<=MAXLEN);
       if(!cur)drawGrid();}
   }catch(e){}
   await Promise.race([hello,wait(700)]);   // the launcher's hello names the kid; alone on a laptop we are "default"
-  await loadProg();progLoaded=true;
-  if(cur)$('tstar').classList.toggle('on',!!prog.traced[cur.ch]&&!cur.done);else drawGrid();
+  await Promise.all([loadProg(),loadOwn(),loadKids()]);progLoaded=true;
+  if(cur)$('tstar').classList.toggle('on',!!count(cur.it)&&!cur.done);else drawGrid();
 }
 init();
 </script></body></html>

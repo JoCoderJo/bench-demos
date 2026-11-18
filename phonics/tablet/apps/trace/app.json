@@ -1,1 +1,1 @@
-{ "title": "Trace It", "subtitle": "trace the letters with your finger", "icon": "✏️", "color": "#d6336c", "needs": ["autoplay"] }
+{ "title": "Trace It", "subtitle": "trace letters, words, names and places", "icon": "✏️", "color": "#d6336c", "needs": ["autoplay"] }

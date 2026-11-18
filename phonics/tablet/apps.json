@@ -31,7 +31,7 @@
    "source": "tablet/apps/camera",
    "tier": "pre-reader",
    "group": "make",
-   "version": "1.0.0",
+   "version": "1.1.0",
    "permissions": [
     "camera",
     "audio"
@@ -175,6 +175,25 @@
    ]
   },
   {
+   "id": "move",
+   "title": "Move to Learn",
+   "subtitle": "pop letters and numbers by moving",
+   "icon": "🤸",
+   "color": "#2f77c9",
+   "path": "apps/move/index.html",
+   "needs": [
+    "autoplay"
+   ],
+   "source": "tablet/apps/move",
+   "tier": "pre-reader",
+   "group": "play",
+   "version": "1.0.0",
+   "permissions": [
+    "audio",
+    "camera"
+   ]
+  },
+  {
    "id": "music",
    "title": "Music Pads",
    "subtitle": "xylophone, drums, follow the lights",
@@ -256,7 +275,7 @@
    "source": "tablet/apps/show-tell",
    "tier": "pre-reader",
    "group": "make",
-   "version": "1.0.0",
+   "version": "1.0.1",
    "permissions": [
     "camera",
     "audio",
@@ -315,7 +334,7 @@
   {
    "id": "trace",
    "title": "Trace It",
-   "subtitle": "trace the letters with your finger",
+   "subtitle": "trace letters, words, names and places",
    "icon": "✏️",
    "color": "#d6336c",
    "path": "apps/trace/index.html",
@@ -325,7 +344,7 @@
    "source": "tablet/apps/trace",
    "tier": "pre-reader",
    "group": "read",
-   "version": "1.0.0",
+   "version": "1.1.0",
    "permissions": [
     "audio"
    ]
